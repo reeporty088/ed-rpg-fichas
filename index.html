@@ -68,7 +68,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const fichaID = "personagem_1";
+    const urlParams = new URLSearchParams(window.location.search);
+    const fichaID = urlParams.get('p') || "personagem_padrao";
 
     // 1. SALVAR (Quando o usuário termina de digitar)
     document.addEventListener('change', (e) => {
@@ -96,3 +97,4 @@
 
 </body>
 </html>
+
