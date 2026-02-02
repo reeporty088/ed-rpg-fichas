@@ -89,28 +89,46 @@
     }
 </script>
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  // Suas configurações extraídas do seu print
   const firebaseConfig = {
-    apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhWQ",
+    apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
     authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+    databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
     projectId: "ed-rpg---sistema-de-fichas",
     storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
     messagingSenderId: "350999444010",
-    appId: "1:350999444010:web:d89f31d13e449b8fbfa153",
-    measurementId: "G-RTF54MWL01"
+    appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const db = getDatabase(app);
+  const fichaID = "personagem_1"; // Identificador único da ficha
+
+  // SALVAR: Escuta qualquer mudança nos campos e envia ao Firebase
+  document.addEventListener('change', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        const campo = e.target.id || e.target.placeholder || "campo_sem_nome";
+        update(ref(db, 'fichas/' + fichaID), {
+            [campo]: e.target.value
+        });
+    }
+  });
+
+  // CARREGAR: Atualiza a ficha automaticamente se os dados mudarem no banco
+  onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
+    const dados = snapshot.val();
+    if (dados) {
+        Object.keys(dados).forEach(key => {
+            const el = document.getElementById(key) || document.querySelector(`[placeholder="${key}"]`);
+            if (el && document.activeElement !== el) el.value = dados[key];
+        });
+    }
+  });
 </script>
 
 </body>
+
 </html>
