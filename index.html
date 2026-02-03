@@ -16,7 +16,30 @@
 
         /* Coluna 1: Avatar e Status */
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
-        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; }
+        .avatar-circle { 
+            width: 140px; 
+            height: 140px; 
+            border-radius: 50%; 
+            border: 4px solid var(--header-bg); 
+            background: #222; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            background-size: cover; 
+            background-position: center;
+            position: relative; 
+        }
+        /* Esconde o botão original mas mantém a área clicável */
+        .avatar-circle input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
         .bar-container { margin-bottom: 10px; }
         .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
         .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
@@ -37,17 +60,16 @@
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
 
-        /* Coluna 3: Ações e Deslocamento */
+        /* Coluna 3: Marcadores */
         .marker-section { margin-bottom: 20px; text-align: center; }
         .marker-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; }
         .marker-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px; }
         .marker-item { cursor: pointer; font-size: 24px; opacity: 0.2; transition: 0.3s; filter: grayscale(1); }
         .marker-item.active { opacity: 1; filter: grayscale(0); drop-shadow: 0 0 5px currentColor; }
-        .tri { color: #00ffff; } /* Ciano para ações */
-        .circ { color: #00ff00; } /* Verde para deslocamento */
+        .tri { color: #00ffff; } 
+        .circ { color: #00ff00; } 
         .btn-count { background: var(--header-bg); border: 1px solid #ffaaaa; color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; line-height: 1; font-weight: bold; }
 
-        /* Geral */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; }
         .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; }
@@ -64,12 +86,15 @@
         <div class="card">
             <div class="header-label">Personagem</div>
             <div class="avatar-container">
-                <label for="img_upload" class="avatar-circle" id="avatar_display"><input type="file" id="img_upload" accept="image/*"></label>
-                <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-size:18px; font-weight:bold; margin-top:10px;" placeholder="NOME">
+                <div class="avatar-circle" id="avatar_display">
+                    <input type="file" id="img_upload" accept="image/*">
+                </div>
+                <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-size:18px; font-weight:bold; margin-top:10px; color:white;" placeholder="NOME">
             </div>
             <label>IDADE</label><input type="text" id="idade">
             <label>FLORINS</label><input type="text" id="florins">
             <label>ARQUÉTIPO</label><input type="text" id="arquetipo">
+            
             <div class="header-label" style="margin-top:15px;">Status</div>
             <div class="bar-container">
                 <div class="bar-controls">
@@ -130,10 +155,7 @@
 
     <div class="col">
         <div class="card">
-           <div class="col">
-        <div class="card">
             <div class="header-label">Ações e Deslocamento</div>
-            
             <div class="marker-section">
                 <label style="text-align:center; display:block; color:cyan;">AÇÕES (Triângulos)</label>
                 <div class="marker-controls">
@@ -143,9 +165,7 @@
                 </div>
                 <div id="display_ações" class="marker-display"></div>
             </div>
-
             <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
-
             <div class="marker-section">
                 <label style="text-align:center; display:block; color:springgreen;">DESLOCAMENTO (Círculos)</label>
                 <div class="marker-controls">
@@ -155,8 +175,6 @@
                 </div>
                 <div id="display_desloc" class="marker-display"></div>
             </div>
-        </div>
-    </div>
         </div>
     </div>
 </div>
@@ -180,7 +198,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
-    // --- SISTEMA DE MARCADORES (COLUNA 3) ---
     window.updateMarkerCount = (type, mod) => {
         const span = document.getElementById('count_' + type);
         let count = (parseInt(span.innerText) || 0) + mod;
@@ -201,14 +218,12 @@
         countSpan.innerText = total || (type === 'ações' ? 3 : 9);
         const icon = type === 'ações' ? '▲' : '●';
         const css = type === 'ações' ? 'tri' : 'circ';
-        
         for(let i=0; i < (total || (type === 'ações' ? 3 : 9)); i++) {
             const isActive = pontos && pontos[`p_${i}`] === true;
             container.innerHTML += `<span id="${type}_${i}" class="marker-item ${css} ${isActive ? 'active' : ''}" onclick="togglePoint('${type}', ${i})">${icon}</span>`;
         }
     }
 
-    // --- HABILIDADES DINÂMICAS (COLUNA 2) ---
     window.addItem = (category) => {
         const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${category}`));
         set(newItemRef, { titulo: "", teste: "", desc: "" });
@@ -230,7 +245,6 @@
         });
     }
 
-    // --- LÓGICA GERAL E FIREBASE ---
     function updateBarVisual(type) {
         const at = parseInt(document.getElementById(type + '_at').value) || 0;
         const max = parseInt(document.getElementById(type + '_max').value) || 1;
@@ -288,8 +302,9 @@
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onloadend = () => {
-            document.getElementById('avatar_display').style.backgroundImage = `url(${reader.result})`;
-            update(ref(db, 'fichas/' + fichaID), { char_img: reader.result });
+            const b64 = reader.result;
+            document.getElementById('avatar_display').style.backgroundImage = `url(${b64})`;
+            update(ref(db, 'fichas/' + fichaID), { char_img: b64 });
         };
         if (file) reader.readAsDataURL(file);
     });
@@ -297,4 +312,3 @@
 
 </body>
 </html>
-
