@@ -23,30 +23,34 @@
         .bar-container { margin-bottom: 10px; }
         .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
         .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
-        .bar-bg { flex-grow: 1; height: 26px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
+        .bar-bg { flex-grow: 1; height: 28px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
         .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; width: 100%; }
         .hp-fill { background: #d32f2f; } .mp-fill { background: #1976d2; } .pa-fill { background: #7b1fa2; }
         .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
-        .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 13px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
+        .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
 
         /* Habilidades Dinâmicas */
         .hab-item { background: rgba(0,0,0,0.3); border: 1px solid #5a1a1f; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
         .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
         .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; }
-        .hab-dice { width: 80px !important; text-align: center; border-radius: 10px !important; margin: 0 !important; }
+        .hab-dice { width: 85px !important; text-align: center; border-radius: 10px !important; margin: 0 !important; }
         .hab-toggle { cursor: pointer; color: #ffaaaa; font-size: 12px; padding: 0 5px; }
         .hab-body { padding: 8px; display: none; border-top: 1px solid #5a1a1f; }
         .hab-body.open { display: block; }
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
 
-        /* Outros Elementos */
+        /* Atributos e Perícias */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; }
         .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; }
         .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 15px; border-radius: 20px; border: 1px solid #5a1a1f; }
+        .pericia-row span { font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .pericia-row input { width: 40px; text-align: center; border: none; background: transparent; font-weight: bold; color: white; }
+        
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
@@ -105,8 +109,17 @@
                 <div class="attr-box"><input type="number" id="resistencia" value="0"><div>RES.</div></div>
             </div>
             <div class="header-label">Perícias</div>
+            <div class="pericia-row"><span>ANIMAIS</span><input type="number" id="p_animais" value="0"></div>
+            <div class="pericia-row"><span>ARTE</span><input type="number" id="p_arte" value="0"></div>
+            <div class="pericia-row"><span>ESPORTE</span><input type="number" id="p_esporte" value="0"></div>
+            <div class="pericia-row"><span>INFLUÊNCIA</span><input type="number" id="p_influencia" value="0"></div>
             <div class="pericia-row"><span>LUTA</span><input type="number" id="p_luta" value="0"></div>
+            <div class="pericia-row"><span>MANHA</span><input type="number" id="p_manha" value="0"></div>
+            <div class="pericia-row"><span>MÁQUINAS</span><input type="number" id="p_maquinas" value="0"></div>
+            <div class="pericia-row"><span>MEDICINA</span><input type="number" id="p_medicina" value="0"></div>
             <div class="pericia-row"><span>MÍSTICA</span><input type="number" id="p_mistica" value="0"></div>
+            <div class="pericia-row"><span>PERCEPÇÃO</span><input type="number" id="p_percepcao" value="0"></div>
+            <div class="pericia-row"><span>SABER</span><input type="number" id="p_saber" value="0"></div>
             <div class="pericia-row"><span>SOBREVIVÊNCIA</span><input type="number" id="p_sobrevivencia" value="0"></div>
         </div>
     </div>
@@ -114,7 +127,6 @@
     <div class="col">
         <div class="card">
             <div class="header-label">Habilidades Gerais</div>
-            
             <label>Vantagens / Desvantagens <button class="btn-add" onclick="addItem('vantagens')">+</button></label>
             <div id="list_vantagens" style="margin-top:5px;"></div>
 
@@ -130,10 +142,7 @@
     </div>
 
     <div class="col">
-        <div class="card">
-            <div class="header-label">Ações & Dados</div>
-            <p style="text-align:center; color:#ccc;">Painel de rolagem aqui.</p>
-        </div>
+        <div class="card"><div class="header-label">Ações & Dados</div><p style="text-align:center; color:#ccc;">Painel de rolagem aqui.</p></div>
     </div>
 </div>
 
@@ -156,7 +165,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
-    // Funções de Lista Dinâmica
     window.addItem = (category) => {
         const listRef = ref(db, `fichas/${fichaID}/habilidades/${category}`);
         const newItemRef = push(listRef);
@@ -201,7 +209,6 @@
         });
     }
 
-    // Lógica Geral
     function updateBarVisual(type) {
         const at = parseInt(document.getElementById(type + '_at').value) || 0;
         const max = parseInt(document.getElementById(type + '_max').value) || 1;
