@@ -1,199 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Ficha RPG - Alta Fantasia</title>
-    <style>
-        :root { --bg: #1a1a1a; --card-bg: #41141a; --header-bg: #800000; --text: #ffffff; --input-bg: #2a0a0d; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1300px; width: 100%; }
-        .col { display: flex; flex-direction: column; gap: 15px; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #5a1a1f; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .header-label { background: var(--header-bg); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
-        
-        input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 6px; border-radius: 5px; width: 100%; box-sizing: border-box; }
-        
-        /* Sistema de Barras Inteligentes */
+/* Sistema de Barras Inteligentes - CORRIGIDO */
         .bar-container { margin-bottom: 15px; }
         .bar-label { font-size: 11px; font-weight: bold; margin-bottom: 3px; display: block; color: #ffaaaa; }
-        .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 5px; }
-        .btn-math { background: #800000; border: 1px solid #ffaaaa; color: white; border-radius: 4px; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
-        .btn-math:hover { background: #b30000; }
+        .bar-controls { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 5px; }
         
-        .bar-bg { flex-grow: 1; height: 20px; background: #222; border-radius: 4px; position: relative; overflow: hidden; border: 1px solid #444; }
-        .bar-fill { height: 100%; width: 50%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; }
-        .hp-fill { background: linear-gradient(90deg, #800000, #ff4444); }
-        .mp-fill { background: linear-gradient(90deg, #002266, #3388ff); }
-        .pa-fill { background: linear-gradient(90deg, #440066, #aa44ff); }
+        .bar-bg { 
+            flex-grow: 1; 
+            height: 28px; 
+            background: #222; 
+            border-radius: 6px; 
+            position: relative; 
+            overflow: hidden; 
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+        }
         
-        .bar-values { position: absolute; width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px black; }
-        .bar-values input { width: 30px; background: transparent; border: none; padding: 0; text-align: center; font-size: 12px; font-weight: bold; }
-
-        /* Estilos de Atributos e Perícias (Mantidos) */
-        .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .attr-box { background: var(--input-bg); border: 1px solid #7a2a2f; border-radius: 15px; padding: 10px; text-align: center; }
-        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 10px; border-radius: 8px; border: 1px solid #5a1a1f; }
-        .pericia-row input { width: 45px; text-align: center; }
-        .death-saves { text-align: center; font-size: 30px; cursor: pointer; }
-        .skull { opacity: 0.2; transition: 0.3s; }
-        .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="col">
-        <div class="card">
-            <div class="header-label">Status</div>
-            
-            <div class="bar-container">
-                <span class="bar-label">VIDA</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('hp', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_hp" class="bar-fill hp-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('hp', 1)">+</button>
-                </div>
-            </div>
-
-            <div class="bar-container">
-                <span class="bar-label">MANA</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('mp', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_mp" class="bar-fill mp-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('mp', 1)">+</button>
-                </div>
-            </div>
-
-            <div class="bar-container">
-                <span class="bar-label">AÇÕES</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('pa', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_pa" class="bar-fill pa-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('pa', 1)">+</button>
-                </div>
-            </div>
-
-            <div class="death-saves">
-                <span class="skull" id="skull1" onclick="toggleSkull('skull1')">💀</span>
-                <span class="skull" id="skull2" onclick="toggleSkull('skull2')">💀</span>
-                <span class="skull" id="skull3" onclick="toggleSkull('skull3')">💀</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="header-label">Atributos</div>
-            <div class="attr-container">
-                <div class="attr-box"><input type="number" id="poder" value="0"><div>PODER</div></div>
-                <div class="attr-box"><input type="number" id="habilidade" value="0"><div>HAB.</div></div>
-                <div class="attr-box"><input type="number" id="resistencia" value="0"><div>RES.</div></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card">
-            <div class="header-label">Perícias</div>
-            <div class="pericia-row"><span>LUTA</span><input type="number" id="p_luta" value="0"></div>
-            <div class="pericia-row"><span>MÍSTICA</span><input type="number" id="p_mistica" value="0"></div>
-            <div class="pericia-row"><span>PERCEPÇÃO</span><input type="number" id="p_percep" value="0"></div>
-            </div>
-    </div>
-
-    <div class="col">
-        <div class="card">
-            <div class="header-label">Geral & Habilidades</div>
-            <label>NOME</label><input type="text" id="nome">
-            <label>FLORINS</label><input type="text" id="florins">
-            <textarea id="habilidades" style="height: 250px; margin-top:10px;" placeholder="Técnicas e Itens..."></textarea>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
-        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
-        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
-        projectId: "ed-rpg---sistema-de-fichas",
-        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
-        messagingSenderId: "350999444010",
-        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const urlParams = new URLSearchParams(window.location.search);
-    const fichaID = urlParams.get('p') || "personagem_padrao";
-
-    // Função para atualizar as barras visuais
-    function updateBarVisual(type) {
-        const at = parseInt(document.getElementById(type + '_at').value) || 0;
-        const max = parseInt(document.getElementById(type + '_max').value) || 1;
-        const percent = Math.min(Math.max((at / max) * 100, 0), 100);
-        document.getElementById('bar_' + type).style.width = percent + '%';
-    }
-
-    // SALVAR
-    document.addEventListener('change', (e) => {
-        if (e.target.id) {
-            update(ref(db, 'fichas/' + fichaID), { [e.target.id]: e.target.value });
-            if (e.target.id.includes('_at') || e.target.id.includes('_max')) {
-                updateBarVisual(e.target.id.split('_')[0]);
-            }
+        .bar-fill { 
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%; 
+            width: 100%; 
+            transition: width 0.3s ease; 
+            z-index: 1; /* Fica atrás do texto */
         }
-    });
 
-    // CARREGAR
-    onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
-        const dados = snapshot.val();
-        if (dados) {
-            Object.keys(dados).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (id.startsWith('skull')) {
-                        dados[id] === "active" ? el.classList.add('active') : el.classList.remove('active');
-                    } else if (document.activeElement !== el) {
-                        el.value = dados[id];
-                        if (id.includes('_at') || id.includes('_max')) updateBarVisual(id.split('_')[0]);
-                    }
-                }
-            });
+        .bar-values { 
+            position: relative; 
+            z-index: 2; /* Fica na frente da barra para poder clicar */
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 2px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.8);
+            pointer-events: none; /* Permite que o clique passe para os inputs abaixo */
         }
-    });
 
-    // BOTÕES DE + e -
-    window.changeVal = (type, mod) => {
-        const el = document.getElementById(type + '_at');
-        let newVal = (parseInt(el.value) || 0) + mod;
-        el.value = newVal;
-        update(ref(db, 'fichas/' + fichaID), { [type + '_at']: newVal });
-        updateBarVisual(type);
-    };
-
-    window.toggleSkull = (id) => {
-        const el = document.getElementById(id);
-        el.classList.toggle('active');
-        update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" });
-    };
-</script>
-
-</body>
-</html>
+        /* Faz os inputs de dentro da barra serem clicáveis e visíveis */
+        .bar-values input { 
+            pointer-events: auto; /* Reativa o clique especificamente nos inputs */
+            width: 35px; 
+            background: transparent; 
+            border: none; 
+            padding: 0; 
+            text-align: center; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: white;
+            outline: none;
+        }
+        
+        /* Remove as setinhas chatas do input de número */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
