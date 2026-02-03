@@ -14,10 +14,12 @@
         input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
 
+        /* Avatar */
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; }
         .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
 
+        /* Status */
         .bar-container { margin-bottom: 10px; }
         .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
         .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
@@ -27,21 +29,25 @@
         .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
 
+        /* Perícias */
         .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 6px; padding: 8px 15px; border-radius: 20px; border: 1px solid #5a1a1f; cursor: pointer; transition: 0.2s; }
         .pericia-row span { font-size: 11px; font-weight: bold; text-transform: uppercase; pointer-events: none; }
         .pericia-row.treinado { background: #ffaaaa; color: #000; border-color: #fff; }
         .pericia-row.treinado span { color: #000; }
 
+        /* Atributos */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; }
         .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; margin: 0; }
         .attr-box div { font-size: 9px; font-weight: bold; color: #ffaaaa; }
 
-        .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
-        .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
+        /* Marcadores */
         .marker-item { cursor: pointer; font-size: 24px; opacity: 0.2; transition: 0.3s; filter: grayscale(1); }
         .marker-item.active { opacity: 1; filter: grayscale(0); drop-shadow: 0 0 5px currentColor; }
         .tri { color: #00ffff; } .circ { color: #00ff00; }
+
+        .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
+        .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -116,8 +122,9 @@
     <div class="col">
         <div class="card">
             <div class="header-label">Ações e Deslocamento</div>
-            <label>AÇÕES</label><div class="bar-controls"><button onclick="updateMarkerCount('ações', -1)">-</button><span id="count_ações">0</span><button onclick="updateMarkerCount('ações', 1)">+</button></div><div id="display_ações"></div>
-            <label>DESLOCAMENTO</label><div class="bar-controls"><button onclick="updateMarkerCount('desloc', -1)">-</button><span id="count_desloc">0</span><button onclick="updateMarkerCount('desloc', 1)">+</button></div><div id="display_desloc"></div>
+            <label>AÇÕES</label><div class="bar-controls"><button onclick="updateMarkerCount('ações', -1)">-</button><span id="count_ações">0</span><button onclick="updateMarkerCount('ações', 1)">+</button></div><div id="display_ações" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px;"></div>
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <label>DESLOCAMENTO</label><div class="bar-controls"><button onclick="updateMarkerCount('desloc', -1)">-</button><span id="count_desloc">0</span><button onclick="updateMarkerCount('desloc', 1)">+</button></div><div id="display_desloc" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px;"></div>
         </div>
     </div>
 </div>
@@ -142,7 +149,6 @@
     const fichaID = urlParams.get('p') || "personagem_padrao";
     const fichaRef = ref(db, 'fichas/' + fichaID);
 
-    // FUNÇÃO UNIVERSAL DE SALVAMENTO COM DEBOUNCE
     let timeout = null;
     function autoSave(data) {
         clearTimeout(timeout);
@@ -152,7 +158,7 @@
     }
 
     document.addEventListener('input', (e) => {
-        if (e.target.id) {
+        if (e.target.id && !e.target.classList.contains('hab-title')) {
             const data = { [e.target.id]: e.target.value };
             autoSave(data);
             const base = e.target.id.split('_')[0];
@@ -212,8 +218,14 @@
     };
 
     window.updateMarkerCount = (type, mod) => {
-        const current = parseInt(document.getElementById('count_'+type).innerText) || 0;
+        const span = document.getElementById('count_' + type);
+        const current = parseInt(span.innerText) || 0;
         update(ref(db, `fichas/${fichaID}/marcadores/${type}`), { total: Math.max(0, current + mod) });
+    };
+
+    window.toggleMarker = (type, i) => {
+        const active = !document.getElementById(`${type}_${i}`).classList.contains('active');
+        update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [`p_${i}`]: active });
     };
 
     function renderMarkers(type, total, pontos) {
@@ -223,9 +235,10 @@
         for(let i=0; i < (total || 0); i++) {
             const active = pontos && pontos[`p_${i}`] ? 'active' : '';
             const span = document.createElement('span');
+            span.id = `${type}_${i}`;
             span.className = `marker-item ${type==='ações'?'tri':'circ'} ${active}`;
             span.innerHTML = type==='ações'?'▲':'●';
-            span.onclick = () => update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [`p_${i}`]: !active });
+            span.onclick = () => window.toggleMarker(type, i);
             container.appendChild(span);
         }
     }
