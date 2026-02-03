@@ -12,22 +12,23 @@
         .header-label { background: var(--header-bg); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
         
         input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
-        label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; }
+        label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; text-transform: uppercase; }
 
         /* Avatar */
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; }
         .avatar-circle input { display: none; }
         
-        /* Barras */
+        /* Barras - SISTEMA CORRIGIDO */
         .bar-container { margin-bottom: 10px; }
-        .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 3px 8px; }
-        .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: bold; width: 20px; z-index: 3; }
-        .bar-bg { flex-grow: 1; height: 24px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
-        .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; }
+        .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
+        .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 25px; z-index: 10; }
+        .bar-bg { flex-grow: 1; height: 26px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
+        .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; width: 100%; }
         .hp-fill { background: #d32f2f; } .mp-fill { background: #1976d2; } .pa-fill { background: #7b1fa2; }
-        .bar-values { position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; align-items: center; gap: 2px; pointer-events: none; }
-        .bar-values input { pointer-events: auto; width: 35px; background: transparent; border: none; text-align: center; font-size: 12px; font-weight: bold; color: white; }
+        
+        .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .bar-values input { pointer-events: auto; width: 40px; background: transparent; border: none; text-align: center; font-size: 13px; font-weight: bold; color: white; margin: 0; padding: 0; text-shadow: 1px 1px 2px #000; }
 
         /* Atributos */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
@@ -40,15 +41,9 @@
         .pericia-row span { font-size: 11px; font-weight: bold; }
         .pericia-row input { width: 35px; text-align: center; border: none; background: transparent; font-weight: bold; color: white; }
         
-        /* Dados e Marcadores */
-        .dice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .dice-btn { background: var(--header-bg); color: white; border: 1px solid #ffaaaa; padding: 8px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .result-display { background: #000; color: #0f0; padding: 10px; border-radius: 10px; text-align: center; font-family: monospace; margin-top: 10px; border: 1px solid #0f0; }
-        .marker-group { display: flex; justify-content: center; gap: 8px; font-size: 22px; margin-bottom: 10px; }
-        .marker { cursor: pointer; opacity: 0.2; transition: 0.3s; }
-        .marker.active { opacity: 1; filter: drop-shadow(0 0 5px currentColor); }
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
@@ -67,13 +62,37 @@
 
             <div class="header-label" style="margin-top:15px;">Status</div>
             <div class="bar-container">
-                <div class="bar-controls"><button class="btn-math" onclick="changeVal('hp', -1)">-</button><div class="bar-bg"><div id="bar_hp" class="bar-fill hp-fill"></div><div class="bar-values"><input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10"></div></div><button class="btn-math" onclick="changeVal('hp', 1)">+</button></div>
+                <label>Vida</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('hp', -1)">-</button>
+                    <div class="bar-bg">
+                        <div id="bar_hp" class="bar-fill hp-fill"></div>
+                        <div class="bar-values"><input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10"></div>
+                    </div>
+                    <button class="btn-math" onclick="changeVal('hp', 1)">+</button>
+                </div>
             </div>
             <div class="bar-container">
-                <div class="bar-controls"><button class="btn-math" onclick="changeVal('mp', -1)">-</button><div class="bar-bg"><div id="bar_mp" class="bar-fill mp-fill"></div><div class="bar-values"><input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10"></div></div><button class="btn-math" onclick="changeVal('mp', 1)">+</button></div>
+                <label>Mana</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('mp', -1)">-</button>
+                    <div class="bar-bg">
+                        <div id="bar_mp" class="bar-fill mp-fill"></div>
+                        <div class="bar-values"><input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10"></div>
+                    </div>
+                    <button class="btn-math" onclick="changeVal('mp', 1)">+</button>
+                </div>
             </div>
             <div class="bar-container">
-                <div class="bar-controls"><button class="btn-math" onclick="changeVal('pa', -1)">-</button><div class="bar-bg"><div id="bar_pa" class="bar-fill pa-fill"></div><div class="bar-values"><input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3"></div></div><button class="btn-math" onclick="changeVal('pa', 1)">+</button></div>
+                <label>Pontos de Ação</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('pa', -1)">-</button>
+                    <div class="bar-bg">
+                        <div id="bar_pa" class="bar-fill pa-fill"></div>
+                        <div class="bar-values"><input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3"></div>
+                    </div>
+                    <button class="btn-math" onclick="changeVal('pa', 1)">+</button>
+                </div>
             </div>
 
             <div style="text-align:center; margin: 10px 0;">
@@ -107,28 +126,14 @@
     <div class="col">
         <div class="card">
             <div class="header-label">Habilidades & Técnicas</div>
-            <textarea id="habilidades" style="height: 800px; border-radius: 15px;" placeholder="Vantagens, Desvantagens, Técnicas e Artefatos..."></textarea>
+            <textarea id="habilidades" style="height: 850px; border-radius: 15px;" placeholder="Vantagens, Desvantagens e Técnicas..."></textarea>
         </div>
     </div>
 
     <div class="col">
         <div class="card">
             <div class="header-label">Ações & Dados</div>
-            <div style="text-align:center; font-size:11px; color:cyan; margin-bottom:5px;">PONTOS DE AÇÃO</div>
-            <div class="marker-group" style="color:cyan;">
-                <span class="marker" id="m_pa1" onclick="toggleMarker('m_pa1')">▲</span><span class="marker" id="m_pa2" onclick="toggleMarker('m_pa2')">▲</span><span class="marker" id="m_pa3" onclick="toggleMarker('m_pa3')">▲</span>
-            </div>
-            <div style="text-align:center; font-size:11px; color:springgreen; margin-bottom:5px;">DESLOCAMENTO</div>
-            <div class="marker-group" style="color:springgreen;">
-                <span class="marker" id="m_d1" onclick="toggleMarker('m_d1')">●</span><span class="marker" id="m_d2" onclick="toggleMarker('m_d2')">●</span><span class="marker" id="m_d3" onclick="toggleMarker('m_d3')">●</span><span class="marker" id="m_d4" onclick="toggleMarker('m_d4')">●</span><span class="marker" id="m_d5" onclick="toggleMarker('m_d5')">●</span>
-            </div>
-            <hr style="border:0; border-top:1px solid #5a1a1f; margin:15px 0;">
-            <div class="dice-grid">
-                <button class="dice-btn" onclick="rollDice(4)">D4</button><button class="dice-btn" onclick="rollDice(6)">D6</button>
-                <button class="dice-btn" onclick="rollDice(8)">D8</button><button class="dice-btn" onclick="rollDice(10)">D10</button>
-                <button class="dice-btn" onclick="rollDice(12)">D12</button><button class="dice-btn" onclick="rollDice(20)">D20</button>
-            </div>
-            <div id="dice-result" class="result-display">Resultado: -</div>
+            <p style="text-align:center; color:#ccc;">(Sistema de dados aqui futuramente)</p>
         </div>
     </div>
 </div>
@@ -157,7 +162,7 @@
         const max = parseInt(document.getElementById(type + '_max').value) || 1;
         const percent = Math.min(Math.max((at / max) * 100, 0), 100);
         const el = document.getElementById('bar_' + type);
-        if(el) el.style.width = percent + '%';
+        if (el) el.style.width = percent + '%';
     }
 
     const imgInput = document.getElementById('img_upload');
@@ -186,7 +191,7 @@
                 if (id === 'char_img') {
                     document.getElementById('avatar_display').style.backgroundImage = `url(${dados[id]})`;
                 } else if (el) {
-                    if (id.startsWith('skull') || id.startsWith('m_')) {
+                    if (id.startsWith('skull')) {
                         dados[id] === "active" ? el.classList.add('active') : el.classList.remove('active');
                     } else if (document.activeElement !== el) {
                         el.value = dados[id];
@@ -209,17 +214,6 @@
         const el = document.getElementById(id);
         el.classList.toggle('active');
         update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" });
-    };
-
-    window.toggleMarker = (id) => {
-        const el = document.getElementById(id);
-        el.classList.toggle('active');
-        update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" });
-    };
-
-    window.rollDice = (faces) => {
-        const result = Math.floor(Math.random() * faces) + 1;
-        document.getElementById('dice-result').innerText = `Resultado (D${faces}): ${result}`;
     };
 </script>
 
