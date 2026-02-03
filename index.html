@@ -11,39 +11,39 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #5a1a1f; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .header-label { background: var(--header-bg); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
         
-        input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 6px; border-radius: 5px; width: 100%; box-sizing: border-box; }
+        input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         
-        /* Sistema de Barras Inteligentes */
-        .bar-container { margin-bottom: 15px; }
-        .bar-label { font-size: 11px; font-weight: bold; margin-bottom: 3px; display: block; color: #ffaaaa; }
-        .bar-controls { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 5px; }
-        .btn-math { background: #800000; border: 1px solid #ffaaaa; color: white; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-weight: bold; z-index: 3; }
-        
-        .bar-bg { flex-grow: 1; height: 30px; background: #222; border-radius: 6px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
+        /* Sistema de Avatar */
+        .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; position: relative; }
+        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; background-image: url('https://via.placeholder.com/150?text=Upload'); background-size: cover; background-position: center; }
+        .avatar-circle input { display: none; }
+        .char-name-input { background: transparent; border: none; font-size: 20px; font-weight: bold; text-align: center; margin-top: 10px; color: white; border-bottom: 1px solid transparent; border-radius: 0; }
+        .char-name-input:hover { border-bottom: 1px solid var(--header-bg); }
+
+        /* Barras de Status */
+        .bar-container { margin-bottom: 12px; }
+        .bar-label { font-size: 11px; font-weight: bold; margin-bottom: 3px; display: block; color: #ffaaaa; text-transform: uppercase; }
+        .bar-controls { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 10px; }
+        .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 25px; }
+        .bar-bg { flex-grow: 1; height: 22px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
         .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; }
-        .hp-fill { background: linear-gradient(90deg, #800000, #ff4444); }
-        .mp-fill { background: linear-gradient(90deg, #002266, #3388ff); }
-        .pa-fill { background: linear-gradient(90deg, #440066, #aa44ff); }
-        
+        .hp-fill { background: #d32f2f; } .mp-fill { background: #1976d2; } .pa-fill { background: #7b1fa2; }
         .bar-values { position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; align-items: center; gap: 2px; pointer-events: none; }
-        .bar-values input { pointer-events: auto; width: 40px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 2px 2px 2px #000; }
+        .bar-values input { pointer-events: auto; width: 35px; background: transparent; border: none; text-align: center; font-size: 13px; font-weight: bold; color: white; margin: 0; padding: 0; }
         
-        /* Atributos Estilo Print */
+        /* Atributos */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .attr-box { background: var(--input-bg); border: 1px solid #7a2a2f; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .attr-box input { font-size: 32px; font-weight: bold; text-align: center; border: none; background: transparent; width: 100%; padding: 0; margin-bottom: 5px; }
-        .attr-box div { font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 1px; }
+        .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 15px; padding: 10px 5px; text-align: center; }
+        .attr-box input { font-size: 32px; font-weight: bold; text-align: center; border: none; background: transparent; width: 100%; padding: 0; margin-bottom: 2px; }
+        .attr-box div { font-size: 10px; font-weight: bold; color: #ccc; text-transform: uppercase; }
 
         /* Perícias */
-        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 10px; border-radius: 8px; border: 1px solid #5a1a1f; }
-        .pericia-row input { width: 45px; text-align: center; }
+        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 15px; border-radius: 20px; border: 1px solid #5a1a1f; }
+        .pericia-row input { width: 40px; text-align: center; border: none; background: transparent; font-weight: bold; margin: 0; }
         
         .death-saves { text-align: center; font-size: 30px; cursor: pointer; margin-top: 10px; }
         .skull { opacity: 0.2; transition: 0.3s; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
-
-        /* Remove setinhas do input de número */
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
@@ -51,48 +51,32 @@
 <div class="container">
     <div class="col">
         <div class="card">
-            <div class="header-label">Status</div>
+            <div class="header-label">Geral</div>
+            
+            <div class="avatar-container">
+                <label for="img_upload" class="avatar-circle" id="avatar_display">
+                    <input type="file" id="img_upload" accept="image/*">
+                </label>
+                <input type="text" id="char_name" class="char-name-input" placeholder="Nome do Personagem">
+            </div>
+
+            <label>Idade:</label><input type="text" id="idade" placeholder="Ex: 25 anos">
+            <label>Florins:</label><input type="text" id="florins" placeholder="Ex: 150">
+            <label>Arquétipo:</label><input type="text" id="arquetipo" placeholder="Ex: Guerreiro">
+
+            <div class="header-label" style="margin-top:20px;">Fracionáveis</div>
             
             <div class="bar-container">
-                <span class="bar-label">PONTOS DE VIDA</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('hp', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_hp" class="bar-fill hp-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('hp', 1)">+</button>
-                </div>
+                <span class="bar-label">Vida</span>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('hp', -1)">-</button><div class="bar-bg"><div id="bar_hp" class="bar-fill hp-fill"></div><div class="bar-values"><input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10"></div></div><button class="btn-math" onclick="changeVal('hp', 1)">+</button></div>
             </div>
-
             <div class="bar-container">
-                <span class="bar-label">PONTOS DE MANA</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('mp', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_mp" class="bar-fill mp-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('mp', 1)">+</button>
-                </div>
+                <span class="bar-label">Mana</span>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('mp', -1)">-</button><div class="bar-bg"><div id="bar_mp" class="bar-fill mp-fill"></div><div class="bar-values"><input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10"></div></div><button class="btn-math" onclick="changeVal('mp', 1)">+</button></div>
             </div>
-
             <div class="bar-container">
-                <span class="bar-label">PONTOS DE AÇÃO</span>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('pa', -1)">-</button>
-                    <div class="bar-bg">
-                        <div id="bar_pa" class="bar-fill pa-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3">
-                        </div>
-                    </div>
-                    <button class="btn-math" onclick="changeVal('pa', 1)">+</button>
-                </div>
+                <span class="bar-label">Ações</span>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('pa', -1)">-</button><div class="bar-bg"><div id="bar_pa" class="bar-fill pa-fill"></div><div class="bar-values"><input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3"></div></div><button class="btn-math" onclick="changeVal('pa', 1)">+</button></div>
             </div>
 
             <div class="death-saves">
@@ -117,21 +101,16 @@
             <div class="header-label">Perícias</div>
             <div class="pericia-row"><span>ANIMAIS</span><input type="number" id="p_animais" value="0"></div>
             <div class="pericia-row"><span>ARTE</span><input type="number" id="p_arte" value="0"></div>
-            <div class="pericia-row"><span>ESPORTE</span><input type="number" id="p_esporte" value="0"></div>
             <div class="pericia-row"><span>LUTA</span><input type="number" id="p_luta" value="0"></div>
             <div class="pericia-row"><span>MÍSTICA</span><input type="number" id="p_mistica" value="0"></div>
             <div class="pericia-row"><span>PERCEPÇÃO</span><input type="number" id="p_percepcao" value="0"></div>
-            <div class="pericia-row"><span>SOBREVIVÊNCIA</span><input type="number" id="p_sobrevivencia" value="0"></div>
         </div>
     </div>
 
     <div class="col">
         <div class="card">
-            <div class="header-label">Geral & Habilidades</div>
-            <label>NOME</label><input type="text" id="nome">
-            <label>FLORINS</label><input type="text" id="florins">
-            <label>ARQUÉTIPO</label><input type="text" id="arquetipo">
-            <textarea id="habilidades" style="height: 250px; margin-top:10px;" placeholder="Técnicas, Itens e Vantagens..."></textarea>
+            <div class="header-label">Habilidades</div>
+            <textarea id="habilidades" style="height: 400px; border-radius: 10px;" placeholder="Vantagens, Desvantagens e Técnicas..."></textarea>
         </div>
     </div>
 </div>
@@ -159,16 +138,27 @@
         const at = parseInt(document.getElementById(type + '_at').value) || 0;
         const max = parseInt(document.getElementById(type + '_max').value) || 1;
         const percent = Math.min(Math.max((at / max) * 100, 0), 100);
-        const barEl = document.getElementById('bar_' + type);
-        if (barEl) barEl.style.width = percent + '%';
+        const el = document.getElementById('bar_' + type);
+        if(el) el.style.width = percent + '%';
     }
 
+    // SISTEMA DE UPLOAD DE IMAGEM
+    const imgInput = document.getElementById('img_upload');
+    imgInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result;
+            document.getElementById('avatar_display').style.backgroundImage = `url(${base64String})`;
+            update(ref(db, 'fichas/' + fichaID), { char_img: base64String });
+        };
+        if (file) reader.readAsDataURL(file);
+    });
+
     document.addEventListener('change', (e) => {
-        if (e.target.id) {
+        if (e.target.id && e.target.id !== 'img_upload') {
             update(ref(db, 'fichas/' + fichaID), { [e.target.id]: e.target.value });
-            if (e.target.id.includes('_at') || e.target.id.includes('_max')) {
-                updateBarVisual(e.target.id.split('_')[0]);
-            }
+            if (e.target.id.includes('_at') || e.target.id.includes('_max')) updateBarVisual(e.target.id.split('_')[0]);
         }
     });
 
@@ -177,7 +167,9 @@
         if (dados) {
             Object.keys(dados).forEach(id => {
                 const el = document.getElementById(id);
-                if (el) {
+                if (id === 'char_img') {
+                    document.getElementById('avatar_display').style.backgroundImage = `url(${dados[id]})`;
+                } else if (el) {
                     if (id.startsWith('skull')) {
                         dados[id] === "active" ? el.classList.add('active') : el.classList.remove('active');
                     } else if (document.activeElement !== el) {
