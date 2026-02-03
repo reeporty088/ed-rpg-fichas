@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Ficha - Escória de Deus RPG</title>
+    <title>Ficha RPG - Alta Fantasia</title>
     <style>
         :root { --bg: #1a1a1a; --card-bg: #41141a; --header-bg: #800000; --text: #ffffff; --input-bg: #2a0a0d; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
@@ -14,32 +14,16 @@
         input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
 
-        /* Coluna 1: Avatar e Status */
+        /* Avatar Circular e Clicável */
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .avatar-circle { 
-            width: 140px; 
-            height: 140px; 
-            border-radius: 50%; 
-            border: 4px solid var(--header-bg); 
-            background: #222; 
-            overflow: hidden; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            background-size: cover; 
-            background-position: center;
-            position: relative; 
+            width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); 
+            background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; background-size: cover; background-position: center; position: relative; 
         }
-        /* Esconde o botão original mas mantém a área clicável */
-        .avatar-circle input[type="file"] {
-            opacity: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
+        .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
 
+        /* Status e Barras */
         .bar-container { margin-bottom: 10px; }
         .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
         .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
@@ -49,7 +33,18 @@
         .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
 
-        /* Coluna 2: Habilidades */
+        /* Perícias como Botões de Treinamento */
+        .pericia-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0,0,0,0.2); margin-bottom: 6px; padding: 8px 15px; 
+            border-radius: 20px; border: 1px solid #5a1a1f; cursor: pointer; transition: 0.3s;
+        }
+        .pericia-row span { font-size: 11px; font-weight: bold; text-transform: uppercase; pointer-events: none; }
+        .pericia-row.treinado { background: #ffaaaa; color: #000; border-color: #fff; }
+        .pericia-row.treinado span { color: #000; }
+        .pericia-row:hover { transform: scale(1.02); }
+
+        /* Habilidades Dinâmicas */
         .hab-item { background: rgba(0,0,0,0.3); border: 1px solid #5a1a1f; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
         .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
         .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; }
@@ -60,20 +55,19 @@
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
 
-        /* Coluna 3: Marcadores */
+        /* Marcadores */
         .marker-section { margin-bottom: 20px; text-align: center; }
         .marker-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; }
         .marker-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px; }
         .marker-item { cursor: pointer; font-size: 24px; opacity: 0.2; transition: 0.3s; filter: grayscale(1); }
         .marker-item.active { opacity: 1; filter: grayscale(0); drop-shadow: 0 0 5px currentColor; }
-        .tri { color: #00ffff; } 
-        .circ { color: #00ff00; } 
+        .tri { color: #00ffff; } .circ { color: #00ff00; }
         .btn-count { background: var(--header-bg); border: 1px solid #ffaaaa; color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; line-height: 1; font-weight: bold; }
 
+        /* Atributos */
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; }
         .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; }
-        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 15px; border-radius: 20px; border: 1px solid #5a1a1f; }
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -124,18 +118,20 @@
                 <div class="attr-box"><input type="number" id="resistencia" value="0"><div>RES.</div></div>
             </div>
             <div class="header-label">Perícias</div>
-            <div class="pericia-row"><span>ANIMAIS</span><input type="number" id="p_animais" value="0"></div>
-            <div class="pericia-row"><span>ARTE</span><input type="number" id="p_arte" value="0"></div>
-            <div class="pericia-row"><span>ESPORTE</span><input type="number" id="p_esporte" value="0"></div>
-            <div class="pericia-row"><span>INFLUÊNCIA</span><input type="number" id="p_influencia" value="0"></div>
-            <div class="pericia-row"><span>LUTA</span><input type="number" id="p_luta" value="0"></div>
-            <div class="pericia-row"><span>MANHA</span><input type="number" id="p_manha" value="0"></div>
-            <div class="pericia-row"><span>MÁQUINAS</span><input type="number" id="p_maquinas" value="0"></div>
-            <div class="pericia-row"><span>MEDICINA</span><input type="number" id="p_medicina" value="0"></div>
-            <div class="pericia-row"><span>MÍSTICA</span><input type="number" id="p_mistica" value="0"></div>
-            <div class="pericia-row"><span>PERCEPÇÃO</span><input type="number" id="p_percepcao" value="0"></div>
-            <div class="pericia-row"><span>SABER</span><input type="number" id="p_saber" value="0"></div>
-            <div class="pericia-row"><span>SOBREVIVÊNCIA</span><input type="number" id="p_sobrevivencia" value="0"></div>
+            <div id="pericias-container">
+                <div class="pericia-row" onclick="togglePericia(this, 'p_animais')"><span>ANIMAIS</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_arte')"><span>ARTE</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_esporte')"><span>ESPORTE</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_influencia')"><span>INFLUÊNCIA</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_luta')"><span>LUTA</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_manha')"><span>MANHA</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_maquinas')"><span>MÁQUINAS</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_medicina')"><span>MEDICINA</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_mistica')"><span>MÍSTICA</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_percepcao')"><span>PERCEPÇÃO</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_saber')"><span>SABER</span></div>
+                <div class="pericia-row" onclick="togglePericia(this, 'p_sobrevivencia')"><span>SOBREVIVÊNCIA</span></div>
+            </div>
         </div>
     </div>
 
@@ -198,6 +194,13 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
+    // --- NOVA LÓGICA DE PERÍCIAS (TREINADO) ---
+    window.togglePericia = (el, id) => {
+        const isTreinado = el.classList.toggle('treinado');
+        update(ref(db, `fichas/${fichaID}/pericias`), { [id]: isTreinado });
+    };
+
+    // --- MARCADORES ---
     window.updateMarkerCount = (type, mod) => {
         const span = document.getElementById('count_' + type);
         let count = (parseInt(span.innerText) || 0) + mod;
@@ -224,6 +227,7 @@
         }
     }
 
+    // --- HABILIDADES DINÂMICAS ---
     window.addItem = (category) => {
         const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${category}`));
         set(newItemRef, { titulo: "", teste: "", desc: "" });
@@ -245,6 +249,7 @@
         });
     }
 
+    // --- LÓGICA GERAL E FIREBASE ---
     function updateBarVisual(type) {
         const at = parseInt(document.getElementById(type + '_at').value) || 0;
         const max = parseInt(document.getElementById(type + '_max').value) || 1;
@@ -263,6 +268,16 @@
     onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
         const dados = snapshot.val();
         if (dados) {
+            // Sincronizar Perícias Treinadas
+            if (dados.pericias) {
+                Object.keys(dados.pericias).forEach(pid => {
+                    const row = document.querySelector(`[onclick*="${pid}"]`);
+                    if (row) {
+                        dados.pericias[pid] ? row.classList.add('treinado') : row.classList.remove('treinado');
+                    }
+                });
+            }
+
             if(dados.habilidades) ['vantagens', 'arquetipo_hab', 'artefatos', 'tecnicas'].forEach(cat => renderHabs(cat, dados.habilidades[cat]));
             if(dados.marcadores) {
                 renderMarkers('ações', dados.marcadores['ações']?.total, dados.marcadores['ações']?.pontos);
@@ -270,7 +285,7 @@
             } else { renderMarkers('ações', 3, null); renderMarkers('desloc', 9, null); }
 
             Object.keys(dados).forEach(id => {
-                if(id === 'habilidades' || id === 'marcadores') return;
+                if(id === 'habilidades' || id === 'marcadores' || id === 'pericias') return;
                 const el = document.getElementById(id);
                 if (id === 'char_img') document.getElementById('avatar_display').style.backgroundImage = `url(${dados[id]})`;
                 else if (el) {
@@ -312,4 +327,3 @@
 
 </body>
 </html>
-
