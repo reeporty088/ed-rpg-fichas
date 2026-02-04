@@ -14,15 +14,7 @@
         input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
 
-        /* --- MELHORIA NA CAIXA DE TEXTO DAS HABILIDADES --- */
-        /* Isso garante que a descrição abra grande o suficiente para ler parágrafos */
-        .hab-body textarea {
-            min-height: 120px; /* Altura inicial maior */
-            resize: vertical;  /* Permite que o usuário puxe para aumentar mais se quiser */
-            line-height: 1.4;  /* Espaçamento melhor entre linhas */
-            font-size: 14px;
-        }
-
+        .hab-body textarea { min-height: 120px; resize: vertical; line-height: 1.4; font-size: 14px; }
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; }
         .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
@@ -61,46 +53,62 @@
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
 
-        .pericia-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(0,0,0,0.2); 
-            margin-bottom: 6px; 
-            padding: 5px 15px; 
-            border-radius: 20px; 
-            border: 1px solid #5a1a1f; 
-        }
-        .pericia-controls {
+        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 6px; padding: 5px 15px; border-radius: 20px; border: 1px solid #5a1a1f; }
+        .pericia-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 15px; }
+        .btn-p { background: transparent; border: none; color: #ffaaaa; font-weight: bold; font-size: 18px; cursor: pointer; width: 25px; display: flex; justify-content: center; }
+        .btn-p:hover { color: white; text-shadow: 0 0 5px white; }
+        .pericia-val { font-weight: bold; color: white; font-size: 16px; min-width: 25px; text-align: right; }
+        .dice-icon { font-size: 20px; margin-left: 2px; }
+
+        /* --- ESTILOS DO SISTEMA DE XP --- */
+        .xp-container {
             display: flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(0,0,0,0.4);
-            padding: 2px 8px;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.3);
             border-radius: 15px;
+            padding: 10px;
+            border: 1px solid #7a2a2f;
+            margin-bottom: 10px;
         }
-        .btn-p {
-            background: transparent;
-            border: none;
-            color: #ffaaaa;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            width: 25px;
-            display: flex;
-            justify-content: center;
+        .xp-display {
+            text-align: center;
         }
-        .btn-p:hover { color: white; text-shadow: 0 0 5px white; }
-        .pericia-val {
+        .xp-number {
+            font-size: 32px;
             font-weight: bold;
+            color: #ffd700; /* Dourado */
+            display: block;
+            line-height: 1;
+        }
+        .xp-label {
+            font-size: 10px;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+        .btn-xp {
+            background: var(--header-bg);
+            border: 1px solid #ffaaaa;
             color: white;
-            font-size: 16px;
-            min-width: 25px;
-            text-align: right;
+            font-size: 10px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.2s;
         }
-        .dice-icon {
-            font-size: 20px;
-            margin-left: 2px;
+        .btn-xp:hover { background: #ffaaaa; color: black; }
+        
+        .xp-info-bar {
+            text-align: center;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #4fc3f7; /* Azul claro para o XP total */
         }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -192,6 +200,21 @@
                 </div>
                 <div id="display_desloc" class="marker-display"></div>
             </div>
+
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="header-label">Experiência</div>
+            <div class="xp-container">
+                <button class="btn-xp" onclick="gastarPonto()">Gastar</button>
+                <div class="xp-display">
+                    <span id="display_pontos" class="xp-number">0</span>
+                    <span class="xp-label">Pontos</span>
+                </div>
+                <button class="btn-xp" onclick="converterXP()">Converter</button>
+            </div>
+            <div class="xp-info-bar">
+                <span id="display_xp_total">0</span> XP
+            </div>
+
         </div>
     </div>
 </div>
@@ -215,7 +238,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
-    // LISTA DE PERÍCIAS
     const periciasList = [
         {id: 'p_animais', nome: 'ANIMAIS'},
         {id: 'p_arte', nome: 'ARTE'},
@@ -235,10 +257,10 @@
         'char_name', 'idade', 'florins', 'arquetipo',
         'hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max',
         'poder', 'habilidade', 'resistencia',
+        'xp_total', 'xp_pontos', // Adicionados ao VIP
         ...periciasList.map(p => p.id)
     ];
 
-    // GERA PERÍCIAS
     const pContainer = document.getElementById('pericias-list');
     periciasList.forEach(p => {
         pContainer.innerHTML += `
@@ -254,6 +276,39 @@
             </div>
         `;
     });
+
+    // --- LÓGICA DE XP ---
+    window.converterXP = () => {
+        const xpSpan = document.getElementById('display_xp_total');
+        const ptSpan = document.getElementById('display_pontos');
+        
+        let xp = parseInt(xpSpan.innerText) || 0;
+        let pontos = parseInt(ptSpan.innerText) || 0;
+
+        if (xp >= 10) {
+            const qtdPontos = Math.floor(xp / 10);
+            const custo = qtdPontos * 10;
+            
+            const novoXP = xp - custo;
+            const novosPontos = pontos + qtdPontos;
+
+            update(ref(db, 'fichas/' + fichaID), {
+                xp_total: novoXP,
+                xp_pontos: novosPontos
+            });
+        } else {
+            alert("XP insuficiente! Precisa de 10 XP para 1 Ponto.");
+        }
+    };
+
+    window.gastarPonto = () => {
+        const ptSpan = document.getElementById('display_pontos');
+        let pontos = parseInt(ptSpan.innerText) || 0;
+
+        if (pontos > 0) {
+            update(ref(db, 'fichas/' + fichaID), { xp_pontos: pontos - 1 });
+        }
+    };
 
     window.updatePericia = (id, mod) => {
         const input = document.getElementById(id);
@@ -293,14 +348,22 @@
 
         camposParaSalvar.forEach(id => {
             if (dados[id] !== undefined) {
-                const el = document.getElementById(id);
-                if (id.startsWith('p_')) {
-                    el.value = dados[id];
-                    updateDisplayPericia(id, dados[id]);
-                }
-                else if (el && document.activeElement !== el) {
-                    el.value = dados[id];
-                    if (id.includes('_at') || id.includes('_max')) updateBarVisual(id.split('_')[0]);
+                // Tratamento especial para XP (que não são inputs)
+                if (id === 'xp_total') {
+                    document.getElementById('display_xp_total').innerText = dados[id];
+                } else if (id === 'xp_pontos') {
+                    document.getElementById('display_pontos').innerText = dados[id];
+                } 
+                else {
+                    const el = document.getElementById(id);
+                    if (id.startsWith('p_')) {
+                        el.value = dados[id];
+                        updateDisplayPericia(id, dados[id]);
+                    }
+                    else if (el && document.activeElement !== el) {
+                        el.value = dados[id];
+                        if (id.includes('_at') || id.includes('_max')) updateBarVisual(id.split('_')[0]);
+                    }
                 }
             }
         });
