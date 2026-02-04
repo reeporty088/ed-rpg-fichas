@@ -6,9 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CONFIGURAÇÃO DA FONTE CUSTOMIZADA --- */
-        /* SE VOCÊ TIVER O ARQUIVO 'MitraLT.ttf', coloque na mesma pasta deste arquivo
-           e descomente (tire o /* e o * /) as linhas abaixo: */
+        /* --- FONTE CUSTOMIZADA --- */
         /*
         @font-face {
             font-family: 'Mitra LT';
@@ -19,82 +17,81 @@
         */
 
         body { 
-            background: transparent; /* Fundo transparente para o OBS */
+            background: transparent; 
             margin: 0; 
             padding: 20px; 
             overflow: hidden; 
-            /* Tenta usar Mitra LT, se não tiver, usa Cinzel */
             font-family: 'Mitra LT', 'Cinzel', serif; 
         }
         
-        /* Container principal sem fundo, só texto com sombra forte */
         #widget {
             width: 100%;
             max-width: 500px;
             color: white;
             text-align: center;
-            /* Sombra forte para ler em cima de qualquer jogo */
             text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0px 3px 5px rgba(0,0,0,0.8);
         }
 
-        /* --- MODO 1: SÓ O NOME --- */
+        /* --- MODO 1: NOME (Atualizado para 2 linhas) --- */
         .mode-name {
-            font-size: 48px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* --- MODO 2: STATUS (TEXTO) --- */
+        .name-line-1 {
+            font-size: 56px; /* Nome principal bem grande */
+            line-height: 0.9;
+        }
+
+        .name-line-2 {
+            font-size: 32px; /* Sobrenome um pouco menor */
+            line-height: 1.1;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* --- MODO 2: STATUS --- */
         .status-container {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-
-        /* Linha principal (PV e PM) */
         .main-stats-row {
             display: flex;
             justify-content: center;
-            gap: 30px; /* Espaço entre Vida e Mana */
+            gap: 30px;
             align-items: baseline;
         }
-
         .stat-group {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
-        /* Valores numéricos grandes */
         .stat-value {
             font-size: 42px;
             font-weight: 700;
             line-height: 1;
         }
-
-        /* Rótulos pequenos (PV, PM) */
         .stat-label {
             font-size: 14px;
             text-transform: uppercase;
             opacity: 0.9;
             font-weight: 400;
-            margin-top: -5px; /* Aproxima o texto do número */
+            margin-top: -5px;
         }
-
-        /* Linha secundária (PA) */
-        .secondary-stats-row {
-            margin-top: 5px;
-        }
+        .secondary-stats-row { margin-top: 5px; }
         .pa-value { font-size: 28px; font-weight: 700; }
         .pa-label { font-size: 12px; text-transform: uppercase; opacity: 0.8; }
 
-        /* Cores dos textos */
-        .txt-hp { color: #ff4444; } /* Vermelho Sangue */
-        .txt-mp { color: #4488ff; } /* Azul Mana */
-        .txt-pa { color: #aa66cc; } /* Roxo Ação */
+        .txt-hp { color: #ff4444; }
+        .txt-mp { color: #4488ff; }
+        .txt-pa { color: #aa66cc; }
 
-        /* Animação de entrada suave */
         .fade-in { animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(20px); } 
@@ -133,19 +130,37 @@
         const data = snapshot.val();
         if (!data) return;
 
-        const nomeCompleto = data.char_name || "Desconhecido";
-        // Pega apenas o primeiro nome, ou o nome todo se for curto
-        const nomeExibicao = nomeCompleto.length > 15 ? nomeCompleto.split(' ')[0] : nomeCompleto;
-
+        const rawName = data.char_name || "Desconhecido";
         const modo = data.overlay_mode || 'nome';
 
         let html = '';
 
         if (modo === 'nome') {
-            // MODO 1: SÓ O NOME GIGANTE
-            html = `<div class="mode-name fade-in">${nomeExibicao}</div>`;
+            // Separa o nome por espaços
+            const partes = rawName.trim().split(' ');
+            
+            if (partes.length > 1) {
+                // Se tiver mais de uma palavra
+                const primeiro = partes[0];
+                const resto = partes.slice(1).join(' '); // Junta o resto
+                
+                html = `
+                    <div class="mode-name fade-in">
+                        <span class="name-line-1">${primeiro}</span>
+                        <span class="name-line-2">${resto}</span>
+                    </div>
+                `;
+            } else {
+                // Se for só uma palavra
+                html = `
+                    <div class="mode-name fade-in">
+                        <span class="name-line-1">${rawName}</span>
+                    </div>
+                `;
+            }
+
         } else {
-            // MODO 2: STATUS TEXTO
+            // MODO STATUS (Mantido igual)
             const hpAt = data.hp_at || 0; const hpMax = data.hp_max || 1;
             const mpAt = data.mp_at || 0; const mpMax = data.mp_max || 1;
             const paAt = data.pa_at || 0; const paMax = data.pa_max || 1;
@@ -162,7 +177,6 @@
                             <span class="stat-label">Pontos de Mana</span>
                         </div>
                     </div>
-                    
                     <div class="secondary-stats-row txt-pa">
                          <span class="pa-value">${paAt} / ${paMax}</span>
                         <span class="pa-label">Pontos de Ação</span>
