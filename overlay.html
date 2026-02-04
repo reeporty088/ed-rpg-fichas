@@ -29,10 +29,16 @@
             max-width: 500px;
             color: white;
             text-align: center;
-            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0px 3px 5px rgba(0,0,0,0.8);
+            /* Sombra forte para destacar os números */
+            text-shadow: 
+                3px 3px 0px #000, 
+                -1px -1px 0px #000, 
+                1px -1px 0px #000, 
+                -1px 1px 0px #000, 
+                0px 3px 5px rgba(0,0,0,0.8);
         }
 
-        /* --- MODO 1: NOME (Atualizado para 2 linhas) --- */
+        /* --- MODO 1: NOME (2 linhas) --- */
         .mode-name {
             font-weight: 700;
             text-transform: uppercase;
@@ -43,51 +49,36 @@
             justify-content: center;
         }
 
-        .name-line-1 {
-            font-size: 56px; /* Nome principal bem grande */
-            line-height: 0.9;
-        }
+        .name-line-1 { font-size: 56px; line-height: 0.9; }
+        .name-line-2 { font-size: 32px; line-height: 1.1; opacity: 0.9; margin-top: 5px; }
 
-        .name-line-2 {
-            font-size: 32px; /* Sobrenome um pouco menor */
-            line-height: 1.1;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-
-        /* --- MODO 2: STATUS --- */
+        /* --- MODO 2: STATUS (LIMPO) --- */
         .status-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            align-items: center; /* Centraliza tudo */
+            gap: 5px; /* Espaço pequeno entre Vida e Mana */
         }
-        .main-stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            align-items: baseline;
-        }
-        .stat-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+
+        /* Estilo dos Números Principais (HP/MP) */
         .stat-value {
-            font-size: 42px;
+            font-size: 52px; /* Aumentei para ficar bem visível */
             font-weight: 700;
             line-height: 1;
         }
-        .stat-label {
-            font-size: 14px;
-            text-transform: uppercase;
-            opacity: 0.9;
-            font-weight: 400;
-            margin-top: -5px;
-        }
-        .secondary-stats-row { margin-top: 5px; }
-        .pa-value { font-size: 28px; font-weight: 700; }
-        .pa-label { font-size: 12px; text-transform: uppercase; opacity: 0.8; }
 
+        /* Estilo do PA */
+        .pa-value { 
+            font-size: 36px; 
+            font-weight: 700; 
+        }
+
+        /* Espaçamento extra para o PA */
+        .pa-spacing {
+            margin-top: 30px; /* <--- ALTERE AQUI PARA AFASTAR MAIS OU MENOS */
+        }
+
+        /* Cores */
         .txt-hp { color: #ff4444; }
         .txt-mp { color: #4488ff; }
         .txt-pa { color: #aa66cc; }
@@ -101,8 +92,7 @@
 </head>
 <body>
 
-    <div id="widget">
-        </div>
+    <div id="widget"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -132,59 +122,39 @@
 
         const rawName = data.char_name || "Desconhecido";
         const modo = data.overlay_mode || 'nome';
-
         let html = '';
 
         if (modo === 'nome') {
-            // Separa o nome por espaços
             const partes = rawName.trim().split(' ');
-            
             if (partes.length > 1) {
-                // Se tiver mais de uma palavra
                 const primeiro = partes[0];
-                const resto = partes.slice(1).join(' '); // Junta o resto
-                
-                html = `
-                    <div class="mode-name fade-in">
-                        <span class="name-line-1">${primeiro}</span>
-                        <span class="name-line-2">${resto}</span>
-                    </div>
-                `;
+                const resto = partes.slice(1).join(' ');
+                html = `<div class="mode-name fade-in"><span class="name-line-1">${primeiro}</span><span class="name-line-2">${resto}</span></div>`;
             } else {
-                // Se for só uma palavra
-                html = `
-                    <div class="mode-name fade-in">
-                        <span class="name-line-1">${rawName}</span>
-                    </div>
-                `;
+                html = `<div class="mode-name fade-in"><span class="name-line-1">${rawName}</span></div>`;
             }
-
         } else {
-            // MODO STATUS (Mantido igual)
+            // MODO STATUS (Vertical e Limpo)
             const hpAt = data.hp_at || 0; const hpMax = data.hp_max || 1;
             const mpAt = data.mp_at || 0; const mpMax = data.mp_max || 1;
             const paAt = data.pa_at || 0; const paMax = data.pa_max || 1;
 
             html = `
                 <div class="status-container fade-in">
-                    <div class="main-stats-row">
-                        <div class="stat-group txt-hp">
-                            <span class="stat-value">${hpAt}/${hpMax}</span>
-                            <span class="stat-label">Pontos de Vida</span>
-                        </div>
-                        <div class="stat-group txt-mp">
-                            <span class="stat-value">${mpAt}/${mpMax}</span>
-                            <span class="stat-label">Pontos de Mana</span>
-                        </div>
+                    <div class="stat-value txt-hp">
+                        ${hpAt}/${hpMax}
                     </div>
-                    <div class="secondary-stats-row txt-pa">
-                         <span class="pa-value">${paAt} / ${paMax}</span>
-                        <span class="pa-label">Pontos de Ação</span>
+                    
+                    <div class="stat-value txt-mp">
+                        ${mpAt}/${mpMax}
+                    </div>
+                    
+                    <div class="pa-value txt-pa pa-spacing">
+                         ${paAt} / ${paMax}
                     </div>
                 </div>
             `;
         }
-
         widget.innerHTML = html;
     });
 </script>
