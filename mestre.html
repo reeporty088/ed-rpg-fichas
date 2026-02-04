@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <title>Monitor do Mestre - RPG</title>
     <style>
-        /* ... (Mantenha seu CSS atual do mestre aqui, sem alterações no visual geral) ... */
         :root { --bg: #121212; --card-bg: #41141a; --header-bg: #800000; --text: #ffffff; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; }
         h1 { text-align: center; color: var(--header-bg); text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        
         #painel-jogadores { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        
         .player-card { background: var(--card-bg); border: 2px solid #5a1a1f; border-radius: 15px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); position: relative; }
         .player-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
         .player-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--header-bg); background-size: cover; background-position: center; background-color: #222; flex-shrink: 0; }
+        
         .player-info { flex-grow: 1; min-width: 0; }
         .player-info h2 { margin: 0; font-size: 16px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .player-info p { margin: 0; font-size: 11px; color: #ccc; }
@@ -43,9 +45,10 @@
             cursor: pointer;
             text-transform: uppercase;
             padding: 4px;
+            transition: 0.2s;
         }
-        .btn-small:hover { background: #444; }
-        .btn-obs.active { background: #800000; border-color: #ffaaaa; color: white; } /* Estilo quando está mostrando Status */
+        .btn-small:hover { background: #444; border-color: #aaa; }
+        .btn-obs.active { background: #800000; border-color: #ffaaaa; color: white; } 
     </style>
 </head>
 <body>
@@ -69,6 +72,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    // URL Base do seu projeto
     const baseURL = "https://reeporty088.github.io/ed-rpg-fichas/";
 
     onValue(ref(db, 'fichas'), (snapshot) => {
@@ -90,9 +94,12 @@
             const mpP = Math.min((mpAt / mpMax) * 100, 100);
             const paP = Math.min((paAt / paMax) * 100, 100);
             const xpTotal = f.xp_total || 0; const ptTotal = f.xp_pontos || 0;
+            
+            // Link da Ficha Principal
             const linkFicha = `${baseURL}?p=${id}`;
+            // Link do Overlay para o OBS
+            const linkOverlay = `${baseURL}overlay.html?p=${id}`;
 
-            // Verifica o estado atual do overlay para pintar o botão
             const isStatusMode = f.overlay_mode === 'status';
 
             const card = document.createElement('div');
@@ -103,7 +110,8 @@
                     <div class="player-info">
                         <h2>${f.char_name || id}</h2>
                         <div class="controls-row">
-                            <button class="btn-small" onclick="window.open('${linkFicha}', '_blank')">Abrir ↗</button>
+                            <button class="btn-small" onclick="window.open('${linkFicha}', '_blank')" title="Abrir Ficha">📄 Abrir</button>
+                            <button class="btn-small" onclick="window.open('${linkOverlay}', '_blank')" title="Link para OBS">🎥 OBS</button>
                             <button class="btn-small btn-obs ${isStatusMode ? 'active' : ''}" onclick="toggleOverlay('${id}', '${f.overlay_mode}')">
                                 ${isStatusMode ? '📊 Status' : '🏷️ Nome'}
                             </button>
@@ -132,7 +140,6 @@
         });
     });
 
-    // Função para alterar o que aparece no OBS
     window.toggleOverlay = (id, currentMode) => {
         const newMode = currentMode === 'status' ? 'nome' : 'status';
         update(ref(db, `fichas/${id}`), { overlay_mode: newMode });
