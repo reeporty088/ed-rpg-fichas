@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Ficha RPG - Versão Final</title>
+    <title>Ficha RPG - Perícias Atualizadas</title>
     <style>
         :root { --bg: #1a1a1a; --card-bg: #41141a; --header-bg: #800000; --text: #ffffff; --input-bg: #2a0a0d; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
@@ -48,9 +48,53 @@
         .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; }
         .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; }
-        .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 4px; padding: 5px 15px; border-radius: 20px; border: 1px solid #5a1a1f; }
+        
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
+
+        /* --- NOVO ESTILO DAS PERÍCIAS --- */
+        .pericia-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(0,0,0,0.2); 
+            margin-bottom: 6px; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            border: 1px solid #5a1a1f; 
+        }
+        .pericia-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 8px;
+            border-radius: 15px;
+        }
+        .btn-p {
+            background: transparent;
+            border: none;
+            color: #ffaaaa;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            width: 25px;
+            display: flex;
+            justify-content: center;
+        }
+        .btn-p:hover { color: white; text-shadow: 0 0 5px white; }
+        .pericia-val {
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+            min-width: 25px;
+            text-align: right;
+        }
+        .dice-icon {
+            font-size: 20px;
+            margin-left: 2px;
+        }
+
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -98,19 +142,10 @@
                 <div class="attr-box"><input type="number" id="habilidade" value="0"><div>HAB.</div></div>
                 <div class="attr-box"><input type="number" id="resistencia" value="0"><div>RES.</div></div>
             </div>
+            
             <div class="header-label">Perícias</div>
-            <div class="pericia-row"><span>ANIMAIS</span><input type="number" id="p_animais" value="0"></div>
-            <div class="pericia-row"><span>ARTE</span><input type="number" id="p_arte" value="0"></div>
-            <div class="pericia-row"><span>ESPORTE</span><input type="number" id="p_esporte" value="0"></div>
-            <div class="pericia-row"><span>INFLUÊNCIA</span><input type="number" id="p_influencia" value="0"></div>
-            <div class="pericia-row"><span>LUTA</span><input type="number" id="p_luta" value="0"></div>
-            <div class="pericia-row"><span>MANHA</span><input type="number" id="p_manha" value="0"></div>
-            <div class="pericia-row"><span>MÁQUINAS</span><input type="number" id="p_maquinas" value="0"></div>
-            <div class="pericia-row"><span>MEDICINA</span><input type="number" id="p_medicina" value="0"></div>
-            <div class="pericia-row"><span>MÍSTICA</span><input type="number" id="p_mistica" value="0"></div>
-            <div class="pericia-row"><span>PERCEPÇÃO</span><input type="number" id="p_percepcao" value="0"></div>
-            <div class="pericia-row"><span>SABER</span><input type="number" id="p_saber" value="0"></div>
-            <div class="pericia-row"><span>SOBREVIVÊNCIA</span><input type="number" id="p_sobrevivencia" value="0"></div>
+            <div id="pericias-list">
+                </div>
         </div>
     </div>
 
@@ -173,77 +208,123 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
-    // --- LISTA VIP: Somente estes campos serão sincronizados ---
-    // Isso evita que campos errados do banco atrapalhem a interface
-    const camposParaSalvar = [
-        'char_name', 'idade', 'florins', 'arquetipo',
-        // Status
-        'hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max',
-        // Atributos
-        'poder', 'habilidade', 'resistencia',
-        // Perícias
-        'p_animais', 'p_arte', 'p_esporte', 'p_influencia', 'p_luta', 
-        'p_manha', 'p_maquinas', 'p_medicina', 'p_mistica', 
-        'p_percepcao', 'p_saber', 'p_sobrevivencia'
+    // LISTA DE PERÍCIAS (Configuração Central)
+    const periciasList = [
+        {id: 'p_animais', nome: 'ANIMAIS'},
+        {id: 'p_arte', nome: 'ARTE'},
+        {id: 'p_esporte', nome: 'ESPORTE'},
+        {id: 'p_influencia', nome: 'INFLUÊNCIA'},
+        {id: 'p_luta', nome: 'LUTA'},
+        {id: 'p_manha', nome: 'MANHA'},
+        {id: 'p_maquinas', nome: 'MÁQUINAS'},
+        {id: 'p_medicina', nome: 'MEDICINA'},
+        {id: 'p_mistica', nome: 'MÍSTICA'},
+        {id: 'p_percepcao', nome: 'PERCEPÇÃO'},
+        {id: 'p_saber', nome: 'SABER'},
+        {id: 'p_sobrevivencia', nome: 'SOBREVIVÊNCIA'}
     ];
 
-    // --- SALVAMENTO UNIVERSAL (DIGITAÇÃO) ---
+    const camposParaSalvar = [
+        'char_name', 'idade', 'florins', 'arquetipo',
+        'hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max',
+        'poder', 'habilidade', 'resistencia',
+        ...periciasList.map(p => p.id) // Adiciona todas as perícias na lista VIP
+    ];
+
+    // GERA O HTML DAS PERÍCIAS
+    const pContainer = document.getElementById('pericias-list');
+    periciasList.forEach(p => {
+        pContainer.innerHTML += `
+            <div class="pericia-row">
+                <span>${p.nome}</span>
+                <div class="pericia-controls">
+                    <button class="btn-p" onclick="updatePericia('${p.id}', -1)">-</button>
+                    <span id="disp_${p.id}" class="pericia-val">+0</span>
+                    <span class="dice-icon">🎲</span>
+                    <input type="hidden" id="${p.id}" value="0">
+                    <button class="btn-p" onclick="updatePericia('${p.id}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    });
+
+    // --- NOVA LÓGICA DE PERÍCIAS (+ e - com Dado) ---
+    window.updatePericia = (id, mod) => {
+        const input = document.getElementById(id);
+        let current = parseInt(input.value) || 0;
+        let newVal = current + mod;
+
+        // Limita entre -2 e +2
+        if (newVal < -2) newVal = -2;
+        if (newVal > 2) newVal = 2;
+
+        input.value = newVal;
+        updateDisplayPericia(id, newVal);
+
+        // Salva no Firebase
+        update(ref(db, 'fichas/' + fichaID), { [id]: newVal });
+    };
+
+    function updateDisplayPericia(id, val) {
+        const display = document.getElementById('disp_' + id);
+        if (display) {
+            // Formata com sinal (+1, -1, +0)
+            const formatted = val >= 0 ? "+" + val : val;
+            display.innerText = formatted;
+            
+            // Muda cor dependendo se é positivo ou negativo (opcional, visual extra)
+            display.style.color = val > 0 ? '#4caf50' : (val < 0 ? '#f44336' : 'white');
+        }
+    }
+
+    // --- SALVAMENTO UNIVERSAL ---
     document.addEventListener('input', (e) => {
         const target = e.target;
-        
-        // Verifica se o campo está na nossa "Lista VIP" ou se é um campo de texto de habilidade
         if (camposParaSalvar.includes(target.id)) {
             const updates = {};
             updates[target.id] = target.value;
-            
-            console.log("Salvando:", target.id, target.value); // Debug no console
             update(ref(db, 'fichas/' + fichaID), updates);
-
-            // Atualiza barra visual se necessário
             if (target.id.includes('_at') || target.id.includes('_max')) {
                 updateBarVisual(target.id.split('_')[0]);
             }
         }
     });
 
-    // --- CARREGAMENTO DO BANCO DE DADOS ---
+    // --- CARREGAMENTO ---
     onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
         const dados = snapshot.val();
         if (!dados) return;
 
-        // 1. Carrega apenas os campos da Lista VIP (Ignora lixo)
         camposParaSalvar.forEach(id => {
             if (dados[id] !== undefined) {
                 const el = document.getElementById(id);
-                // Só atualiza se o usuário NÃO estiver digitando neste campo agora
-                if (el && document.activeElement !== el) {
+                
+                // Se for uma perícia, atualiza o display visual e o input oculto
+                if (id.startsWith('p_')) {
                     el.value = dados[id];
-                    // Atualiza barras visuais
-                    if (id.includes('_at') || id.includes('_max')) {
-                        updateBarVisual(id.split('_')[0]);
-                    }
+                    updateDisplayPericia(id, dados[id]);
+                }
+                else if (el && document.activeElement !== el) {
+                    el.value = dados[id];
+                    if (id.includes('_at') || id.includes('_max')) updateBarVisual(id.split('_')[0]);
                 }
             }
         });
 
-        // 2. Carrega Imagem
-        if (dados.char_img) {
-            document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
-        }
+        // Imagem
+        if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
         
-        // 3. Carrega Caveiras
+        // Caveiras
         ['skull1', 'skull2', 'skull3'].forEach(sid => {
             const el = document.getElementById(sid);
             if(dados[sid] === "active") el.classList.add('active');
             else el.classList.remove('active');
         });
 
-        // 4. Carrega Habilidades Complexas
-        if(dados.habilidades) {
-            ['vantagens', 'arquetipo_hab', 'artefatos', 'tecnicas'].forEach(cat => renderHabs(cat, dados.habilidades[cat]));
-        }
-
-        // 5. Carrega Marcadores
+        // Listas
+        if(dados.habilidades) ['vantagens', 'arquetipo_hab', 'artefatos', 'tecnicas'].forEach(cat => renderHabs(cat, dados.habilidades[cat]));
+        
+        // Marcadores
         if(dados.marcadores) {
             renderMarkers('ações', dados.marcadores['ações']?.total, dados.marcadores['ações']?.pontos);
             renderMarkers('desloc', dados.marcadores['desloc']?.total, dados.marcadores['desloc']?.pontos);
@@ -253,20 +334,15 @@
         }
     });
 
-    // --- FUNÇÕES DE BOTÕES (+ e -) ---
+    // --- OUTRAS FUNÇÕES ---
     window.changeVal = (type, mod) => {
         const el = document.getElementById(type + '_at');
         const maxEl = document.getElementById(type + '_max');
-        
         let current = parseInt(el.value) || 0;
         let max = parseInt(maxEl.value) || 0;
         let newVal = current + mod;
-
-        if (newVal < 0) newVal = 0;
-        if (newVal > max) newVal = max;
-
-        el.value = newVal; // Atualiza visual na hora
-        console.log("Botão clicado:", type, newVal);
+        if (newVal < 0) newVal = 0; if (newVal > max) newVal = max;
+        el.value = newVal; 
         update(ref(db, 'fichas/' + fichaID), { [type + '_at']: newVal });
         updateBarVisual(type);
     };
@@ -279,7 +355,6 @@
         if (el) el.style.width = percent + '%';
     }
 
-    // --- OUTRAS FUNÇÕES (MANTIDAS) ---
     window.updateMarkerCount = (type, mod) => {
         const span = document.getElementById('count_' + type);
         let count = (parseInt(span.innerText) || 0) + mod;
@@ -306,18 +381,13 @@
         }
     }
 
-    // Funções de Habilidade (Vantagens, etc)
     window.addItem = (category) => {
         const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${category}`));
         set(newItemRef, { titulo: "", teste: "", desc: "" });
     };
     window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
     window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
-    
-    // Listener específico para inputs de habilidade (porque eles são criados dinamicamente)
-    window.saveHab = (cat, id, field, val) => { 
-        update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }); 
-    };
+    window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }); };
 
     function renderHabs(category, data) {
         const container = document.getElementById('list_' + category);
@@ -337,52 +407,24 @@
         el.classList.toggle('active');
         update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" });
     };
-// --- UPLOAD E COMPRESSÃO DE IMAGEM ---
+
     document.getElementById('img_upload').addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (readerEvent) => {
             const image = new Image();
             image.onload = () => {
-                // Cria um canvas para redimensionar a imagem
                 const canvas = document.createElement('canvas');
-                const maxSize = 300; // Tamanho máximo (300px é ótimo para avatar)
-                let width = image.width;
-                let height = image.height;
-
-                // Calcula a nova proporção mantendo o aspecto
-                if (width > height) {
-                    if (width > maxSize) {
-                        height *= maxSize / width;
-                        width = maxSize;
-                    }
-                } else {
-                    if (height > maxSize) {
-                        width *= maxSize / height;
-                        height = maxSize;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                
-                // Desenha a imagem redimensionada no canvas
+                const maxSize = 300;
+                let width = image.width; let height = image.height;
+                if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } 
+                else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+                canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(image, 0, 0, width, height);
-
-                // Converte para texto (Base64) com qualidade reduzida (JPEG 0.7)
-                // Isso garante que o arquivo fique leve para o banco de dados
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                // Atualiza na tela imediatamente
                 document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`;
-
-                // Envia para o Firebase
-                update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl })
-                    .then(() => console.log("Imagem salva com sucesso!"))
-                    .catch((error) => console.error("Erro ao salvar imagem:", error));
+                update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl });
             };
             image.src = readerEvent.target.result;
         };
@@ -392,4 +434,3 @@
 
 </body>
 </html>
-
