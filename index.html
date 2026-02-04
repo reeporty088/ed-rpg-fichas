@@ -14,6 +14,15 @@
         input, textarea { background: var(--input-bg); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         label { font-size: 10px; color: #ffaaaa; font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
 
+        /* --- MELHORIA NA CAIXA DE TEXTO DAS HABILIDADES --- */
+        /* Isso garante que a descrição abra grande o suficiente para ler parágrafos */
+        .hab-body textarea {
+            min-height: 120px; /* Altura inicial maior */
+            resize: vertical;  /* Permite que o usuário puxe para aumentar mais se quiser */
+            line-height: 1.4;  /* Espaçamento melhor entre linhas */
+            font-size: 14px;
+        }
+
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--header-bg); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; }
         .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
@@ -52,7 +61,6 @@
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
 
-        /* --- NOVO ESTILO DAS PERÍCIAS --- */
         .pericia-row { 
             display: flex; 
             justify-content: space-between; 
@@ -144,8 +152,7 @@
             </div>
             
             <div class="header-label">Perícias</div>
-            <div id="pericias-list">
-                </div>
+            <div id="pericias-list"></div>
         </div>
     </div>
 
@@ -208,7 +215,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p') || "personagem_padrao";
 
-    // LISTA DE PERÍCIAS (Configuração Central)
+    // LISTA DE PERÍCIAS
     const periciasList = [
         {id: 'p_animais', nome: 'ANIMAIS'},
         {id: 'p_arte', nome: 'ARTE'},
@@ -228,10 +235,10 @@
         'char_name', 'idade', 'florins', 'arquetipo',
         'hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max',
         'poder', 'habilidade', 'resistencia',
-        ...periciasList.map(p => p.id) // Adiciona todas as perícias na lista VIP
+        ...periciasList.map(p => p.id)
     ];
 
-    // GERA O HTML DAS PERÍCIAS
+    // GERA PERÍCIAS
     const pContainer = document.getElementById('pericias-list');
     periciasList.forEach(p => {
         pContainer.innerHTML += `
@@ -248,36 +255,26 @@
         `;
     });
 
-    // --- NOVA LÓGICA DE PERÍCIAS (+ e - com Dado) ---
     window.updatePericia = (id, mod) => {
         const input = document.getElementById(id);
         let current = parseInt(input.value) || 0;
         let newVal = current + mod;
-
-        // Limita entre -2 e +2
         if (newVal < -2) newVal = -2;
         if (newVal > 2) newVal = 2;
-
         input.value = newVal;
         updateDisplayPericia(id, newVal);
-
-        // Salva no Firebase
         update(ref(db, 'fichas/' + fichaID), { [id]: newVal });
     };
 
     function updateDisplayPericia(id, val) {
         const display = document.getElementById('disp_' + id);
         if (display) {
-            // Formata com sinal (+1, -1, +0)
             const formatted = val >= 0 ? "+" + val : val;
             display.innerText = formatted;
-            
-            // Muda cor dependendo se é positivo ou negativo (opcional, visual extra)
             display.style.color = val > 0 ? '#4caf50' : (val < 0 ? '#f44336' : 'white');
         }
     }
 
-    // --- SALVAMENTO UNIVERSAL ---
     document.addEventListener('input', (e) => {
         const target = e.target;
         if (camposParaSalvar.includes(target.id)) {
@@ -290,7 +287,6 @@
         }
     });
 
-    // --- CARREGAMENTO ---
     onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
         const dados = snapshot.val();
         if (!dados) return;
@@ -298,8 +294,6 @@
         camposParaSalvar.forEach(id => {
             if (dados[id] !== undefined) {
                 const el = document.getElementById(id);
-                
-                // Se for uma perícia, atualiza o display visual e o input oculto
                 if (id.startsWith('p_')) {
                     el.value = dados[id];
                     updateDisplayPericia(id, dados[id]);
@@ -311,20 +305,16 @@
             }
         });
 
-        // Imagem
         if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
         
-        // Caveiras
         ['skull1', 'skull2', 'skull3'].forEach(sid => {
             const el = document.getElementById(sid);
             if(dados[sid] === "active") el.classList.add('active');
             else el.classList.remove('active');
         });
 
-        // Listas
         if(dados.habilidades) ['vantagens', 'arquetipo_hab', 'artefatos', 'tecnicas'].forEach(cat => renderHabs(cat, dados.habilidades[cat]));
         
-        // Marcadores
         if(dados.marcadores) {
             renderMarkers('ações', dados.marcadores['ações']?.total, dados.marcadores['ações']?.pontos);
             renderMarkers('desloc', dados.marcadores['desloc']?.total, dados.marcadores['desloc']?.pontos);
@@ -334,7 +324,6 @@
         }
     });
 
-    // --- OUTRAS FUNÇÕES ---
     window.changeVal = (type, mod) => {
         const el = document.getElementById(type + '_at');
         const maxEl = document.getElementById(type + '_max');
@@ -434,4 +423,3 @@
 
 </body>
 </html>
-
