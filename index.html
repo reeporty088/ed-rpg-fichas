@@ -9,32 +9,33 @@
             --bg: #1a1a1a; 
             --text: #ffffff;
             
-            /* Cores padrão (Sangue) - Serão substituídas pelo JS */
-            --theme-main: #800000;      /* Cabeçalhos */
+            /* Cores padrão (Sangue) */
+            --theme-main: #800000;      /* Cabeçalhos e Botões Principais */
             --theme-card: #41141a;      /* Fundo dos cards */
             --theme-border: #5a1a1f;    /* Bordas */
             --theme-input: #2a0a0d;     /* Fundo dos inputs */
-            --theme-light: #ffaaaa;     /* Textos de destaque */
+            --theme-light: #ffaaaa;     /* Textos de destaque e ícones */
         }
 
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1400px; width: 100%; }
         .col { display: flex; flex-direction: column; gap: 15px; }
         
-        /* Cards usando as novas variáveis */
+        /* Cards com variáveis */
         .card { background: var(--theme-card); border-radius: 12px; padding: 15px; border: 1px solid var(--theme-border); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; }
         .header-label { background: var(--theme-main); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 10px; }
         
         input, textarea { background: var(--theme-input); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
         label { font-size: 10px; color: var(--theme-light); font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
 
+        /* Texto grande nas habilidades */
         .hab-body textarea { min-height: 120px; resize: vertical; line-height: 1.4; font-size: 14px; }
         
+        /* Avatar e Seletor de Cores */
         .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; position: relative; }
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--theme-main); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; }
         .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
 
-        /* Botão de Tema */
         .theme-btn {
             position: absolute;
             top: 0;
@@ -55,9 +56,8 @@
         }
         .theme-btn:hover { background: var(--theme-light); color: #000; }
         
-        /* Modal de Cores */
         .color-picker {
-            display: none; /* Oculto por padrão */
+            display: none;
             position: absolute;
             top: 40px;
             right: 0;
@@ -81,6 +81,7 @@
         }
         .color-swatch:hover { transform: scale(1.2); border-color: white; }
 
+        /* Barras */
         .bar-container { margin-bottom: 10px; }
         .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
         .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
@@ -90,6 +91,7 @@
         .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
 
+        /* Habilidades */
         .hab-item { background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
         .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
         .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; }
@@ -100,6 +102,7 @@
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
 
+        /* Marcadores */
         .marker-section { margin-bottom: 20px; text-align: center; }
         .marker-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; }
         .marker-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px; }
@@ -115,6 +118,7 @@
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
 
+        /* Perícias */
         .pericia-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin-bottom: 6px; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--theme-border); }
         .pericia-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 15px; }
         .btn-p { background: transparent; border: none; color: var(--theme-light); font-weight: bold; font-size: 18px; cursor: pointer; width: 25px; display: flex; justify-content: center; }
@@ -122,6 +126,7 @@
         .pericia-val { font-weight: bold; color: white; font-size: 16px; min-width: 25px; text-align: right; }
         .dice-icon { font-size: 20px; margin-left: 2px; }
 
+        /* XP System */
         .xp-container { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 10px; border: 1px solid var(--theme-border); margin-bottom: 10px; }
         .xp-display { text-align: center; }
         .xp-number { font-size: 32px; font-weight: bold; color: #ffd700; display: block; line-height: 1; }
@@ -143,4 +148,410 @@
                 <div class="avatar-circle" id="avatar_display">
                     <input type="file" id="img_upload" accept="image/*">
                 </div>
-                <button class="theme-btn" onclick="toggleColorPicker
+                <button class="theme-btn" onclick="toggleColorPicker()">🎨</button>
+                <div id="colorPicker" class="color-picker"></div>
+                
+                <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-size:18px; font-weight:bold; margin-top:10px; color:white;" placeholder="NOME">
+            </div>
+            <label>IDADE</label><input type="text" id="idade">
+            <label>FLORINS</label><input type="text" id="florins">
+            <label>ARQUÉTIPO</label><input type="text" id="arquetipo">
+            
+            <div class="header-label" style="margin-top:15px;">Status</div>
+            <div class="bar-container">
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('hp', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_hp" class="bar-fill hp-fill"></div><div class="bar-values"><input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10"></div></div>
+                    <button class="btn-math" onclick="changeVal('hp', 1)">+</button>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('mp', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_mp" class="bar-fill mp-fill"></div><div class="bar-values"><input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10"></div></div>
+                    <button class="btn-math" onclick="changeVal('mp', 1)">+</button>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('pa', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_pa" class="bar-fill pa-fill"></div><div class="bar-values"><input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3"></div></div>
+                    <button class="btn-math" onclick="changeVal('pa', 1)">+</button>
+                </div>
+            </div>
+            <div style="text-align:center; margin: 10px 0;"><span class="skull" id="skull1" onclick="toggleSkull('skull1')">💀</span><span class="skull" id="skull2" onclick="toggleSkull('skull2')">💀</span><span class="skull" id="skull3" onclick="toggleSkull('skull3')">💀</span></div>
+            <div class="attr-container">
+                <div class="attr-box"><input type="number" id="poder" value="0"><div>PODER</div></div>
+                <div class="attr-box"><input type="number" id="habilidade" value="0"><div>HAB.</div></div>
+                <div class="attr-box"><input type="number" id="resistencia" value="0"><div>RES.</div></div>
+            </div>
+            
+            <div class="header-label">Perícias</div>
+            <div id="pericias-list"></div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card">
+            <div class="header-label">Habilidades Gerais</div>
+            <label>Vantagens <button class="btn-add" onclick="addItem('vantagens')">+</button></label>
+            <div id="list_vantagens" style="margin-top:5px;"></div>
+            <label style="margin-top:10px;">Arquétipo <button class="btn-add" onclick="addItem('arquetipo_hab')">+</button></label>
+            <div id="list_arquetipo_hab" style="margin-top:5px;"></div>
+            <label style="margin-top:10px;">Artefatos <button class="btn-add" onclick="addItem('artefatos')">+</button></label>
+            <div id="list_artefatos" style="margin-top:5px;"></div>
+            <label style="margin-top:10px;">Técnicas <button class="btn-add" onclick="addItem('tecnicas')">+</button></label>
+            <div id="list_tecnicas" style="margin-top:5px;"></div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card">
+            <div class="header-label">Ações e Deslocamento</div>
+            <div class="marker-section">
+                <label style="text-align:center; display:block; color:cyan;">AÇÕES (Triângulos)</label>
+                <div class="marker-controls">
+                    <button class="btn-count" onclick="updateMarkerCount('ações', -1)">-</button>
+                    <span id="count_ações" style="font-weight:bold; color:cyan;">3</span>
+                    <button class="btn-count" onclick="updateMarkerCount('ações', 1)">+</button>
+                </div>
+                <div id="display_ações" class="marker-display"></div>
+            </div>
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="marker-section">
+                <label style="text-align:center; display:block; color:springgreen;">DESLOCAMENTO (Círculos)</label>
+                <div class="marker-controls">
+                    <button class="btn-count" onclick="updateMarkerCount('desloc', -1)">-</button>
+                    <span id="count_desloc" style="font-weight:bold; color:springgreen;">9</span>
+                    <button class="btn-count" onclick="updateMarkerCount('desloc', 1)">+</button>
+                </div>
+                <div id="display_desloc" class="marker-display"></div>
+            </div>
+
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="header-label">Experiência</div>
+            <div class="xp-container">
+                <button class="btn-xp" onclick="gastarPonto()">Gastar</button>
+                <div class="xp-display">
+                    <span id="display_pontos" class="xp-number">0</span>
+                    <span class="xp-label">Pontos</span>
+                </div>
+                <button class="btn-xp" onclick="converterXP()">Converter</button>
+            </div>
+            <div class="xp-info-bar">
+                <span id="display_xp_total">0</span> XP
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, update, onValue, remove, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlParams = new URLSearchParams(window.location.search);
+    const fichaID = urlParams.get('p') || "personagem_padrao";
+
+    // --- CORES (TEMAS) ---
+    const themes = {
+        sangue:   { main: '#800000', card: '#41141a', border: '#5a1a1f', input: '#2a0a0d', light: '#ffaaaa' },
+        oceano:   { main: '#0d47a1', card: '#0a192f', border: '#1565c0', input: '#0d2345', light: '#82b1ff' },
+        floresta: { main: '#1b5e20', card: '#0f2913', border: '#2e7d32', input: '#0a210f', light: '#a5d6a7' },
+        ametista: { main: '#4a148c', card: '#240a33', border: '#7b1fa2', input: '#210530', light: '#e1bee7' },
+        brasa:    { main: '#bf360c', card: '#3e1b05', border: '#d84315', input: '#361505', light: '#ffccbc' },
+        sombra:   { main: '#424242', card: '#212121', border: '#616161', input: '#121212', light: '#bdbdbd' },
+        ouro:     { main: '#ff6f00', card: '#331a00', border: '#ff8f00', input: '#2e1800', light: '#ffecb3' },
+        rosa:     { main: '#880e4f', card: '#33081b', border: '#ad1457', input: '#300518', light: '#f8bbd0' }
+    };
+
+    window.toggleColorPicker = () => {
+        document.getElementById('colorPicker').classList.toggle('open');
+    };
+
+    window.setTheme = (themeName) => {
+        const t = themes[themeName];
+        if(!t) return;
+        
+        const r = document.documentElement.style;
+        r.setProperty('--theme-main', t.main);
+        r.setProperty('--theme-card', t.card);
+        r.setProperty('--theme-border', t.border);
+        r.setProperty('--theme-input', t.input);
+        r.setProperty('--theme-light', t.light);
+
+        update(ref(db, 'fichas/' + fichaID), { color_theme: themeName });
+        document.getElementById('colorPicker').classList.remove('open');
+    };
+
+    // Gera os botões de cores
+    const picker = document.getElementById('colorPicker');
+    Object.keys(themes).forEach(key => {
+        const div = document.createElement('div');
+        div.className = 'color-swatch';
+        div.style.backgroundColor = themes[key].main;
+        div.onclick = () => setTheme(key);
+        picker.appendChild(div);
+    });
+
+    const periciasList = [
+        {id: 'p_animais', nome: 'ANIMAIS'},
+        {id: 'p_arte', nome: 'ARTE'},
+        {id: 'p_esporte', nome: 'ESPORTE'},
+        {id: 'p_influencia', nome: 'INFLUÊNCIA'},
+        {id: 'p_luta', nome: 'LUTA'},
+        {id: 'p_manha', nome: 'MANHA'},
+        {id: 'p_maquinas', nome: 'MÁQUINAS'},
+        {id: 'p_medicina', nome: 'MEDICINA'},
+        {id: 'p_mistica', nome: 'MÍSTICA'},
+        {id: 'p_percepcao', nome: 'PERCEPÇÃO'},
+        {id: 'p_saber', nome: 'SABER'},
+        {id: 'p_sobrevivencia', nome: 'SOBREVIVÊNCIA'}
+    ];
+
+    const camposParaSalvar = [
+        'char_name', 'idade', 'florins', 'arquetipo',
+        'hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max',
+        'poder', 'habilidade', 'resistencia',
+        'xp_total', 'xp_pontos', 'color_theme',
+        ...periciasList.map(p => p.id)
+    ];
+
+    // Gera HTML das Perícias
+    const pContainer = document.getElementById('pericias-list');
+    periciasList.forEach(p => {
+        pContainer.innerHTML += `
+            <div class="pericia-row">
+                <span>${p.nome}</span>
+                <div class="pericia-controls">
+                    <button class="btn-p" onclick="updatePericia('${p.id}', -1)">-</button>
+                    <span id="disp_${p.id}" class="pericia-val">+0</span>
+                    <span class="dice-icon">🎲</span>
+                    <input type="hidden" id="${p.id}" value="0">
+                    <button class="btn-p" onclick="updatePericia('${p.id}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    });
+
+    // XP Lógica
+    window.converterXP = () => {
+        const xpSpan = document.getElementById('display_xp_total');
+        const ptSpan = document.getElementById('display_pontos');
+        let xp = parseInt(xpSpan.innerText) || 0;
+        let pontos = parseInt(ptSpan.innerText) || 0;
+        if (xp >= 10) {
+            const qtdPontos = Math.floor(xp / 10);
+            const custo = qtdPontos * 10;
+            const novoXP = xp - custo;
+            const novosPontos = pontos + qtdPontos;
+            update(ref(db, 'fichas/' + fichaID), { xp_total: novoXP, xp_pontos: novosPontos });
+        } else {
+            alert("XP insuficiente!");
+        }
+    };
+
+    window.gastarPonto = () => {
+        const ptSpan = document.getElementById('display_pontos');
+        let pontos = parseInt(ptSpan.innerText) || 0;
+        if (pontos > 0) update(ref(db, 'fichas/' + fichaID), { xp_pontos: pontos - 1 });
+    };
+
+    // Perícias Lógica
+    window.updatePericia = (id, mod) => {
+        const input = document.getElementById(id);
+        let current = parseInt(input.value) || 0;
+        let newVal = current + mod;
+        if (newVal < -2) newVal = -2;
+        if (newVal > 2) newVal = 2;
+        input.value = newVal;
+        updateDisplayPericia(id, newVal);
+        update(ref(db, 'fichas/' + fichaID), { [id]: newVal });
+    };
+
+    function updateDisplayPericia(id, val) {
+        const display = document.getElementById('disp_' + id);
+        if (display) {
+            const formatted = val >= 0 ? "+" + val : val;
+            display.innerText = formatted;
+            display.style.color = val > 0 ? '#4caf50' : (val < 0 ? '#f44336' : 'white');
+        }
+    }
+
+    document.addEventListener('input', (e) => {
+        const target = e.target;
+        if (camposParaSalvar.includes(target.id)) {
+            const updates = {};
+            updates[target.id] = target.value;
+            update(ref(db, 'fichas/' + fichaID), updates);
+            if (target.id.includes('_at') || target.id.includes('_max')) {
+                updateBarVisual(target.id.split('_')[0]);
+            }
+        }
+    });
+
+    onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
+        const dados = snapshot.val();
+        if (!dados) return;
+
+        // TEMA
+        if (dados.color_theme) {
+            const t = themes[dados.color_theme];
+            if (t) {
+                const r = document.documentElement.style;
+                r.setProperty('--theme-main', t.main);
+                r.setProperty('--theme-card', t.card);
+                r.setProperty('--theme-border', t.border);
+                r.setProperty('--theme-input', t.input);
+                r.setProperty('--theme-light', t.light);
+            }
+        }
+
+        camposParaSalvar.forEach(id => {
+            if (dados[id] !== undefined) {
+                if (id === 'xp_total') document.getElementById('display_xp_total').innerText = dados[id];
+                else if (id === 'xp_pontos') document.getElementById('display_pontos').innerText = dados[id];
+                else if (id === 'color_theme') return;
+                else {
+                    const el = document.getElementById(id);
+                    if (id.startsWith('p_')) {
+                        el.value = dados[id];
+                        updateDisplayPericia(id, dados[id]);
+                    }
+                    else if (el && document.activeElement !== el) {
+                        el.value = dados[id];
+                        if (id.includes('_at') || id.includes('_max')) updateBarVisual(id.split('_')[0]);
+                    }
+                }
+            }
+        });
+
+        if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
+        
+        ['skull1', 'skull2', 'skull3'].forEach(sid => {
+            const el = document.getElementById(sid);
+            if(dados[sid] === "active") el.classList.add('active');
+            else el.classList.remove('active');
+        });
+
+        if(dados.habilidades) ['vantagens', 'arquetipo_hab', 'artefatos', 'tecnicas'].forEach(cat => renderHabs(cat, dados.habilidades[cat]));
+        
+        if(dados.marcadores) {
+            renderMarkers('ações', dados.marcadores['ações']?.total, dados.marcadores['ações']?.pontos);
+            renderMarkers('desloc', dados.marcadores['desloc']?.total, dados.marcadores['desloc']?.pontos);
+        } else {
+            renderMarkers('ações', 3, null);
+            renderMarkers('desloc', 9, null);
+        }
+    });
+
+    window.changeVal = (type, mod) => {
+        const el = document.getElementById(type + '_at');
+        const maxEl = document.getElementById(type + '_max');
+        let current = parseInt(el.value) || 0;
+        let max = parseInt(maxEl.value) || 0;
+        let newVal = current + mod;
+        if (newVal < 0) newVal = 0; if (newVal > max) newVal = max;
+        el.value = newVal; 
+        update(ref(db, 'fichas/' + fichaID), { [type + '_at']: newVal });
+        updateBarVisual(type);
+    };
+
+    function updateBarVisual(type) {
+        const at = parseInt(document.getElementById(type + '_at').value) || 0;
+        const max = parseInt(document.getElementById(type + '_max').value) || 1;
+        const percent = Math.min(Math.max((at / max) * 100, 0), 100);
+        const el = document.getElementById('bar_' + type);
+        if (el) el.style.width = percent + '%';
+    }
+
+    window.updateMarkerCount = (type, mod) => {
+        const span = document.getElementById('count_' + type);
+        let count = (parseInt(span.innerText) || 0) + mod;
+        if(count < 0) count = 0;
+        update(ref(db, `fichas/${fichaID}/marcadores/${type}`), { total: count });
+    };
+
+    window.togglePoint = (type, index) => {
+        const key = `p_${index}`;
+        const current = document.getElementById(`${type}_${index}`).classList.contains('active');
+        update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [key]: !current });
+    };
+
+    function renderMarkers(type, total, pontos) {
+        const container = document.getElementById('display_' + type);
+        const countSpan = document.getElementById('count_' + type);
+        container.innerHTML = "";
+        countSpan.innerText = total || (type === 'ações' ? 3 : 9);
+        const icon = type === 'ações' ? '▲' : '●';
+        const css = type === 'ações' ? 'tri' : 'circ';
+        for(let i=0; i < (total || (type === 'ações' ? 3 : 9)); i++) {
+            const isActive = pontos && pontos[`p_${i}`] === true;
+            container.innerHTML += `<span id="${type}_${i}" class="marker-item ${css} ${isActive ? 'active' : ''}" onclick="togglePoint('${type}', ${i})">${icon}</span>`;
+        }
+    }
+
+    window.addItem = (category) => {
+        const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${category}`));
+        set(newItemRef, { titulo: "", teste: "", desc: "" });
+    };
+    window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
+    window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
+    window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }); };
+
+    function renderHabs(category, data) {
+        const container = document.getElementById('list_' + category);
+        if(!container) return; container.innerHTML = "";
+        if(!data) return;
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            const div = document.createElement('div');
+            div.className = 'hab-item';
+            div.innerHTML = `<div class="hab-header"><span class="hab-toggle" onclick="toggleHab('${id}')">▼</span><input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome"><input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="Teste"><button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button></div><div class="hab-body" id="body_${id}"><textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição...">${item.desc || ''}</textarea></div>`;
+            container.appendChild(div);
+        });
+    }
+
+    window.toggleSkull = (id) => {
+        const el = document.getElementById(id);
+        el.classList.toggle('active');
+        update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" });
+    };
+
+    document.getElementById('img_upload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (readerEvent) => {
+            const image = new Image();
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxSize = 300;
+                let width = image.width; let height = image.height;
+                if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } 
+                else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`;
+                update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl });
+            };
+            image.src = readerEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+
+</body>
+</html>
