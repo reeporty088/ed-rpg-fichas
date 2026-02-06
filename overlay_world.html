@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>World Overlay OBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- FONTE CUSTOMIZADA (Se tiver Mitra LT, descomente abaixo) --- */
+        /*
+        @font-face { font-family: 'Mitra LT'; src: url('MitraLT.ttf'); }
+        */
+
+        body { 
+            background: transparent; /* Transparente para OBS */
+            margin: 0; 
+            padding: 20px; 
+            overflow: hidden; 
+            font-family: 'Mitra LT', 'Cinzel', serif; 
+        }
+        
+        /* O WIDGET EM SI */
+        #world-widget {
+            width: 350px; /* Largura fixa compacta */
+            background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(65,20,26,0.95) 100%);
+            border-left: 4px solid #800000;
+            border-radius: 0 10px 10px 0;
+            padding: 10px 20px;
+            color: white;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            /* Animação suave */
+            transition: all 0.5s ease;
+        }
+
+        /* Linha de cima: Hora e Clima */
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+            margin-bottom: 2px;
+        }
+
+        .time-display {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(255, 170, 170, 0.2);
+        }
+
+        .weather-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+        .weather-icon { font-size: 24px; }
+
+        /* Linha de baixo: Data */
+        .date-row {
+            font-size: 14px;
+            color: #ffaaaa; /* Cor de destaque */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        /* Animação de entrada */
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="world-widget" class="fade-in">
+        <div class="top-row">
+            <div class="time-display" id="wd_time">00:00</div>
+            <div class="weather-display">
+                <span id="wd_weather_text">Carregando...</span>
+                <span id="wd_weather_icon" class="weather-icon">☀</span>
+            </div>
+        </div>
+        <div class="date-row" id="wd_date">
+            Anno 0000 | Estação | Dia 00
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- LÓGICA DO MUNDO (Mesma do Calendário) ---
+    const SEASONS = ["Primavera", "Verão", "Outono", "Inverno"];
+    const WEATHER_TYPES = {
+        "Primavera": ["Sol", "Nublado", "Nublado", "Chuva", "Tempestade"],
+        "Verão":     ["Sol Intenso", "Sol", "Nublado", "Tempestade", "Vendaval"],
+        "Outono":    ["Nublado", "Chuva", "Neblina", "Vento", "Seco"],
+        "Inverno":   ["Nublado", "Neve Fraca", "Neve Forte", "Vento Gelado", "Nevasca"]
+    };
+    const WEATHER_ICONS = {
+        "Sol": "☀", "Sol Intenso": "🔥", "Nublado": "☁", "Chuva": "🌧", 
+        "Tempestade": "⛈", "Neblina": "🌫", "Vento": "🌬", "Vento Gelado": "🌬",
+        "Seco": "🍂", "Neve Fraca": "🌨", "Neve Forte": "❄", "Nevasca": "☃", "Vendaval": "🌪"
+    };
+
+    function pseudoRandom(seed) {
+        let x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+
+    function getWeather(seasonIndex, day, periodIndex) {
+        const seasonName = SEASONS[seasonIndex];
+        const options = WEATHER_TYPES[seasonName];
+        const seed = (seasonIndex * 1000) + (day * 10) + periodIndex; 
+        const rand = Math.floor(pseudoRandom(seed) * options.length);
+        const name = options[rand];
+        return { name: name, icon: WEATHER_ICONS[name] || "❓" };
+    }
+
+    onValue(ref(db, 'world_time'), (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
+
+        // Hora
+        const h = data.hour.toString().padStart(2, '0');
+        const m = data.minute.toString().padStart(2, '0');
+        document.getElementById('wd_time').innerText = `${h}:${m}`;
+
+        // Data
+        document.getElementById('wd_date').innerText = `Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`;
+
+        // Clima
+        const weather = getWeather(data.season, data.day, data.period);
+        document.getElementById('wd_weather_icon').innerText = weather.icon;
+        document.getElementById('wd_weather_text').innerText = weather.name;
+    });
+</script>
+</body>
+</html>
