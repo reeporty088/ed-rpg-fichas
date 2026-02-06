@@ -5,9 +5,8 @@
     <title>Painel do Mestre - RPG</title>
     <style>
         :root { --bg: #121212; --card-bg: #41141a; --header-bg: #800000; --text: #ffffff; --npc-bg: #222; --accent: #ffaaaa; --divider-bg: #1e1e1e; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; padding-right: 60px; /* Espaço para o botão flutuante */ }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; padding-right: 60px; }
         
-        /* Título */
         h1 { text-align: center; color: var(--header-bg); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         h2.section-title { border-bottom: 2px solid var(--header-bg); padding-bottom: 5px; margin-top: 40px; color: #ccc; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
 
@@ -92,91 +91,29 @@
 
         /* --- SIDEBAR DE COMBATE --- */
         #combat-sidebar {
-            position: fixed;
-            top: 0;
-            right: -320px;
-            width: 300px;
-            height: 100%;
-            background: #111;
-            border-left: 3px solid var(--header-bg);
-            box-shadow: -5px 0 15px rgba(0,0,0,0.8);
-            transition: right 0.3s ease;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            box-sizing: border-box;
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: #111;
+            border-left: 3px solid var(--header-bg); box-shadow: -5px 0 15px rgba(0,0,0,0.8);
+            transition: right 0.3s ease; z-index: 2000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
         }
         #combat-sidebar.open { right: 0; }
 
         .combat-toggle-btn {
-            position: fixed;
-            top: 50%;
-            right: 0;
-            transform: translateY(-50%);
-            background: var(--header-bg);
-            color: white;
-            border: 2px solid white;
-            border-right: none;
-            width: 40px;
-            height: 60px;
-            border-radius: 10px 0 0 10px;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 2001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
+            position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+            background: var(--header-bg); color: white; border: 2px solid white; border-right: none;
+            width: 40px; height: 60px; border-radius: 10px 0 0 10px; font-size: 24px; cursor: pointer;
+            z-index: 2001; display: flex; align-items: center; justify-content: center; box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
             transition: right 0.3s ease;
         }
         #combat-sidebar.open + .combat-toggle-btn { right: 300px; }
 
         .combat-header { text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; font-size: 18px; color: var(--accent); }
-        
-        .combat-drop-zone {
-            flex-grow: 1;
-            border: 2px dashed #444;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.3);
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .combat-drop-zone { flex-grow: 1; border: 2px dashed #444; border-radius: 10px; background: rgba(0,0,0,0.3); overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .combat-drop-zone.drag-over { border-color: var(--accent); background: rgba(128,0,0,0.2); }
-
-        .combat-item {
-            display: flex;
-            align-items: center;
-            background: #222;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            gap: 10px;
-            transition: 0.3s;
-        }
-        .combat-item.active {
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            background: #332b00;
-        }
-
+        .combat-item { display: flex; align-items: center; background: #222; padding: 8px; border-radius: 8px; border: 1px solid #444; gap: 10px; transition: 0.3s; }
+        .combat-item.active { border: 2px solid #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); background: #332b00; }
         .combat-avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; background-position: center; flex-shrink: 0; border: 1px solid #666; }
         .combat-name { font-size: 12px; font-weight: bold; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .combat-init-bubble {
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            background: #111;
-            border: 2px solid #666;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            color: white;
-        }
+        .combat-init-bubble { width: 30px; height: 30px; border-radius: 50%; background: #111; border: 2px solid #666; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: white; }
         .combat-btn-remove { color: #f44336; font-size: 18px; cursor: pointer; background: none; border: none; padding: 0 5px; }
 
         .combat-controls { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
@@ -214,29 +151,19 @@
             <div class="world-date" id="wd_date">CARREGANDO...</div>
             <div class="world-time">
                 <span id="wd_time">00:00</span>
-                <div class="weather-badge">
-                    <span id="wd_weather_icon">☀</span>
-                    <span id="wd_weather_text" style="text-transform: uppercase; font-size: 12px; font-weight: normal;">Normal</span>
-                </div>
+                <div class="weather-badge"><span id="wd_weather_icon">☀</span><span id="wd_weather_text">Normal</span></div>
             </div>
         </div>
-        
         <div class="world-buttons">
             <button class="btn-calendar" onclick="window.open('calendario.html', '_blank')">📅 Calendário</button>
             <button class="btn-world-obs" onclick="window.open('overlay_world.html', '_blank')">🎥 OBS</button>
         </div>
     </div>
 
-    <h2 class="section-title">
-        JOGADORES 
-        <button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button>
-    </h2>
+    <h2 class="section-title">JOGADORES <button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button></h2>
     <div id="wrapper-players"></div>
 
-    <h2 class="section-title">
-        NPCs & MONSTROS
-        <button class="btn-add-cat" onclick="addCategory('npcs')">+ Divisória</button>
-    </h2>
+    <h2 class="section-title">NPCs & MONSTROS <button class="btn-add-cat" onclick="addCategory('npcs')">+ Divisória</button></h2>
     <button class="btn-add-npc" onclick="openNpcForm()">+ CRIAR NOVO NPC</button>
     <div id="wrapper-npcs"></div>
 
@@ -246,9 +173,10 @@
              ondragover="allowDrop(event)" 
              ondrop="dropInCombat(event)" 
              ondragenter="this.classList.add('drag-over')" 
-             ondragleave="this.classList.remove('drag-over')">
-             </div>
+             ondragleave="this.classList.remove('drag-over')"></div>
         <div class="combat-controls">
+            <button id="btn-regen-toggle" class="btn-combat" style="border: 1px solid #4488ff; color: #4488ff;" onclick="toggleAutoRegen()">💧 Regen Auto: ON</button>
+            
             <button class="btn-combat btn-roll" onclick="calculateInitiative()">🎲 Calcular Iniciativa</button>
             <div style="display:flex; gap:5px;">
                 <button class="btn-combat btn-prev" onclick="changeTurn(-1)">◀ Ant</button>
@@ -264,22 +192,10 @@
         <div class="npc-form">
             <h3 style="text-align:center; margin-top:0;">EDITOR DE NPC</h3>
             <input type="hidden" id="npc_id">
-            <div class="form-row">
-                <div><label>Nome</label><input type="text" id="npc_name"></div>
-                <div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div>
-            </div>
-            <div class="form-row-3">
-                <div><label>Poder</label><input type="number" id="npc_pod" value="0"></div>
-                <div><label>Habilidade</label><input type="number" id="npc_hab" value="0"></div>
-                <div><label>Resistência</label><input type="number" id="npc_res" value="0"></div>
-            </div>
-            <div class="form-row-3">
-                <div><label>Vida (Max)</label><input type="number" id="npc_hp" value="10"></div>
-                <div><label>Mana (Max)</label><input type="number" id="npc_mp" value="10"></div>
-                <div><label>PA (Max)</label><input type="number" id="npc_pa" value="3"></div>
-            </div>
-            <label>Perícias (Deixe 0 para esconder)</label>
-            <div class="skills-grid" id="npc_skills_container"></div>
+            <div class="form-row"><div><label>Nome</label><input type="text" id="npc_name"></div><div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div></div>
+            <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0"></div></div>
+            <div class="form-row-3"><div><label>Vida (Max)</label><input type="number" id="npc_hp" value="10"></div><div><label>Mana (Max)</label><input type="number" id="npc_mp" value="10"></div><div><label>PA (Max)</label><input type="number" id="npc_pa" value="3"></div></div>
+            <label>Perícias (Deixe 0 para esconder)</label><div class="skills-grid" id="npc_skills_container"></div>
             <label>Habilidades Gerais <button type="button" class="btn-icon" style="height:20px; width:20px; font-size:10px;" onclick="addHabRow()">+</button></label>
             <div id="hab_editor_list" class="hab-list-editor"></div>
             <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button>
@@ -327,49 +243,28 @@
     });
 
     // ==========================================
-    // SISTEMA DE DIVISÓRIAS E DRAG & DROP GERAL
+    // SISTEMA DE DIVISÓRIAS E DRAG & DROP
     // ==========================================
-
-    let globalPlayers = {};
-    let globalNpcs = {};
-    let globalDivisions = { players: {}, npcs: {} };
+    let globalPlayers = {}; let globalNpcs = {}; let globalDivisions = { players: {}, npcs: {} };
 
     function createDividerHTML(divId, divName, type) {
         const isDefault = divId === 'default';
         const nameHtml = isDefault ? `<span>${divName}</span>` : `<span onclick="renameCategory('${type}', '${divId}', '${divName}')">✎ ${divName}</span> <button class="btn-del-cat" onclick="deleteCategory('${type}', '${divId}')">✖</button>`;
-        return `
-            <div class="category-container" id="cat_${divId}" 
-                 ondragover="allowDrop(event)" 
-                 ondrop="drop(event, '${divId}', '${type}')" 
-                 ondragenter="this.classList.add('drag-over')" 
-                 ondragleave="this.classList.remove('drag-over')">
-                <div class="category-header"><div class="category-title">${nameHtml}</div></div>
-                <div class="category-grid" id="grid_${type}_${divId}"></div>
-            </div>`;
+        return `<div class="category-container" id="cat_${divId}" ondragover="allowDrop(event)" ondrop="drop(event, '${divId}', '${type}')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"><div class="category-header"><div class="category-title">${nameHtml}</div></div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`;
     }
 
     function renderAll() {
-        const wrapperP = document.getElementById('wrapper-players');
-        const wrapperN = document.getElementById('wrapper-npcs');
-        let htmlP = createDividerHTML('default', 'Geral', 'players');
-        if (globalDivisions.players) Object.keys(globalDivisions.players).forEach(key => { htmlP += createDividerHTML(key, globalDivisions.players[key].name, 'players'); });
-        wrapperP.innerHTML = htmlP;
-        let htmlN = createDividerHTML('default', 'Geral', 'npcs');
-        if (globalDivisions.npcs) Object.keys(globalDivisions.npcs).forEach(key => { htmlN += createDividerHTML(key, globalDivisions.npcs[key].name, 'npcs'); });
-        wrapperN.innerHTML = htmlN;
+        const wrapperP = document.getElementById('wrapper-players'); const wrapperN = document.getElementById('wrapper-npcs');
+        let htmlP = createDividerHTML('default', 'Geral', 'players'); if (globalDivisions.players) Object.keys(globalDivisions.players).forEach(key => { htmlP += createDividerHTML(key, globalDivisions.players[key].name, 'players'); }); wrapperP.innerHTML = htmlP;
+        let htmlN = createDividerHTML('default', 'Geral', 'npcs'); if (globalDivisions.npcs) Object.keys(globalDivisions.npcs).forEach(key => { htmlN += createDividerHTML(key, globalDivisions.npcs[key].name, 'npcs'); }); wrapperN.innerHTML = htmlN;
 
         Object.keys(globalPlayers).forEach(id => {
-            const f = globalPlayers[id];
-            const cat = (f.category && (f.category === 'default' || globalDivisions.players?.[f.category])) ? f.category : 'default';
-            const container = document.getElementById(`grid_players_${cat}`);
-            if(container) container.appendChild(createPlayerCard(id, f));
+            const f = globalPlayers[id]; const cat = (f.category && (f.category === 'default' || globalDivisions.players?.[f.category])) ? f.category : 'default';
+            const container = document.getElementById(`grid_players_${cat}`); if(container) container.appendChild(createPlayerCard(id, f));
         });
-
         Object.keys(globalNpcs).forEach(id => {
-            const n = globalNpcs[id];
-            const cat = (n.category && (n.category === 'default' || globalDivisions.npcs?.[n.category])) ? n.category : 'default';
-            const container = document.getElementById(`grid_npcs_${cat}`);
-            if(container) container.appendChild(createNpcCard(id, n));
+            const n = globalNpcs[id]; const cat = (n.category && (n.category === 'default' || globalDivisions.npcs?.[n.category])) ? n.category : 'default';
+            const container = document.getElementById(`grid_npcs_${cat}`); if(container) container.appendChild(createNpcCard(id, n));
         });
     }
 
@@ -378,264 +273,114 @@
     onValue(ref(db, 'npcs'), (snap) => { globalNpcs = snap.val() || {}; renderAll(); });
 
     function createPlayerCard(id, f) {
-        const el = document.createElement('div'); el.className = 'player-card'; el.draggable = true;
-        el.ondragstart = (e) => drag(e, id, 'players');
-        // Visual
-        const hpAt = parseInt(f.hp_at)||0; const hpMax = parseInt(f.hp_max)||1;
-        const mpAt = parseInt(f.mp_at)||0; const mpMax = parseInt(f.mp_max)||1;
-        const paAt = parseInt(f.pa_at)||0; const paMax = parseInt(f.pa_max)||1;
+        const el = document.createElement('div'); el.className = 'player-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'players');
+        const hpAt = parseInt(f.hp_at)||0; const hpMax = parseInt(f.hp_max)||1; const mpAt = parseInt(f.mp_at)||0; const mpMax = parseInt(f.mp_max)||1; const paAt = parseInt(f.pa_at)||0; const paMax = parseInt(f.pa_max)||1;
         const hpP = Math.min((hpAt/hpMax)*100,100); const mpP = Math.min((mpAt/mpMax)*100,100); const paP = Math.min((paAt/paMax)*100,100);
         const linkFicha = `${baseURL}?p=${id}`; const linkOverlay = `${baseURL}overlay.html?p=${id}`; const isStatusMode = f.overlay_mode === 'status';
-        el.innerHTML = `
-            <div class="player-header">
-                <div class="player-img" style="background-image: url('${f.char_img || ''}')"></div>
-                <div class="player-info"><h2>${f.char_name || id}</h2>
-                    <div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}', '_blank')">📄</button><button class="btn-small" onclick="window.open('${linkOverlay}', '_blank')">🎥</button><button class="btn-small btn-obs ${isStatusMode ? 'active' : ''}" onclick="toggleOverlay('${id}', '${f.overlay_mode}')">${isStatusMode ? '📊' : '🏷️'}</button></div></div></div>
-            <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${hpP}%"></div></div>
-            <div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div>
-            <div class="status-bar"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${paP}%"></div></div>
-            <div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div>
-            <div class="xp-control"><div class="xp-display-mini">Pts: ${f.xp_pontos||0} | XP: ${f.xp_total||0}</div></div>
-            <div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
+        el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${f.char_img || ''}')"></div><div class="player-info"><h2>${f.char_name || id}</h2><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}', '_blank')">📄</button><button class="btn-small" onclick="window.open('${linkOverlay}', '_blank')">🎥</button><button class="btn-small btn-obs ${isStatusMode ? 'active' : ''}" onclick="toggleOverlay('${id}', '${f.overlay_mode}')">${isStatusMode ? '📊' : '🏷️'}</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${hpP}%"></div></div><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div><div class="status-bar"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${paP}%"></div></div><div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div><div class="xp-control"><div class="xp-display-mini">Pts: ${f.xp_pontos||0} | XP: ${f.xp_total||0}</div></div><div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
         return el;
     }
 
     function createNpcCard(id, n) {
-        const el = document.createElement('div'); el.className = 'player-card npc-card'; el.draggable = true;
-        el.ondragstart = (e) => drag(e, id, 'npcs');
-        // NPC Visual
+        const el = document.createElement('div'); el.className = 'player-card npc-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'npcs');
+        // NPC MP Logic fix:
+        const mpMax = n.mp || 1; const mpAt = (n.mp_at !== undefined) ? n.mp_at : mpMax;
+        const mpP = Math.min((mpAt/mpMax)*100, 100);
+        
         const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
         let skillHtml = ''; periciasIds.forEach(pid => { const val = n.skills ? (parseInt(n.skills[pid]) || 0) : 0; if (val !== 0) { const css = val > 0 ? 'pos' : 'neg'; const txt = val > 0 ? `+${val}` : val; skillHtml += `<span class="skill-tag ${css}">${pid.toUpperCase().substr(0,3)} ${txt}</span>`; } });
         let habHtml = ''; if (n.habs) { n.habs.forEach((h, idx) => { habHtml += `<div class="npc-hab-item"><div class="npc-hab-title" onclick="toggleNpcDesc('${id}_hab_${idx}')"><span>${h.titulo}</span> <span>[${h.teste}]</span></div><div class="npc-hab-desc" id="desc_${id}_hab_${idx}">${h.desc}</div></div>`; }); }
-        el.innerHTML = `
-            <div class="player-header"><div class="player-img" style="background-image: url('${n.img || ''}')"></div><div class="player-info"><h2>${n.name || 'NPC'}</h2><div class="controls-row"><button class="btn-small" onclick='editNpc(${JSON.stringify(id)})'>✏️ Editar</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️</button></div></div></div>
-            <div class="status-bar"><div class="bar-text">PV ${n.hp}/${n.hp}</div><div class="bar-fill hp" style="width:100%"></div></div>
-            <div class="status-bar"><div class="bar-text">PM ${n.mp}/${n.mp}</div><div class="bar-fill mp" style="width:100%"></div></div>
-            <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
-            <div id="details_${id}" class="npc-details"><div class="npc-attr-row"><div class="npc-attr">POD<span>${n.pod}</span></div><div class="npc-attr">HAB<span>${n.hab}</span></div><div class="npc-attr">RES<span>${n.res}</span></div><div class="npc-attr" style="color:#aa66cc">PA<span>${n.pa}</span></div></div><div class="tag-container">${skillHtml || '<span style="color:#666; font-size:10px">Sem perícias</span>'}</div><div class="npc-hab-list">${habHtml}</div></div>`;
+        el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${n.img || ''}')"></div><div class="player-info"><h2>${n.name || 'NPC'}</h2><div class="controls-row"><button class="btn-small" onclick='editNpc(${JSON.stringify(id)})'>✏️ Editar</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${n.hp}/${n.hp}</div><div class="bar-fill hp" style="width:100%"></div></div><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div><button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button><div id="details_${id}" class="npc-details"><div class="npc-attr-row"><div class="npc-attr">POD<span>${n.pod}</span></div><div class="npc-attr">HAB<span>${n.hab}</span></div><div class="npc-attr">RES<span>${n.res}</span></div><div class="npc-attr" style="color:#aa66cc">PA<span>${n.pa}</span></div></div><div class="tag-container">${skillHtml || '<span style="color:#666; font-size:10px">Sem perícias</span>'}</div><div class="npc-hab-list">${habHtml}</div></div>`;
         return el;
     }
 
     window.allowDrop = (ev) => ev.preventDefault();
     window.drag = (ev, id, type) => ev.dataTransfer.setData("text/plain", JSON.stringify({id: id, type: type}));
-    window.drop = (ev, catId, targetType) => {
-        ev.preventDefault();
-        document.querySelectorAll('.category-container').forEach(el => el.classList.remove('drag-over'));
-        const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
-        if (data.type !== targetType) return; // Impede player em npc
-        const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`;
-        update(ref(db, path), { category: catId });
-    };
-
+    window.drop = (ev, catId, targetType) => { ev.preventDefault(); document.querySelectorAll('.category-container').forEach(el => el.classList.remove('drag-over')); const data = JSON.parse(ev.dataTransfer.getData("text/plain")); if (data.type !== targetType) return; const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`; update(ref(db, path), { category: catId }); };
     window.addCategory = (type) => { const newRef = push(ref(db, `divisoes/${type}`)); set(newRef, { name: "Nova Divisória" }); };
     window.renameCategory = (type, catId, oldName) => { const newName = prompt("Nome da divisória:", oldName); if (newName && newName !== oldName) update(ref(db, `divisoes/${type}/${catId}`), { name: newName }); };
     window.deleteCategory = (type, catId) => { if(confirm("Excluir divisória?")) remove(ref(db, `divisoes/${type}/${catId}`)); };
 
-
     // ==========================================
     // SISTEMA DE COMBATE (SIDEBAR)
     // ==========================================
+    let autoRegen = true;
 
-    window.toggleCombatSidebar = () => {
-        document.getElementById('combat-sidebar').classList.toggle('open');
-        // Atualiza botão lateral position
-        const btn = document.querySelector('.combat-toggle-btn');
-        if(document.getElementById('combat-sidebar').classList.contains('open')) {
-            btn.style.right = "300px";
-            btn.innerHTML = "✖";
-        } else {
-            btn.style.right = "0";
-            btn.innerHTML = "⚔️";
-        }
+    window.toggleAutoRegen = () => {
+        autoRegen = !autoRegen;
+        const btn = document.getElementById('btn-regen-toggle');
+        if(autoRegen) { btn.innerHTML = "💧 Regen Auto: ON"; btn.style.color = "#4488ff"; btn.style.borderColor = "#4488ff"; } 
+        else { btn.innerHTML = "💧 Regen Auto: OFF"; btn.style.color = "#666"; btn.style.borderColor = "#666"; }
     };
 
-    // Drop no Combate
+    window.toggleCombatSidebar = () => { document.getElementById('combat-sidebar').classList.toggle('open'); const btn = document.querySelector('.combat-toggle-btn'); if(document.getElementById('combat-sidebar').classList.contains('open')) { btn.style.right = "300px"; btn.innerHTML = "✖"; } else { btn.style.right = "0"; btn.innerHTML = "⚔️"; } };
     window.dropInCombat = (ev) => {
-        ev.preventDefault();
-        document.getElementById('combat_list').classList.remove('drag-over');
-        const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
-        
+        ev.preventDefault(); document.getElementById('combat_list').classList.remove('drag-over'); const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
         let charData = null;
-        let hab = 0;
-        
-        if (data.type === 'players') {
-            const f = globalPlayers[data.id];
-            if(f) { charData = { name: f.char_name || "Player", img: f.char_img || "", hab: parseInt(f.habilidade)||0, id: data.id, type: 'player' }; }
-        } else {
-            const n = globalNpcs[data.id];
-            if(n) { charData = { name: n.name || "NPC", img: n.img || "", hab: parseInt(n.hab)||0, id: data.id, type: 'npc' }; }
-        }
-
-        if(charData) {
-            // Adiciona ao nó de combate no Firebase
-            // Usa push para permitir multiplos npcs iguais
-            push(ref(db, 'combate/participantes'), {
-                ...charData,
-                init_val: 0,
-                tie_breaker: 0,
-                active: false
-            });
-        }
+        if (data.type === 'players') { const f = globalPlayers[data.id]; if(f) { charData = { name: f.char_name || "Player", img: f.char_img || "", hab: parseInt(f.habilidade)||0, id: data.id, type: 'player' }; } } 
+        else { const n = globalNpcs[data.id]; if(n) { charData = { name: n.name || "NPC", img: n.img || "", hab: parseInt(n.hab)||0, id: data.id, type: 'npc' }; } }
+        if(charData) { push(ref(db, 'combate/participantes'), { ...charData, init_val: 0, tie_breaker: 0, active: false }); }
     };
 
-    // Listener do Combate
     onValue(ref(db, 'combate'), (snap) => {
-        const data = snap.val();
-        const list = document.getElementById('combat_list');
-        list.innerHTML = "";
-        
+        const data = snap.val(); const list = document.getElementById('combat_list'); list.innerHTML = "";
         if (!data || !data.participantes) return;
-
-        // Converte para array para ordenar
-        let parts = [];
-        Object.keys(data.participantes).forEach(key => {
-            parts.push({ ...data.participantes[key], key: key });
-        });
-
-        // Ordenação Visual (Já deve vir ordenado do calculo, mas garantimos aqui se tiver valor)
-        // Se init_val > 0, ordena. Se não, ordem de chegada.
-        parts.sort((a, b) => {
-            if (b.init_val !== a.init_val) return b.init_val - a.init_val; // Maior total
-            if (b.hab !== a.hab) return b.hab - a.hab; // Maior HAB
-            return b.tie_breaker - a.tie_breaker; // Desempate oculto
-        });
-
-        parts.forEach(p => {
-            const div = document.createElement('div');
-            div.className = `combat-item ${p.active ? 'active' : ''}`;
-            div.innerHTML = `
-                <div class="combat-avatar" style="background-image: url('${p.img}')"></div>
-                <div class="combat-name">${p.name}</div>
-                <div class="combat-init-bubble">${p.init_val > 0 ? p.init_val : '-'}</div>
-                <button class="combat-btn-remove" onclick="removeCombatant('${p.key}')">×</button>
-            `;
-            list.appendChild(div);
-        });
+        let parts = []; Object.keys(data.participantes).forEach(key => { parts.push({ ...data.participantes[key], key: key }); });
+        parts.sort((a, b) => { if (b.init_val !== a.init_val) return b.init_val - a.init_val; if (b.hab !== a.hab) return b.hab - a.hab; return b.tie_breaker - a.tie_breaker; });
+        parts.forEach(p => { const div = document.createElement('div'); div.className = `combat-item ${p.active ? 'active' : ''}`; div.innerHTML = `<div class="combat-avatar" style="background-image: url('${p.img}')"></div><div class="combat-name">${p.name}</div><div class="combat-init-bubble">${p.init_val > 0 ? p.init_val : '-'}</div><button class="combat-btn-remove" onclick="removeCombatant('${p.key}')">×</button>`; list.appendChild(div); });
     });
 
-    window.calculateInitiative = () => {
-        onValue(ref(db, 'combate/participantes'), (snap) => {
-            const parts = snap.val();
-            if(!parts) return;
-
-            const updates = {};
-            Object.keys(parts).forEach(key => {
-                const p = parts[key];
-                const d6 = Math.floor(Math.random() * 6) + 1;
-                const total = d6 + p.hab;
-                
-                updates[key + '/init_val'] = total;
-                // Desempate oculto (segundo d6)
-                updates[key + '/tie_breaker'] = Math.random(); 
-                updates[key + '/active'] = false; // Reseta turno
-            });
-            update(ref(db, 'combate/participantes'), updates);
-        }, { onlyOnce: true });
-    };
-
-    window.removeCombatant = (key) => {
-        remove(ref(db, `combate/participantes/${key}`));
-    };
-
-    window.endCombat = () => {
-        if(confirm("Encerrar o combate e limpar a lista?")) {
-            remove(ref(db, 'combate'));
-        }
-    };
+    window.calculateInitiative = () => { onValue(ref(db, 'combate/participantes'), (snap) => { const parts = snap.val(); if(!parts) return; const updates = {}; Object.keys(parts).forEach(key => { const p = parts[key]; const d6 = Math.floor(Math.random() * 6) + 1; const total = d6 + p.hab; updates[key + '/init_val'] = total; updates[key + '/tie_breaker'] = Math.random(); updates[key + '/active'] = false; }); update(ref(db, 'combate/participantes'), updates); }, { onlyOnce: true }); };
+    window.removeCombatant = (key) => { remove(ref(db, `combate/participantes/${key}`)); };
+    window.endCombat = () => { if(confirm("Encerrar o combate e limpar a lista?")) { remove(ref(db, 'combate')); } };
 
     window.changeTurn = (dir) => {
         onValue(ref(db, 'combate/participantes'), (snap) => {
-            const partsMap = snap.val();
-            if(!partsMap) return;
-
-            // Transforma em array ordenado igual ao visual
-            let parts = [];
-            Object.keys(partsMap).forEach(key => parts.push({...partsMap[key], key: key}));
-            
-            parts.sort((a, b) => {
-                if (b.init_val !== a.init_val) return b.init_val - a.init_val;
-                if (b.hab !== a.hab) return b.hab - a.hab;
-                return b.tie_breaker - a.tie_breaker;
-            });
-
-            // Acha o índice atual
+            const partsMap = snap.val(); if(!partsMap) return;
+            let parts = []; Object.keys(partsMap).forEach(key => parts.push({...partsMap[key], key: key}));
+            parts.sort((a, b) => { if (b.init_val !== a.init_val) return b.init_val - a.init_val; if (b.hab !== a.hab) return b.hab - a.hab; return b.tie_breaker - a.tie_breaker; });
             let activeIndex = parts.findIndex(p => p.active === true);
-            
-            // Calcula novo índice
             let newIndex = activeIndex + dir;
-            if (newIndex >= parts.length) newIndex = 0; // Loop pro começo
-            if (newIndex < 0) newIndex = parts.length - 1; // Loop pro fim (se voltar do 0)
-
-            // Reseta todos e ativa o novo
-            const updates = {};
-            parts.forEach(p => updates[p.key + '/active'] = false);
-            
-            // Se ninguém tava ativo e apertou next, ativa o primeiro (index 0)
+            if (newIndex >= parts.length) newIndex = 0; if (newIndex < 0) newIndex = parts.length - 1;
+            const updates = {}; parts.forEach(p => updates[p.key + '/active'] = false);
             if (activeIndex === -1 && dir === 1) newIndex = 0;
-            
             updates[parts[newIndex].key + '/active'] = true;
-            
             update(ref(db, 'combate/participantes'), updates);
+
+            // === LÓGICA DE REGEN DE MANA ===
+            if (autoRegen) {
+                const char = parts[newIndex];
+                const refPath = char.type === 'player' ? `fichas/${char.id}` : `npcs/${char.id}`;
+                
+                onValue(ref(db, refPath), (charSnap) => {
+                    const cData = charSnap.val();
+                    if(cData) {
+                        let currentMp, maxMp, hab;
+                        if (char.type === 'player') { currentMp = parseInt(cData.mp_at) || 0; maxMp = parseInt(cData.mp_max) || 1; hab = parseInt(cData.habilidade) || 0; } 
+                        else { maxMp = parseInt(cData.mp) || 1; currentMp = (cData.mp_at !== undefined) ? parseInt(cData.mp_at) : maxMp; hab = parseInt(cData.hab) || 0; }
+                        
+                        const roll = Math.floor(Math.random() * 6) + 1;
+                        const regen = roll + hab;
+                        let newMp = currentMp + regen;
+                        if(newMp > maxMp) newMp = maxMp;
+                        
+                        if (newMp !== currentMp) { update(ref(db, refPath), { mp_at: newMp }); }
+                    }
+                }, { onlyOnce: true });
+            }
+            // ===============================
 
         }, { onlyOnce: true });
     };
 
     // --- FUNÇÕES GERAIS (Mantidas) ---
-    window.openNpcForm = () => {
-        document.getElementById('npc_id').value = ""; document.getElementById('npc_name').value = ""; document.getElementById('npc_img_data').value = ""; document.getElementById('npc_img_file').value = "";
-        document.getElementById('npc_pod').value = 0; document.getElementById('npc_hab').value = 0; document.getElementById('npc_res').value = 0;
-        document.getElementById('npc_hp').value = 10; document.getElementById('npc_mp').value = 10; document.getElementById('npc_pa').value = 3;
-        const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
-        periciasIds.forEach(pid => document.getElementById(`form_skill_${pid}`).value = 0);
-        document.getElementById('hab_editor_list').innerHTML = "";
-        document.getElementById('form-npc-container').classList.add('open');
-    };
+    window.openNpcForm = () => { document.getElementById('npc_id').value = ""; document.getElementById('npc_name').value = ""; document.getElementById('npc_img_data').value = ""; document.getElementById('npc_img_file').value = ""; document.getElementById('npc_pod').value = 0; document.getElementById('npc_hab').value = 0; document.getElementById('npc_res').value = 0; document.getElementById('npc_hp').value = 10; document.getElementById('npc_mp').value = 10; document.getElementById('npc_pa').value = 3; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; periciasIds.forEach(pid => document.getElementById(`form_skill_${pid}`).value = 0); document.getElementById('hab_editor_list').innerHTML = ""; document.getElementById('form-npc-container').classList.add('open'); };
     window.closeNpcForm = () => document.getElementById('form-npc-container').classList.remove('open');
-    window.addHabRow = (titulo="", teste="", desc="") => {
-        const div = document.createElement('div'); div.className = 'hab-editor-row';
-        div.innerHTML = `<div style="flex-grow:1"><input type="text" placeholder="Nome" class="hab-row-title" value="${titulo}" style="margin-bottom:2px"><input type="text" placeholder="Teste" class="hab-row-test" value="${teste}" style="margin-bottom:2px"><textarea placeholder="Descrição" class="hab-row-desc" rows="2">${desc}</textarea></div><button type="button" class="btn-icon" onclick="this.parentElement.remove()">✖</button>`;
-        document.getElementById('hab_editor_list').appendChild(div);
-    };
-    window.saveNpc = () => {
-        const id = document.getElementById('npc_id').value;
-        const name = document.getElementById('npc_name').value;
-        const img = document.getElementById('npc_img_data').value;
-        const pod = parseInt(document.getElementById('npc_pod').value)||0; const hab = parseInt(document.getElementById('npc_hab').value)||0; const res = parseInt(document.getElementById('npc_res').value)||0;
-        const hp = parseInt(document.getElementById('npc_hp').value)||10; const mp = parseInt(document.getElementById('npc_mp').value)||10; const pa = parseInt(document.getElementById('npc_pa').value)||3;
-        const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
-        const skills = {}; periciasIds.forEach(pid => { skills[pid] = parseInt(document.getElementById(`form_skill_${pid}`).value) || 0; });
-        const habs = []; document.querySelectorAll('.hab-editor-row').forEach(row => { habs.push({ titulo: row.querySelector('.hab-row-title').value, teste: row.querySelector('.hab-row-test').value, desc: row.querySelector('.hab-row-desc').value }); });
-        
-        const npcData = { name, img, pod, hab, res, hp, mp, pa, skills, habs };
-        if(!id) npcData.category = 'default';
-
-        if (id) update(ref(db, 'npcs/' + id), npcData).then(closeNpcForm);
-        else push(ref(db, 'npcs'), npcData).then(closeNpcForm);
-    };
-    window.editNpc = (id) => {
-        onValue(ref(db, 'npcs/' + id), (snap) => {
-            const data = snap.val(); document.getElementById('npc_id').value = id; document.getElementById('npc_name').value = data.name; document.getElementById('npc_img_data').value = data.img || "";
-            document.getElementById('npc_pod').value = data.pod; document.getElementById('npc_hab').value = data.hab; document.getElementById('npc_res').value = data.res;
-            document.getElementById('npc_hp').value = data.hp; document.getElementById('npc_mp').value = data.mp; document.getElementById('npc_pa').value = data.pa;
-            const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
-            periciasIds.forEach(pid => { document.getElementById(`form_skill_${pid}`).value = data.skills ? (data.skills[pid] || 0) : 0; });
-            const habList = document.getElementById('hab_editor_list'); habList.innerHTML = "";
-            if (data.habs) data.habs.forEach(h => addHabRow(h.titulo, h.teste, h.desc));
-            document.getElementById('form-npc-container').classList.add('open');
-        }, { onlyOnce: true });
-    };
+    window.addHabRow = (titulo="", teste="", desc="") => { const div = document.createElement('div'); div.className = 'hab-editor-row'; div.innerHTML = `<div style="flex-grow:1"><input type="text" placeholder="Nome" class="hab-row-title" value="${titulo}" style="margin-bottom:2px"><input type="text" placeholder="Teste" class="hab-row-test" value="${teste}" style="margin-bottom:2px"><textarea placeholder="Descrição" class="hab-row-desc" rows="2">${desc}</textarea></div><button type="button" class="btn-icon" onclick="this.parentElement.remove()">✖</button>`; document.getElementById('hab_editor_list').appendChild(div); };
+    window.saveNpc = () => { const id = document.getElementById('npc_id').value; const name = document.getElementById('npc_name').value; const img = document.getElementById('npc_img_data').value; const pod = parseInt(document.getElementById('npc_pod').value)||0; const hab = parseInt(document.getElementById('npc_hab').value)||0; const res = parseInt(document.getElementById('npc_res').value)||0; const hp = parseInt(document.getElementById('npc_hp').value)||10; const mp = parseInt(document.getElementById('npc_mp').value)||10; const pa = parseInt(document.getElementById('npc_pa').value)||3; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; const skills = {}; periciasIds.forEach(pid => { skills[pid] = parseInt(document.getElementById(`form_skill_${pid}`).value) || 0; }); const habs = []; document.querySelectorAll('.hab-editor-row').forEach(row => { habs.push({ titulo: row.querySelector('.hab-row-title').value, teste: row.querySelector('.hab-row-test').value, desc: row.querySelector('.hab-row-desc').value }); }); const npcData = { name, img, pod, hab, res, hp, mp, pa, skills, habs }; if(!id) npcData.category = 'default'; if (id) update(ref(db, 'npcs/' + id), npcData).then(closeNpcForm); else push(ref(db, 'npcs'), npcData).then(closeNpcForm); };
+    window.editNpc = (id) => { onValue(ref(db, 'npcs/' + id), (snap) => { const data = snap.val(); document.getElementById('npc_id').value = id; document.getElementById('npc_name').value = data.name; document.getElementById('npc_img_data').value = data.img || ""; document.getElementById('npc_pod').value = data.pod; document.getElementById('npc_hab').value = data.hab; document.getElementById('npc_res').value = data.res; document.getElementById('npc_hp').value = data.hp; document.getElementById('npc_mp').value = data.mp; document.getElementById('npc_pa').value = data.pa; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; periciasIds.forEach(pid => { document.getElementById(`form_skill_${pid}`).value = data.skills ? (data.skills[pid] || 0) : 0; }); const habList = document.getElementById('hab_editor_list'); habList.innerHTML = ""; if (data.habs) data.habs.forEach(h => addHabRow(h.titulo, h.teste, h.desc)); document.getElementById('form-npc-container').classList.add('open'); }, { onlyOnce: true }); };
     window.deleteNpc = (id) => { if(confirm("Deletar NPC?")) remove(ref(db, 'npcs/' + id)); };
-    document.getElementById('npc_img_file').addEventListener('change', (e) => {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader(); reader.onload = (re) => {
-            const img = new Image(); img.onload = () => {
-                const cvs = document.createElement('canvas'); const max = 300; let w = img.width, h = img.height;
-                if(w>h){ if(w>max){h*=max/w; w=max}} else {if(h>max){w*=max/h; h=max}}
-                cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h);
-                document.getElementById('npc_img_data').value = cvs.toDataURL('image/jpeg', 0.7);
-            }; img.src = re.target.result;
-        }; reader.readAsDataURL(file);
-    });
+    document.getElementById('npc_img_file').addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (re) => { const img = new Image(); img.onload = () => { const cvs = document.createElement('canvas'); const max = 300; let w = img.width, h = img.height; if(w>h){ if(w>max){h*=max/w; w=max}} else {if(h>max){w*=max/h; h=max}} cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h); document.getElementById('npc_img_data').value = cvs.toDataURL('image/jpeg', 0.7); }; img.src = re.target.result; }; reader.readAsDataURL(file); });
     window.toggleNpcDetails = (id) => document.getElementById('details_'+id).classList.toggle('open');
     window.toggleNpcDesc = (uid) => document.getElementById('desc_'+uid).classList.toggle('open');
     window.toggleOverlay = (id, currentMode) => { const newMode = currentMode === 'status' ? 'nome' : 'status'; update(ref(db, `fichas/${id}`), { overlay_mode: newMode }); };
