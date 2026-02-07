@@ -20,7 +20,6 @@
         .btn-calendar:hover { background: #a00000; box-shadow: 0 0 10px var(--header-bg); }
         .btn-world-obs { background: transparent; color: #00ffff; border: 1px solid #00ffff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
         .btn-world-obs:hover { background: rgba(0, 255, 255, 0.1); box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
-        /* Botão Global de Toggle */
         .btn-global-toggle { background: transparent; color: #ffd700; border: 1px solid #ffd700; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
         .btn-global-toggle:hover { background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
 
@@ -58,8 +57,6 @@
         .controls-row { display: flex; gap: 5px; margin-top: 5px; }
         .btn-small { flex-grow: 1; background: #222; border: 1px solid #555; color: white; border-radius: 4px; font-size: 10px; cursor: pointer; text-transform: uppercase; padding: 4px; transition: 0.2s; white-space: nowrap; }
         .btn-small:hover { background: #444; border-color: #aaa; }
-        
-        /* Botões Específicos */
         .btn-obs { border-color: #00ffff; color: #00ffff; }
         .btn-obs:hover { background: rgba(0,255,255,0.1); }
         .btn-cfg { border-color: #aaa; color: #ddd; }
@@ -194,6 +191,10 @@
                 <span>🎭 Máscara Lunar</span>
                 <input type="checkbox" id="check_mask">
             </div>
+            <div class="config-option">
+                <span>😈 Chamado do Inferno</span>
+                <input type="checkbox" id="check_hell">
+            </div>
             <button class="btn-action btn-save" onclick="savePlayerConfig()">Confirmar</button>
             <button class="btn-action btn-cancel" onclick="document.getElementById('config-player-container').classList.remove('open')">Fechar</button>
         </div>
@@ -273,33 +274,25 @@
         const f = globalPlayers[id]; if(!f) return;
         document.getElementById('cfg_player_id').value = id;
         document.getElementById('check_mask').checked = (f.unlocked_abilities && f.unlocked_abilities.mask === true);
+        document.getElementById('check_hell').checked = (f.unlocked_abilities && f.unlocked_abilities.hell === true);
         document.getElementById('config-player-container').classList.add('open');
     };
 
     window.savePlayerConfig = () => {
         const id = document.getElementById('cfg_player_id').value;
         const mask = document.getElementById('check_mask').checked;
-        update(ref(db, 'fichas/' + id), { 'unlocked_abilities/mask': mask });
+        const hell = document.getElementById('check_hell').checked;
+        update(ref(db, 'fichas/' + id), { 
+            'unlocked_abilities/mask': mask,
+            'unlocked_abilities/hell': hell
+        });
         document.getElementById('config-player-container').classList.remove('open');
     };
 
-    // --- NOVA FUNÇÃO GLOBAL ---
     window.toggleAllOverlays = () => {
-        // Logica: Pega o modo do primeiro jogador e inverte para todos
-        let targetMode = 'status'; 
-        const keys = Object.keys(globalPlayers);
-        if (keys.length > 0) {
-            // Se o primeiro já for status, vamos para nome (inverter)
-            if (globalPlayers[keys[0]].overlay_mode === 'status') {
-                targetMode = 'nome';
-            }
-        }
-        
-        const updates = {};
-        keys.forEach(id => {
-            updates[`fichas/${id}/overlay_mode`] = targetMode;
-        });
-        update(ref(db), updates);
+        let targetMode = 'status'; const keys = Object.keys(globalPlayers);
+        if (keys.length > 0) { if (globalPlayers[keys[0]].overlay_mode === 'status') { targetMode = 'nome'; } }
+        const updates = {}; keys.forEach(id => { updates[`fichas/${id}/overlay_mode`] = targetMode; }); update(ref(db), updates);
     };
 
     function createPlayerCard(id, f) {
@@ -307,14 +300,8 @@
         const hpAt = parseInt(f.hp_at)||0; const hpMax = parseInt(f.hp_max)||1; const mpAt = parseInt(f.mp_at)||0; const mpMax = parseInt(f.mp_max)||1; const paAt = parseInt(f.pa_at)||0; const paMax = parseInt(f.pa_max)||1;
         const hpP = Math.min((hpAt/hpMax)*100,100); const mpP = Math.min((mpAt/mpMax)*100,100); const paP = Math.min((paAt/paMax)*100,100);
         const linkFicha = `${baseURL}?p=${id}`; const linkOverlay = `${baseURL}overlay.html?p=${id}`;
-        
-        el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${f.char_img || ''}')"></div><div class="player-info"><h2>${f.char_name || id}</h2>
-        <div class="controls-row">
-            <button class="btn-small" onclick="window.open('${linkFicha}', '_blank')" title="Abrir Ficha">📄 Ficha</button>
-            <button class="btn-small btn-cfg" onclick="openPlayerConfig('${id}')" title="Configurações">⚙️ Config</button>
-            <button class="btn-small btn-obs" onclick="window.open('${linkOverlay}', '_blank')" title="Abrir Overlay do Jogador">🎥 OBS</button>
-        </div></div></div>
-        <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${hpP}%"></div></div><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div><div class="status-bar"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${paP}%"></div></div><div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div><div class="xp-control"><div class="xp-display-mini">Pts: ${f.xp_pontos||0} | XP: ${f.xp_total||0}</div></div><div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
+        const isStatusMode = f.overlay_mode === 'status';
+        el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${f.char_img || ''}')"></div><div class="player-info"><h2>${f.char_name || id}</h2><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}', '_blank')" title="Abrir Ficha">📄 Ficha</button><button class="btn-small btn-cfg" onclick="openPlayerConfig('${id}')" title="Configurações">⚙️ Config</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}', '_blank')" title="Abrir Overlay do Jogador">🎥 OBS</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${hpP}%"></div></div><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div><div class="status-bar"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${paP}%"></div></div><div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div><div class="xp-control"><div class="xp-display-mini">Pts: ${f.xp_pontos||0} | XP: ${f.xp_total||0}</div></div><div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
         return el;
     }
 
