@@ -5,76 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overlay RPG</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@900&display=swap');
-
+        /* Fonte padrão igual da ficha (Segoe UI) */
         body { 
             margin: 0; 
+            padding: 10px;
             overflow: hidden; 
-            background: transparent; /* Fundo transparente para o OBS */
-            font-family: 'Cinzel', serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            background: transparent;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Removemos alinhamentos centrais que bagunçavam o OBS */
         }
 
-        /* Container Principal */
+        /* Container simples, sem flexbox centralizado */
         .overlay-container {
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s, transform 0.5s;
-        }
-        .overlay-container.visible {
-            opacity: 1;
-            transform: translateY(0);
+            display: inline-block;
+            text-align: left; /* Alinha à esquerda padrão */
         }
 
-        /* Estilo do Texto Neon */
-        .neon-text {
-            color: #ffffff; /* Texto sempre branco */
-            font-weight: 900;
+        /* Estilo das linhas de texto */
+        .stat-row {
+            font-size: 32px; /* Tamanho bom para leitura */
+            font-weight: 900; /* Negrito forte */
+            color: #ffffff; /* Texto Branco */
             text-transform: uppercase;
-            /* O text-shadow será injetado via JS baseado na cor do tema */
-        }
-
-        /* --- MODO STATUS (Barras e Números) --- */
-        .status-wrapper {
-            display: flex;
-            gap: 40px;
-            align-items: flex-end;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        .stat-value {
-            font-size: 56px; /* Números bem grandes */
-            line-height: 1;
-            font-family: 'Roboto', sans-serif; /* Fonte mais grossa para números */
-        }
-
-        .stat-label {
-            font-size: 18px;
-            margin-top: 5px;
-            letter-spacing: 2px;
-            opacity: 0.9;
-        }
-
-        /* Ícones opcionais (pode remover se quiser só texto) */
-        .icon { font-size: 24px; margin-bottom: 5px; display: block; }
-
-        /* --- MODO NOME --- */
-        .char-name {
-            font-size: 72px;
-            letter-spacing: 3px;
+            margin-bottom: 5px;
             white-space: nowrap;
+            /* Sombra (brilho) será injetada via JS */
         }
 
+        .char-name {
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -99,26 +62,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Pega o ID da URL (ex: overlay.html?p=guerreiro)
     const urlParams = new URLSearchParams(window.location.search);
     const fichaID = urlParams.get('p');
 
-    // Mapa de Cores (Copiado do index.html)
-    // Se quiser o brilho mais forte, pode clarear essas cores hexadecimais
+    // Cores para o brilho (Glow)
     const themeColors = { 
-        sangue: '#ff0000',    // Vermelho vivo
-        oceano: '#0088ff',    // Azul claro
-        floresta: '#00ff00',  // Verde neon
-        ametista: '#d500f9',  // Roxo brilhante
-        brasa: '#ff4400',     // Laranja fogo
-        sombra: '#aaaaaa',    // Cinza claro (para brilhar no fundo escuro)
-        ouro: '#ffcc00',      // Amarelo ouro
-        rosa: '#ff00cc'       // Rosa choque
+        sangue: '#ff0000', oceano: '#0088ff', floresta: '#00ff00', 
+        ametista: '#d500f9', brasa: '#ff4400', sombra: '#aaaaaa', 
+        ouro: '#ffcc00', rosa: '#ff00cc' 
     };
 
-    if (!fichaID) {
-        document.body.innerHTML = "<h1 style='color:white'>ERRO: ID não especificado na URL (?p=...)</h1>";
-    } else {
+    if (fichaID) {
         onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
             const data = snapshot.val();
             if (data) updateOverlay(data);
@@ -127,66 +81,38 @@
 
     function updateOverlay(data) {
         const container = document.getElementById('app');
-        const mode = data.overlay_mode || 'status'; // 'status' ou 'nome'
+        const mode = data.overlay_mode || 'status';
         const theme = data.color_theme || 'sangue';
         
-        // Pega a cor base. Se não achar, usa vermelho padrão.
-        const glowColor = themeColors[theme] || '#ff0000';
+        // Define a cor do brilho
+        let glowColor = themeColors[theme] || '#ff0000';
+        
+        // Habilidades Especiais mudam a cor do brilho
+        if (data.active_abilities?.mask) glowColor = '#00ffff'; // Ciano
+        else if (data.active_abilities?.hell) glowColor = '#ff0000'; // Vermelho
 
-        // Cria o estilo de brilho (Glow)
-        // 3 camadas de sombra para criar um efeito de névoa/neon forte
-        const glowStyle = `text-shadow: 
-            0 0 10px ${glowColor}, 
-            0 0 20px ${glowColor}, 
-            0 0 40px ${glowColor};`;
+        // Estilo do Brilho (Sombra colorida atrás do texto branco)
+        const glowStyle = `text-shadow: 2px 2px 0px #000, 0 0 10px ${glowColor}, 0 0 20px ${glowColor};`;
 
         let html = '';
 
         if (mode === 'nome') {
-            // MODO: APENAS NOME
-            html = `
-                <div class="neon-text char-name" style="${glowStyle}">
-                    ${data.char_name || 'Desconhecido'}
-                </div>
-            `;
+            html = `<div class="char-name" style="${glowStyle}">${data.char_name || 'Personagem'}</div>`;
         } else {
-            // MODO: STATUS (Vida, Mana, PA)
-            // Se Máscara Lunar estiver ativa, muda a cor do brilho para Ciano
-            // Se Inferno estiver ativo, muda para Vermelho Sangue
-            let finalGlow = glowStyle;
-            if (data.active_abilities?.mask) {
-                const maskColor = '#00ffff';
-                finalGlow = `text-shadow: 0 0 10px ${maskColor}, 0 0 20px ${maskColor}, 0 0 40px ${maskColor};`;
-            } else if (data.active_abilities?.hell) {
-                const hellColor = '#ff0000';
-                finalGlow = `text-shadow: 0 0 10px ${hellColor}, 0 0 20px ${hellColor}, 0 0 40px ${hellColor};`;
-            }
-
-            // Valores Atuais
+            // Layout Vertical Clássico
             const hp = data.hp_at || 0;
             const mp = data.mp_at || 0;
             const pa = data.pa_at || 0;
-
+            // Se quiser mostrar o máximo também, mude para: ${hp}/${data.hp_max}
+            
             html = `
-                <div class="status-wrapper">
-                    <div class="stat-item">
-                        <span class="neon-text stat-value" style="${finalGlow}">${hp}</span>
-                        <span class="neon-text stat-label" style="${finalGlow}">VIDA</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="neon-text stat-value" style="${finalGlow}">${mp}</span>
-                        <span class="neon-text stat-label" style="${finalGlow}">MANA</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="neon-text stat-value" style="${finalGlow}">${pa}</span>
-                        <span class="neon-text stat-label" style="${finalGlow}">AÇÃO</span>
-                    </div>
-                </div>
+                <div class="stat-row" style="${glowStyle}">VIDA: ${hp}</div>
+                <div class="stat-row" style="${glowStyle}">MANA: ${mp}</div>
+                <div class="stat-row" style="${glowStyle}">PA: ${pa}</div>
             `;
         }
 
         container.innerHTML = html;
-        container.classList.add('visible');
     }
 </script>
 </body>
