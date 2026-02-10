@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexamap World Builder</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; }
+        
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 300px; height: 100%;
+            background: rgba(30, 30, 30, 0.9); border-right: 2px solid #444;
+            padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;
+            z-index: 10;
+        }
+
+        canvas { display: block; background: #111; cursor: crosshair; }
+        
+        h2 { margin: 0 0 10px 0; color: #ffaa00; text-transform: uppercase; font-size: 16px; }
+        label { font-size: 12px; color: #aaa; display: block; margin-bottom: 5px; }
+        input[type="range"] { width: 100%; margin-bottom: 10px; }
+        
+        .btn { background: #444; color: white; border: 1px solid #666; padding: 8px; cursor: pointer; width: 100%; margin-bottom: 5px; font-weight: bold; }
+        .btn:hover { background: #666; }
+        .btn.active { background: #ffaa00; color: black; border-color: #ffaa00; }
+
+        .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px; }
+        .swatch { width: 100%; aspect-ratio: 1; border: 2px solid #555; cursor: pointer; transition: 0.2s; position: relative; }
+        .swatch:hover { border-color: white; transform: scale(1.1); z-index: 2; }
+        .swatch.selected { border-color: #ffaa00; box-shadow: 0 0 10px #ffaa00; z-index: 2; }
+        
+        .info-bar { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <h2>Configuração</h2>
+        <label>Carregar Mapa Mundi (Imagem)</label>
+        <input type="file" id="bgLoader" accept="image/*">
+        
+        <label>Tamanho do Hexágono</label>
+        <input type="range" id="hexSize" min="10" max="100" value="30">
+        
+        <label>Opacidade da Grade</label>
+        <input type="range" id="gridOpacity" min="0" max="1" step="0.1" value="0.3">
+
+        <hr style="border:0; border-top:1px solid #444; width:100%;">
+        
+        <h2>Terrenos</h2>
+        <div class="palette" id="palette">
+            </div>
+
+        <button class="btn" onclick="clearHexes()">Limpar Tudo</button>
+        <button class="btn" onclick="saveMap()">Salvar JSON</button>
+        <button class="btn" onclick="loadMap()">Carregar JSON</button>
+        <input type="file" id="jsonLoader" style="display:none" accept=".json">
+    </div>
+
+    <canvas id="mapCanvas"></canvas>
+    <div class="info-bar" id="coordDisplay">Hex: 0, 0</div>
+
+<script>
+    const canvas = document.getElementById('mapCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- CONFIGURAÇÃO GLOBAL ---
+    let camera = { x: 0, y: 0, zoom: 1 };
+    let isDragging = false;
+    let lastMouse = { x: 0, y: 0 };
+    let bgImage = null;
+    
+    // Dados do Mapa
+    // Estrutura: "q,r" : { type: 'forest', ... }
+    let hexMap = {}; 
+    let hexRadius = 30;
+    let gridOpacity = 0.3;
+
+    // Tipos de Terreno
+    const TERRAINS = {
+        'void': { color: 'transparent', icon: '' }, // Apagar
+        'ocean': { color: '#1a237e', icon: '🌊', label: 'Oceano' },
+        'coast': { color: '#4fc3f7', icon: '💧', label: 'Costa' },
+        'grass': { color: '#2e7d32', icon: '🌱', label: 'Planície' },
+        'forest': { color: '#1b5e20', icon: '🌲', label: 'Floresta' },
+        'desert': { color: '#fbc02d', icon: '🌵', label: 'Deserto' },
+        'mountain': { color: '#5d4037', icon: '⛰️', label: 'Montanha' },
+        'snow': { color: '#eceff1', icon: '❄️', label: 'Neve' },
+        'city': { color: '#9e9e9e', icon: '🏰', label: 'Cidade' },
+        'village': { color: '#795548', icon: '🏠', label: 'Vila' },
+        'ruin': { color: '#000000', icon: '💀', label: 'Ruína' },
+        'road': { color: '#ff9800', icon: '🛤️', label: 'Estrada' } // Exemplo especial
+    };
+    let currentTerrain = 'grass';
+
+    // --- INICIALIZAÇÃO ---
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- PALETA DE CORES ---
+    const paletteDiv = document.getElementById('palette');
+    Object.keys(TERRAINS).forEach(key => {
+        const t = TERRAINS[key];
+        const div = document.createElement('div');
+        div.className = 'swatch';
+        div.style.backgroundColor = t.color === 'transparent' ? '#333' : t.color;
+        div.innerText = t.icon;
+        div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.justifyContent = 'center'; div.style.fontSize = '20px';
+        div.title = t.label || 'Apagar';
+        div.onclick = () => selectTerrain(key, div);
+        if(key === 'grass') div.classList.add('selected');
+        paletteDiv.appendChild(div);
+    });
+
+    function selectTerrain(key, el) {
+        currentTerrain = key;
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // --- MOTOR GRÁFICO (HEX MATH) ---
+    // Hexágonos "Flat-Topped" (Topo chato)
+    
+    function hexToPixel(q, r) {
+        const x = hexRadius * (3/2 * q);
+        const y = hexRadius * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
+        return { x, y };
+    }
+
+    function pixelToHex(x, y) {
+        const q = (2/3 * x) / hexRadius;
+        const r = (-1/3 * x + Math.sqrt(3)/3 * y) / hexRadius;
+        return cubeRound(q, -q-r, r);
+    }
+
+    function cubeRound(fracQ, fracS, fracR) {
+        let q = Math.round(fracQ);
+        let s = Math.round(fracS);
+        let r = Math.round(fracR);
+
+        const qDiff = Math.abs(q - fracQ);
+        const sDiff = Math.abs(s - fracS);
+        const rDiff = Math.abs(r - fracR);
+
+        if (qDiff > sDiff && qDiff > rDiff) {
+            q = -s - r;
+        } else if (sDiff > rDiff) {
+            s = -q - r;
+        } else {
+            r = -q - s;
+        }
+        return { q, r };
+    }
+
+    function drawHex(ctx, x, y, size, color, icon, stroke = true) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle_deg = 60 * i;
+            const angle_rad = Math.PI / 180 * angle_deg;
+            const px = x + size * Math.cos(angle_rad);
+            const py = y + size * Math.sin(angle_rad);
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        
+        if (color && color !== 'transparent') {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        
+        if (stroke) {
+            ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        if (icon) {
+            ctx.fillStyle = 'white';
+            ctx.font = `${Math.floor(size/1.5)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(icon, x, y);
+        }
+    }
+
+    // --- LOOP DE DESENHO ---
+    function draw() {
+        // Limpa a tela
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        
+        // Aplica Câmera (Zoom e Pan)
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(camera.zoom, camera.zoom);
+        ctx.translate(-canvas.width / 2 + camera.x, -canvas.height / 2 + camera.y);
+
+        // 1. Desenha Fundo
+        if (bgImage) {
+            ctx.drawImage(bgImage, 0, 0);
+        }
+
+        // 2. Calcula Grid Visível
+        // Para otimizar, desenhamos apenas hexágonos próximos ou os que estão salvos
+        // Como queremos desenhar a grade INFINITA, precisamos calcular os limites da tela
+        // (Simplificação para este exemplo: desenhamos apenas os hexágonos salvos e uma grade local ao redor do mouse ou fixa se a imagem existir)
+        
+        // Desenhar Hexágonos Salvos
+        for (let key in hexMap) {
+            const [q, r] = key.split(',').map(Number);
+            const pos = hexToPixel(q, r);
+            const data = hexMap[key];
+            const terrain = TERRAINS[data.type];
+            if (terrain) {
+                drawHex(ctx, pos.x, pos.y, hexRadius, terrain.color, terrain.icon, false);
+            }
+        }
+
+        // Desenhar Grade (Overlay)
+        // Se tiver imagem, desenha grade cobrindo a imagem.
+        // Se não, desenha grade local.
+        if (gridOpacity > 0) {
+            // Algoritmo simples de preenchimento de grade visível seria ideal aqui
+            // Por enquanto, desenhamos contornos apenas nos salvos ou onde passamos o mouse
+            // Para "Muuuuuitos hexágonos", desenhar todos as linhas consome CPU.
+            // Vamos desenhar a grade apenas nos hexágonos que existem no mapa + raio ao redor do mouse
+        }
+        
+        // Desenha Cursor
+        if (lastMouse) {
+            // Transforma mouse screen -> world
+            const worldX = (lastMouse.x - canvas.width / 2) / camera.zoom + canvas.width / 2 - camera.x;
+            const worldY = (lastMouse.y - canvas.height / 2) / camera.zoom + canvas.height / 2 - camera.y;
+            
+            const hex = pixelToHex(worldX, worldY);
+            const center = hexToPixel(hex.q, hex.r);
+            
+            // Desenha hexágono de hover
+            drawHex(ctx, center.x, center.y, hexRadius, 'rgba(255, 255, 255, 0.2)', null, true);
+            
+            // Texto de coordenada
+            document.getElementById('coordDisplay').innerText = `Hex: ${hex.q}, ${hex.r} | Zoom: ${camera.zoom.toFixed(1)}`;
+        }
+
+        ctx.restore();
+        requestAnimationFrame(draw);
+    }
+
+    // --- CONTROLES E EVENTOS ---
+
+    // Upload de Imagem
+    document.getElementById('bgLoader').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const img = new Image();
+            img.onload = () => {
+                bgImage = img;
+                // Centraliza imagem
+                camera.x = canvas.width/2 - img.width/2;
+                camera.y = canvas.height/2 - img.height/2;
+            };
+            img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('hexSize').addEventListener('input', (e) => { hexRadius = parseInt(e.target.value); });
+    document.getElementById('gridOpacity').addEventListener('input', (e) => { gridOpacity = parseFloat(e.target.value); });
+
+    // Mouse Interaction
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 1 || (e.button === 0 && e.altKey)) { // Botão do meio ou Alt+Click para arrastar
+            isDragging = true;
+            canvas.style.cursor = 'grabbing';
+        } else if (e.button === 0) { // Clique esquerdo para pintar
+            paintHex(e.clientX, e.clientY);
+            canvas.addEventListener('mousemove', paintOnDrag);
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        canvas.style.cursor = 'crosshair';
+        canvas.removeEventListener('mousemove', paintOnDrag);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        lastMouse = { x: e.clientX, y: e.clientY };
+        
+        if (isDragging) {
+            camera.x += e.movementX / camera.zoom;
+            camera.y += e.movementY / camera.zoom;
+        }
+    });
+
+    function paintOnDrag(e) {
+        paintHex(e.clientX, e.clientY);
+    }
+
+    function paintHex(screenX, screenY) {
+        const worldX = (screenX - canvas.width / 2) / camera.zoom + canvas.width / 2 - camera.x;
+        const worldY = (screenY - canvas.height / 2) / camera.zoom + canvas.height / 2 - camera.y;
+        const hex = pixelToHex(worldX, worldY);
+        const key = `${hex.q},${hex.r}`;
+
+        if (currentTerrain === 'void') {
+            delete hexMap[key];
+        } else {
+            hexMap[key] = { type: currentTerrain };
+        }
+    }
+
+    // Zoom (Roda do Mouse)
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomSpeed = 0.1;
+        const newZoom = camera.zoom - Math.sign(e.deltaY) * zoomSpeed;
+        if (newZoom > 0.1 && newZoom < 5) {
+            camera.zoom = newZoom;
+        }
+    }, { passive: false });
+
+    // --- SALVAR/CARREGAR ---
+    window.clearHexes = () => { if(confirm('Limpar mapa?')) hexMap = {}; };
+    
+    window.saveMap = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(hexMap));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "hex_map_data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    window.loadMap = () => document.getElementById('jsonLoader').click();
+    
+    document.getElementById('jsonLoader').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            hexMap = JSON.parse(evt.target.result);
+        };
+        reader.readAsText(file);
+    });
+
+    // Iniciar loop
+    requestAnimationFrame(draw);
+
+</script>
+</body>
+</html>
