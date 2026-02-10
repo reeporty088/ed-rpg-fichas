@@ -53,7 +53,6 @@
         .input-group input { margin-bottom: 0; }
         .input-group button { width: 40px; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
 
-        /* Controles Específicos */
         .tool-controls { display: none; background: #222; padding: 10px; border-radius: 5px; border: 1px solid #555; margin-bottom: 10px; }
         .tool-controls.visible { display: block; }
     </style>
@@ -156,7 +155,7 @@
     let camera = { x: 0, y: 0, zoom: 1 };
     
     // Ferramentas
-    let activeTool = 'brush'; // 'brush', 'hand', 'border', 'generator'
+    let activeTool = 'brush'; 
     let isSpacePressed = false;
     let isDragging = false;
     let lastMouse = { x: 0, y: 0 };
@@ -265,7 +264,6 @@
                 currentTerrain = key;
                 document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
                 div.classList.add('selected');
-                // Se estiver no gerador, mantém. Senão, muda pra brush.
                 if (activeTool !== 'generator') window.setTool('brush');
             };
             if(key === 'grass') div.classList.add('selected');
@@ -290,15 +288,22 @@
         document.getElementById('gridOpacity').addEventListener('input', (e) => { gridOpacity = parseFloat(e.target.value); draw(); });
     }
 
-    // --- MATH ---
+    // --- MATH CORRIGIDA ---
     function hexToPixel(q, r) { return { x: hexRadius * (3/2 * q), y: hexRadius * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r) }; }
-    function pixelToHex(x, y) { return cubeRound((2/3 * x) / hexRadius, (-1/3 * x + Math.sqrt(3)/3 * y) / hexRadius); }
-    function cubeRound(fracQ, fracS) {
-        let fracR = -fracQ - fracS; let q = Math.round(fracQ); let s = Math.round(fracS); let r = Math.round(fracR);
-        const qDiff = Math.abs(q - fracQ); const sDiff = Math.abs(s - fracS); const rDiff = Math.abs(r - fracR);
-        if (qDiff > sDiff && qDiff > rDiff) q = -s - r; else if (sDiff > rDiff) s = -q - r; else r = -q - s;
+    
+    function pixelToHex(x, y) {
+        const q = (2/3 * x) / hexRadius;
+        const r = (-1/3 * x + Math.sqrt(3)/3 * y) / hexRadius;
+        return cubeRound(q, r, -q-r); // Envia o 3º componente (S) calculado corretamente
+    }
+
+    function cubeRound(fracQ, fracR, fracS) {
+        let q = Math.round(fracQ); let r = Math.round(fracR); let s = Math.round(fracS);
+        const qDiff = Math.abs(q - fracQ); const rDiff = Math.abs(r - fracR); const sDiff = Math.abs(s - fracS);
+        if (qDiff > rDiff && qDiff > sDiff) q = -r - s; else if (rDiff > sDiff) r = -q - s; else s = -q - r;
         return { q, r };
     }
+
     function screenToWorld(sx, sy) { return { x: (sx - canvas.width / 2) / camera.zoom + camera.x, y: (sy - canvas.height / 2) / camera.zoom + camera.y }; }
     function hexDistance(a, b) { return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2; }
     function getClosestSide(hexCenter, mouseWorld) {
@@ -312,40 +317,23 @@
         const radius = parseInt(document.getElementById('genRadius').value);
         const density = parseInt(document.getElementById('genDensity').value) / 100;
         const mainType = currentTerrain;
-        
-        // Definição de "Receitas" para cada bioma
-        // primary: o terreno escolhido
-        // mix: o que mistura nas bordas ou meio (ex: grama na floresta)
-        // rare: coisas raras (ruinas, cavernas)
-        
         let mixType = 'grass';
         if (mainType === 'desert') mixType = 'mountain';
         if (mainType === 'snow') mixType = 'mountain';
         if (mainType === 'ocean') mixType = 'coast';
 
-        // Loop em hexágonos no raio
         for (let q = -radius; q <= radius; q++) {
             for (let r = Math.max(-radius, -q - radius); r <= Math.min(radius, -q + radius); r++) {
                 const hex = { q: centerQ + q, r: centerR + r };
                 const dist = hexDistance({q:centerQ, r:centerR}, hex);
                 const key = `${hex.q},${hex.r}`;
-
-                // Chance baseada na distância (mais denso no centro)
-                // Invertemos: quanto mais perto, maior chance
                 let chance = density; 
-                
-                // Bordas ficam mais "ralas"
                 if (dist > radius * 0.7) chance *= 0.6; 
-
                 if (Math.random() < chance) {
                     let finalType = mainType;
-                    
-                    // Variação aleatória
                     const rand = Math.random();
-                    if (rand < 0.05) finalType = 'ruin'; // 5% de ruína/detalhe
-                    else if (rand < 0.15) finalType = mixType; // 10% de mistura
-
-                    // Se for Void (apagar), apaga
+                    if (rand < 0.05) finalType = 'ruin'; 
+                    else if (rand < 0.15) finalType = mixType; 
                     if (mainType === 'void') delete hexMap[key];
                     else hexMap[key] = { type: finalType };
                 }
@@ -411,9 +399,7 @@
                 const width = document.getElementById('borderWidth').value;
                 drawBorderLine(ctx, center.x, center.y, hexRadius, side, color, width);
             } else if (activeTool === 'generator') {
-                // Desenha o raio de efeito do gerador
                 const radius = parseInt(document.getElementById('genRadius').value);
-                // Desenha circulo aproximado
                 ctx.beginPath();
                 ctx.arc(center.x, center.y, radius * hexRadius * 1.5, 0, 2*Math.PI);
                 ctx.strokeStyle = 'rgba(255,255,0,0.5)';
@@ -444,7 +430,6 @@
             else borderMap[bKey] = { color: document.getElementById('borderColor').value, width: parseInt(document.getElementById('borderWidth').value) };
         }
         else if (activeTool === 'generator' && isClick) {
-            // Gerador só ativa no clique (não arrasta) para não travar
             generateBiome(hex.q, hex.r);
         }
         draw();
@@ -467,9 +452,8 @@
         if (activeTool === 'hand' || isSpacePressed || isMiddle) {
             isDragging = true; dragStart = { x: e.clientX, y: e.clientY }; canvas.style.cursor = 'grabbing';
         } else if (isLeft && MODE === 'EDIT') {
-            // Passa true para isClick
             handleInput(e.clientX, e.clientY, true); 
-            if (activeTool !== 'generator') isDragging = true; // Generator não arrasta
+            if (activeTool !== 'generator') isDragging = true; 
         }
     });
 
