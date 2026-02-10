@@ -7,35 +7,33 @@
     <style>
         body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; }
         
-        /* UI DO EDITOR (Esquerda) */
+        /* UI DO EDITOR */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 320px; height: 100%;
             background: rgba(30, 30, 30, 0.95); border-right: 2px solid #444;
-            padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;
+            padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px;
             z-index: 10; box-shadow: 5px 0 15px rgba(0,0,0,0.5);
             transition: transform 0.3s;
+            overflow-y: auto;
         }
 
-        /* Esconde UI se for Viewer */
         body.viewer-mode #ui-layer { transform: translateX(-350px); }
-        body.viewer-mode #toggle-ui { display: none; }
 
         canvas { display: block; background: #111; cursor: default; }
         
-        h2 { margin: 0 0 5px 0; color: #ffaa00; text-transform: uppercase; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        h2 { margin: 5px 0 5px 0; color: #ffaa00; text-transform: uppercase; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         label { font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; margin-top: 5px; }
-        input[type="range"], input[type="text"] { width: 100%; box-sizing: border-box; margin-bottom: 5px; background: #222; border: 1px solid #555; color: white; padding: 4px; border-radius: 4px; }
+        input[type="range"], input[type="text"], input[type="color"] { width: 100%; box-sizing: border-box; margin-bottom: 5px; background: #222; border: 1px solid #555; color: white; padding: 4px; border-radius: 4px; }
         
         .btn { background: #444; color: white; border: 1px solid #666; padding: 8px; cursor: pointer; width: 100%; margin-bottom: 5px; font-weight: bold; border-radius: 4px; transition: 0.2s; font-size: 12px; }
         .btn:hover { background: #666; }
-        .btn.active { background: #ffaa00; color: black; border-color: #ffaa00; }
         .btn-save { background: #2e7d32; border-color: #4caf50; }
         
-        .tools-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tools-row { display: flex; gap: 5px; margin-bottom: 5px; }
         .tool-btn { flex: 1; padding: 10px; font-size: 18px; background: #222; border: 1px solid #555; cursor: pointer; border-radius: 5px; }
         .tool-btn.active { background: #ffaa00; border-color: white; color: black; }
 
-        .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
         .swatch { width: 100%; aspect-ratio: 1; border: 2px solid #555; cursor: pointer; transition: 0.2s; position: relative; border-radius: 4px; display:flex; align-items:center; justify-content:center; background: #222; }
         .swatch:hover { border-color: white; transform: scale(1.1); z-index: 2; }
         .swatch.selected { border-color: #ffaa00; box-shadow: 0 0 10px #ffaa00; z-index: 2; }
@@ -43,13 +41,7 @@
         .status-led { width: 10px; height: 10px; border-radius: 50%; background: #444; display: inline-block; margin-right: 5px; }
         .status-led.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
         .status-led.busy { background: #ffaa00; animation: blink 0.5s infinite; }
-
         @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #222; }
-        ::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
 
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; pointer-events: none; opacity: 0; transition: 0.5s; }
         .loading-overlay.active { opacity: 1; pointer-events: all; }
@@ -61,6 +53,9 @@
         .input-group input { margin-bottom: 0; }
         .input-group button { width: 40px; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
 
+        /* Controles de Fronteira (Escondidos por padrão) */
+        #border-controls { display: none; background: #222; padding: 10px; border-radius: 5px; border: 1px solid #555; margin-bottom: 10px; }
+        #border-controls.visible { display: block; }
     </style>
 </head>
 <body>
@@ -75,22 +70,28 @@
         </div>
 
         <div class="tools-row">
-            <button class="tool-btn active" id="btnBrush" onclick="setTool('brush')" title="Pintar (B)">🖌️</button>
+            <button class="tool-btn active" id="btnBrush" onclick="setTool('brush')" title="Pintar Terreno (B)">🖌️</button>
+            <button class="tool-btn" id="btnBorder" onclick="setTool('border')" title="Desenhar Fronteira (F)">✏️</button>
             <button class="tool-btn" id="btnHand" onclick="setTool('hand')" title="Mover (H / Espaço)">✋</button>
         </div>
 
+        <div id="border-controls">
+            <label style="margin-top:0">Cor da Linha</label>
+            <input type="color" id="borderColor" value="#ff0000">
+            <label>Espessura</label>
+            <input type="range" id="borderWidth" min="2" max="10" value="4">
+            <small style="color:#aaa; font-size:10px;">Clique nas bordas dos hexágonos para desenhar.</small>
+        </div>
+
         <h2>Configuração Global</h2>
-        
         <label>URL da Imagem de Fundo</label>
         <div class="input-group">
-            <input type="text" id="bgUrlInput" placeholder="Link direto da imagem...">
-            <button class="btn" onclick="updateBgFromUrl(document.getElementById('bgUrlInput').value)" title="Carregar Imagem">OK</button>
+            <input type="text" id="bgUrlInput" placeholder="Link direto (Discord/Imgur)...">
+            <button class="btn" onclick="updateBgFromUrl(document.getElementById('bgUrlInput').value)" title="Carregar">OK</button>
         </div>
-        <small style="color:#666; font-size:10px; margin-bottom:5px; display:block;">Use link direto (Discord/Imgur/Google Drive).</small>
 
         <label>Tamanho Hexágono</label>
         <input type="range" id="hexSize" min="10" max="150" value="30">
-        
         <label>Opacidade Grade</label>
         <input type="range" id="gridOpacity" min="0" max="1" step="0.1" value="0.3">
 
@@ -114,7 +115,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // --- FIREBASE CONFIG (Sua conta existente) ---
     const firebaseConfig = {
         apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
         authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
@@ -128,15 +128,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- ESTADO DO SISTEMA ---
     const urlParams = new URLSearchParams(window.location.search);
     const MODE = urlParams.get('mode') === 'view' ? 'VIEW' : 'EDIT';
-    const MAP_ID = 'mapa_mundi_principal'; // ID fixo para facilitar
+    const MAP_ID = 'mapa_mundi_principal';
 
-    if (MODE === 'VIEW') {
-        document.body.classList.add('viewer-mode');
-    } else {
-        // Gera link do viewer
+    if (MODE === 'VIEW') document.body.classList.add('viewer-mode');
+    else {
         const baseUrl = window.location.href.split('?')[0];
         document.getElementById('viewLink').href = `${baseUrl}?mode=view`;
         document.getElementById('viewLink').innerText = "Clique para abrir modo Visualizador";
@@ -146,387 +143,4 @@
     const ctx = canvas.getContext('2d');
     const led = document.getElementById('db-led');
 
-    // Camera
-    let camera = { x: 0, y: 0, zoom: 1 };
-    
-    // Interação
-    let activeTool = 'brush'; 
-    let isSpacePressed = false;
-    let isDragging = false;
-    let lastMouse = { x: 0, y: 0 };
-    let dragStart = { x: 0, y: 0 };
-    
-    // Dados do Mapa
-    let bgImage = null;
-    let bgImageUrl = "";
-    let hexMap = {}; 
-    let hexRadius = 30;
-    let gridOpacity = 0.3;
-
-    // TERRENOS
-    const TERRAINS = {
-        'void': { color: 'transparent', icon: '❌', label: 'Apagar' },
-        'ocean': { color: '#1a237e', icon: '🌊', label: 'Oceano' },
-        'coast': { color: '#4fc3f7', icon: '💧', label: 'Costa' },
-        'grass': { color: '#2e7d32', icon: '🌱', label: 'Planície' },
-        'forest': { color: '#1b5e20', icon: '🌲', label: 'Floresta' },
-        'swamp': { color: '#2e3828', icon: '🐸', label: 'Pântano' },
-        'desert': { color: '#fbc02d', icon: '🌵', label: 'Deserto' },
-        'mountain': { color: '#5d4037', icon: '⛰️', label: 'Montanha' },
-        'snow': { color: '#eceff1', icon: '❄️', label: 'Neve' },
-        'city': { color: '#9e9e9e', icon: '🏰', label: 'Cidade' },
-        'village': { color: '#795548', icon: '🏠', label: 'Vila' },
-        'ruin': { color: '#000000', icon: '💀', label: 'Ruína' },
-        'tower': { color: '#5c6bc0', icon: '🗼', label: 'Torre' },
-        'cave': { color: '#3e2723', icon: '🦇', label: 'Caverna' },
-        'road': { color: '#ff9800', icon: '🛤️', label: 'Estrada' },
-        'danger': { color: '#b71c1c', icon: '⚔️', label: 'Perigo' },
-        'poi': { color: '#d500f9', icon: '⭐', label: 'Interesse' }
-    };
-    let currentTerrain = 'grass';
-
-    // --- INICIALIZAÇÃO ---
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        draw();
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // --- CARREGAR DADOS DO FIREBASE ---
-    // Escuta em tempo real (tanto Editor quanto Viewer recebem updates)
-    const mapRef = ref(db, 'maps/' + MAP_ID);
-    
-    document.getElementById('loader').classList.add('active');
-    
-    onValue(mapRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            // Carregar Configs
-            if (data.config) {
-                hexRadius = data.config.hexSize || 30;
-                gridOpacity = data.config.gridOpacity !== undefined ? data.config.gridOpacity : 0.3;
-                
-                // Carregar Imagem se mudou
-                if (data.config.bgUrl && data.config.bgUrl !== bgImageUrl) {
-                    bgImageUrl = data.config.bgUrl;
-                    if(MODE === 'EDIT') document.getElementById('bgUrlInput').value = bgImageUrl;
-                    loadImage(bgImageUrl);
-                }
-                
-                // Atualizar Inputs do Editor
-                if (MODE === 'EDIT') {
-                    document.getElementById('hexSize').value = hexRadius;
-                    document.getElementById('gridOpacity').value = gridOpacity;
-                }
-            }
-            
-            // Carregar Hexes
-            if (data.hexes) {
-                hexMap = data.hexes;
-            } else {
-                hexMap = {};
-            }
-        }
-        document.getElementById('loader').classList.remove('active');
-        led.classList.add('on');
-        draw();
-    }, (error) => {
-        console.error(error);
-        alert("Erro ao carregar mapa!");
-    });
-
-    // --- FUNÇÕES DE SALVAMENTO (Somente Editor) ---
-    window.saveToCloud = () => {
-        if (MODE === 'VIEW') return;
-        
-        led.className = 'status-led busy';
-        const dataToSave = {
-            config: {
-                bgUrl: bgImageUrl,
-                hexSize: parseInt(document.getElementById('hexSize').value),
-                gridOpacity: parseFloat(document.getElementById('gridOpacity').value)
-            },
-            hexes: hexMap
-        };
-
-        update(ref(db, 'maps/' + MAP_ID), dataToSave)
-            .then(() => {
-                led.className = 'status-led on';
-                // Feedback visual rápido
-                const btn = document.querySelector('.btn-save');
-                const oldText = btn.innerText;
-                btn.innerText = "✅ SALVO!";
-                setTimeout(() => btn.innerText = oldText, 2000);
-            })
-            .catch((err) => {
-                alert("Erro ao salvar: " + err.message);
-                led.className = 'status-led';
-            });
-    };
-
-    window.updateBgFromUrl = (url) => {
-        if(!url) return;
-        bgImageUrl = url;
-        loadImage(url);
-    };
-
-    function loadImage(url) {
-        if(!url) return;
-        const img = new Image();
-        img.crossOrigin = "Anonymous"; // Tenta evitar problemas de CORS
-        img.onload = () => {
-            bgImage = img;
-            // Se for a primeira vez carregando (camera no 0,0), centraliza
-            if (camera.x === 0 && camera.y === 0) {
-                camera.x = canvas.width/2 - img.width/2;
-                camera.y = canvas.height/2 - img.height/2;
-            }
-            draw();
-        };
-        img.onerror = () => {
-            console.warn("Não foi possível carregar a imagem diretamente (Erro de CORS). Tente links do Discord ou Imgur.");
-        };
-        img.src = url;
-    }
-
-    // --- INTERFACE DE UI (Somente Editor) ---
-    if (MODE === 'EDIT') {
-        const paletteDiv = document.getElementById('palette');
-        Object.keys(TERRAINS).forEach(key => {
-            const t = TERRAINS[key];
-            const div = document.createElement('div');
-            div.className = 'swatch';
-            div.innerHTML = `<span style="font-size:24px">${t.icon}</span>`;
-            div.title = t.label;
-            div.onclick = () => {
-                currentTerrain = key;
-                document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-                div.classList.add('selected');
-                window.setTool('brush');
-            };
-            if(key === 'grass') div.classList.add('selected');
-            paletteDiv.appendChild(div);
-        });
-
-        window.setTool = (tool) => {
-            activeTool = tool;
-            document.getElementById('btnBrush').classList.toggle('active', tool === 'brush');
-            document.getElementById('btnHand').classList.toggle('active', tool === 'hand');
-            canvas.style.cursor = tool === 'hand' ? 'grab' : 'default';
-        };
-
-        window.clearHexes = () => { 
-            if(confirm('Tem certeza? Isso apagará todos os hexágonos do mapa.')) {
-                hexMap = {}; 
-                draw();
-            }
-        };
-        
-        // Listeners de Configuração em tempo real
-        document.getElementById('hexSize').addEventListener('input', (e) => { hexRadius = parseInt(e.target.value); draw(); });
-        document.getElementById('gridOpacity').addEventListener('input', (e) => { gridOpacity = parseFloat(e.target.value); draw(); });
-    }
-
-    // --- MOTOR GRÁFICO ---
-    function hexToPixel(q, r) {
-        const x = hexRadius * (3/2 * q);
-        const y = hexRadius * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
-        return { x, y };
-    }
-
-    function pixelToHex(x, y) {
-        const q = (2/3 * x) / hexRadius;
-        const r = (-1/3 * x + Math.sqrt(3)/3 * y) / hexRadius;
-        return cubeRound(q, -q-r, r);
-    }
-
-    function cubeRound(fracQ, fracS, fracR) {
-        let q = Math.round(fracQ);
-        let s = Math.round(fracS);
-        let r = Math.round(fracR);
-        const qDiff = Math.abs(q - fracQ);
-        const sDiff = Math.abs(s - fracS);
-        const rDiff = Math.abs(r - fracR);
-        if (qDiff > sDiff && qDiff > rDiff) q = -s - r;
-        else if (sDiff > rDiff) s = -q - r;
-        else r = -q - s;
-        return { q, r };
-    }
-
-    function screenToWorld(sx, sy) {
-        return {
-            x: (sx - canvas.width / 2) / camera.zoom + camera.x,
-            y: (sy - canvas.height / 2) / camera.zoom + camera.y
-        };
-    }
-
-    function drawHex(ctx, x, y, size, color, icon) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            const angle_rad = Math.PI / 180 * (60 * i);
-            const px = x + size * Math.cos(angle_rad);
-            const py = y + size * Math.sin(angle_rad);
-            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        
-        if (color && color !== 'transparent') {
-            ctx.fillStyle = color;
-            ctx.fill();
-        }
-        
-        if (gridOpacity > 0) {
-            ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-
-        if (icon) {
-            ctx.fillStyle = 'white';
-            ctx.font = `${Math.floor(size/1.3)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = "black";
-            ctx.shadowBlur = 4;
-            ctx.fillText(icon, x, y);
-            ctx.shadowBlur = 0;
-        }
-    }
-
-    function draw() {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.scale(camera.zoom, camera.zoom);
-        ctx.translate(-camera.x, -camera.y);
-
-        // 1. Fundo
-        if (bgImage) {
-            ctx.drawImage(bgImage, -bgImage.width/2, -bgImage.height/2);
-        } else if (bgImageUrl) {
-            // Placeholder
-            ctx.fillStyle = "#222";
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "#555";
-            ctx.textAlign = "center";
-            ctx.fillText("Carregando Imagem de Fundo...", 0, 0);
-        }
-
-        // 2. Hexágonos
-        for (let key in hexMap) {
-            const [q, r] = key.split(',').map(Number);
-            const pos = hexToPixel(q, r);
-            const data = hexMap[key];
-            const terrain = TERRAINS[data.type];
-            if (terrain) {
-                drawHex(ctx, pos.x, pos.y, hexRadius, terrain.color, terrain.icon);
-            }
-        }
-
-        // 3. Hover (Só se não estiver arrastando)
-        if (!isDragging && MODE === 'EDIT') {
-            const mouseWorld = screenToWorld(lastMouse.x, lastMouse.y);
-            const hex = pixelToHex(mouseWorld.x, mouseWorld.y);
-            const center = hexToPixel(hex.q, hex.r);
-            drawHex(ctx, center.x, center.y, hexRadius, 'rgba(255, 255, 255, 0.2)', null);
-        }
-
-        ctx.restore();
-    }
-
-    function paintHex(screenX, screenY) {
-        if (MODE === 'VIEW') return;
-        
-        const worldPos = screenToWorld(screenX, screenY);
-        const hex = pixelToHex(worldPos.x, worldPos.y);
-        const key = `${hex.q},${hex.r}`;
-
-        if (currentTerrain === 'void') {
-            delete hexMap[key];
-        } else {
-            hexMap[key] = { type: currentTerrain };
-        }
-        draw(); // Redesenha localmente
-    }
-
-    // --- INPUTS ---
-    canvas.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const zoomIntensity = 0.1;
-        const mouseWorldBefore = screenToWorld(e.clientX, e.clientY);
-        const delta = -Math.sign(e.deltaY);
-        const newZoom = camera.zoom * (1 + delta * zoomIntensity);
-        if (newZoom < 0.05 || newZoom > 10) return;
-        camera.zoom = newZoom;
-        const mouseWorldAfter = screenToWorld(e.clientX, e.clientY);
-        camera.x += (mouseWorldBefore.x - mouseWorldAfter.x);
-        camera.y += (mouseWorldBefore.y - mouseWorldAfter.y);
-        draw();
-    }, { passive: false });
-
-    canvas.addEventListener('mousedown', (e) => {
-        const isMiddleClick = e.button === 1;
-        const isLeftClick = e.button === 0;
-
-        if (activeTool === 'hand' || isSpacePressed || isMiddleClick) {
-            isDragging = true;
-            dragStart = { x: e.clientX, y: e.clientY };
-            canvas.style.cursor = 'grabbing';
-        } else if (isLeftClick && MODE === 'EDIT') {
-            paintHex(e.clientX, e.clientY);
-            isDragging = true; 
-        }
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-        lastMouse = { x: e.clientX, y: e.clientY };
-        if (!isDragging) return;
-
-        const isHandMode = (activeTool === 'hand' || isSpacePressed || e.buttons === 4);
-
-        if (isHandMode) {
-            const dx = (e.clientX - dragStart.x) / camera.zoom;
-            const dy = (e.clientY - dragStart.y) / camera.zoom;
-            camera.x -= dx;
-            camera.y -= dy;
-            dragStart = { x: e.clientX, y: e.clientY };
-            draw();
-        } else if (MODE === 'EDIT') {
-            paintHex(e.clientX, e.clientY);
-        }
-    });
-
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
-        canvas.style.cursor = (activeTool === 'hand' || isSpacePressed) ? 'grab' : 'default';
-    });
-
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !isSpacePressed) {
-            isSpacePressed = true;
-            canvas.style.cursor = 'grab';
-        }
-        if (MODE === 'EDIT') {
-            if (e.key.toLowerCase() === 'b') window.setTool('brush');
-            if (e.key.toLowerCase() === 'h') window.setTool('hand');
-        }
-    });
-
-    window.addEventListener('keyup', (e) => {
-        if (e.code === 'Space') {
-            isSpacePressed = false;
-            canvas.style.cursor = activeTool === 'hand' ? 'grab' : 'default';
-            isDragging = false;
-        }
-    });
-
-    // Loop inicial
-    requestAnimationFrame(draw);
-
-</script>
-</body>
-</html>
+    let camera = { x: 0, y: 0, zoom:
