@@ -125,6 +125,28 @@
         .weight-val.danger { color: #f44336; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .mobile-nav { display: none; }
+        
+        /* === MODAIS (Novos para o sistema de Escolha) === */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+        
+        .modal-choice { background: var(--theme-card); padding: 20px; border-radius: 15px; border: 2px solid var(--theme-main); width: 300px; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .btn-choice { width: 100%; padding: 15px; margin: 8px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--theme-light); color: white; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.2s; font-size: 14px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-choice:hover { background: var(--theme-main); color: white; transform: scale(1.02); }
+
+        .modal-library { background: var(--theme-card); width: 90%; max-width: 600px; height: 80vh; border-radius: 15px; border: 2px solid var(--theme-main); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
+        .lib-header { padding: 15px; background: var(--theme-main); font-weight: bold; text-align: center; border-bottom: 1px solid var(--theme-light); color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .lib-search { padding: 10px; background: rgba(0,0,0,0.5); }
+        .lib-search input { width: 100%; padding: 10px; background: #222; border: 1px solid #555; color: white; border-radius: 8px; }
+        .lib-list { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .lib-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .lib-item:hover { border-color: var(--theme-light); background: rgba(255,255,255,0.05); }
+        .lib-item h4 { margin: 0; color: var(--theme-light); font-size: 16px; }
+        .lib-item span { font-size: 12px; color: #aaa; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; }
+        .lib-close { padding: 15px; background: #222; border: none; color: #aaa; cursor: pointer; width: 100%; font-weight: bold; border-top: 1px solid #444; transition: 0.2s; }
+        .lib-close:hover { background: #333; color: white; }
+
         @media (max-width: 768px) { .container { display: block; } .col { display: none; width: 100%; animation: fadeEffect 0.5s; } .col.active { display: flex; } .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--theme-main); padding: 15px 0; justify-content: center; gap: 50px; z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.7); border-top: 1px solid var(--theme-light); } .nav-btn { background: rgba(0,0,0,0.3); border: 2px solid white; color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; } .nav-btn:active { transform: scale(0.9); background: white; color: black; } @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} } }
     </style>
 </head>
@@ -175,11 +197,21 @@
     <div class="col" id="col-1">
         <div class="card">
             <div class="header-label">Habilidades Gerais</div>
-            <label>Geral <button class="btn-add" onclick="addItem('geral')">+</button></label><div id="list_geral" style="margin-top:5px;"></div>
-            <label style="margin-top:10px;">Vantagens <button class="btn-add" onclick="addItem('vantagens')">+</button></label><div id="list_vantagens" style="margin-top:5px;"></div>
-            <label style="margin-top:10px;">Arquétipo <button class="btn-add" onclick="addItem('arquetipo_hab')">+</button></label><div id="list_arquetipo_hab" style="margin-top:5px;"></div>
-            <label style="margin-top:10px;">Artefatos <button class="btn-add" onclick="addItem('artefatos')">+</button></label><div id="list_artefatos" style="margin-top:5px;"></div>
-            <label style="margin-top:10px;">Técnicas <button class="btn-add" onclick="addItem('tecnicas')">+</button></label><div id="list_tecnicas" style="margin-top:5px;"></div>
+            
+            <label>Geral <button class="btn-add" onclick="openAddMenu('geral')">+</button></label>
+            <div id="list_geral" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Vantagens <button class="btn-add" onclick="openAddMenu('vantagens')">+</button></label>
+            <div id="list_vantagens" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Arquétipo <button class="btn-add" onclick="openAddMenu('arquetipo_hab')">+</button></label>
+            <div id="list_arquetipo_hab" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Artefatos <button class="btn-add" onclick="openAddMenu('artefatos')">+</button></label>
+            <div id="list_artefatos" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Técnicas <button class="btn-add" onclick="openAddMenu('tecnicas')">+</button></label>
+            <div id="list_tecnicas" style="margin-top:5px;"></div>
         </div>
     </div>
 
@@ -206,11 +238,32 @@
             <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
             <div class="header-label">Inventário</div>
             <div class="weight-display">PESO: <span id="weight_val" class="weight-val">0</span> / <span id="weight_max">0</span></div>
-            <label>Itens <button class="btn-add" onclick="addItem('inventario')">+</button></label><div id="list_inventario" style="margin-top:5px;"></div>
+            <label>Itens <button class="btn-add" onclick="openAddMenu('inventario')">+</button></label>
+            <div id="list_inventario" style="margin-top:5px;"></div>
         </div>
     </div>
 </div>
 <div class="mobile-nav"><button class="nav-btn" onclick="changeColumn(-1)">◀</button><button class="nav-btn" onclick="changeColumn(1)">▶</button></div>
+
+<div class="modal-overlay" id="modal-choice" onclick="closeModal('modal-choice')">
+    <div class="modal-choice" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; color:var(--theme-light);">ADICIONAR NOVO</h3>
+        <button class="btn-choice" onclick="selectFromLibrary()">📜 Escolher da Lista</button>
+        <button class="btn-choice" onclick="createManual()">✏️ Criar Manualmente</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-library">
+    <div class="modal-library">
+        <div class="lib-header" id="lib-title">BIBLIOTECA</div>
+        <div class="lib-search">
+            <input type="text" id="lib-search-input" placeholder="Buscar habilidade..." onkeyup="filterLibrary()">
+        </div>
+        <div class="lib-list" id="lib-list-container">
+            </div>
+        <button class="lib-close" onclick="closeModal('modal-library')">FECHAR</button>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -233,6 +286,10 @@
 
     let globalCharData = {};
     let globalWorldTime = {};
+    
+    // Variáveis para o sistema de Escolha
+    let currentCategory = ""; 
+    let libraryData = {}; 
 
     let currentColumn = 0; const totalColumns = 3;
     window.changeColumn = (dir) => { const cols = document.querySelectorAll('.col'); cols[currentColumn].classList.remove('active'); currentColumn += dir; if (currentColumn < 0) currentColumn = 0; if (currentColumn >= totalColumns) currentColumn = totalColumns - 1; cols[currentColumn].classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -251,7 +308,6 @@
         let c = 0; if (globalCharData.active_abilities.mask) c++; if (globalCharData.active_abilities.hell) c++; return c;
     }
 
-    // --- CÁLCULO DE STATUS DERIVADOS ---
     function calculateDerivedStats() {
         const pod = parseInt(globalCharData.poder) || 0;
         const hab = parseInt(globalCharData.habilidade) || 0;
@@ -262,7 +318,6 @@
         let maxHp = res * 5;
         let deslocTotal = hab * 2; 
 
-        // Se Inferno estiver ativo: HP e PA dobram
         if (globalCharData.active_abilities?.hell) {
             maxHp *= 2;
             maxPa *= 2;
@@ -272,23 +327,18 @@
         document.getElementById('mp_max').value = maxMp;
         document.getElementById('pa_max').value = maxPa;
 
-        // Salva maximos
         const updates = { hp_max: maxHp, mp_max: maxMp, pa_max: maxPa };
         if (globalCharData.marcadores?.desloc?.total !== deslocTotal) {
             updates['marcadores/desloc/total'] = deslocTotal;
         }
         
         update(ref(db, 'fichas/' + fichaID), updates);
-        
         return { maxHp, maxMp, maxPa };
     }
 
     window.toggleAbility = (abilityName) => {
         const isActive = globalCharData.active_abilities && globalCharData.active_abilities[abilityName];
-        
-        // CORREÇÃO PARA MANA
         const currentMp = parseInt(globalCharData.mp_at) || 0;
-        
         let cost = 0; if (abilityName === 'mask') cost = 4; if (abilityName === 'hell') cost = 5;
 
         if (!isActive) {
@@ -297,16 +347,13 @@
             
             const updates = { [`active_abilities/${abilityName}`]: true, 'mp_at': currentMp - cost };
             
-            // ATIVANDO
             if (abilityName === 'hell') {
-                // Dobra a VIDA atual
                 const curHp = parseInt(globalCharData.hp_at) || 0;
                 updates['hp_at'] = curHp * 2;
             }
 
             update(ref(db, 'fichas/' + fichaID), updates).then(() => {
                 if(abilityName === 'hell') {
-                    // Recarrega PA (Dobra)
                     setTimeout(() => {
                         const newMaxPa = parseInt(document.getElementById('pa_max').value);
                         update(ref(db, 'fichas/' + fichaID), { pa_at: newMaxPa });
@@ -315,18 +362,14 @@
             });
 
         } else {
-            // DESATIVANDO
             const updates = { [`active_abilities/${abilityName}`]: false };
-            
             if (abilityName === 'hell') {
-                // Corta a VIDA atual pela metade
                 const curHp = parseInt(globalCharData.hp_at) || 0;
                 updates['hp_at'] = Math.ceil(curHp / 2);
             }
 
             update(ref(db, 'fichas/' + fichaID), updates).then(() => {
                 if(abilityName === 'hell') {
-                    // Corta PA pela metade
                     setTimeout(() => {
                         const curPa = parseInt(globalCharData.pa_at) || 0;
                         update(ref(db, 'fichas/' + fichaID), { pa_at: Math.floor(curPa / 2) });
@@ -344,7 +387,7 @@
     function refreshDisplayValues() {
         if (!globalCharData) return;
         const ab = globalCharData.active_abilities || {};
-        const stats = calculateDerivedStats(); // Garante maximos atualizados
+        const stats = calculateDerivedStats(); 
 
         const maskBtn = document.getElementById('mask-btn'); const hellBtn = document.getElementById('hell-btn');
         document.body.classList.remove('moon-mode', 'hell-mode', 'hybrid-mode');
@@ -373,7 +416,6 @@
 
         const hpAtEl = document.getElementById('hp_at'); const paAtEl = document.getElementById('pa_at'); const mpAtEl = document.getElementById('mp_at');
         
-        // MOSTRA VALOR REAL DO DB (SEM DOBRAR VISUALMENTE)
         if (document.activeElement !== hpAtEl) hpAtEl.value = globalCharData.hp_at || 0;
         if (document.activeElement !== paAtEl) paAtEl.value = globalCharData.pa_at || 0;
         if (document.activeElement !== mpAtEl) mpAtEl.value = globalCharData.mp_at || 0;
@@ -394,20 +436,13 @@
         updateWeight();
     }
 
-    // --- CHANGE VAL SIMPLIFICADO ---
     window.changeVal = (type, mod) => {
-        // Pega valor real do DB
         let current = parseInt(globalCharData[type + '_at']) || 0;
-        
-        // Pega máximos dos inputs (que já foram calculados corretamente)
         let max = parseInt(document.getElementById(type + '_max').value) || 0;
-
         let newVal = current + mod;
         if (newVal < 0) newVal = 0;
         if (newVal > max) newVal = max;
-
         update(ref(db, 'fichas/' + fichaID), { [type + '_at']: newVal });
-        
         if (type === 'mp' && newVal <= 0 && globalCharData.active_abilities?.mask) { 
             update(ref(db, 'fichas/' + fichaID), { 'active_abilities/mask': false }); 
             alert("Mana esgotada! Máscara Lunar desativada."); 
@@ -427,9 +462,6 @@
 
         if (camposParaSalvar.includes(target.id)) {
             let valToSave = target.value;
-            
-            // Removemos a lógica de dividir pela metade. Salva o que está escrito.
-            // Apenas para atributos que causam recalculo
             if (['poder', 'habilidade', 'resistencia'].includes(target.id)) {
                 const updates = {}; updates[target.id] = valToSave;
                 update(ref(db, 'fichas/' + fichaID), updates).then(() => calculateDerivedStats());
@@ -483,12 +515,78 @@
 
     window.togglePoint = (type, index) => { const key = `p_${index}`; const isActive = document.getElementById(`${type}_${index}`).classList.contains('active'); update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [key]: !isActive }); };
     function renderMarkers(type, total, pontos) { const container = document.getElementById('display_' + type); const countSpan = document.getElementById('count_' + type); container.innerHTML = ""; const finalTotal = (total !== undefined) ? total : (type === 'ações' ? 3 : 0); countSpan.innerText = finalTotal; const icon = type === 'ações' ? '▲' : '●'; const css = type === 'ações' ? 'tri' : 'circ'; for(let i=0; i < finalTotal; i++) { const isActive = pontos && pontos[`p_${i}`] === true; container.innerHTML += `<span id="${type}_${i}" class="marker-item ${css} ${isActive ? 'active' : ''}" onclick="togglePoint('${type}', ${i})">${icon}</span>`; } }
-    window.addItem = (category) => { const data = category === 'inventario' ? { titulo: "", peso: 0, desc: "" } : { titulo: "", teste: "", desc: "" }; const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${category}`)); set(newItemRef, data); };
+    
+    // --- SISTEMA DE LISTAS E ESCOLHA (NOVO) ---
+    
+    window.openAddMenu = (category) => {
+        currentCategory = category;
+        document.getElementById('modal-choice').classList.add('open');
+    };
+
+    window.closeModal = (id) => {
+        document.getElementById(id).classList.remove('open');
+    };
+
+    window.createManual = () => {
+        closeModal('modal-choice');
+        const data = currentCategory === 'inventario' ? { titulo: "", peso: 0, desc: "" } : { titulo: "", teste: "", desc: "" }; 
+        const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`)); 
+        set(newItemRef, data);
+    };
+
+    window.selectFromLibrary = () => {
+        closeModal('modal-choice');
+        const modalLib = document.getElementById('modal-library');
+        modalLib.classList.add('open'); 
+        
+        document.getElementById('lib-title').innerText = "BIBLIOTECA: " + currentCategory.toUpperCase();
+        document.getElementById('lib-list-container').innerHTML = "<div style='color:#aaa; text-align:center'>Carregando...</div>";
+        document.getElementById('lib-search-input').value = ""; 
+
+        onValue(ref(db, `biblioteca_habilidades/${currentCategory}`), (snap) => {
+            libraryData = snap.val() || {};
+            window.filterLibrary(); 
+        }, { onlyOnce: true });
+    };
+
+    window.filterLibrary = () => {
+        const term = document.getElementById('lib-search-input').value.toLowerCase();
+        const container = document.getElementById('lib-list-container');
+        container.innerHTML = "";
+
+        const items = [];
+        for(let id in libraryData) items.push(libraryData[id]);
+        items.sort((a,b) => a.nome.localeCompare(b.nome));
+
+        if(items.length === 0) {
+            container.innerHTML = "<div style='padding:10px; color:#aaa; text-align:center;'>Nenhum item nesta categoria.</div>";
+            return;
+        }
+
+        items.forEach(item => {
+            if(item.nome.toLowerCase().includes(term)) {
+                const div = document.createElement('div');
+                div.className = 'lib-item';
+                div.innerHTML = `<h4>${item.nome}</h4><span>${item.custo || ''}</span>`;
+                div.onclick = () => {
+                    const data = { titulo: item.nome, teste: item.custo, desc: item.desc };
+                    if(currentCategory === 'inventario') data.peso = 0; // Ajuste se for item
+                    
+                    push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    closeModal('modal-library');
+                };
+                container.appendChild(div);
+            }
+        });
+    };
+
     window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
     window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
     window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }).then(() => { if(cat === 'inventario') updateWeight(); }); };
+    
     function renderHabs(category, data) { const container = document.getElementById('list_' + category); if(!container) return; container.innerHTML = ""; if(!data) return; Object.keys(data).forEach(id => { const item = data[id]; const div = document.createElement('div'); div.className = 'hab-item'; div.innerHTML = `<div class="hab-header"><span class="hab-toggle" onclick="toggleHab('${id}')">▼</span><input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome"><input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="Teste"><button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button></div><div class="hab-body" id="body_${id}"><textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição...">${item.desc || ''}</textarea></div>`; container.appendChild(div); }); }
     function renderInventory(data) { const container = document.getElementById('list_inventario'); if(!container) return; container.innerHTML = ""; if(!data) return; Object.keys(data).forEach(id => { const item = data[id]; const div = document.createElement('div'); div.className = 'hab-item'; div.innerHTML = `<div class="hab-header"><span class="hab-toggle" onclick="toggleHab('${id}')">▼</span><input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('inventario','${id}','titulo',this.value)" placeholder="Item"><input type="number" step="0.1" class="hab-dice" value="${item.peso || 0}" onchange="saveHab('inventario','${id}','peso',this.value)" placeholder="Peso"><button class="btn-del" onclick="removeItem('inventario','${id}')">✖</button></div><div class="hab-body" id="body_${id}"><textarea onchange="saveHab('inventario','${id}','desc',this.value)" placeholder="Detalhes...">${item.desc || ''}</textarea></div>`; container.appendChild(div); }); }
+    
     window.toggleSkull = (id) => { const el = document.getElementById(id); el.classList.toggle('active'); update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" }); };
     document.getElementById('img_upload').addEventListener('change', (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (readerEvent) => { const image = new Image(); image.onload = () => { const canvas = document.createElement('canvas'); const maxSize = 300; let width = image.width; let height = image.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0, width, height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`; update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl }); }; image.src = readerEvent.target.result; }; reader.readAsDataURL(file); });
 </script>
