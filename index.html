@@ -29,9 +29,7 @@
         body.hell-mode #bar_hp .bar-values input, 
         body.hell-mode #bar_pa .bar-values input, 
         body.hell-mode #char_name, 
-        body.hell-mode #hell-btn { 
-            color: #ff0000 !important; text-shadow: 0 0 8px #ff0000; 
-        }
+        body.hell-mode #hell-btn { color: #ff0000 !important; text-shadow: 0 0 8px #ff0000; }
         body.hell-mode .attr-box.hell-active { box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); border-color: #ff0000; }
 
         body.hybrid-mode { --theme-main: #4a0072; --theme-light: #d500f9; }
@@ -101,6 +99,13 @@
         .tech-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 0 8px 8px 8px; font-size: 11px; color: #aaa; }
         .tech-info span { background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; text-align: center; }
         
+        /* Estilo do Card de Artefato (Pai) */
+        .artifact-card { border: 1px solid var(--theme-light); background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
+        .artifact-header { background: var(--theme-border); padding: 10px; display: flex; gap: 10px; align-items: center; }
+        .artifact-body { padding: 10px; }
+        .mod-list { margin-top: 10px; border-top: 1px dashed #555; padding-top: 10px; }
+        .mod-label { font-size: 10px; color: #aaa; text-transform: uppercase; display: block; margin-bottom: 5px; text-align: center; }
+        
         .art-cost { width: 60px !important; text-align: center; font-weight: bold; }
         .art-cost.positive { color: #ff5555; }
         .art-cost.negative { color: #55ff55; }
@@ -127,7 +132,6 @@
         .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
         .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
 
-        /* --- ESTILO DAS PERÍCIAS (GRID 3 COLUNAS) --- */
         #pericias-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
         .pericia-row { display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 4px; border-radius: 10px; border: 1px solid var(--theme-border); }
         .pericia-row span:first-child { font-size: 10px; font-weight: bold; color: #ccc; margin-bottom: 4px; text-transform: uppercase; }
@@ -231,17 +235,9 @@
             <label style="margin-top:10px;">Arquétipo <button class="btn-add" onclick="openAddMenu('arquetipo')">+</button></label>
             <div id="list_arquetipo" style="margin-top:5px;"></div>
             
-            <label style="margin-top:10px;">Artefatos (Arma Personalizada) <button class="btn-add" onclick="openAddMenu('artefatos_mods')">+</button></label>
-            <div style="background: rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #444; margin-bottom:10px;">
-                <input type="text" id="art_name" placeholder="Nome da Arma / Artefato" style="font-weight:bold; color:cyan; text-align:center;">
-                <input type="text" id="art_weight" placeholder="Peso Total" style="text-align:center;">
-                <label style="margin-left:0; text-align:center; color:#aaa; margin-top:5px;">MODIFICADORES / EFEITOS</label>
-                <div id="list_artefatos_mods" style="margin-top:5px;"></div>
-                <div style="text-align:center; margin-top:10px; font-weight:bold; color:#ffeb3b; font-size:14px; border-top:1px dashed #555; padding-top:5px;">
-                    CUSTO TOTAL: <span id="art_total_cost">0</span>
-                </div>
-            </div>
-            
+            <label style="margin-top:10px;">Artefatos (Armas) <button class="btn-add" onclick="openAddMenu('artefatos')">+</button></label>
+            <div id="list_artefatos" style="margin-top:5px;"></div>
+
             <div class="header-label" style="margin-top:10px;">Técnicas</div>
             
             <label>Truques</label>
@@ -332,6 +328,7 @@
     // Variáveis para o sistema de Escolha
     let currentCategory = ""; 
     let libraryData = {}; 
+    let currentParentId = null; // Usado para adicionar Mods dentro de um Artefato Específico
 
     let currentColumn = 0; const totalColumns = 3;
     window.changeColumn = (dir) => { const cols = document.querySelectorAll('.col'); cols[currentColumn].classList.remove('active'); currentColumn += dir; if (currentColumn < 0) currentColumn = 0; if (currentColumn >= totalColumns) currentColumn = totalColumns - 1; cols[currentColumn].classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -340,10 +337,10 @@
     window.setTheme = (themeName) => { const t = themes[themeName]; if(!t) return; const r = document.documentElement.style; r.setProperty('--theme-main', t.main); r.setProperty('--theme-card', t.card); r.setProperty('--theme-border', t.border); r.setProperty('--theme-input', t.input); r.setProperty('--theme-light', t.light); update(ref(db, 'fichas/' + fichaID), { color_theme: themeName }); document.getElementById('colorPicker').classList.remove('open'); };
     const picker = document.getElementById('colorPicker'); Object.keys(themes).forEach(key => { const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = themes[key].main; div.onclick = () => setTheme(key); picker.appendChild(div); });
     
-    // LISTA DE PERÍCIAS ATUALIZADA (Nomes Encurtados para Grid)
+    // LISTA DE PERÍCIAS ATUALIZADA
     const periciasList = [ {id: 'p_animais', nome: 'ANIMAIS'}, {id: 'p_arte', nome: 'ARTE'}, {id: 'p_esporte', nome: 'ESPORTE'}, {id: 'p_influencia', nome: 'INFLU.'}, {id: 'p_luta', nome: 'LUTA'}, {id: 'p_manha', nome: 'MANHA'}, {id: 'p_maquinas', nome: 'MÁQUINAS'}, {id: 'p_medicina', nome: 'MEDICINA'}, {id: 'p_mistica', nome: 'MÍSTICA'}, {id: 'p_percepcao', nome: 'PERCEP.'}, {id: 'p_saber', nome: 'SABER'}, {id: 'p_sobrevivencia', nome: 'SOBREVIV.'} ];
     
-    const camposParaSalvar = [ 'char_name', 'idade', 'florins', 'arquetipo', 'hp_at', 'mp_at', 'pa_at', 'poder', 'habilidade', 'resistencia', 'xp_total', 'xp_pontos', 'color_theme', 'art_name', 'art_weight', ...periciasList.map(p => p.id) ];
+    const camposParaSalvar = [ 'char_name', 'idade', 'florins', 'arquetipo', 'hp_at', 'mp_at', 'pa_at', 'poder', 'habilidade', 'resistencia', 'xp_total', 'xp_pontos', 'color_theme', ...periciasList.map(p => p.id) ];
     const pContainer = document.getElementById('pericias-list'); periciasList.forEach(p => { pContainer.innerHTML += `<div class="pericia-row"><span>${p.nome}</span><div class="pericia-controls"><button class="btn-p" onclick="updatePericia('${p.id}', -1)">-</button><span id="disp_${p.id}" class="pericia-val">+0</span><span class="dice-icon">🎲</span><input type="hidden" id="${p.id}" value="0"><button class="btn-p" onclick="updatePericia('${p.id}', 1)">+</button></div></div>`; });
 
     onValue(ref(db, 'world_time'), (snapshot) => { globalWorldTime = snapshot.val() || {}; refreshDisplayValues(); });
@@ -498,7 +495,25 @@
     window.gastarPonto = () => { const pt = parseInt(document.getElementById('display_pontos').innerText)||0; if (pt>0) update(ref(db, 'fichas/' + fichaID), { xp_pontos: pt-1 }); };
     window.updatePericia = (id, mod) => { if (document.body.classList.contains('moon-mode') || document.body.classList.contains('hybrid-mode')) { alert("Desative habilidades para editar."); return; } const current = parseInt(globalCharData[id]) || 0; let newVal = current + mod; if (newVal < -2) newVal = -2; if (newVal > 2) newVal = 2; update(ref(db, 'fichas/' + fichaID), { [id]: newVal }); };
     function updateDisplayPericia(id, val) { const display = document.getElementById('disp_' + id); if (display) { const formatted = val >= 0 ? "+" + val : val; display.innerText = formatted; display.style.color = val > 0 ? '#4caf50' : (val < 0 ? '#f44336' : 'white'); } }
-    function updateWeight() { const inputs = document.querySelectorAll('#list_inventario input.hab-dice'); let totalW = 0; inputs.forEach(inp => totalW += parseFloat(inp.value) || 0); const pod = parseInt(document.getElementById('poder').value) || 0; const res = parseInt(document.getElementById('resistencia').value) || 0; const maxW = (pod + res) * 2; const wVal = document.getElementById('weight_val'); const wMax = document.getElementById('weight_max'); if(wVal) wVal.innerText = Math.ceil(totalW); if(wMax) wMax.innerText = maxW; wVal.className = 'weight-val'; if (maxW > 0) { const pct = totalW / maxW; if (pct >= 1) wVal.classList.add('danger'); else if (pct >= 0.7) wVal.classList.add('alert'); } }
+    function updateWeight() { 
+        const inputs = document.querySelectorAll('#list_inventario input.hab-dice'); 
+        // Também soma o peso dos artefatos
+        const artInputs = document.querySelectorAll('.art-weight-input');
+        
+        let totalW = 0; 
+        inputs.forEach(inp => totalW += parseFloat(inp.value) || 0); 
+        artInputs.forEach(inp => totalW += parseFloat(inp.value) || 0);
+
+        const pod = parseInt(document.getElementById('poder').value) || 0; 
+        const res = parseInt(document.getElementById('resistencia').value) || 0; 
+        const maxW = (pod + res) * 2; 
+        const wVal = document.getElementById('weight_val'); 
+        const wMax = document.getElementById('weight_max'); 
+        if(wVal) wVal.innerText = Math.ceil(totalW); 
+        if(wMax) wMax.innerText = maxW; 
+        wVal.className = 'weight-val'; 
+        if (maxW > 0) { const pct = totalW / maxW; if (pct >= 1) wVal.classList.add('danger'); else if (pct >= 0.7) wVal.classList.add('alert'); } 
+    }
 
     document.addEventListener('input', (e) => {
         const target = e.target;
@@ -540,12 +555,12 @@
         if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
         ['skull1', 'skull2', 'skull3'].forEach(sid => { document.getElementById(sid).classList.toggle('active', dados[sid] === "active"); });
         
-        // RENDERIZAR LISTAS GENERICAS
         ['geral', 'vantagens', 'arquetipo'].forEach(cat => renderHabs(cat, dados.habilidades?.[cat]));
         
-        // RENDERIZAR ESPECIAS
+        // Renderiza Artefatos (Lista Pai)
+        renderArtifacts(dados.habilidades?.['artefatos']);
+        
         renderHabs('tecnicas', dados.habilidades?.['tecnicas']);
-        renderHabs('artefatos_mods', dados.habilidades?.['artefatos_mods']);
         renderInventory(dados.habilidades?.['inventario']);
         
         renderMarkers('ações', dados.marcadores?.['ações']?.total, dados.marcadores?.['ações']?.pontos);
@@ -572,27 +587,34 @@
     
     window.openAddMenu = (category) => {
         currentCategory = category;
+        currentParentId = null; // Reset para adicionar na raiz
         document.getElementById('modal-choice').classList.add('open');
     };
+
+    // Abre menu especificamente para MODIFICADORES de um Artefato
+    window.openModMenu = (artifactId) => {
+        currentCategory = 'artefatos_mods';
+        currentParentId = artifactId;
+        // Pula o modal de escolha e vai direto para a biblioteca
+        selectFromLibrary();
+    }
 
     window.closeModal = (id) => {
         document.getElementById(id).classList.remove('open');
     };
 
-    // 1. Criar Manual
     window.createManual = () => {
         closeModal('modal-choice');
         let data = { titulo: "", desc: "", locked: false };
         
         if (currentCategory === 'inventario') { data.peso = 0; }
-        else if (currentCategory === 'artefatos_mods') { data.custo = 0; data.variavel = false; }
-        else { data.teste = ""; } // Para Vantagens/Geral é texto
+        else if (currentCategory === 'artefatos') { data.peso = 0; } // Artefato base
+        else { data.teste = ""; } 
         
         const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`)); 
         set(newItemRef, data);
     };
 
-    // 2. Escolher da Lista
     window.selectFromLibrary = () => {
         closeModal('modal-choice');
         const modalLib = document.getElementById('modal-library');
@@ -631,24 +653,30 @@
                     let data = { titulo: item.nome, desc: item.desc, locked: true };
                     
                     if (currentCategory === 'tecnicas') {
-                        data.exigencia = item.exigencia;
-                        data.alcance = item.alcance;
-                        data.duracao = item.duracao;
-                        data.tipo = item.tipo;
-                        data.teste = item.custo; // Campo visual na ficha
+                        data.exigencia = item.exigencia; data.alcance = item.alcance; data.duracao = item.duracao; data.tipo = item.tipo; data.teste = item.custo;
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     }
                     else if (currentCategory === 'artefatos_mods') {
-                        data.custo = item.custo; // Numérico
-                        data.variavel = item.variavel;
+                        data.custo = item.custo; data.variavel = item.variavel;
+                        // Adiciona DENTRO do artefato específico
+                        if(currentParentId) {
+                            push(ref(db, `fichas/${fichaID}/habilidades/artefatos/${currentParentId}/mods`), data);
+                        }
                     }
                     else if (currentCategory === 'inventario') {
                         data.peso = 0;
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     } 
+                    else if (currentCategory === 'artefatos') {
+                        // Não deve acontecer pois artefatos não vêm da lib (só os mods), mas por segurança
+                        data.peso = 0;
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    }
                     else {
-                         data.teste = item.custo; // Texto
+                         data.teste = item.custo;
+                         push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     }
                     
-                    push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     closeModal('modal-library');
                 };
                 container.appendChild(div);
@@ -662,19 +690,122 @@
         }
     };
     
-    window.toggleModActive = (id, currentVal) => {
-        update(ref(db, `fichas/${fichaID}/habilidades/artefatos_mods/${id}`), { active_mod: !currentVal });
+    // Toggle para Modificadores dentro de Artefatos
+    window.toggleModActive = (artId, modId, currentVal) => {
+        update(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`), { active_mod: !currentVal });
+    };
+    // Salva valores de Modificadores (nested)
+    window.saveMod = (artId, modId, field, val) => {
+        update(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`), { [field]: val });
+    };
+    // Remove Modificador (nested)
+    window.removeMod = (artId, modId) => {
+        if(confirm("Remover este modificador?")) remove(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`));
     };
 
     window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
     window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
-    window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }).then(() => { if(cat === 'inventario') updateWeight(); }); };
+    window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }).then(() => { if(cat === 'inventario' || cat === 'artefatos') updateWeight(); }); };
     
+    // Renderiza a Lista Pai de Artefatos
+    function renderArtifacts(data) {
+        const container = document.getElementById('list_artefatos');
+        if(!container) return;
+        container.innerHTML = "";
+        
+        if(!data) return;
+
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            
+            const div = document.createElement('div');
+            div.className = 'artifact-card';
+            div.innerHTML = `
+                <div class="artifact-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    <input type="text" style="font-weight:bold; color:cyan; text-align:center; margin:0;" value="${item.titulo || ''}" onchange="saveHab('artefatos','${id}','titulo',this.value)" placeholder="Nome do Artefato">
+                    <input type="number" step="0.1" class="hab-dice art-weight-input" style="width:60px; margin:0;" value="${item.peso || 0}" onchange="saveHab('artefatos','${id}','peso',this.value)" placeholder="Peso">
+                    <button class="btn-del" onclick="removeItem('artefatos','${id}')">✖</button>
+                </div>
+                <div class="artifact-body hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('artefatos','${id}','desc',this.value)" placeholder="Descrição visual da arma..." style="margin-bottom:10px;">${item.desc || ''}</textarea>
+                    
+                    <div style="text-align:center; font-size:12px; color:#aaa; border-bottom:1px solid #444; padding-bottom:5px;">MODIFICADORES / EFEITOS</div>
+                    
+                    <div id="mods_list_${id}"></div>
+                    
+                    <button class="btn-add" onclick="openModMenu('${id}')" style="width:100%; border-radius:5px; margin-top:10px;">+ Adicionar Efeito</button>
+                    
+                    <div style="text-align:center; margin-top:10px; font-weight:bold; color:#ffeb3b; font-size:14px; padding-top:5px;">
+                        CUSTO TOTAL: <span id="cost_total_${id}">0</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            
+            // Renderiza os mods deste artefato específico
+            renderArtifactMods(id, item.mods);
+        });
+    }
+
+    // Renderiza a Lista de Modificadores DENTRO de um Artefato
+    function renderArtifactMods(artId, modsData) {
+        const container = document.getElementById(`mods_list_${artId}`);
+        if(!container) return;
+        container.innerHTML = "";
+        
+        let totalCost = 0;
+
+        if(modsData) {
+            Object.keys(modsData).forEach(modId => {
+                const mod = modsData[modId];
+                
+                // Cálculo e Classe CSS
+                let displayCostClass = "neutral";
+                let val = parseFloat(mod.custo) || 0;
+                let costInputHtml = "";
+
+                if (mod.variavel) {
+                     costInputHtml = `<input type="number" class="hab-dice art-cost" value="${mod.custo}" onchange="saveMod('${artId}','${modId}','custo',this.value)" placeholder="Var.">`;
+                } else {
+                    if(val > 0) displayCostClass = "positive";
+                    if(val < 0) displayCostClass = "negative";
+                    costInputHtml = `<input type="number" class="hab-dice art-cost ${displayCostClass}" value="${mod.custo}" readonly>`; // Mods fixos são readonly
+                }
+
+                const isActive = mod.active_mod !== false; 
+                if(isActive) totalCost += val;
+                const checkBtn = `<button class="btn-check ${isActive ? 'checked' : ''}" onclick="toggleModActive('${artId}','${modId}', ${isActive})">✔</button>`;
+                
+                // ID único para o toggle de descrição deste mod
+                const uniqueModToggleId = `mod_body_${artId}_${modId}`;
+
+                const div = document.createElement('div');
+                div.className = 'hab-item';
+                div.style.border = "1px solid #333"; // Visualmente um pouco mais fraco que o pai
+                div.innerHTML = `
+                    <div class="hab-header">
+                        <span class="hab-toggle" onclick="document.getElementById('${uniqueModToggleId}').classList.toggle('open')">▼</span>
+                        ${checkBtn}
+                        <input type="text" class="hab-title" value="${mod.titulo || ''}" readonly style="font-size:13px;">
+                        ${costInputHtml}
+                        <button class="btn-del" onclick="removeMod('${artId}','${modId}')">✖</button>
+                    </div>
+                    <div class="hab-body" id="${uniqueModToggleId}">
+                        <div style="padding:5px; font-size:12px; color:#ccc;">${mod.desc || 'Sem descrição.'}</div>
+                    </div>`;
+                container.appendChild(div);
+            });
+        }
+        
+        // Atualiza o display de total deste artefato
+        const totalSpan = document.getElementById(`cost_total_${artId}`);
+        if(totalSpan) totalSpan.innerText = totalCost;
+    }
+
     function renderHabs(category, data) { 
-        // Containers específicos
         let container = document.getElementById('list_' + category); 
         
-        // Se for TÉCNICAS, precisamos distribuir
         if (category === 'tecnicas') {
             document.getElementById('list_tecnicas_truque').innerHTML = "";
             document.getElementById('list_tecnicas_comum').innerHTML = "";
@@ -714,66 +845,7 @@
             });
             return;
         }
-        
-        // Se for ARTEFATOS (Modificadores)
-        if (category === 'artefatos_mods') {
-            container.innerHTML = "";
-            let totalCost = 0;
-            
-            if(data) {
-                Object.keys(data).forEach(id => {
-                    const item = data[id];
-                    
-                    const isLocked = item.locked === true;
-                    const readOnlyAttr = isLocked ? 'readonly' : '';
-                    const modClass = !isLocked ? 'modified' : '';
-                    const editBtn = isLocked ? `<button class="btn-edit" onclick="unlockItem('${category}','${id}')" title="Editar">✏️</button>` : '';
-                    
-                    // Cálculo do custo
-                    let displayCostClass = "neutral";
-                    let val = parseFloat(item.custo) || 0;
-                    
-                    // Lógica especial para Checkbox de Variável
-                    let costInputHtml = "";
-                    if (item.variavel) {
-                        // Se é variável, precisa de um Checkbox para ativar/desativar o cálculo se quiser (opcional)
-                        // Mas o pedido foi: "jogador escolhe e adiciona". Então o input deve ser editável.
-                        costInputHtml = `<input type="number" class="hab-dice art-cost" value="${item.custo}" onchange="saveHab('${category}','${id}','custo',this.value)" placeholder="Var.">`;
-                    } else {
-                        // Se não é variável, é readonly se estiver travado
-                        let rOnly = isLocked ? 'readonly' : '';
-                        if(val > 0) displayCostClass = "positive";
-                        if(val < 0) displayCostClass = "negative";
-                        costInputHtml = `<input type="number" class="hab-dice art-cost ${displayCostClass}" value="${item.custo}" onchange="saveHab('${category}','${id}','custo',this.value)" ${rOnly}>`;
-                    }
-                    
-                    // Botão de Ativar (Check) para somar
-                    const isActive = item.active_mod !== false; // Padrão true
-                    if(isActive) totalCost += val;
-                    const checkBtn = `<button class="btn-check ${isActive ? 'checked' : ''}" onclick="toggleModActive('${id}', ${isActive})">✔</button>`;
 
-                    const div = document.createElement('div');
-                    div.className = 'hab-item';
-                    div.innerHTML = `
-                        <div class="hab-header">
-                            <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
-                            ${checkBtn}
-                            <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Modificador" ${readOnlyAttr}>
-                            ${editBtn}
-                            ${costInputHtml}
-                            <button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>
-                        </div>
-                        <div class="hab-body" id="body_${id}">
-                            <textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Efeito..." ${readOnlyAttr}>${item.desc || ''}</textarea>
-                        </div>`;
-                    container.appendChild(div);
-                });
-            }
-            document.getElementById('art_total_cost').innerText = totalCost;
-            return;
-        }
-
-        // PADRÃO (Geral, Vantagens, Arquetipo)
         if(!container) return; 
         container.innerHTML = ""; 
         if(!data) return; 
