@@ -77,15 +77,28 @@
         .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
         .bar-values input[readonly] { background: transparent; border: none; color: rgba(255,255,255,0.7); cursor: default; }
 
+        /* ESTILOS DAS HABILIDADES (Modificados) */
         .hab-item { background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
         .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
+        
         .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; }
+        /* Título modificado fica Amarelo */
+        .hab-title.modified { color: #ffd700 !important; font-style: italic; }
+        /* Input Readonly parece texto normal */
+        .hab-item input[readonly] { color: #eee; cursor: default; border-color: transparent; background: transparent; }
+        .hab-item textarea[readonly] { color: #aaa; cursor: default; border-color: transparent; background: transparent; }
+
         .hab-dice { width: 85px !important; text-align: center; border-radius: 10px !important; margin: 0 !important; }
         .hab-toggle { cursor: pointer; color: var(--theme-light); font-size: 12px; padding: 0 5px; }
         .hab-body { padding: 8px; display: none; border-top: 1px solid var(--theme-border); }
         .hab-body.open { display: block; }
+        
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        /* Botão de Editar (Lápis) */
+        .btn-edit { background: transparent; border: none; cursor: pointer; font-size: 16px; margin-right: 5px; opacity: 0.7; transition: 0.2s; color: var(--theme-light); }
+        .btn-edit:hover { opacity: 1; transform: scale(1.1); color: white; }
 
         .marker-section { margin-bottom: 20px; text-align: center; }
         .marker-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; }
@@ -516,7 +529,7 @@
     window.togglePoint = (type, index) => { const key = `p_${index}`; const isActive = document.getElementById(`${type}_${index}`).classList.contains('active'); update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [key]: !isActive }); };
     function renderMarkers(type, total, pontos) { const container = document.getElementById('display_' + type); const countSpan = document.getElementById('count_' + type); container.innerHTML = ""; const finalTotal = (total !== undefined) ? total : (type === 'ações' ? 3 : 0); countSpan.innerText = finalTotal; const icon = type === 'ações' ? '▲' : '●'; const css = type === 'ações' ? 'tri' : 'circ'; for(let i=0; i < finalTotal; i++) { const isActive = pontos && pontos[`p_${i}`] === true; container.innerHTML += `<span id="${type}_${i}" class="marker-item ${css} ${isActive ? 'active' : ''}" onclick="togglePoint('${type}', ${i})">${icon}</span>`; } }
     
-    // --- SISTEMA DE LISTAS E ESCOLHA (NOVO) ---
+    // --- SISTEMA DE LISTAS E ESCOLHA ---
     
     window.openAddMenu = (category) => {
         currentCategory = category;
@@ -527,13 +540,17 @@
         document.getElementById(id).classList.remove('open');
     };
 
+    // 1. Criar Manual: Nasce destravado (locked: false)
     window.createManual = () => {
         closeModal('modal-choice');
-        const data = currentCategory === 'inventario' ? { titulo: "", peso: 0, desc: "" } : { titulo: "", teste: "", desc: "" }; 
+        const data = currentCategory === 'inventario' 
+            ? { titulo: "", peso: 0, desc: "", locked: false } 
+            : { titulo: "", teste: "", desc: "", locked: false }; 
         const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`)); 
         set(newItemRef, data);
     };
 
+    // 2. Escolher da Lista: Nasce travado (locked: true)
     window.selectFromLibrary = () => {
         closeModal('modal-choice');
         const modalLib = document.getElementById('modal-library');
@@ -569,8 +586,8 @@
                 div.className = 'lib-item';
                 div.innerHTML = `<h4>${item.nome}</h4><span>${item.custo || ''}</span>`;
                 div.onclick = () => {
-                    const data = { titulo: item.nome, teste: item.custo, desc: item.desc };
-                    if(currentCategory === 'inventario') data.peso = 0; // Ajuste se for item
+                    const data = { titulo: item.nome, teste: item.custo, desc: item.desc, locked: true };
+                    if(currentCategory === 'inventario') data.peso = 0; 
                     
                     push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     closeModal('modal-library');
@@ -580,12 +597,101 @@
         });
     };
 
+    // 3. Função Destravar (Botão Lápis)
+    window.unlockItem = (category, id) => {
+        if(confirm("Editar esta habilidade? Ela ficará marcada como personalizada.")) {
+            update(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`), { locked: false });
+        }
+    };
+
     window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
     window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
     window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }).then(() => { if(cat === 'inventario') updateWeight(); }); };
     
-    function renderHabs(category, data) { const container = document.getElementById('list_' + category); if(!container) return; container.innerHTML = ""; if(!data) return; Object.keys(data).forEach(id => { const item = data[id]; const div = document.createElement('div'); div.className = 'hab-item'; div.innerHTML = `<div class="hab-header"><span class="hab-toggle" onclick="toggleHab('${id}')">▼</span><input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome"><input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="Teste"><button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button></div><div class="hab-body" id="body_${id}"><textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição...">${item.desc || ''}</textarea></div>`; container.appendChild(div); }); }
-    function renderInventory(data) { const container = document.getElementById('list_inventario'); if(!container) return; container.innerHTML = ""; if(!data) return; Object.keys(data).forEach(id => { const item = data[id]; const div = document.createElement('div'); div.className = 'hab-item'; div.innerHTML = `<div class="hab-header"><span class="hab-toggle" onclick="toggleHab('${id}')">▼</span><input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('inventario','${id}','titulo',this.value)" placeholder="Item"><input type="number" step="0.1" class="hab-dice" value="${item.peso || 0}" onchange="saveHab('inventario','${id}','peso',this.value)" placeholder="Peso"><button class="btn-del" onclick="removeItem('inventario','${id}')">✖</button></div><div class="hab-body" id="body_${id}"><textarea onchange="saveHab('inventario','${id}','desc',this.value)" placeholder="Detalhes...">${item.desc || ''}</textarea></div>`; container.appendChild(div); }); }
+    function renderHabs(category, data) { 
+        const container = document.getElementById('list_' + category); 
+        if(!container) return; 
+        container.innerHTML = ""; 
+        if(!data) return; 
+        
+        Object.keys(data).forEach(id => { 
+            const item = data[id]; 
+            
+            // LÓGICA DE TRAVAMENTO
+            const isLocked = item.locked === true;
+            const readOnlyAttr = isLocked ? 'readonly' : '';
+            const modClass = !isLocked ? 'modified' : '';
+            const editBtn = isLocked 
+                ? `<button class="btn-edit" onclick="unlockItem('${category}','${id}')" title="Editar">✏️</button>` 
+                : '';
+
+            const div = document.createElement('div'); 
+            div.className = 'hab-item'; 
+            div.innerHTML = `
+                <div class="hab-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    
+                    <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" 
+                        onchange="saveHab('${category}','${id}','titulo',this.value)" 
+                        placeholder="Nome" ${readOnlyAttr}>
+                    
+                    ${editBtn}
+
+                    <input type="text" class="hab-dice" value="${item.teste || ''}" 
+                        onchange="saveHab('${category}','${id}','teste',this.value)" 
+                        placeholder="Teste" ${readOnlyAttr}>
+                        
+                    <button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>
+                </div>
+                <div class="hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('${category}','${id}','desc',this.value)" 
+                        placeholder="Descrição..." ${readOnlyAttr}>${item.desc || ''}</textarea>
+                </div>`; 
+            container.appendChild(div); 
+        }); 
+    }
+
+    function renderInventory(data) { 
+        const container = document.getElementById('list_inventario'); 
+        if(!container) return; 
+        container.innerHTML = ""; 
+        if(!data) return; 
+        
+        Object.keys(data).forEach(id => { 
+            const item = data[id]; 
+            
+            const isLocked = item.locked === true;
+            const readOnlyAttr = isLocked ? 'readonly' : '';
+            const modClass = !isLocked ? 'modified' : '';
+            const editBtn = isLocked 
+                ? `<button class="btn-edit" onclick="unlockItem('inventario','${id}')" title="Editar">✏️</button>` 
+                : '';
+
+            const div = document.createElement('div'); 
+            div.className = 'hab-item'; 
+            div.innerHTML = `
+                <div class="hab-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    
+                    <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" 
+                        onchange="saveHab('inventario','${id}','titulo',this.value)" 
+                        placeholder="Item" ${readOnlyAttr}>
+                    
+                    ${editBtn}
+
+                    <input type="number" step="0.1" class="hab-dice" value="${item.peso || 0}" 
+                        onchange="saveHab('inventario','${id}','peso',this.value)" 
+                        placeholder="Peso" ${readOnlyAttr}>
+                        
+                    <button class="btn-del" onclick="removeItem('inventario','${id}')">✖</button>
+                </div>
+                <div class="hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('inventario','${id}','desc',this.value)" 
+                        placeholder="Detalhes..." ${readOnlyAttr}>${item.desc || ''}</textarea>
+                </div>`; 
+            container.appendChild(div); 
+        }); 
+    }
     
     window.toggleSkull = (id) => { const el = document.getElementById(id); el.classList.toggle('active'); update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" }); };
     document.getElementById('img_upload').addEventListener('change', (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (readerEvent) => { const image = new Image(); image.onload = () => { const canvas = document.createElement('canvas'); const maxSize = 300; let width = image.width; let height = image.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0, width, height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`; update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl }); }; image.src = readerEvent.target.result; }; reader.readAsDataURL(file); });
