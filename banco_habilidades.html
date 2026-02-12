@@ -2,66 +2,67 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Banco de Habilidades - RPG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Mestre - Banco de Habilidades</title>
     <style>
-        :root { --bg: #121212; --card-bg: #1e1e1e; --accent: #800000; --text: #eee; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        body { background: #1a1a1a; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { max-width: 800px; width: 100%; display: grid; grid-template-columns: 1fr; gap: 20px; }
         
-        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+        .card { background: #2a2a2a; padding: 20px; border-radius: 10px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h2 { margin-top: 0; color: #ffaaaa; text-transform: uppercase; text-align: center; border-bottom: 2px solid #800000; padding-bottom: 10px; }
         
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { background: #333; color: #aaa; border: 1px solid #444; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .tab-btn:hover { color: white; background: #444; }
-
-        .container { width: 100%; max-width: 800px; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #ccc; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; background: #111; border: 1px solid #555; color: white; border-radius: 5px; box-sizing: border-box; }
+        textarea { height: 100px; resize: vertical; }
         
-        .form-box { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #444; margin-bottom: 20px; }
-        .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; }
-        input, textarea, select { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px; box-sizing: border-box; }
-        textarea { resize: vertical; min-height: 80px; }
+        button { margin-top: 20px; width: 100%; padding: 12px; background: #800000; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
+        button:hover { background: #a00000; }
+
+        .hidden { display: none; }
         
-        .btn-add { width: 100%; background: #2e7d32; color: white; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        .btn-add:hover { background: #4caf50; }
-
-        .search-bar { width: 100%; padding: 10px; margin-bottom: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 5px; }
-
-        .item-list { display: flex; flex-direction: column; gap: 10px; }
-        .item-card { background: var(--card-bg); border-left: 4px solid var(--accent); padding: 15px; border-radius: 5px; position: relative; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .item-title { font-weight: bold; font-size: 16px; color: #ffaaaa; }
-        .item-cost { background: #333; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .item-desc { font-size: 13px; color: #ccc; white-space: pre-wrap; }
-        .btn-delete { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #666; cursor: pointer; font-size: 16px; }
-        .btn-delete:hover { color: #f44336; }
-
+        .item-list { margin-top: 20px; max-height: 400px; overflow-y: auto; background: #222; padding: 10px; border-radius: 5px; }
+        .db-item { background: #333; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #800000; }
+        .db-item span { font-size: 14px; }
+        .btn-del { width: auto; margin: 0; padding: 5px 10px; background: #ff4444; font-size: 12px; }
+        
+        /* Destaques visuais */
+        .info-box { background: rgba(0, 255, 255, 0.1); padding: 10px; border-radius: 5px; font-size: 12px; color: #00ffff; margin-bottom: 15px; border: 1px solid #00aaaa; }
     </style>
 </head>
 <body>
 
-    <h1>Biblioteca do Mestre</h1>
+<div class="container">
+    <div class="card">
+        <h2>Adicionar ao Banco de Dados</h2>
+        
+        <label>CATEGORIA</label>
+        <select id="categoria" onchange="updateForm()">
+            <option value="vantagens">Vantagens / Desvantagens (Geral)</option>
+            <option value="arquetipo">Arquétipo (Vantagens/Desvantagens)</option>
+            <option value="artefatos_mods">Artefatos (Bônus e Ônus)</option>
+            <option value="tecnicas">Técnicas</option>
+        </select>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="setTab('vantagens')">Vantagens</button>
-        <button class="tab-btn" onclick="setTab('desvantagens')">Desvantagens</button>
-        <button class="tab-btn" onclick="setTab('habilidades')">Habilidades</button>
-        <button class="tab-btn" onclick="setTab('artefatos')">Artefatos</button>
-    </div>
-
-    <div class="container">
-        <div class="form-box">
-            <h3>Adicionar Novo</h3>
-            <div class="form-row">
-                <input type="text" id="inp_name" placeholder="Nome (ex: Ataque Poderoso)">
-                <input type="text" id="inp_cost" placeholder="Custo/Tipo (ex: 2 PM ou Passiva)">
-            </div>
-            <textarea id="inp_desc" placeholder="Descrição detalhada do efeito..."></textarea>
-            <button class="btn-add" onclick="addItem()">SALVAR NA BIBLIOTECA</button>
+        <div id="form-content">
+            <label>Nome da Habilidade</label>
+            <input type="text" id="nome" placeholder="Ex: Ataque Poderoso">
         </div>
 
-        <input type="text" class="search-bar" id="search" placeholder="🔍 Buscar na lista..." onkeyup="renderList()">
-        <div id="list-container" class="item-list"></div>
+        <div id="extra-fields"></div>
+
+        <label>Descrição</label>
+        <textarea id="desc" placeholder="Descreva o efeito..."></textarea>
+
+        <button onclick="salvarNoBanco()">SALVAR NO BANCO</button>
     </div>
+
+    <div class="card">
+        <h2>Itens Cadastrados (Preview)</h2>
+        <div class="item-list" id="preview-list">
+            <div style="text-align:center; color:#777;">Carregando...</div>
+        </div>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -80,82 +81,139 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let currentTab = 'vantagens';
-    let dbData = {};
+    // Elementos do DOM
+    const catSelect = document.getElementById('categoria');
+    const extraDiv = document.getElementById('extra-fields');
+    const nomeInput = document.getElementById('nome');
+    const descInput = document.getElementById('desc');
 
-    window.setTab = (tab) => {
-        currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        loadData();
+    // Função para atualizar o formulário baseado na categoria
+    window.updateForm = () => {
+        const cat = catSelect.value;
+        extraDiv.innerHTML = ""; // Limpa campos extras
+
+        if (cat === 'vantagens' || cat === 'arquetipo') {
+            // Padrão: Custo Texto
+            extraDiv.innerHTML = `
+                <label>Custo (Texto)</label>
+                <input type="text" id="custo" placeholder="Ex: 2 PT, -1 PT, Gratuito">
+            `;
+        } 
+        else if (cat === 'artefatos_mods') {
+            // Artefatos: Modificadores numéricos
+            extraDiv.innerHTML = `
+                <div class="info-box">Aqui você cadastra os MODIFICADORES que compõem os artefatos (ex: "Afiada", "Pesada"). O jogador usará estes itens para montar a arma na ficha.</div>
+                <label>Custo do Modificador (Número)</label>
+                <input type="number" id="custo_mod" placeholder="Ex: 1 para Bônus, -1 para Ônus">
+            `;
+        }
+        else if (cat === 'tecnicas') {
+            // Técnicas: Complexo
+            extraDiv.innerHTML = `
+                <label>Tipo de Técnica</label>
+                <select id="tipo_tec">
+                    <option value="truque">Truque</option>
+                    <option value="comum">Técnica Comum</option>
+                    <option value="lendaria">Técnica Lendária</option>
+                </select>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Exigência</label><input type="text" id="exigencia" placeholder="Ex: Espada Nv.1"></div>
+                    <div><label>Alcance</label><input type="text" id="alcance" placeholder="Ex: Curto, 9m"></div>
+                    <div><label>Custo (PM/Ação)</label><input type="text" id="custo" placeholder="Ex: 2 PM"></div>
+                    <div><label>Duração</label><input type="text" id="duracao" placeholder="Ex: Instantâneo"></div>
+                </div>
+            `;
+        }
+        loadPreview();
     };
 
-    function loadData() {
-        const listRef = ref(db, `biblioteca_habilidades/${currentTab}`);
-        onValue(listRef, (snapshot) => {
-            dbData = snapshot.val() || {};
-            renderList();
+    // Função para Salvar
+    window.salvarNoBanco = () => {
+        const cat = catSelect.value;
+        const nome = nomeInput.value;
+        const desc = descInput.value;
+
+        if(!nome) { alert("O nome é obrigatório!"); return; }
+
+        let data = { nome, desc };
+
+        if (cat === 'vantagens' || cat === 'arquetipo') {
+            data.custo = document.getElementById('custo').value;
+        }
+        else if (cat === 'artefatos_mods') {
+            data.custo = parseFloat(document.getElementById('custo_mod').value) || 0;
+            // Identifica visualmente se é bonus ou onus no nome para facilitar
+            if (data.custo > 0) data.tipo = "Bonus";
+            else data.tipo = "Onus";
+        }
+        else if (cat === 'tecnicas') {
+            data.tipo = document.getElementById('tipo_tec').value;
+            data.exigencia = document.getElementById('exigencia').value;
+            data.alcance = document.getElementById('alcance').value;
+            data.custo = document.getElementById('custo').value;
+            data.duracao = document.getElementById('duracao').value;
+        }
+
+        // Salva no caminho específico
+        push(ref(db, `biblioteca_habilidades/${cat}`), data)
+            .then(() => {
+                alert("Salvo com sucesso!");
+                nomeInput.value = "";
+                descInput.value = "";
+                // Limpa campos extras
+                if(document.getElementById('custo')) document.getElementById('custo').value = "";
+                if(document.getElementById('custo_mod')) document.getElementById('custo_mod').value = "";
+                if(document.getElementById('exigencia')) document.getElementById('exigencia').value = "";
+            })
+            .catch(err => alert("Erro: " + err.message));
+    };
+
+    // Função de Preview (Lista o que já tem no banco)
+    function loadPreview() {
+        const cat = catSelect.value;
+        const list = document.getElementById('preview-list');
+        list.innerHTML = "Carregando...";
+
+        onValue(ref(db, `biblioteca_habilidades/${cat}`), (snapshot) => {
+            list.innerHTML = "";
+            const data = snapshot.val();
+            
+            if (!data) {
+                list.innerHTML = "<div style='text-align:center; padding:10px; color:#555;'>Nenhum item nesta categoria.</div>";
+                return;
+            }
+
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                const div = document.createElement('div');
+                div.className = 'db-item';
+                
+                let detail = "";
+                if(item.custo) detail = `[${item.custo}]`;
+                if(item.tipo && cat === 'tecnicas') detail = `[${item.tipo.toUpperCase()}]`;
+                if(cat === 'artefatos_mods') detail = `[Custo: ${item.custo}]`;
+
+                div.innerHTML = `
+                    <div>
+                        <strong>${item.nome}</strong> <span style="color:#aaa; font-size:12px;">${detail}</span>
+                    </div>
+                    <button class="btn-del" id="del_${key}">X</button>
+                `;
+                list.appendChild(div);
+                
+                // Evento de deletar
+                document.getElementById(`del_${key}`).onclick = () => {
+                    if(confirm(`Excluir "${item.nome}" do banco de dados?`)) {
+                        remove(ref(db, `biblioteca_habilidades/${cat}/${key}`));
+                    }
+                };
+            });
         });
     }
 
-    window.addItem = () => {
-        const name = document.getElementById('inp_name').value;
-        const cost = document.getElementById('inp_cost').value;
-        const desc = document.getElementById('inp_desc').value;
-
-        if(!name) return alert("Digite um nome!");
-
-        push(ref(db, `biblioteca_habilidades/${currentTab}`), {
-            nome: name,
-            custo: cost,
-            desc: desc
-        });
-
-        // Limpa campos
-        document.getElementById('inp_name').value = "";
-        document.getElementById('inp_cost').value = "";
-        document.getElementById('inp_desc').value = "";
-    };
-
-    window.deleteItem = (id) => {
-        if(confirm("Excluir este item da biblioteca?")) {
-            remove(ref(db, `biblioteca_habilidades/${currentTab}/${id}`));
-        }
-    };
-
-    window.renderList = () => {
-        const container = document.getElementById('list-container');
-        container.innerHTML = "";
-        const term = document.getElementById('search').value.toLowerCase();
-
-        const items = [];
-        for(let id in dbData) {
-            items.push({ id, ...dbData[id] });
-        }
-
-        // Ordenar alfabético
-        items.sort((a,b) => a.nome.localeCompare(b.nome));
-
-        items.forEach(item => {
-            if(item.nome.toLowerCase().includes(term)) {
-                const div = document.createElement('div');
-                div.className = 'item-card';
-                div.innerHTML = `
-                    <div class="item-header">
-                        <span class="item-title">${item.nome}</span>
-                        <span class="item-cost">${item.custo}</span>
-                    </div>
-                    <div class="item-desc">${item.desc}</div>
-                    <button class="btn-delete" onclick="deleteItem('${item.id}')">🗑️</button>
-                `;
-                container.appendChild(div);
-            }
-        });
-    };
-
     // Inicializa
-    loadData();
-
+    updateForm();
 </script>
+
 </body>
 </html>
