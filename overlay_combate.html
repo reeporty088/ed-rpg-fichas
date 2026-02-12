@@ -7,65 +7,73 @@
     <style>
         body { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: 'Cinzel', serif; }
         
+        /* --- POSICIONAMENTO UNIFICADO (TOPO CENTRAL) --- */
+        .overlay-element {
+            position: fixed;
+            top: 20px; /* Margem do topo para facilitar no OBS */
+            left: 0; 
+            width: 100%;
+            display: flex; 
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;
+            pointer-events: none;
+        }
+
         /* --- ANIMAÇÃO DE INTRODUÇÃO --- */
         #intro-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            pointer-events: none;
             opacity: 0;
             transition: opacity 1s;
+            z-index: 10; /* Fica na frente se colidir */
         }
         
         .intro-text {
-            font-size: 120px;
+            font-size: 80px; /* Reduzido de 120px */
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 15px;
-            text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 50px rgba(0,0,0,0.5);
-            transform: scale(0.8);
+            letter-spacing: 10px; /* Reduzido de 15px */
+            text-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.5);
+            transform: scale(0.9);
             transition: transform 4s ease-out;
+            margin: 0;
         }
 
         .mode-normal { color: #f5f5f5; text-shadow: 0 0 20px #800000; }
-        .mode-letal { color: #ff0000; text-shadow: 0 0 30px #8b0000, 0 0 60px black; border-bottom: 5px solid #ff0000; }
+        .mode-letal { color: #ff0000; text-shadow: 0 0 20px #8b0000, 0 0 40px black; border-bottom: 3px solid #ff0000; }
 
         /* --- HUD DO TURNO ATUAL --- */
         #turn-hud {
-            position: fixed;
-            bottom: 50px; /* Posição na tela */
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
             opacity: 0;
             transition: opacity 1s;
+            z-index: 5;
         }
 
         .hud-name {
-            font-size: 60px;
+            font-size: 50px; /* Reduzido de 60px */
             font-weight: 700;
             color: #ffffff;
             text-shadow: 2px 2px 4px #000;
             text-transform: uppercase;
-            margin-bottom: 0px;
+            margin: 0;
             letter-spacing: 2px;
+            line-height: 1.1;
         }
 
         .hud-divider {
             width: 0%; /* Animação de largura */
-            height: 3px;
+            height: 2px; /* Mais fino */
             background: linear-gradient(90deg, transparent, #fff, transparent);
-            margin: 5px auto;
+            margin: 2px auto 5px auto; /* Margens ajustadas */
             transition: width 1s ease-in-out;
         }
 
         .hud-info {
-            font-size: 24px;
+            font-size: 18px; /* Reduzido de 24px */
             color: #ddd;
             font-weight: 400;
             text-shadow: 1px 1px 3px #000;
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             align-items: center;
         }
@@ -74,19 +82,19 @@
 
         /* Classes de animação */
         .show-intro { opacity: 1 !important; }
-        .zoom-text { transform: scale(1.1) !important; }
+        .zoom-text { transform: scale(1.05) !important; } /* Zoom mais suave */
         .show-hud { opacity: 1 !important; }
-        .expand-line { width: 100% !important; }
+        .expand-line { width: 400px !important; max-width: 90%; } /* Largura fixa elegante */
 
     </style>
 </head>
 <body>
 
-    <div id="intro-container">
+    <div id="intro-container" class="overlay-element">
         <div id="intro-text" class="intro-text">COMBATE</div>
     </div>
 
-    <div id="turn-hud">
+    <div id="turn-hud" class="overlay-element">
         <div id="char-name" class="hud-name">PERSONAGEM</div>
         <div class="hud-divider" id="divider"></div>
         <div class="hud-info">
@@ -155,7 +163,7 @@
                 const firstName = activeChar.name.trim().split(' ')[0];
                 document.getElementById('char-name').innerText = firstName;
                 
-                // Se a intro já passou, garante que o HUD está visível
+                // Se a intro já passou (opacity 0), garante que o HUD está visível
                 const intro = document.getElementById('intro-container');
                 if (getComputedStyle(intro).opacity == 0) {
                     showHud();
@@ -227,7 +235,7 @@
         document.getElementById('turn-hud').classList.add('show-hud');
         setTimeout(() => {
             document.getElementById('divider').classList.add('expand-line');
-        }, 500);
+        }, 300);
     }
 
     function hideAll() {
