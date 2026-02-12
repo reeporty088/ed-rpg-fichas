@@ -630,6 +630,7 @@
         }, { onlyOnce: true });
     };
 
+    // --- FUNÇÃO CORRIGIDA ---
     window.filterLibrary = () => {
         const term = document.getElementById('lib-search-input').value.toLowerCase();
         const container = document.getElementById('lib-list-container');
@@ -648,32 +649,46 @@
             if(item.nome.toLowerCase().includes(term)) {
                 const div = document.createElement('div');
                 div.className = 'lib-item';
-                div.innerHTML = `<h4>${item.nome}</h4><span>${item.custo || ''}</span>`;
+                // Mostra o custo se tiver, senão mostra vazio. Verifica se é undefined.
+                div.innerHTML = `<h4>${item.nome}</h4><span>${item.custo !== undefined ? item.custo : ''}</span>`;
+                
                 div.onclick = () => {
-                    let data = { titulo: item.nome, desc: item.desc, locked: true };
+                    // Previne undefined no título e descrição
+                    let data = { 
+                        titulo: item.nome || "Item", 
+                        desc: item.desc || "", 
+                        locked: true 
+                    };
                     
                     if (currentCategory === 'tecnicas') {
-                        data.exigencia = item.exigencia; data.alcance = item.alcance; data.duracao = item.duracao; data.tipo = item.tipo; data.teste = item.custo;
+                        data.exigencia = item.exigencia || ""; 
+                        data.alcance = item.alcance || ""; 
+                        data.duracao = item.duracao || ""; 
+                        data.tipo = item.tipo || "comum"; 
+                        data.teste = item.custo || "";
                         push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     }
                     else if (currentCategory === 'artefatos_mods') {
-                        data.custo = item.custo; data.variavel = item.variavel;
+                        // Se não tiver custo, assume 0. Se não tiver variavel, assume false.
+                        data.custo = item.custo !== undefined ? item.custo : 0; 
+                        data.variavel = item.variavel || false;
+                        
                         // Adiciona DENTRO do artefato específico
                         if(currentParentId) {
                             push(ref(db, `fichas/${fichaID}/habilidades/artefatos/${currentParentId}/mods`), data);
                         }
                     }
                     else if (currentCategory === 'inventario') {
-                        data.peso = 0;
+                        data.peso = item.peso !== undefined ? item.peso : 0;
                         push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     } 
                     else if (currentCategory === 'artefatos') {
-                        // Não deve acontecer pois artefatos não vêm da lib (só os mods), mas por segurança
                         data.peso = 0;
                         push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     }
                     else {
-                         data.teste = item.custo;
+                         // Para Geral, Vantagens, Arquétipo
+                         data.teste = item.custo || "";
                          push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
                     }
                     
