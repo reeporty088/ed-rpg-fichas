@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha RPG - Escória de Deus</title>
+    <style>
+        :root { 
+            --bg: #1a1a1a; 
+            --text: #ffffff;
+            --theme-main: #800000;
+            --theme-card: #41141a;
+            --theme-border: #5a1a1f;
+            --theme-input: #2a0a0d;
+            --theme-light: #ffaaaa;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; padding-bottom: 80px; transition: 0.5s; }
+        .container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1400px; width: 100%; }
+        .col { display: flex; flex-direction: column; gap: 15px; }
+        
+        /* --- MODOS ESPECIAIS --- */
+        body.moon-mode { --theme-main: #0088aa; --theme-light: #00ffff; }
+        body.moon-mode .attr-box input, body.moon-mode .pericia-val, body.moon-mode #char_name, body.moon-mode #mask-btn { color: #00ffff !important; text-shadow: 0 0 8px #00ffff; }
+        body.moon-mode .attr-box { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); border-color: #00ffff; }
+
+        body.hell-mode { --theme-main: #880000; --theme-light: #ff0000; }
+        body.hell-mode .attr-box.hell-active input, 
+        body.hell-mode #bar_hp .bar-values input, 
+        body.hell-mode #bar_pa .bar-values input, 
+        body.hell-mode #char_name, 
+        body.hell-mode #hell-btn { color: #ff0000 !important; text-shadow: 0 0 8px #ff0000; }
+        body.hell-mode .attr-box.hell-active { box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); border-color: #ff0000; }
+
+        body.hybrid-mode { --theme-main: #4a0072; --theme-light: #d500f9; }
+        body.hybrid-mode #char_name, body.hybrid-mode #mask-btn, body.hybrid-mode #hell-btn { color: #d500f9 !important; text-shadow: 0 0 10px #d500f9; }
+        body.hybrid-mode .attr-box input { color: #00ffff !important; } 
+        body.hybrid-mode .attr-box.hell-active input { color: #ff0000 !important; text-shadow: 0 0 10px #ff0000; }
+        
+        .card { background: var(--theme-card); border-radius: 12px; padding: 15px; border: 1px solid var(--theme-border); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; }
+        .header-label { background: var(--theme-main); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        
+        input, textarea { background: var(--theme-input); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
+        input[readonly] { background: rgba(0,0,0,0.3); color: #aaa; border: 1px dashed #444; cursor: not-allowed; }
+        
+        label { font-size: 10px; color: var(--theme-light); font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
+        .hab-body textarea { min-height: 120px; resize: vertical; line-height: 1.4; font-size: 14px; }
+        
+        .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; position: relative; }
+        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--theme-main); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; }
+        .avatar-circle input[type="file"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
+        .theme-btn { position: absolute; top: 0; right: 20px; background: #222; border: 2px solid var(--theme-light); color: var(--theme-light); border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 20; transition: 0.3s; }
+        .theme-btn:hover { background: var(--theme-light); color: #000; }
+        
+        .ability-btn { position: absolute; top: 40px; right: 20px; background: #111; border: 2px solid #555; color: #555; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 18px; z-index: 20; transition: 0.3s; }
+        .ability-btn:hover { border-color: white; color: white; }
+        #mask-btn { right: 20px; } 
+        #mask-btn.active { border-color: #00ffff; color: #00ffff; box-shadow: 0 0 10px #00ffff; }
+        #hell-btn { right: 60px; }
+        #hell-btn.active { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 10px #ff0000; }
+
+        .color-picker { display: none; position: absolute; top: 40px; right: 0; background: #222; border: 1px solid #555; padding: 10px; border-radius: 10px; grid-template-columns: repeat(4, 1fr); gap: 8px; z-index: 30; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .color-picker.open { display: grid; }
+        .color-swatch { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .color-swatch:hover { transform: scale(1.2); border-color: white; }
+
+        .bar-container { margin-bottom: 12px; }
+        .bar-label { margin-left: 5px; margin-bottom: 3px; color: var(--theme-light); font-size: 11px; font-weight: bold; text-transform: uppercase; display: block; }
+        .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
+        .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
+        .bar-bg { flex-grow: 1; height: 28px; background: #222; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
+        .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; width: 100%; }
+        .hp-fill { background: #d32f2f; } .mp-fill { background: #1976d2; } .pa-fill { background: #7b1fa2; }
+        .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
+        .bar-values input[readonly] { background: transparent; border: none; color: rgba(255,255,255,0.7); cursor: default; }
+
+        /* ESTILOS DAS HABILIDADES */
+        .hab-item { background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+        .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
+        
+        .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; }
+        .hab-title.modified { color: #ffd700 !important; font-style: italic; }
+        .hab-item input[readonly] { color: #eee; cursor: default; border-color: transparent; background: transparent; }
+        .hab-item textarea[readonly] { color: #aaa; cursor: default; border-color: transparent; background: transparent; }
+
+        .hab-dice { width: 85px !important; text-align: center; border-radius: 10px !important; margin: 0 !important; }
+        .hab-toggle { cursor: pointer; color: var(--theme-light); font-size: 12px; padding: 0 5px; }
+        .hab-body { padding: 8px; display: none; border-top: 1px solid var(--theme-border); }
+        .hab-body.open { display: block; }
+        
+        .btn-add { background: #22aa22; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        .btn-edit { background: transparent; border: none; cursor: pointer; font-size: 16px; margin-right: 5px; opacity: 0.7; transition: 0.2s; color: var(--theme-light); }
+        .btn-edit:hover { opacity: 1; transform: scale(1.1); color: white; }
+        
+        /* ESTILOS ESPECÍFICOS PARA TÉCNICAS E ARTEFATOS */
+        .tech-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 0 8px 8px 8px; font-size: 11px; color: #aaa; }
+        .tech-info span { background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; text-align: center; }
+        
+        /* Estilo do Card de Artefato (Pai) */
+        .artifact-card { border: 1px solid var(--theme-light); background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
+        .artifact-header { background: var(--theme-border); padding: 10px; display: flex; gap: 10px; align-items: center; }
+        .artifact-body { padding: 10px; }
+        .mod-list { margin-top: 10px; border-top: 1px dashed #555; padding-top: 10px; }
+        .mod-label { font-size: 10px; color: #aaa; text-transform: uppercase; display: block; margin-bottom: 5px; text-align: center; }
+        
+        .art-cost { width: 60px !important; text-align: center; font-weight: bold; }
+        .art-cost.positive { color: #ff5555; }
+        .art-cost.negative { color: #55ff55; }
+        .btn-check { width: 25px; height: 25px; border-radius: 4px; border: 1px solid #555; background: #222; color: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-right: 5px; }
+        .btn-check.checked { background: var(--theme-main); color: white; border-color: var(--theme-light); }
+
+        .marker-section { margin-bottom: 20px; text-align: center; }
+        .marker-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; }
+        .marker-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px; }
+        .marker-item { cursor: pointer; font-size: 24px; opacity: 0.2; transition: 0.3s; filter: grayscale(1); }
+        .marker-item.active { opacity: 1; filter: grayscale(0); drop-shadow: 0 0 5px currentColor; }
+        .tri { color: #00ffff; } .circ { color: #00ff00; } 
+        .btn-count { background: var(--theme-main); border: 1px solid var(--theme-light); color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; line-height: 1; font-weight: bold; }
+
+        .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
+        .attr-box { background: rgba(255,255,255,0.05); border: 1px solid #7a2a2f; border-radius: 12px; padding: 10px 2px; text-align: center; transition: 0.5s; position: relative; }
+        .attr-box input { font-size: 28px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; }
+        
+        .attr-selector { position: absolute; top: 5px; right: 5px; width: 12px; height: 12px; border-radius: 50%; border: 1px solid #666; background: #222; cursor: pointer; display: none; }
+        .attr-selector.selected { background: #ff0000; border-color: white; box-shadow: 0 0 5px red; }
+        .show-hell-selector .attr-selector { display: block; }
+        .attr-box.hell-active .attr-selector { display: block; background: #ff0000; cursor: default; }
+
+        .skull { opacity: 0.2; transition: 0.3s; cursor: pointer; font-size: 30px; margin: 0 5px; }
+        .skull.active { opacity: 1; filter: drop-shadow(0 0 5px red); }
+
+        #pericias-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
+        .pericia-row { display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 4px; border-radius: 10px; border: 1px solid var(--theme-border); }
+        .pericia-row span:first-child { font-size: 10px; font-weight: bold; color: #ccc; margin-bottom: 4px; text-transform: uppercase; }
+        .pericia-controls { display: flex; align-items: center; gap: 2px; background: transparent; padding: 0; width: 100%; justify-content: center; }
+        .btn-p { background: transparent; border: none; color: var(--theme-light); font-weight: bold; font-size: 16px; cursor: pointer; width: 20px; display: flex; justify-content: center; }
+        .btn-p:hover { color: white; text-shadow: 0 0 5px white; }
+        .pericia-val { font-weight: bold; color: white; font-size: 18px; min-width: 22px; text-align: center; }
+        .dice-icon { font-size: 12px; margin-left: 2px; opacity: 0.5; }
+
+        .xp-container { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 10px; border: 1px solid var(--theme-border); margin-bottom: 10px; }
+        .xp-display { text-align: center; }
+        .xp-number { font-size: 32px; font-weight: bold; color: #ffd700; display: block; line-height: 1; }
+        .xp-label { font-size: 10px; color: #ccc; text-transform: uppercase; }
+        .btn-xp { background: var(--theme-main); border: 1px solid var(--theme-light); color: white; font-size: 10px; padding: 5px 10px; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.2s; }
+        .btn-xp:hover { background: var(--theme-light); color: black; }
+        .xp-info-bar { text-align: center; background: #222; border: 1px solid #444; border-radius: 8px; padding: 5px; font-weight: bold; font-size: 14px; color: #4fc3f7; }
+        .weight-display { text-align: center; background: rgba(0,0,0,0.5); border: 1px solid var(--theme-border); padding: 5px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; }
+        .weight-val { color: white; transition: 0.3s; }
+        .weight-val.alert { color: #ffeb3b; }
+        .weight-val.danger { color: #f44336; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .mobile-nav { display: none; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+        
+        .modal-choice { background: var(--theme-card); padding: 20px; border-radius: 15px; border: 2px solid var(--theme-main); width: 300px; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .btn-choice { width: 100%; padding: 15px; margin: 8px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--theme-light); color: white; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.2s; font-size: 14px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-choice:hover { background: var(--theme-main); color: white; transform: scale(1.02); }
+
+        .modal-library { background: var(--theme-card); width: 90%; max-width: 600px; height: 80vh; border-radius: 15px; border: 2px solid var(--theme-main); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
+        .lib-header { padding: 15px; background: var(--theme-main); font-weight: bold; text-align: center; border-bottom: 1px solid var(--theme-light); color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .lib-search { padding: 10px; background: rgba(0,0,0,0.5); }
+        .lib-search input { width: 100%; padding: 10px; background: #222; border: 1px solid #555; color: white; border-radius: 8px; }
+        .lib-list { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .lib-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .lib-item:hover { border-color: var(--theme-light); background: rgba(255,255,255,0.05); }
+        .lib-item h4 { margin: 0; color: var(--theme-light); font-size: 16px; }
+        .lib-item span { font-size: 12px; color: #aaa; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; }
+        .lib-close { padding: 15px; background: #222; border: none; color: #aaa; cursor: pointer; width: 100%; font-weight: bold; border-top: 1px solid #444; transition: 0.2s; }
+        .lib-close:hover { background: #333; color: white; }
+
+        @media (max-width: 768px) { .container { display: block; } .col { display: none; width: 100%; animation: fadeEffect 0.5s; } .col.active { display: flex; } .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--theme-main); padding: 15px 0; justify-content: center; gap: 50px; z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.7); border-top: 1px solid var(--theme-light); } .nav-btn { background: rgba(0,0,0,0.3); border: 2px solid white; color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; } .nav-btn:active { transform: scale(0.9); background: white; color: black; } @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="col active" id="col-0">
+        <div class="card">
+            <div class="header-label">Personagem</div>
+            <div class="avatar-container">
+                <div class="avatar-circle" id="avatar_display"><input type="file" id="img_upload" accept="image/*"></div>
+                <button class="theme-btn" onclick="toggleColorPicker()">🎨</button>
+                <button class="ability-btn" id="mask-btn" onclick="toggleAbility('mask')" title="Máscara Lunar">🎭</button>
+                <button class="ability-btn" id="hell-btn" onclick="toggleAbility('hell')" title="Chamado do Inferno">😈</button>
+                <div id="colorPicker" class="color-picker"></div>
+                <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-size:18px; font-weight:bold; margin-top:10px; color:white;" placeholder="NOME">
+            </div>
+            <label>IDADE</label><input type="text" id="idade">
+            <label>FLORINS</label><input type="text" id="florins">
+            <label>ARQUÉTIPO</label><input type="text" id="arquetipo">
+            
+            <div class="header-label" style="margin-top:15px;">Status</div>
+            <div class="bar-container">
+                <label class="bar-label">PONTOS DE VIDA (Max = Res x 5)</label>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('hp', -1)">-</button><div class="bar-bg"><div id="bar_hp" class="bar-fill hp-fill"></div><div class="bar-values"><input type="number" id="hp_at" value="10"> / <input type="number" id="hp_max" value="10" readonly></div></div><button class="btn-math" onclick="changeVal('hp', 1)">+</button></div>
+            </div>
+            <div class="bar-container">
+                <label class="bar-label">PONTOS DE MANA (Max = Hab x 5)</label>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('mp', -1)">-</button><div class="bar-bg"><div id="bar_mp" class="bar-fill mp-fill"></div><div class="bar-values"><input type="number" id="mp_at" value="10"> / <input type="number" id="mp_max" value="10" readonly></div></div><button class="btn-math" onclick="changeVal('mp', 1)">+</button></div>
+            </div>
+            <div class="bar-container">
+                <label class="bar-label">PONTOS DE AÇÃO (Max = Pod)</label>
+                <div class="bar-controls"><button class="btn-math" onclick="changeVal('pa', -1)">-</button><div class="bar-bg"><div id="bar_pa" class="bar-fill pa-fill"></div><div class="bar-values"><input type="number" id="pa_at" value="3"> / <input type="number" id="pa_max" value="3" readonly></div></div><button class="btn-math" onclick="changeVal('pa', 1)">+</button></div>
+            </div>
+            <div style="text-align:center; margin: 10px 0;"><span class="skull" id="skull1" onclick="toggleSkull('skull1')">💀</span><span class="skull" id="skull2" onclick="toggleSkull('skull2')">💀</span><span class="skull" id="skull3" onclick="toggleSkull('skull3')">💀</span></div>
+            
+            <div class="attr-container" id="attr_container">
+                <div class="attr-box" id="box_poder"><input type="number" id="poder" value="0"><div>PODER</div><div class="attr-selector" onclick="selectHellAttr('poder')"></div></div>
+                <div class="attr-box" id="box_habilidade"><input type="number" id="habilidade" value="0"><div>HAB.</div><div class="attr-selector" onclick="selectHellAttr('habilidade')"></div></div>
+                <div class="attr-box" id="box_resistencia"><input type="number" id="resistencia" value="0"><div>RES.</div><div class="attr-selector" onclick="selectHellAttr('resistencia')"></div></div>
+            </div>
+            
+            <div class="header-label">Perícias</div>
+            <div id="pericias-list"></div>
+        </div>
+    </div>
+
+    <div class="col" id="col-1">
+        <div class="card">
+            <div class="header-label">Habilidades Gerais</div>
+            
+            <label>Geral <button class="btn-add" onclick="openAddMenu('geral')">+</button></label>
+            <div id="list_geral" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Vantagens / Desvantagens <button class="btn-add" onclick="openAddMenu('vantagens')">+</button></label>
+            <div id="list_vantagens" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Arquétipo <button class="btn-add" onclick="openAddMenu('arquetipo')">+</button></label>
+            <div id="list_arquetipo" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Artefatos (Armas) <button class="btn-add" onclick="openAddMenu('artefatos')">+</button></label>
+            <div id="list_artefatos" style="margin-top:5px;"></div>
+
+            <div class="header-label" style="margin-top:10px;">Técnicas</div>
+            
+            <label>Truques</label>
+            <div id="list_tecnicas_truque" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Técnicas Comuns</label>
+            <div id="list_tecnicas_comum" style="margin-top:5px;"></div>
+            
+            <label style="margin-top:10px;">Técnicas Lendárias</label>
+            <div id="list_tecnicas_lendaria" style="margin-top:5px;"></div>
+            
+            <button class="btn-add" onclick="openAddMenu('tecnicas')" style="width:100%; border-radius:8px; margin-top:10px;">+ Adicionar Técnica</button>
+        </div>
+    </div>
+
+    <div class="col" id="col-2">
+        <div class="card">
+            <div class="header-label">Ações e Deslocamento</div>
+            <div class="marker-section">
+                <label style="text-align:center; display:block; color:cyan;">AÇÃO COMPLETA</label>
+                <div class="marker-controls"><button class="btn-count" onclick="updateMarkerCount('ações', -1)">-</button><span id="count_ações" style="font-weight:bold; color:cyan;">3</span><button class="btn-count" onclick="updateMarkerCount('ações', 1)">+</button></div>
+                <div id="display_ações" class="marker-display"></div>
+            </div>
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="marker-section">
+                <label style="text-align:center; display:block; color:springgreen;">DESLOCAMENTO</label>
+                <div class="marker-controls">
+                    <span id="count_desloc" style="font-weight:bold; color:springgreen;">0</span>
+                </div>
+                <div id="display_desloc" class="marker-display"></div>
+            </div>
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="header-label">Experiência</div>
+            <div class="xp-container"><button class="btn-xp" onclick="gastarPonto()">Gastar</button><div class="xp-display"><span id="display_pontos" class="xp-number">0</span><span class="xp-label">Pontos</span></div><button class="btn-xp" onclick="converterXP()">Converter</button></div>
+            <div class="xp-info-bar"><span id="display_xp_total">0</span> XP</div>
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+            <div class="header-label">Inventário</div>
+            <div class="weight-display">PESO: <span id="weight_val" class="weight-val">0</span> / <span id="weight_max">0</span></div>
+            <label>Itens <button class="btn-add" onclick="openAddMenu('inventario')">+</button></label>
+            <div id="list_inventario" style="margin-top:5px;"></div>
+        </div>
+    </div>
+</div>
+<div class="mobile-nav"><button class="nav-btn" onclick="changeColumn(-1)">◀</button><button class="nav-btn" onclick="changeColumn(1)">▶</button></div>
+
+<div class="modal-overlay" id="modal-choice" onclick="closeModal('modal-choice')">
+    <div class="modal-choice" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; color:var(--theme-light);">ADICIONAR NOVO</h3>
+        <button class="btn-choice" onclick="selectFromLibrary()">📜 Escolher da Lista</button>
+        <button class="btn-choice" onclick="createManual()">✏️ Criar Manualmente</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-library">
+    <div class="modal-library">
+        <div class="lib-header" id="lib-title">BIBLIOTECA</div>
+        <div class="lib-search">
+            <input type="text" id="lib-search-input" placeholder="Buscar habilidade..." onkeyup="filterLibrary()">
+        </div>
+        <div class="lib-list" id="lib-list-container">
+            </div>
+        <button class="lib-close" onclick="closeModal('modal-library')">FECHAR</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, update, onValue, remove, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlParams = new URLSearchParams(window.location.search);
+    const fichaID = urlParams.get('p') || "personagem_padrao";
+
+    let globalCharData = {};
+    let globalWorldTime = {};
+    
+    // Variáveis para o sistema de Escolha
+    let currentCategory = ""; 
+    let libraryData = {}; 
+    let currentParentId = null; // Usado para adicionar Mods dentro de um Artefato Específico
+
+    let currentColumn = 0; const totalColumns = 3;
+    window.changeColumn = (dir) => { const cols = document.querySelectorAll('.col'); cols[currentColumn].classList.remove('active'); currentColumn += dir; if (currentColumn < 0) currentColumn = 0; if (currentColumn >= totalColumns) currentColumn = totalColumns - 1; cols[currentColumn].classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const themes = { sangue: { main: '#800000', card: '#41141a', border: '#5a1a1f', input: '#2a0a0d', light: '#ffaaaa' }, oceano: { main: '#0d47a1', card: '#0a192f', border: '#1565c0', input: '#0d2345', light: '#82b1ff' }, floresta: { main: '#1b5e20', card: '#0f2913', border: '#2e7d32', input: '#0a210f', light: '#a5d6a7' }, ametista: { main: '#4a148c', card: '#240a33', border: '#7b1fa2', input: '#210530', light: '#e1bee7' }, brasa: { main: '#bf360c', card: '#3e1b05', border: '#d84315', input: '#361505', light: '#ffccbc' }, sombra: { main: '#424242', card: '#212121', border: '#616161', input: '#121212', light: '#bdbdbd' }, ouro: { main: '#ff6f00', card: '#331a00', border: '#ff8f00', input: '#2e1800', light: '#ffecb3' }, rosa: { main: '#880e4f', card: '#33081b', border: '#ad1457', input: '#300518', light: '#f8bbd0' } };
+    window.toggleColorPicker = () => { document.getElementById('colorPicker').classList.toggle('open'); };
+    window.setTheme = (themeName) => { const t = themes[themeName]; if(!t) return; const r = document.documentElement.style; r.setProperty('--theme-main', t.main); r.setProperty('--theme-card', t.card); r.setProperty('--theme-border', t.border); r.setProperty('--theme-input', t.input); r.setProperty('--theme-light', t.light); update(ref(db, 'fichas/' + fichaID), { color_theme: themeName }); document.getElementById('colorPicker').classList.remove('open'); };
+    const picker = document.getElementById('colorPicker'); Object.keys(themes).forEach(key => { const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = themes[key].main; div.onclick = () => setTheme(key); picker.appendChild(div); });
+    
+    // LISTA DE PERÍCIAS ATUALIZADA
+    const periciasList = [ {id: 'p_animais', nome: 'ANIMAIS'}, {id: 'p_arte', nome: 'ARTE'}, {id: 'p_esporte', nome: 'ESPORTE'}, {id: 'p_influencia', nome: 'INFLU.'}, {id: 'p_luta', nome: 'LUTA'}, {id: 'p_manha', nome: 'MANHA'}, {id: 'p_maquinas', nome: 'MÁQUINAS'}, {id: 'p_medicina', nome: 'MEDICINA'}, {id: 'p_mistica', nome: 'MÍSTICA'}, {id: 'p_percepcao', nome: 'PERCEP.'}, {id: 'p_saber', nome: 'SABER'}, {id: 'p_sobrevivencia', nome: 'SOBREVIV.'} ];
+    
+    const camposParaSalvar = [ 'char_name', 'idade', 'florins', 'arquetipo', 'hp_at', 'mp_at', 'pa_at', 'poder', 'habilidade', 'resistencia', 'xp_total', 'xp_pontos', 'color_theme', ...periciasList.map(p => p.id) ];
+    const pContainer = document.getElementById('pericias-list'); periciasList.forEach(p => { pContainer.innerHTML += `<div class="pericia-row"><span>${p.nome}</span><div class="pericia-controls"><button class="btn-p" onclick="updatePericia('${p.id}', -1)">-</button><span id="disp_${p.id}" class="pericia-val">+0</span><span class="dice-icon">🎲</span><input type="hidden" id="${p.id}" value="0"><button class="btn-p" onclick="updatePericia('${p.id}', 1)">+</button></div></div>`; });
+
+    onValue(ref(db, 'world_time'), (snapshot) => { globalWorldTime = snapshot.val() || {}; refreshDisplayValues(); });
+
+    function countActiveAbilities() {
+        if (!globalCharData.active_abilities) return 0;
+        let c = 0; if (globalCharData.active_abilities.mask) c++; if (globalCharData.active_abilities.hell) c++; return c;
+    }
+
+    function calculateDerivedStats() {
+        const pod = parseInt(globalCharData.poder) || 0;
+        const hab = parseInt(globalCharData.habilidade) || 0;
+        const res = parseInt(globalCharData.resistencia) || 0;
+
+        let maxPa = pod;
+        let maxMp = hab * 5;
+        let maxHp = res * 5;
+        let deslocTotal = hab * 2; 
+
+        if (globalCharData.active_abilities?.hell) {
+            maxHp *= 2;
+            maxPa *= 2;
+        }
+
+        document.getElementById('hp_max').value = maxHp;
+        document.getElementById('mp_max').value = maxMp;
+        document.getElementById('pa_max').value = maxPa;
+
+        const updates = { hp_max: maxHp, mp_max: maxMp, pa_max: maxPa };
+        if (globalCharData.marcadores?.desloc?.total !== deslocTotal) {
+            updates['marcadores/desloc/total'] = deslocTotal;
+        }
+        
+        update(ref(db, 'fichas/' + fichaID), updates);
+        return { maxHp, maxMp, maxPa };
+    }
+
+    window.toggleAbility = (abilityName) => {
+        const isActive = globalCharData.active_abilities && globalCharData.active_abilities[abilityName];
+        const currentMp = parseInt(globalCharData.mp_at) || 0;
+        let cost = 0; if (abilityName === 'mask') cost = 4; if (abilityName === 'hell') cost = 5;
+
+        if (!isActive) {
+            if (countActiveAbilities() >= 2) { alert("Limite de 2 habilidades ativas atingido."); return; }
+            if (currentMp < cost) { alert(`Mana insuficiente (${cost} PM).`); return; }
+            
+            const updates = { [`active_abilities/${abilityName}`]: true, 'mp_at': currentMp - cost };
+            
+            if (abilityName === 'hell') {
+                const curHp = parseInt(globalCharData.hp_at) || 0;
+                updates['hp_at'] = curHp * 2;
+            }
+
+            update(ref(db, 'fichas/' + fichaID), updates).then(() => {
+                if(abilityName === 'hell') {
+                    setTimeout(() => {
+                        const newMaxPa = parseInt(document.getElementById('pa_max').value);
+                        update(ref(db, 'fichas/' + fichaID), { pa_at: newMaxPa });
+                    }, 200);
+                }
+            });
+
+        } else {
+            const updates = { [`active_abilities/${abilityName}`]: false };
+            if (abilityName === 'hell') {
+                const curHp = parseInt(globalCharData.hp_at) || 0;
+                updates['hp_at'] = Math.ceil(curHp / 2);
+            }
+
+            update(ref(db, 'fichas/' + fichaID), updates).then(() => {
+                if(abilityName === 'hell') {
+                    setTimeout(() => {
+                        const curPa = parseInt(globalCharData.pa_at) || 0;
+                        update(ref(db, 'fichas/' + fichaID), { pa_at: Math.floor(curPa / 2) });
+                    }, 200);
+                }
+            });
+        }
+    };
+
+    window.selectHellAttr = (attr) => {
+        if (globalCharData.active_abilities && globalCharData.active_abilities.hell) { alert("Não pode mudar atributo enquanto Chamado do Inferno está ativo."); return; }
+        update(ref(db, 'fichas/' + fichaID), { 'hell_selected_attr': attr });
+    };
+
+    function refreshDisplayValues() {
+        if (!globalCharData) return;
+        const ab = globalCharData.active_abilities || {};
+        const stats = calculateDerivedStats(); 
+
+        const maskBtn = document.getElementById('mask-btn'); const hellBtn = document.getElementById('hell-btn');
+        document.body.classList.remove('moon-mode', 'hell-mode', 'hybrid-mode');
+        maskBtn.classList.toggle('active', !!ab.mask); hellBtn.classList.toggle('active', !!ab.hell);
+
+        if (ab.mask && ab.hell) document.body.classList.add('hybrid-mode');
+        else if (ab.mask) document.body.classList.add('moon-mode');
+        else if (ab.hell) document.body.classList.add('hell-mode');
+
+        const un = globalCharData.unlocked_abilities || {};
+        maskBtn.style.display = un.mask ? 'flex' : 'none'; hellBtn.style.display = un.hell ? 'flex' : 'none';
+
+        const hellAttr = globalCharData.hell_selected_attr || "";
+        const attrContainer = document.getElementById('attr_container');
+        if (un.hell) attrContainer.classList.add('show-hell-selector'); else attrContainer.classList.remove('show-hell-selector');
+        document.querySelectorAll('.attr-box').forEach(b => b.classList.remove('hell-active'));
+        document.querySelectorAll('.attr-selector').forEach(s => s.classList.remove('selected'));
+        if (hellAttr) { const box = document.getElementById('box_' + hellAttr); if(box) { box.querySelector('.attr-selector').classList.add('selected'); if (ab.hell) box.classList.add('hell-active'); } }
+
+        ['poder', 'habilidade', 'resistencia'].forEach(attr => {
+            const el = document.getElementById(attr);
+            let val = parseInt(globalCharData[attr]) || 0;
+            if (ab.hell && hellAttr === attr) { val *= 3; } else if (ab.mask) { val *= 2; }
+            el.value = val; el.disabled = (ab.mask || ab.hell);
+        });
+
+        const hpAtEl = document.getElementById('hp_at'); const paAtEl = document.getElementById('pa_at'); const mpAtEl = document.getElementById('mp_at');
+        
+        if (document.activeElement !== hpAtEl) hpAtEl.value = globalCharData.hp_at || 0;
+        if (document.activeElement !== paAtEl) paAtEl.value = globalCharData.pa_at || 0;
+        if (document.activeElement !== mpAtEl) mpAtEl.value = globalCharData.mp_at || 0;
+
+        updateBarVisual('hp', parseInt(globalCharData.hp_at)||0, stats.maxHp);
+        updateBarVisual('mp', parseInt(globalCharData.mp_at)||0, stats.maxMp);
+        updateBarVisual('pa', parseInt(globalCharData.pa_at)||0, stats.maxPa);
+
+        periciasList.forEach(p => { let val = parseInt(globalCharData[p.id]) || 0; if (ab.mask) { if (val < 2) val += 1; } updateDisplayPericia(p.id, val); });
+
+        const isNight = globalWorldTime.period === 2; const dayMod = globalWorldTime.day % 28; const isFullMoon = (dayMod >= 13 && dayMod <= 16); 
+        let bonusActions = (ab.mask && isNight && isFullMoon) ? 1 : 0;
+        const totalAcoes = (globalCharData.marcadores?.ações?.total || 3);
+        renderMarkers('ações', totalAcoes + bonusActions, globalCharData.marcadores?.ações?.pontos);
+        
+        renderMarkers('desloc', globalCharData.marcadores?.desloc?.total, globalCharData.marcadores?.desloc?.pontos);
+        
+        updateWeight();
+    }
+
+    window.changeVal = (type, mod) => {
+        let current = parseInt(globalCharData[type + '_at']) || 0;
+        let max = parseInt(document.getElementById(type + '_max').value) || 0;
+        let newVal = current + mod;
+        if (newVal < 0) newVal = 0;
+        if (newVal > max) newVal = max;
+        update(ref(db, 'fichas/' + fichaID), { [type + '_at']: newVal });
+        if (type === 'mp' && newVal <= 0 && globalCharData.active_abilities?.mask) { 
+            update(ref(db, 'fichas/' + fichaID), { 'active_abilities/mask': false }); 
+            alert("Mana esgotada! Máscara Lunar desativada."); 
+        }
+    };
+
+    window.converterXP = () => { const xpSpan = document.getElementById('display_xp_total'); const ptSpan = document.getElementById('display_pontos'); let xp = parseInt(xpSpan.innerText) || 0; let pontos = parseInt(ptSpan.innerText) || 0; if (xp >= 10) { const qtd = Math.floor(xp / 10); update(ref(db, 'fichas/' + fichaID), { xp_total: xp - (qtd*10), xp_pontos: pontos + qtd }); } else { alert("XP insuficiente!"); } };
+    window.gastarPonto = () => { const pt = parseInt(document.getElementById('display_pontos').innerText)||0; if (pt>0) update(ref(db, 'fichas/' + fichaID), { xp_pontos: pt-1 }); };
+    window.updatePericia = (id, mod) => { if (document.body.classList.contains('moon-mode') || document.body.classList.contains('hybrid-mode')) { alert("Desative habilidades para editar."); return; } const current = parseInt(globalCharData[id]) || 0; let newVal = current + mod; if (newVal < -2) newVal = -2; if (newVal > 2) newVal = 2; update(ref(db, 'fichas/' + fichaID), { [id]: newVal }); };
+    function updateDisplayPericia(id, val) { const display = document.getElementById('disp_' + id); if (display) { const formatted = val >= 0 ? "+" + val : val; display.innerText = formatted; display.style.color = val > 0 ? '#4caf50' : (val < 0 ? '#f44336' : 'white'); } }
+    function updateWeight() { 
+        const inputs = document.querySelectorAll('#list_inventario input.hab-dice'); 
+        // Também soma o peso dos artefatos
+        const artInputs = document.querySelectorAll('.art-weight-input');
+        
+        let totalW = 0; 
+        inputs.forEach(inp => totalW += parseFloat(inp.value) || 0); 
+        artInputs.forEach(inp => totalW += parseFloat(inp.value) || 0);
+
+        const pod = parseInt(document.getElementById('poder').value) || 0; 
+        const res = parseInt(document.getElementById('resistencia').value) || 0; 
+        const maxW = (pod + res) * 2; 
+        const wVal = document.getElementById('weight_val'); 
+        const wMax = document.getElementById('weight_max'); 
+        if(wVal) wVal.innerText = Math.ceil(totalW); 
+        if(wMax) wMax.innerText = maxW; 
+        wVal.className = 'weight-val'; 
+        if (maxW > 0) { const pct = totalW / maxW; if (pct >= 1) wVal.classList.add('danger'); else if (pct >= 0.7) wVal.classList.add('alert'); } 
+    }
+
+    document.addEventListener('input', (e) => {
+        const target = e.target;
+        const ab = globalCharData.active_abilities || {};
+        if ((target.id === 'poder' || target.id === 'habilidade' || target.id === 'resistencia') && (ab.mask || ab.hell)) return;
+
+        if (camposParaSalvar.includes(target.id)) {
+            let valToSave = target.value;
+            if (['poder', 'habilidade', 'resistencia'].includes(target.id)) {
+                const updates = {}; updates[target.id] = valToSave;
+                update(ref(db, 'fichas/' + fichaID), updates).then(() => calculateDerivedStats());
+            } else {
+                const updates = {}; updates[target.id] = valToSave;
+                update(ref(db, 'fichas/' + fichaID), updates);
+            }
+        }
+    });
+
+    onValue(ref(db, 'fichas/' + fichaID), (snapshot) => {
+        const dados = snapshot.val(); if (!dados) return; globalCharData = dados;
+        if (dados.color_theme && !document.body.classList.contains('moon-mode') && !document.body.classList.contains('hell-mode') && !document.body.classList.contains('hybrid-mode')) { const t = themes[dados.color_theme]; if (t) { const r = document.documentElement.style; r.setProperty('--theme-main', t.main); r.setProperty('--theme-card', t.card); r.setProperty('--theme-border', t.border); r.setProperty('--theme-input', t.input); r.setProperty('--theme-light', t.light); } }
+
+        camposParaSalvar.forEach(id => {
+            if (dados[id] !== undefined) {
+                if (id === 'xp_total') document.getElementById('display_xp_total').innerText = dados[id];
+                else if (id === 'xp_pontos') document.getElementById('display_pontos').innerText = dados[id];
+                else if (id === 'color_theme') return;
+                else {
+                    const el = document.getElementById(id);
+                    const isAttr = ['poder','habilidade','resistencia'].includes(id);
+                    const isStat = ['hp_at', 'hp_max', 'mp_at', 'mp_max', 'pa_at', 'pa_max'].includes(id);
+                    if (!id.startsWith('p_') && !isAttr && !isStat) {
+                         if (el && document.activeElement !== el) { el.value = dados[id]; }
+                    }
+                }
+            }
+        });
+
+        if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
+        ['skull1', 'skull2', 'skull3'].forEach(sid => { document.getElementById(sid).classList.toggle('active', dados[sid] === "active"); });
+        
+        ['geral', 'vantagens', 'arquetipo'].forEach(cat => renderHabs(cat, dados.habilidades?.[cat]));
+        
+        // Renderiza Artefatos (Lista Pai)
+        renderArtifacts(dados.habilidades?.['artefatos']);
+        
+        renderHabs('tecnicas', dados.habilidades?.['tecnicas']);
+        renderInventory(dados.habilidades?.['inventario']);
+        
+        renderMarkers('ações', dados.marcadores?.['ações']?.total, dados.marcadores?.['ações']?.pontos);
+        refreshDisplayValues();
+    });
+
+    function updateBarVisual(type, current, max) {
+        if (current === undefined) current = parseInt(document.getElementById(type + '_at').value) || 0;
+        if (max === undefined) max = parseInt(document.getElementById(type + '_max').value) || 1;
+        const percent = Math.min(Math.max((current / max) * 100, 0), 100);
+        const el = document.getElementById('bar_' + type); if (el) el.style.width = percent + '%';
+    }
+
+    window.updateMarkerCount = (type, mod) => {
+        let currentTotal = globalCharData.marcadores?.[type]?.total || (type === 'ações' ? 3 : 9);
+        let newTotal = currentTotal + mod; if(newTotal < 0) newTotal = 0;
+        update(ref(db, `fichas/${fichaID}/marcadores/${type}`), { total: newTotal });
+    };
+
+    window.togglePoint = (type, index) => { const key = `p_${index}`; const isActive = document.getElementById(`${type}_${index}`).classList.contains('active'); update(ref(db, `fichas/${fichaID}/marcadores/${type}/pontos`), { [key]: !isActive }); };
+    function renderMarkers(type, total, pontos) { const container = document.getElementById('display_' + type); const countSpan = document.getElementById('count_' + type); container.innerHTML = ""; const finalTotal = (total !== undefined) ? total : (type === 'ações' ? 3 : 0); countSpan.innerText = finalTotal; const icon = type === 'ações' ? '▲' : '●'; const css = type === 'ações' ? 'tri' : 'circ'; for(let i=0; i < finalTotal; i++) { const isActive = pontos && pontos[`p_${i}`] === true; container.innerHTML += `<span id="${type}_${i}" class="marker-item ${css} ${isActive ? 'active' : ''}" onclick="togglePoint('${type}', ${i})">${icon}</span>`; } }
+    
+    // --- SISTEMA DE LISTAS E ESCOLHA ---
+    
+    window.openAddMenu = (category) => {
+        currentCategory = category;
+        currentParentId = null; // Reset para adicionar na raiz
+        document.getElementById('modal-choice').classList.add('open');
+    };
+
+    // Abre menu especificamente para MODIFICADORES de um Artefato
+    window.openModMenu = (artifactId) => {
+        currentCategory = 'artefatos_mods';
+        currentParentId = artifactId;
+        // Pula o modal de escolha e vai direto para a biblioteca
+        selectFromLibrary();
+    }
+
+    window.closeModal = (id) => {
+        document.getElementById(id).classList.remove('open');
+    };
+
+    window.createManual = () => {
+        closeModal('modal-choice');
+        let data = { titulo: "", desc: "", locked: false };
+        
+        if (currentCategory === 'inventario') { data.peso = 0; }
+        else if (currentCategory === 'artefatos') { data.peso = 0; } // Artefato base
+        else { data.teste = ""; } 
+        
+        const newItemRef = push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`)); 
+        set(newItemRef, data);
+    };
+
+    window.selectFromLibrary = () => {
+        closeModal('modal-choice');
+        const modalLib = document.getElementById('modal-library');
+        modalLib.classList.add('open'); 
+        
+        document.getElementById('lib-title').innerText = "BIBLIOTECA: " + currentCategory.toUpperCase();
+        document.getElementById('lib-list-container').innerHTML = "<div style='color:#aaa; text-align:center'>Carregando...</div>";
+        document.getElementById('lib-search-input').value = ""; 
+
+        onValue(ref(db, `biblioteca_habilidades/${currentCategory}`), (snap) => {
+            libraryData = snap.val() || {};
+            window.filterLibrary(); 
+        }, { onlyOnce: true });
+    };
+
+    // --- FUNÇÃO CORRIGIDA PARA EXIBIR DESCRIÇÃO ---
+    window.filterLibrary = () => {
+        const term = document.getElementById('lib-search-input').value.toLowerCase();
+        const container = document.getElementById('lib-list-container');
+        container.innerHTML = "";
+
+        const items = [];
+        for(let id in libraryData) items.push(libraryData[id]);
+        items.sort((a,b) => a.nome.localeCompare(b.nome));
+
+        if(items.length === 0) {
+            container.innerHTML = "<div style='padding:10px; color:#aaa; text-align:center;'>Nenhum item nesta categoria.</div>";
+            return;
+        }
+
+        items.forEach(item => {
+            if(item.nome.toLowerCase().includes(term)) {
+                const div = document.createElement('div');
+                div.className = 'lib-item';
+                
+                // --- CORREÇÃO AQUI: Inserido div wrapper para Título e Descrição ---
+                div.innerHTML = `
+                    <div style="display:flex; flex-direction:column; text-align:left; padding-right:10px; max-width: 85%;">
+                        <h4 style="margin:0">${item.nome}</h4>
+                        <small style="color:#aaa; font-size:11px; margin-top:2px; line-height:1.2;">${item.desc || "Sem descrição"}</small>
+                    </div>
+                    <span>${item.custo !== undefined ? item.custo : ''}</span>
+                `;
+                
+                div.onclick = () => {
+                    let data = { 
+                        titulo: item.nome || "Item", 
+                        desc: item.desc || "", 
+                        locked: true 
+                    };
+                    
+                    if (currentCategory === 'tecnicas') {
+                        data.exigencia = item.exigencia || ""; 
+                        data.alcance = item.alcance || ""; 
+                        data.duracao = item.duracao || ""; 
+                        data.tipo = item.tipo || "comum"; 
+                        data.teste = item.custo || "";
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    }
+                    else if (currentCategory === 'artefatos_mods') {
+                        data.custo = item.custo !== undefined ? item.custo : 0; 
+                        data.variavel = item.variavel || false;
+                        if(currentParentId) {
+                            push(ref(db, `fichas/${fichaID}/habilidades/artefatos/${currentParentId}/mods`), data);
+                        }
+                    }
+                    else if (currentCategory === 'inventario') {
+                        data.peso = item.peso !== undefined ? item.peso : 0;
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    } 
+                    else if (currentCategory === 'artefatos') {
+                        data.peso = 0;
+                        push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    }
+                    else {
+                         data.teste = item.custo || "";
+                         push(ref(db, `fichas/${fichaID}/habilidades/${currentCategory}`), data);
+                    }
+                    
+                    closeModal('modal-library');
+                };
+                container.appendChild(div);
+            }
+        });
+    };
+
+    window.unlockItem = (category, id) => {
+        if(confirm("Editar esta habilidade? Ela ficará marcada como personalizada.")) {
+            update(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`), { locked: false });
+        }
+    };
+    
+    // Toggle para Modificadores dentro de Artefatos
+    window.toggleModActive = (artId, modId, currentVal) => {
+        update(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`), { active_mod: !currentVal });
+    };
+    // Salva valores de Modificadores (nested)
+    window.saveMod = (artId, modId, field, val) => {
+        update(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`), { [field]: val });
+    };
+    // Remove Modificador (nested)
+    window.removeMod = (artId, modId) => {
+        if(confirm("Remover este modificador?")) remove(ref(db, `fichas/${fichaID}/habilidades/artefatos/${artId}/mods/${modId}`));
+    };
+
+    window.removeItem = (category, id) => { if(confirm("Apagar?")) remove(ref(db, `fichas/${fichaID}/habilidades/${category}/${id}`)); };
+    window.toggleHab = (id) => { document.getElementById('body_' + id).classList.toggle('open'); };
+    window.saveHab = (cat, id, field, val) => { update(ref(db, `fichas/${fichaID}/habilidades/${cat}/${id}`), { [field]: val }).then(() => { if(cat === 'inventario' || cat === 'artefatos') updateWeight(); }); };
+    
+    // Renderiza a Lista Pai de Artefatos
+    function renderArtifacts(data) {
+        const container = document.getElementById('list_artefatos');
+        if(!container) return;
+        container.innerHTML = "";
+        
+        if(!data) return;
+
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            
+            const div = document.createElement('div');
+            div.className = 'artifact-card';
+            div.innerHTML = `
+                <div class="artifact-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    <input type="text" style="font-weight:bold; color:cyan; text-align:center; margin:0;" value="${item.titulo || ''}" onchange="saveHab('artefatos','${id}','titulo',this.value)" placeholder="Nome do Artefato">
+                    <input type="number" step="0.1" class="hab-dice art-weight-input" style="width:60px; margin:0;" value="${item.peso || 0}" onchange="saveHab('artefatos','${id}','peso',this.value)" placeholder="Peso">
+                    <button class="btn-del" onclick="removeItem('artefatos','${id}')">✖</button>
+                </div>
+                <div class="artifact-body hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('artefatos','${id}','desc',this.value)" placeholder="Descrição visual da arma..." style="margin-bottom:10px;">${item.desc || ''}</textarea>
+                    
+                    <div style="text-align:center; font-size:12px; color:#aaa; border-bottom:1px solid #444; padding-bottom:5px;">MODIFICADORES / EFEITOS</div>
+                    
+                    <div id="mods_list_${id}"></div>
+                    
+                    <button class="btn-add" onclick="openModMenu('${id}')" style="width:100%; border-radius:5px; margin-top:10px;">+ Adicionar Efeito</button>
+                    
+                    <div style="text-align:center; margin-top:10px; font-weight:bold; color:#ffeb3b; font-size:14px; padding-top:5px;">
+                        CUSTO TOTAL: <span id="cost_total_${id}">0</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            
+            // Renderiza os mods deste artefato específico
+            renderArtifactMods(id, item.mods);
+        });
+    }
+
+    // Renderiza a Lista de Modificadores DENTRO de um Artefato
+    function renderArtifactMods(artId, modsData) {
+        const container = document.getElementById(`mods_list_${artId}`);
+        if(!container) return;
+        container.innerHTML = "";
+        
+        let totalCost = 0;
+
+        if(modsData) {
+            Object.keys(modsData).forEach(modId => {
+                const mod = modsData[modId];
+                
+                // Cálculo e Classe CSS
+                let displayCostClass = "neutral";
+                let val = parseFloat(mod.custo) || 0;
+                let costInputHtml = "";
+
+                if (mod.variavel) {
+                     costInputHtml = `<input type="number" class="hab-dice art-cost" value="${mod.custo}" onchange="saveMod('${artId}','${modId}','custo',this.value)" placeholder="Var.">`;
+                } else {
+                    if(val > 0) displayCostClass = "positive";
+                    if(val < 0) displayCostClass = "negative";
+                    costInputHtml = `<input type="number" class="hab-dice art-cost ${displayCostClass}" value="${mod.custo}" readonly>`; // Mods fixos são readonly
+                }
+
+                const isActive = mod.active_mod !== false; 
+                if(isActive) totalCost += val;
+                const checkBtn = `<button class="btn-check ${isActive ? 'checked' : ''}" onclick="toggleModActive('${artId}','${modId}', ${isActive})">✔</button>`;
+                
+                // ID único para o toggle de descrição deste mod
+                const uniqueModToggleId = `mod_body_${artId}_${modId}`;
+
+                const div = document.createElement('div');
+                div.className = 'hab-item';
+                div.style.border = "1px solid #333"; // Visualmente um pouco mais fraco que o pai
+                div.innerHTML = `
+                    <div class="hab-header">
+                        <span class="hab-toggle" onclick="document.getElementById('${uniqueModToggleId}').classList.toggle('open')">▼</span>
+                        ${checkBtn}
+                        <input type="text" class="hab-title" value="${mod.titulo || ''}" readonly style="font-size:13px;">
+                        ${costInputHtml}
+                        <button class="btn-del" onclick="removeMod('${artId}','${modId}')">✖</button>
+                    </div>
+                    <div class="hab-body" id="${uniqueModToggleId}">
+                        <div style="padding:5px; font-size:12px; color:#ccc;">${mod.desc || 'Sem descrição.'}</div>
+                    </div>`;
+                container.appendChild(div);
+            });
+        }
+        
+        // Atualiza o display de total deste artefato
+        const totalSpan = document.getElementById(`cost_total_${artId}`);
+        if(totalSpan) totalSpan.innerText = totalCost;
+    }
+
+    function renderHabs(category, data) { 
+        let container = document.getElementById('list_' + category); 
+        
+        if (category === 'tecnicas') {
+            document.getElementById('list_tecnicas_truque').innerHTML = "";
+            document.getElementById('list_tecnicas_comum').innerHTML = "";
+            document.getElementById('list_tecnicas_lendaria').innerHTML = "";
+            if(!data) return;
+            
+            Object.keys(data).forEach(id => {
+                const item = data[id];
+                const type = item.tipo || 'comum';
+                const targetId = `list_tecnicas_${type}`;
+                const targetContainer = document.getElementById(targetId) || document.getElementById('list_tecnicas_comum');
+                
+                const isLocked = item.locked === true;
+                const readOnlyAttr = isLocked ? 'readonly' : '';
+                const modClass = !isLocked ? 'modified' : '';
+                const editBtn = isLocked ? `<button class="btn-edit" onclick="unlockItem('${category}','${id}')" title="Editar">✏️</button>` : '';
+
+                const div = document.createElement('div');
+                div.className = 'hab-item';
+                div.innerHTML = `
+                    <div class="hab-header">
+                        <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                        <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome" ${readOnlyAttr}>
+                        ${editBtn}
+                        <input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="Custo" ${readOnlyAttr}>
+                        <button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>
+                    </div>
+                    <div class="hab-body" id="body_${id}">
+                        <div class="tech-info">
+                             <span>Req: ${item.exigencia || '-'}</span>
+                             <span>Alc: ${item.alcance || '-'}</span>
+                             <span>Dur: ${item.duracao || '-'}</span>
+                        </div>
+                        <textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição..." ${readOnlyAttr}>${item.desc || ''}</textarea>
+                    </div>`;
+                targetContainer.appendChild(div);
+            });
+            return;
+        }
+
+        if(!container) return; 
+        container.innerHTML = ""; 
+        if(!data) return; 
+        
+        Object.keys(data).forEach(id => { 
+            const item = data[id]; 
+            const isLocked = item.locked === true;
+            const readOnlyAttr = isLocked ? 'readonly' : '';
+            const modClass = !isLocked ? 'modified' : '';
+            const editBtn = isLocked ? `<button class="btn-edit" onclick="unlockItem('${category}','${id}')" title="Editar">✏️</button>` : '';
+
+            const div = document.createElement('div'); 
+            div.className = 'hab-item'; 
+            div.innerHTML = `
+                <div class="hab-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome" ${readOnlyAttr}>
+                    ${editBtn}
+                    <input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="Custo" ${readOnlyAttr}>
+                    <button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>
+                </div>
+                <div class="hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição..." ${readOnlyAttr}>${item.desc || ''}</textarea>
+                </div>`; 
+            container.appendChild(div); 
+        }); 
+    }
+
+    function renderInventory(data) { 
+        const container = document.getElementById('list_inventario'); 
+        if(!container) return; 
+        container.innerHTML = ""; 
+        if(!data) return; 
+        
+        Object.keys(data).forEach(id => { 
+            const item = data[id]; 
+            const isLocked = item.locked === true;
+            const readOnlyAttr = isLocked ? 'readonly' : '';
+            const modClass = !isLocked ? 'modified' : '';
+            const editBtn = isLocked ? `<button class="btn-edit" onclick="unlockItem('inventario','${id}')" title="Editar">✏️</button>` : '';
+
+            const div = document.createElement('div'); 
+            div.className = 'hab-item'; 
+            div.innerHTML = `
+                <div class="hab-header">
+                    <span class="hab-toggle" onclick="toggleHab('${id}')">▼</span>
+                    <input type="text" class="hab-title ${modClass}" value="${item.titulo || ''}" onchange="saveHab('inventario','${id}','titulo',this.value)" placeholder="Item" ${readOnlyAttr}>
+                    ${editBtn}
+                    <input type="number" step="0.1" class="hab-dice" value="${item.peso || 0}" onchange="saveHab('inventario','${id}','peso',this.value)" placeholder="Peso" ${readOnlyAttr}>
+                    <button class="btn-del" onclick="removeItem('inventario','${id}')">✖</button>
+                </div>
+                <div class="hab-body" id="body_${id}">
+                    <textarea onchange="saveHab('inventario','${id}','desc',this.value)" placeholder="Detalhes..." ${readOnlyAttr}>${item.desc || ''}</textarea>
+                </div>`; 
+            container.appendChild(div); 
+        }); 
+    }
+    
+    window.toggleSkull = (id) => { const el = document.getElementById(id); el.classList.toggle('active'); update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" }); };
+    document.getElementById('img_upload').addEventListener('change', (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (readerEvent) => { const image = new Image(); image.onload = () => { const canvas = document.createElement('canvas'); const maxSize = 300; let width = image.width; let height = image.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0, width, height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`; update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl }); }; image.src = readerEvent.target.result; }; reader.readAsDataURL(file); });
+</script>
+</body>
+</html>
