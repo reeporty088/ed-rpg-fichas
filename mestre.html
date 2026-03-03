@@ -16,6 +16,7 @@
         .world-time { font-size: 32px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
         .weather-badge { background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px; font-size: 14px; border: 1px solid #555; display: flex; align-items: center; gap: 8px; }
         
+        /* BOTÕES DO TOPO */
         .world-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-calendar { background: var(--header-bg); color: white; border: 1px solid var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
         .btn-calendar:hover { background: #a00000; box-shadow: 0 0 10px var(--header-bg); }
@@ -25,6 +26,7 @@
         .btn-global-toggle:hover { background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         .btn-journey { background: transparent; color: #4caf50; border: 1px solid #4caf50; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
         .btn-journey:hover { background: rgba(76, 175, 80, 0.1); box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
+
 
         .category-container { background: var(--divider-bg); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 20px; transition: 0.3s; }
         .category-container.drag-over { border-color: var(--accent); background: #2a1a1a; }
@@ -42,6 +44,7 @@
         .player-info h2 { margin: 0; font-size: 16px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .player-info p { margin: 0; font-size: 11px; color: #ccc; }
         
+        /* BARRAS DE STATUS COM BOTÕES */
         .stat-row { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
         .btn-stat { width: 22px; height: 18px; background: #222; border: 1px solid #555; color: #ccc; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .btn-stat:hover { background: #444; color: white; border-color: white; }
@@ -86,22 +89,46 @@
         .npc-hab-desc { display: none; color: #ccc; margin-top: 3px; font-size: 11px; white-space: pre-wrap; }
         .npc-hab-desc.open { display: block; }
 
+        /* --- SIDEBAR DIREITA (COMBATE) --- */
         #combat-sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: #111; border-left: 3px solid var(--header-bg); box-shadow: -5px 0 15px rgba(0,0,0,0.8); transition: right 0.3s ease; z-index: 2000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
         #combat-sidebar.open { right: 0; }
         .combat-toggle-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); background: var(--header-bg); color: white; border: 2px solid white; border-right: none; width: 40px; height: 60px; border-radius: 10px 0 0 10px; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; box-shadow: -2px 2px 5px rgba(0,0,0,0.5); transition: right 0.3s ease; }
-        
+        #combat-sidebar.open + .combat-toggle-btn { right: 300px; }
+        .combat-header { text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; font-size: 18px; color: var(--accent); }
+        .combat-drop-zone { flex-grow: 1; border: 2px dashed #444; border-radius: 10px; background: rgba(0,0,0,0.3); overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .combat-drop-zone.drag-over { border-color: var(--accent); background: rgba(128,0,0,0.2); }
+        .combat-item { display: flex; align-items: center; background: #222; padding: 8px; border-radius: 8px; border: 1px solid #444; gap: 10px; transition: 0.3s; }
+        .combat-item.active { border: 2px solid #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); background: #332b00; }
+        .combat-avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; background-position: center; flex-shrink: 0; border: 1px solid #666; }
+        .combat-name { font-size: 12px; font-weight: bold; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .combat-init-bubble { width: 30px; height: 30px; border-radius: 50%; background: #111; border: 2px solid #666; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: white; }
+        .combat-btn-remove { color: #f44336; font-size: 18px; cursor: pointer; background: none; border: none; padding: 0 5px; }
+        .combat-controls { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .btn-combat { width: 100%; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 5px; border: none; text-transform: uppercase; font-size: 12px; }
+        .btn-roll { background: var(--header-bg); color: white; border: 1px solid var(--accent); }
+        .btn-next { background: #ffd700; color: black; }
+        .btn-prev { background: #444; color: white; }
+        .btn-end { background: #c62828; color: white; margin-top: 5px; }
+
+        /* --- SIDEBAR ESQUERDA (ESTOQUE/ROSTER) --- */
         #roster-sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: #111; border-right: 3px solid var(--header-bg); box-shadow: 5px 0 15px rgba(0,0,0,0.8); transition: left 0.3s ease; z-index: 2000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
         #roster-sidebar.open { left: 0; }
         .roster-toggle-btn { position: fixed; top: 50%; left: 0; transform: translateY(-50%); background: var(--header-bg); color: white; border: 2px solid white; border-left: none; width: 40px; height: 60px; border-radius: 0 10px 10px 0; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); transition: left 0.3s ease; }
+        #roster-sidebar.open + .roster-toggle-btn { left: 300px; }
         
         .roster-section { flex-grow: 1; display: flex; flex-direction: column; min-height: 0; margin-bottom: 10px; }
         .roster-title { font-size: 14px; font-weight: bold; color: #ccc; margin-bottom: 5px; padding-left: 5px; border-bottom: 1px solid #444; }
         .roster-drop-zone { flex-grow: 1; border: 1px dashed #444; border-radius: 8px; background: rgba(0,0,0,0.2); overflow-y: auto; padding: 5px; display: flex; flex-direction: column; gap: 5px; }
         .roster-drop-zone.drag-over { background: rgba(255, 255, 255, 0.1); border-color: #aaa; }
+        
         .roster-item { display: flex; align-items: center; background: #222; padding: 8px; border-radius: 8px; border: 1px solid #444; gap: 10px; cursor: grab; transition: 0.2s; }
+        .roster-item:hover { background: #333; border-color: #777; }
+        .roster-item:active { cursor: grabbing; }
         .roster-avatar { width: 35px; height: 35px; border-radius: 50%; background-size: cover; background-position: center; border: 1px solid #666; flex-shrink: 0; }
         .roster-name { font-size: 13px; font-weight: bold; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+
+        /* Form NPC */
         #form-npc-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         #form-npc-container.open { display: flex; justify-content: center; align-items: flex-start; }
         .npc-form { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 2px solid var(--header-bg); width: 100%; max-width: 600px; margin-top: 20px; }
@@ -119,6 +146,7 @@
         .btn-add-npc { background: var(--header-bg); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; display: block; margin: 20px auto; }
         .btn-icon { background: #444; border: none; color: white; cursor: pointer; width: 30px; height: 30px; border-radius: 5px; }
 
+        /* Form Config Player */
         #config-player-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2100; align-items: center; justify-content: center; }
         #config-player-container.open { display: flex; }
         .config-box { background: #222; border: 2px solid var(--accent); padding: 20px; border-radius: 10px; min-width: 300px; text-align: center; }
@@ -154,25 +182,42 @@
     <div id="wrapper-npcs"></div>
 
     <div id="roster-sidebar">
-        <div class="combat-header">👥 ESTOQUE (ARQUIVADOS)</div>
+        <div class="combat-header">👥 ESTOQUE</div>
+        
         <div class="roster-section">
             <div class="roster-title">Jogadores</div>
-            <div id="roster_list_players" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event, 'players')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"></div>
+            <div id="roster_list_players" class="roster-drop-zone" 
+                 ondragover="allowDrop(event)" 
+                 ondrop="dropInRoster(event, 'players')"
+                 ondragenter="this.classList.add('drag-over')" 
+                 ondragleave="this.classList.remove('drag-over')">
+            </div>
         </div>
+        
         <div class="roster-section">
             <div class="roster-title">NPCs</div>
-            <div id="roster_list_npcs" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event, 'npcs')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"></div>
+            <div id="roster_list_npcs" class="roster-drop-zone" 
+                 ondragover="allowDrop(event)" 
+                 ondrop="dropInRoster(event, 'npcs')"
+                 ondragenter="this.classList.add('drag-over')" 
+                 ondragleave="this.classList.remove('drag-over')">
+            </div>
         </div>
     </div>
     <button class="roster-toggle-btn" onclick="toggleRosterSidebar()">👥</button>
 
     <div id="combat-sidebar">
         <div class="combat-header">⚔️ INICIATIVA</div>
-        <div class="combat-drop-zone" id="combat_list" ondragover="allowDrop(event)" ondrop="dropInCombat(event)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"></div>
+        <div class="combat-drop-zone" id="combat_list" 
+             ondragover="allowDrop(event)" 
+             ondrop="dropInCombat(event)" 
+             ondragenter="this.classList.add('drag-over')" 
+             ondragleave="this.classList.remove('drag-over')"></div>
         <div class="combat-controls">
             <label style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:12px; color:#ff5555; cursor:pointer; background:#222; padding:5px; border-radius:5px; margin-bottom: 5px; border: 1px solid #5a1a1f;">
                 <input type="checkbox" id="chk_letal"> ☠️ COMBATE LETAL
             </label>
+
             <button id="btn-regen-toggle" class="btn-combat" style="border: 1px solid #4488ff; color: #4488ff;" onclick="toggleAutoRegen()">💧 Regen Auto: ON</button>
             <button class="btn-combat btn-roll" onclick="calculateInitiative()">🎲 Calcular Iniciativa</button>
             <div style="display:flex; gap:5px;">
@@ -184,237 +229,406 @@
     </div>
     <button class="combat-toggle-btn" onclick="toggleCombatSidebar()">⚔️</button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, runTransaction, push, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
-            authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
-            databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
-            projectId: "ed-rpg---sistema-de-fichas",
-            storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
-            messagingSenderId: "350999444010",
-            appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
-        };
+    <div id="form-npc-container">
+        <div class="npc-form">
+            <h3 style="text-align:center; margin-top:0;">EDITOR DE NPC</h3>
+            <input type="hidden" id="npc_id">
+            <div class="form-row"><div><label>Nome</label><input type="text" id="npc_name"></div><div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div></div>
+            <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0"></div></div>
+            <div class="form-row-3"><div><label>Vida (Max)</label><input type="number" id="npc_hp" value="10"></div><div><label>Mana (Max)</label><input type="number" id="npc_mp" value="10"></div><div><label>PA (Max)</label><input type="number" id="npc_pa" value="3"></div></div>
+            <label>Perícias (Deixe 0 para esconder)</label><div class="skills-grid" id="npc_skills_container"></div>
+            <label>Habilidades Gerais <button type="button" class="btn-icon" style="height:20px; width:20px; font-size:10px;" onclick="addHabRow()">+</button></label>
+            <div id="hab_editor_list" class="hab-list-editor"></div>
+            <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button>
+            <button class="btn-action btn-cancel" onclick="closeNpcForm()">CANCELAR</button>
+        </div>
+    </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const baseURL = "https://reeporty088.github.io/ed-rpg-fichas/";
+    <div id="config-player-container">
+        <div class="config-box">
+            <h3>Habilidades Especiais</h3>
+            <input type="hidden" id="cfg_player_id">
+            <div class="config-option">
+                <span>🎭 Máscara Lunar</span>
+                <input type="checkbox" id="check_mask">
+            </div>
+            <div class="config-option">
+                <span>😈 Chamado do Inferno</span>
+                <input type="checkbox" id="check_hell">
+            </div>
+            <button class="btn-action btn-save" onclick="savePlayerConfig()">Confirmar</button>
+            <button class="btn-action btn-cancel" onclick="document.getElementById('config-player-container').classList.remove('open')">Fechar</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update, runTransaction, push, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const baseURL = "https://reeporty088.github.io/ed-rpg-fichas/";
+
+    const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
+    const skillContainer = document.getElementById('npc_skills_container');
+    periciasIds.forEach(pid => {
+        const div = document.createElement('div');
+        div.className = 'skill-input';
+        div.innerHTML = `<label>${pid.toUpperCase().substr(0,3)}</label><input type="number" id="form_skill_${pid}" value="0">`;
+        skillContainer.appendChild(div);
+    });
+
+    const SEASONS = ["Primavera", "Verão", "Outono", "Inverno"];
+    const WEATHER_TYPES = { "Primavera": ["Sol", "Nublado", "Nublado", "Chuva", "Tempestade"], "Verão": ["Sol Intenso", "Sol", "Nublado", "Tempestade", "Vendaval"], "Outono": ["Nublado", "Chuva", "Neblina", "Vento", "Seco"], "Inverno": ["Nublado", "Neve Fraca", "Neve Forte", "Vento Gelado", "Nevasca"] };
+    const WEATHER_ICONS = { "Sol": "☀", "Sol Intenso": "🔥", "Nublado": "☁", "Chuva": "🌧", "Tempestade": "⛈", "Neblina": "🌫", "Vento": "🌬", "Vento Gelado": "🌬", "Seco": "🍂", "Neve Fraca": "🌨", "Neve Forte": "❄", "Nevasca": "☃", "Vendaval": "🌪" };
+
+    function getWeather(seasonIndex, day, periodIndex) {
+        const seasonName = SEASONS[seasonIndex]; const options = WEATHER_TYPES[seasonName];
+        const seed = (seasonIndex * 1000) + (day * 10) + periodIndex; 
+        const rand = Math.floor((Math.sin(seed) * 10000 - Math.floor(Math.sin(seed) * 10000)) * options.length);
+        const name = options[rand]; return { name: name, icon: WEATHER_ICONS[name] || "❓" };
+    }
+
+    onValue(ref(db, 'world_time'), (snapshot) => {
+        const data = snapshot.val(); if(!data) return;
+        document.getElementById('wd_date').innerText = `Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`;
+        const h = data.hour.toString().padStart(2, '0'); const m = data.minute.toString().padStart(2, '0');
+        document.getElementById('wd_time').innerText = `${h}:${m}`;
+        const weather = getWeather(data.season, data.day, data.period);
+        document.getElementById('wd_weather_icon').innerText = weather.icon; document.getElementById('wd_weather_text').innerText = weather.name;
+    });
+
+    let globalPlayers = {}; let globalNpcs = {}; let globalDivisions = { players: {}, npcs: {} };
+
+    function createDividerHTML(divId, divName, type) {
+        const isDefault = divId === 'default';
+        const nameHtml = isDefault ? `<span>${divName}</span>` : `<span onclick="renameCategory('${type}', '${divId}', '${divName}')">✎ ${divName}</span> <button class="btn-del-cat" onclick="deleteCategory('${type}', '${divId}')">✖</button>`;
+        return `<div class="category-container" id="cat_${divId}" ondragover="allowDrop(event)" ondrop="drop(event, '${divId}', '${type}')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"><div class="category-header"><div class="category-title">${nameHtml}</div></div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`;
+    }
+
+    function renderAll() {
+        const wrapperP = document.getElementById('wrapper-players'); const wrapperN = document.getElementById('wrapper-npcs');
+        // Limpar listas do Roster também
+        document.getElementById('roster_list_players').innerHTML = "";
+        document.getElementById('roster_list_npcs').innerHTML = "";
+
+        let htmlP = createDividerHTML('default', 'Geral', 'players'); if (globalDivisions.players) Object.keys(globalDivisions.players).forEach(key => { htmlP += createDividerHTML(key, globalDivisions.players[key].name, 'players'); }); wrapperP.innerHTML = htmlP;
+        let htmlN = createDividerHTML('default', 'Geral', 'npcs'); if (globalDivisions.npcs) Object.keys(globalDivisions.npcs).forEach(key => { htmlN += createDividerHTML(key, globalDivisions.npcs[key].name, 'npcs'); }); wrapperN.innerHTML = htmlN;
+
+        Object.keys(globalPlayers).forEach(id => {
+            const f = globalPlayers[id]; 
+            // Se estiver "hidden_roster", vai para a sidebar, senão vai para o main
+            if (f.category === 'hidden_roster') {
+                const item = createRosterItem(id, f, 'players');
+                document.getElementById('roster_list_players').appendChild(item);
+            } else {
+                const cat = (f.category && (f.category === 'default' || globalDivisions.players?.[f.category])) ? f.category : 'default';
+                const container = document.getElementById(`grid_players_${cat}`); 
+                if(container) container.appendChild(createPlayerCard(id, f));
+            }
+        });
+
+        Object.keys(globalNpcs).forEach(id => {
+            const n = globalNpcs[id]; 
+            if (n.category === 'hidden_roster') {
+                const item = createRosterItem(id, n, 'npcs');
+                document.getElementById('roster_list_npcs').appendChild(item);
+            } else {
+                const cat = (n.category && (n.category === 'default' || globalDivisions.npcs?.[n.category])) ? n.category : 'default';
+                const container = document.getElementById(`grid_npcs_${cat}`); 
+                if(container) container.appendChild(createNpcCard(id, n));
+            }
+        });
+    }
+
+    // Função para criar o item simples da Sidebar (Roster)
+    function createRosterItem(id, data, type) {
+        const el = document.createElement('div'); 
+        el.className = 'roster-item';
+        el.draggable = true; 
+        el.ondragstart = (e) => drag(e, id, type);
+        
+        const imgUrl = (type === 'players' ? data.char_img : data.img) || "";
+        const name = (type === 'players' ? data.char_name : data.name) || "Sem Nome";
+
+        el.innerHTML = `
+            <div class="roster-avatar" style="background-image: url('${imgUrl}')"></div>
+            <div class="roster-name">${name}</div>
+        `;
+        return el;
+    }
+
+    onValue(ref(db, 'divisoes'), (snap) => { globalDivisions = snap.val() || { players: {}, npcs: {} }; renderAll(); });
+    onValue(ref(db, 'fichas'), (snap) => { globalPlayers = snap.val() || {}; renderAll(); });
+    onValue(ref(db, 'npcs'), (snap) => { globalNpcs = snap.val() || {}; renderAll(); });
+
+    window.openPlayerConfig = (id) => {
+        const f = globalPlayers[id]; if(!f) return;
+        document.getElementById('cfg_player_id').value = id;
+        document.getElementById('check_mask').checked = (f.unlocked_abilities && f.unlocked_abilities.mask === true);
+        document.getElementById('check_hell').checked = (f.unlocked_abilities && f.unlocked_abilities.hell === true);
+        document.getElementById('config-player-container').classList.add('open');
+    };
+
+    window.savePlayerConfig = () => {
+        const id = document.getElementById('cfg_player_id').value;
+        const mask = document.getElementById('check_mask').checked;
+        const hell = document.getElementById('check_hell').checked;
+        update(ref(db, 'fichas/' + id), { 
+            'unlocked_abilities/mask': mask,
+            'unlocked_abilities/hell': hell
+        });
+        document.getElementById('config-player-container').classList.remove('open');
+    };
+
+    window.toggleAllOverlays = () => {
+        let targetMode = 'status'; const keys = Object.keys(globalPlayers);
+        if (keys.length > 0) { if (globalPlayers[keys[0]].overlay_mode === 'status') { targetMode = 'nome'; } }
+        const updates = {}; keys.forEach(id => { updates[`fichas/${id}/overlay_mode`] = targetMode; }); update(ref(db), updates);
+    };
+
+    function createPlayerCard(id, f) {
+        const el = document.createElement('div'); el.className = 'player-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'players');
+        const hpAt = parseInt(f.hp_at)||0; const hpMax = parseInt(f.hp_max)||1; const mpAt = parseInt(f.mp_at)||0; const mpMax = parseInt(f.mp_max)||1; const paAt = parseInt(f.pa_at)||0; const paMax = parseInt(f.pa_max)||1;
+        const hpP = Math.min((hpAt/hpMax)*100,100); const mpP = Math.min((mpAt/mpMax)*100,100); const paP = Math.min((paAt/paMax)*100,100);
+        const linkFicha = `${baseURL}?p=${id}`; const linkOverlay = `${baseURL}overlay.html?p=${id}`;
+        const isStatusMode = f.overlay_mode === 'status';
+        el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${f.char_img || ''}')"></div><div class="player-info"><h2>${f.char_name || id}</h2><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}', '_blank')" title="Abrir Ficha">📄 Ficha</button><button class="btn-small btn-cfg" onclick="openPlayerConfig('${id}')" title="Configurações">⚙️ Config</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}', '_blank')" title="Abrir Overlay do Jogador">🎥 OBS</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${hpP}%"></div></div><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${mpP}%"></div></div><div class="status-bar"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${paP}%"></div></div><div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div><div class="xp-control"><div class="xp-display-mini">Pts: ${f.xp_pontos||0} | XP: ${f.xp_total||0}</div></div><div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
+        return el;
+    }
+
+    function createNpcCard(id, n) {
+        const el = document.createElement('div'); el.className = 'player-card npc-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'npcs');
+        
+        // Dados de Mana
+        const mpMax = n.mp || 1; 
+        const mpAt = (n.mp_at !== undefined) ? n.mp_at : mpMax; 
+        const mpP = Math.min((mpAt/mpMax)*100, 100);
+
+        // Dados de Vida
+        const hpMax = n.hp || 1;
+        const hpAt = (n.hp_at !== undefined) ? n.hp_at : hpMax;
+        const hpP = Math.min((hpAt/hpMax)*100, 100);
 
         const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia'];
-        const skillContainer = document.getElementById('npc_skills_container');
-        periciasIds.forEach(pid => {
-            const div = document.createElement('div');
-            div.className = 'skill-input';
-            div.innerHTML = `<label>${pid.toUpperCase().substr(0,3)}</label><input type="number" id="form_skill_${pid}" value="0" style="width:35px; background:#333; color:white; border:none; text-align:center;">`;
-            if(skillContainer) skillContainer.appendChild(div);
-        });
+        let skillHtml = ''; periciasIds.forEach(pid => { const val = n.skills ? (parseInt(n.skills[pid]) || 0) : 0; if (val !== 0) { const css = val > 0 ? 'pos' : 'neg'; const txt = val > 0 ? `+${val}` : val; skillHtml += `<span class="skill-tag ${css}">${pid.toUpperCase().substr(0,3)} ${txt}</span>`; } });
+        let habHtml = ''; if (n.habs) { n.habs.forEach((h, idx) => { habHtml += `<div class="npc-hab-item"><div class="npc-hab-title" onclick="toggleNpcDesc('${id}_hab_${idx}')"><span>${h.titulo}</span> <span>[${h.teste}]</span></div><div class="npc-hab-desc" id="desc_${id}_hab_${idx}">${h.desc}</div></div>`; }); }
+        
+        el.innerHTML = `
+            <div class="player-header"><div class="player-img" style="background-image: url('${n.img || ''}')"></div><div class="player-info"><h2>${n.name || 'NPC'}</h2><div class="controls-row"><button class="btn-small" onclick='editNpc(${JSON.stringify(id)})'>✏️ Editar</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️</button></div></div></div>
+            
+            <div class="stat-row">
+                <button class="btn-stat minus" onclick="changeNpcStat('${id}', 'hp', -1)">-</button>
+                <div class="status-bar">
+                    <div class="bar-text">PV ${hpAt}/${hpMax}</div>
+                    <div class="bar-fill hp" style="width:${hpP}%"></div>
+                </div>
+                <button class="btn-stat plus" onclick="changeNpcStat('${id}', 'hp', 1)">+</button>
+            </div>
 
-        const SEASONS = ["Primavera", "Verão", "Outono", "Inverno"];
-        const WEATHER_TYPES = { "Primavera": ["Sol", "Nublado", "Nublado", "Chuva", "Tempestade"], "Verão": ["Sol Intenso", "Sol", "Nublado", "Tempestade", "Vendaval"], "Outono": ["Nublado", "Chuva", "Neblina", "Vento", "Seco"], "Inverno": ["Nublado", "Neve Fraca", "Neve Forte", "Vento Gelado", "Nevasca"] };
-        const WEATHER_ICONS = { "Sol": "☀", "Sol Intenso": "🔥", "Nublado": "☁", "Chuva": "🌧", "Tempestade": "⛈", "Neblina": "🌫", "Vento": "🌬", "Vento Gelado": "🌬", "Seco": "🍂", "Neve Fraca": "🌨", "Neve Forte": "❄", "Nevasca": "☃", "Vendaval": "🌪" };
+            <div class="stat-row">
+                <button class="btn-stat minus" onclick="changeNpcStat('${id}', 'mp', -1)">-</button>
+                <div class="status-bar">
+                    <div class="bar-text">PM ${mpAt}/${mpMax}</div>
+                    <div class="bar-fill mp" style="width:${mpP}%"></div>
+                </div>
+                <button class="btn-stat plus" onclick="changeNpcStat('${id}', 'mp', 1)">+</button>
+            </div>
+            
+            <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
+            <div id="details_${id}" class="npc-details"><div class="npc-attr-row"><div class="npc-attr">POD<span>${n.pod}</span></div><div class="npc-attr">HAB<span>${n.hab}</span></div><div class="npc-attr">RES<span>${n.res}</span></div><div class="npc-attr" style="color:#aa66cc">PA<span>${n.pa}</span></div></div><div class="tag-container">${skillHtml || '<span style="color:#666; font-size:10px">Sem perícias</span>'}</div><div class="npc-hab-list">${habHtml}</div></div>
+        `;
+        return el;
+    }
 
-        function getWeather(seasonIndex, day, periodIndex) {
-            const seasonName = SEASONS[seasonIndex]; const options = WEATHER_TYPES[seasonName];
-            const seed = (seasonIndex * 1000) + (day * 10) + periodIndex; 
-            const rand = Math.floor((Math.sin(seed) * 10000 - Math.floor(Math.sin(seed) * 10000)) * options.length);
-            const name = options[rand]; return { name: name, icon: WEATHER_ICONS[name] || "❓" };
+    // NOVA FUNÇÃO: Alterar Status de NPC
+    window.changeNpcStat = (id, type, mod) => {
+        const n = globalNpcs[id];
+        if(!n) return;
+        
+        const maxKey = type; // 'hp' ou 'mp'
+        const curKey = type + '_at';
+        
+        const max = parseInt(n[maxKey]) || 1;
+        // Se _at não existe (nunca foi mexido), assume que está cheio (max)
+        const current = (n[curKey] !== undefined) ? parseInt(n[curKey]) : max;
+        
+        let newVal = current + mod;
+        if(newVal < 0) newVal = 0;
+        if(newVal > max) newVal = max;
+        
+        update(ref(db, `npcs/${id}`), { [curKey]: newVal });
+    };
+
+    window.allowDrop = (ev) => ev.preventDefault();
+    window.drag = (ev, id, type) => ev.dataTransfer.setData("text/plain", JSON.stringify({id: id, type: type}));
+    
+    // ATUALIZADO: Drop padrão nos divisores agora tira da sidebar (se estava lá) e bota na categoria
+    window.drop = (ev, catId, targetType) => { 
+        ev.preventDefault(); 
+        document.querySelectorAll('.category-container').forEach(el => el.classList.remove('drag-over')); 
+        const data = JSON.parse(ev.dataTransfer.getData("text/plain")); 
+        if (data.type !== targetType) return; 
+        
+        const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`; 
+        update(ref(db, path), { category: catId }); // Isso remove da sidebar porque 'category' muda de 'hidden_roster' para o ID da divisoria
+    };
+
+    window.addCategory = (type) => { const newRef = push(ref(db, `divisoes/${type}`)); set(newRef, { name: "Nova Divisória" }); };
+    window.renameCategory = (type, catId, oldName) => { const newName = prompt("Nome da divisória:", oldName); if (newName && newName !== oldName) update(ref(db, `divisoes/${type}/${catId}`), { name: newName }); };
+    window.deleteCategory = (type, catId) => { if(confirm("Excluir divisória?")) remove(ref(db, `divisoes/${type}/${catId}`)); };
+
+    // --- LÓGICA DA SIDEBAR ESQUERDA ---
+    window.toggleRosterSidebar = () => {
+        const bar = document.getElementById('roster-sidebar');
+        const btn = document.querySelector('.roster-toggle-btn');
+        bar.classList.toggle('open');
+        if (bar.classList.contains('open')) {
+            btn.style.left = "300px";
+            btn.innerHTML = "✖";
+        } else {
+            btn.style.left = "0";
+            btn.innerHTML = "👥";
         }
+    };
 
-        onValue(ref(db, 'world_time'), (snapshot) => {
-            const data = snapshot.val(); if(!data) return;
-            document.getElementById('wd_date').innerText = `Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`;
-            document.getElementById('wd_time').innerText = `${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')}`;
-            const weather = getWeather(data.season, data.day, data.period);
-            document.getElementById('wd_weather_icon').innerText = weather.icon; document.getElementById('wd_weather_text').innerText = weather.name;
-        });
+    window.dropInRoster = (ev, targetType) => {
+        ev.preventDefault();
+        const rosterLists = document.querySelectorAll('.roster-drop-zone');
+        rosterLists.forEach(el => el.classList.remove('drag-over'));
+        
+        const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+        if (data.type !== targetType) return; // Jogador só cai na lista de jogador, NPC em NPC
 
-        let globalPlayers = {}; let globalNpcs = {}; let globalDivisions = { players: {}, npcs: {} };
+        const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`;
+        // Define categoria como 'hidden_roster' para esconder do main e aparecer aqui
+        update(ref(db, path), { category: 'hidden_roster' });
+    };
 
-        function createDividerHTML(divId, divName, type) {
-            const isDefault = divId === 'default';
-            const nameHtml = isDefault ? `<span>${divName}</span>` : `<span onclick="renameCategory('${type}', '${divId}', '${divName}')">✎ ${divName}</span> <button class="btn-del-cat" onclick="deleteCategory('${type}', '${divId}')">✖</button>`;
-            return `<div class="category-container" id="cat_${divId}" ondragover="allowDrop(event)" ondrop="drop(event, '${divId}', '${type}')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')"><div class="category-header"><div class="category-title">${nameHtml}</div></div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`;
-        }
+    let autoRegen = true;
 
-        function renderAll() {
-            const wrapperP = document.getElementById('wrapper-players'); 
-            const wrapperN = document.getElementById('wrapper-npcs');
-            document.getElementById('roster_list_players').innerHTML = "";
-            document.getElementById('roster_list_npcs').innerHTML = "";
+    window.toggleAutoRegen = () => {
+        autoRegen = !autoRegen;
+        const btn = document.getElementById('btn-regen-toggle');
+        if(autoRegen) { btn.innerHTML = "💧 Regen Auto: ON"; btn.style.color = "#4488ff"; btn.style.borderColor = "#4488ff"; } 
+        else { btn.innerHTML = "💧 Regen Auto: OFF"; btn.style.color = "#666"; btn.style.borderColor = "#666"; }
+    };
 
-            let htmlP = createDividerHTML('default', 'Geral', 'players'); 
-            if (globalDivisions.players) Object.keys(globalDivisions.players).forEach(key => { htmlP += createDividerHTML(key, globalDivisions.players[key].name, 'players'); }); 
-            if(wrapperP) wrapperP.innerHTML = htmlP;
+    window.toggleCombatSidebar = () => { document.getElementById('combat-sidebar').classList.toggle('open'); const btn = document.querySelector('.combat-toggle-btn'); if(document.getElementById('combat-sidebar').classList.contains('open')) { btn.style.right = "300px"; btn.innerHTML = "✖"; } else { btn.style.right = "0"; btn.innerHTML = "⚔️"; } };
+    window.dropInCombat = (ev) => {
+        ev.preventDefault(); document.getElementById('combat_list').classList.remove('drag-over'); const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+        let charData = null;
+        if (data.type === 'players') { const f = globalPlayers[data.id]; if(f) { charData = { name: f.char_name || "Player", img: f.char_img || "", hab: parseInt(f.habilidade)||0, id: data.id, type: 'player' }; } } 
+        else { const n = globalNpcs[data.id]; if(n) { charData = { name: n.name || "NPC", img: n.img || "", hab: parseInt(n.hab)||0, id: data.id, type: 'npc' }; } }
+        if(charData) { push(ref(db, 'combate/participantes'), { ...charData, init_val: 0, tie_breaker: 0, active: false }); }
+    };
 
-            let htmlN = createDividerHTML('default', 'Geral', 'npcs'); 
-            if (globalDivisions.npcs) Object.keys(globalDivisions.npcs).forEach(key => { htmlN += createDividerHTML(key, globalDivisions.npcs[key].name, 'npcs'); }); 
-            if(wrapperN) wrapperN.innerHTML = htmlN;
+    onValue(ref(db, 'combate'), (snap) => {
+        const data = snap.val(); const list = document.getElementById('combat_list'); list.innerHTML = "";
+        if (!data || !data.participantes) return;
+        let parts = []; Object.keys(data.participantes).forEach(key => { parts.push({ ...data.participantes[key], key: key }); });
+        parts.sort((a, b) => { if (b.init_val !== a.init_val) return b.init_val - a.init_val; if (b.hab !== a.hab) return b.hab - a.hab; return b.tie_breaker - a.tie_breaker; });
+        parts.forEach(p => { const div = document.createElement('div'); div.className = `combat-item ${p.active ? 'active' : ''}`; div.innerHTML = `<div class="combat-avatar" style="background-image: url('${p.img}')"></div><div class="combat-name">${p.name}</div><div class="combat-init-bubble">${p.init_val > 0 ? p.init_val : '-'}</div><button class="combat-btn-remove" onclick="removeCombatant('${p.key}')">×</button>`; list.appendChild(div); });
+    });
 
-            Object.keys(globalPlayers).forEach(id => {
-                const f = globalPlayers[id]; 
-                if (f.category === 'hidden_roster') {
-                    document.getElementById('roster_list_players').appendChild(createRosterItem(id, f, 'players'));
-                } else {
-                    // CORREÇÃO: Se a categoria da ficha não existe nas divisórias atuais, ela vai para o Estoque lateral
-                    const categoryExists = f.category === 'default' || (globalDivisions.players && globalDivisions.players[f.category]);
-                    if (!categoryExists && f.category !== 'hidden_roster') {
-                        update(ref(db, `fichas/${id}`), { category: 'hidden_roster' });
-                    } else {
-                        const container = document.getElementById(`grid_players_${f.category || 'default'}`); 
-                        if(container) container.appendChild(createPlayerCard(id, f));
-                    }
+    // --- FUNÇÃO ATUALIZADA PARA O NOVO OVERLAY ---
+    window.calculateInitiative = () => { 
+        const isLetal = document.getElementById('chk_letal').checked;
+        
+        onValue(ref(db, 'combate/participantes'), (snap) => { 
+            const parts = snap.val(); 
+            if(!parts) return; 
+            
+            const updates = {}; 
+            
+            // Define o início do combate e o modo (para o overlay ler)
+            updates['combate/started_at'] = Date.now();
+            updates['combate/mode'] = isLetal ? 'letal' : 'normal';
+
+            // Reseta e rola dados dos participantes
+            Object.keys(parts).forEach(key => { 
+                const p = parts[key]; 
+                const d6 = Math.floor(Math.random() * 6) + 1; 
+                const total = d6 + parseInt(p.hab || 0); // Garante que é numero
+                updates['combate/participantes/' + key + '/init_val'] = total; 
+                updates['combate/participantes/' + key + '/tie_breaker'] = Math.random(); 
+                updates['combate/participantes/' + key + '/active'] = false; 
+            }); 
+            
+            update(ref(db), updates); 
+        }, { onlyOnce: true }); 
+    };
+
+    window.removeCombatant = (key) => { remove(ref(db, `combate/participantes/${key}`)); };
+    window.endCombat = () => { if(confirm("Encerrar o combate e limpar a lista?")) { remove(ref(db, 'combate')); } };
+
+    window.changeTurn = (dir) => {
+        onValue(ref(db, 'combate/participantes'), (snap) => {
+            const partsMap = snap.val(); if(!partsMap) return;
+            let parts = []; Object.keys(partsMap).forEach(key => parts.push({...partsMap[key], key: key}));
+            parts.sort((a, b) => { if (b.init_val !== a.init_val) return b.init_val - a.init_val; if (b.hab !== a.hab) return b.hab - a.hab; return b.tie_breaker - a.tie_breaker; });
+            let activeIndex = parts.findIndex(p => p.active === true);
+            let newIndex = activeIndex + dir;
+            if (newIndex >= parts.length) newIndex = 0; if (newIndex < 0) newIndex = parts.length - 1;
+            
+            const updates = {}; parts.forEach(p => updates[p.key + '/active'] = false);
+            if (activeIndex === -1 && dir === 1) newIndex = 0;
+            const nextChar = parts[newIndex];
+            updates[nextChar.key + '/active'] = true;
+            update(ref(db, 'combate/participantes'), updates);
+
+            // === LÓGICA DE TURNO (MÁSCARA + REGEN) ===
+            const refPath = nextChar.type === 'player' ? `fichas/${nextChar.id}` : `npcs/${nextChar.id}`;
+            onValue(ref(db, refPath), (charSnap) => {
+                const cData = charSnap.val();
+                if(cData) {
+                    let currentMp, maxMp, hab;
+                    if (nextChar.type === 'player') { currentMp = parseInt(cData.mp_at) || 0; maxMp = parseInt(cData.mp_max) || 1; hab = parseInt(cData.habilidade) || 0; } 
+                    else { maxMp = parseInt(cData.mp) || 1; currentMp = (cData.mp_at !== undefined) ? parseInt(cData.mp_at) : maxMp; hab = parseInt(cData.hab) || 0; }
+                    
+                    let maskCost = 0;
+                    if (cData.active_abilities && cData.active_abilities.mask) { maskCost = 4; }
+
+                    let regen = 0;
+                    if (autoRegen) { const roll = Math.floor(Math.random() * 6) + 1; regen = roll + hab; }
+
+                    let newMp = currentMp - maskCost + regen;
+                    if (newMp > maxMp) newMp = maxMp;
+                    
+                    if (maskCost > 0 && newMp < 0) {
+                        newMp = 0; update(ref(db, refPath), { 'active_abilities/mask': false });
+                        alert(`Atenção: ${nextChar.name} ficou sem mana e a Máscara caiu!`);
+                    } else if (newMp < 0) { newMp = 0; }
+
+                    if (newMp !== currentMp) { update(ref(db, refPath), { mp_at: newMp }); }
                 }
-            });
-
-            Object.keys(globalNpcs).forEach(id => {
-                const n = globalNpcs[id]; 
-                if (n.category === 'hidden_roster') {
-                    document.getElementById('roster_list_npcs').appendChild(createRosterItem(id, n, 'npcs'));
-                } else {
-                    // CORREÇÃO: Se a categoria da ficha não existe nas divisórias atuais, ela vai para o Estoque lateral
-                    const categoryExists = n.category === 'default' || (globalDivisions.npcs && globalDivisions.npcs[n.category]);
-                    if (!categoryExists && n.category !== 'hidden_roster') {
-                        update(ref(db, `npcs/${id}`), { category: 'hidden_roster' });
-                    } else {
-                        const container = document.getElementById(`grid_npcs_${n.category || 'default'}`); 
-                        if(container) container.appendChild(createNpcCard(id, n));
-                    }
-                }
-            });
-        }
-
-        function createRosterItem(id, data, type) {
-            const el = document.createElement('div'); el.className = 'roster-item'; el.draggable = true; 
-            el.ondragstart = (e) => drag(e, id, type);
-            const imgUrl = (type === 'players' ? data.char_img : data.img) || "";
-            const name = (type === 'players' ? data.char_name : data.name) || "Sem Nome";
-            el.innerHTML = `<div class="roster-avatar" style="background-image: url('${imgUrl}')"></div><div class="roster-name">${name}</div>`;
-            return el;
-        }
-
-        onValue(ref(db, 'divisoes'), (snap) => { globalDivisions = snap.val() || { players: {}, npcs: {} }; renderAll(); });
-        onValue(ref(db, 'fichas'), (snap) => { globalPlayers = snap.val() || {}; renderAll(); });
-        onValue(ref(db, 'npcs'), (snap) => { globalNpcs = snap.val() || {}; renderAll(); });
-
-        // CORREÇÃO: Função de Deletar Divisória movendo fichas para o Estoque
-        window.deleteCategory = (type, catId) => { 
-            if(confirm("Deseja excluir esta divisória? Todas as fichas dentro dela serão movidas para o Estoque lateral.")) {
-                const updates = {};
-                // Percorre Players
-                Object.keys(globalPlayers).forEach(id => {
-                    if (globalPlayers[id].category === catId) updates[`fichas/${id}/category`] = 'hidden_roster';
-                });
-                // Percorre NPCs
-                Object.keys(globalNpcs).forEach(id => {
-                    if (globalNpcs[id].category === catId) updates[`npcs/${id}/category`] = 'hidden_roster';
-                });
-                // Remove a divisória em si
-                updates[`divisoes/${type}/${catId}`] = null;
-                update(ref(db), updates);
-            }
-        };
-
-        window.addCategory = (type) => { const newRef = push(ref(db, `divisoes/${type}`)); set(newRef, { name: "Nova Divisória" }); };
-        window.renameCategory = (type, catId, oldName) => { const newName = prompt("Nome da divisória:", oldName); if (newName && newName !== oldName) update(ref(db, `divisoes/${type}/${catId}`), { name: newName }); };
-
-        window.allowDrop = (ev) => ev.preventDefault();
-        window.drag = (ev, id, type) => ev.dataTransfer.setData("text/plain", JSON.stringify({id: id, type: type}));
-        window.drop = (ev, catId, targetType) => { 
-            ev.preventDefault(); document.querySelectorAll('.category-container').forEach(el => el.classList.remove('drag-over')); 
-            const data = JSON.parse(ev.dataTransfer.getData("text/plain")); if (data.type !== targetType) return; 
-            const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`; 
-            update(ref(db, path), { category: catId });
-        };
-
-        window.dropInRoster = (ev, targetType) => {
-            ev.preventDefault(); document.querySelectorAll('.roster-drop-zone').forEach(el => el.classList.remove('drag-over'));
-            const data = JSON.parse(ev.dataTransfer.getData("text/plain")); if (data.type !== targetType) return;
-            const path = data.type === 'players' ? `fichas/${data.id}` : `npcs/${data.id}`;
-            update(ref(db, path), { category: 'hidden_roster' });
-        };
-
-        window.toggleRosterSidebar = () => {
-            const bar = document.getElementById('roster-sidebar'); const btn = document.querySelector('.roster-toggle-btn');
-            bar.classList.toggle('open');
-            btn.style.left = bar.classList.contains('open') ? "300px" : "0";
-            btn.innerHTML = bar.classList.contains('open') ? "✖" : "👥";
-        };
-
-        window.toggleCombatSidebar = () => { 
-            const bar = document.getElementById('combat-sidebar'); const btn = document.querySelector('.combat-toggle-btn');
-            bar.classList.toggle('open'); 
-            btn.style.right = bar.classList.contains('open') ? "300px" : "0";
-            btn.innerHTML = bar.classList.contains('open') ? "✖" : "⚔️";
-        };
-
-        function createPlayerCard(id, f) {
-            const el = document.createElement('div'); el.className = 'player-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'players');
-            const hpAt = parseInt(f.hp_at)||0; const hpMax = parseInt(f.hp_max)||1; const mpAt = parseInt(f.mp_at)||0; const mpMax = parseInt(f.mp_max)||1; const paAt = parseInt(f.pa_at)||0; const paMax = parseInt(f.pa_max)||1;
-            el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${f.char_img || ''}')"></div><div class="player-info"><h2>${f.char_name || id}</h2><div class="controls-row"><button class="btn-small" onclick="window.open('${baseURL}?p=${id}', '_blank')">📄 Ficha</button><button class="btn-small btn-cfg" onclick="openPlayerConfig('${id}')">⚙️</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${(hpAt/hpMax)*100}%"></div></div><div class="status-bar" style="margin-top:4px;"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${(mpAt/mpMax)*100}%"></div></div><div class="status-bar" style="margin-top:4px;"><div class="bar-text">PA ${paAt}/${paMax}</div><div class="bar-fill pa" style="width:${(paAt/paMax)*100}%"></div></div><div class="skull-display"><span class="skull-icon ${f.skull1 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull2 === 'active' ? 'active' : ''}">💀</span><span class="skull-icon ${f.skull3 === 'active' ? 'active' : ''}">💀</span></div><div class="xp-control"><input type="number" id="input_xp_${id}" placeholder="XP" class="xp-input"><button class="btn-send" onclick="sendXP('${id}')">+</button></div>`;
-            return el;
-        }
-
-        function createNpcCard(id, n) {
-            const el = document.createElement('div'); el.className = 'player-card npc-card'; el.draggable = true; el.ondragstart = (e) => drag(e, id, 'npcs');
-            const hpMax = n.hp || 1; const hpAt = (n.hp_at !== undefined) ? n.hp_at : hpMax;
-            const mpMax = n.mp || 1; const mpAt = (n.mp_at !== undefined) ? n.mp_at : mpMax;
-            el.innerHTML = `<div class="player-header"><div class="player-img" style="background-image: url('${n.img || ''}')"></div><div class="player-info"><h2>${n.name || 'NPC'}</h2><div class="controls-row"><button class="btn-small" onclick='editNpc(${JSON.stringify(id)})'>✏️</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️</button></div></div></div><div class="stat-row"><button class="btn-stat minus" onclick="changeNpcStat('${id}', 'hp', -1)">-</button><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${(hpAt/hpMax)*100}%"></div></div><button class="btn-stat plus" onclick="changeNpcStat('${id}', 'hp', 1)">+</button></div><div class="stat-row"><button class="btn-stat minus" onclick="changeNpcStat('${id}', 'mp', -1)">-</button><div class="status-bar"><div class="bar-text">PM ${mpAt}/${mpMax}</div><div class="bar-fill mp" style="width:${(mpAt/mpMax)*100}%"></div></div><button class="btn-stat plus" onclick="changeNpcStat('${id}', 'mp', 1)">+</button></div><button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES</button><div id="details_${id}" class="npc-details"><div class="npc-attr-row"><div class="npc-attr">POD<span>${n.pod}</span></div><div class="npc-attr">HAB<span>${n.hab}</span></div><div class="npc-attr">RES<span>${n.res}</span></div></div></div>`;
-            return el;
-        }
-
-        window.changeNpcStat = (id, type, mod) => {
-            const n = globalNpcs[id]; if(!n) return;
-            const max = parseInt(n[type]) || 1;
-            const current = (n[type + '_at'] !== undefined) ? parseInt(n[type + '_at']) : max;
-            let newVal = Math.min(Math.max(current + mod, 0), max);
-            update(ref(db, `npcs/${id}`), { [type + '_at']: newVal });
-        };
-
-        window.dropInCombat = (ev) => {
-            ev.preventDefault(); document.getElementById('combat_list').classList.remove('drag-over'); const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
-            let charData = null;
-            if (data.type === 'players') { const f = globalPlayers[data.id]; if(f) charData = { name: f.char_name, img: f.char_img, hab: parseInt(f.habilidade)||0, id: data.id, type: 'player' }; } 
-            else { const n = globalNpcs[data.id]; if(n) charData = { name: n.name, img: n.img, hab: parseInt(n.hab)||0, id: data.id, type: 'npc' }; }
-            if(charData) push(ref(db, 'combate/participantes'), { ...charData, init_val: 0, tie_breaker: 0, active: false });
-        };
-
-        window.calculateInitiative = () => {
-            onValue(ref(db, 'combate/participantes'), (snap) => {
-                const parts = snap.val(); if(!parts) return;
-                const updates = {};
-                Object.keys(parts).forEach(key => {
-                    updates['combate/participantes/' + key + '/init_val'] = (Math.floor(Math.random() * 6) + 1) + parseInt(parts[key].hab || 0);
-                    updates['combate/participantes/' + key + '/tie_breaker'] = Math.random();
-                    updates['combate/participantes/' + key + '/active'] = false;
-                });
-                update(ref(db), updates);
             }, { onlyOnce: true });
-        };
 
-        window.changeTurn = (dir) => {
-            onValue(ref(db, 'combate/participantes'), (snap) => {
-                const partsMap = snap.val(); if(!partsMap) return;
-                let parts = Object.keys(partsMap).map(key => ({...partsMap[key], key: key}));
-                parts.sort((a, b) => (b.init_val - a.init_val) || (b.hab - a.hab) || (b.tie_breaker - a.tie_breaker));
-                let activeIndex = parts.findIndex(p => p.active === true);
-                let newIndex = activeIndex + dir;
-                if (newIndex >= parts.length) newIndex = 0; if (newIndex < 0) newIndex = parts.length - 1;
-                const updates = {}; parts.forEach(p => updates[p.key + '/active'] = false);
-                updates[parts[newIndex].key + '/active'] = true;
-                update(ref(db, 'combate/participantes'), updates);
-            }, { onlyOnce: true });
-        };
+        }, { onlyOnce: true });
+    };
 
-        window.endCombat = () => confirm("Encerrar combate?") && remove(ref(db, 'combate'));
-        window.sendXP = (id) => { const input = document.getElementById(`input_xp_${id}`); const qtd = parseInt(input.value); if (qtd > 0) runTransaction(ref(db, `fichas/${id}/xp_total`), c => (c || 0) + qtd).then(() => input.value = ""); };
-        window.openNpcForm = () => document.getElementById('form-npc-container').classList.add('open');
-        window.closeNpcForm = () => document.getElementById('form-npc-container').classList.remove('open');
-        window.saveNpc = () => { /* lógica de salvar simplificada para o exemplo */ closeNpcForm(); };
-        window.deleteNpc = (id) => confirm("Excluir?") && remove(ref(db, 'npcs/' + id));
-        window.toggleNpcDetails = (id) => document.getElementById('details_' + id).classList.toggle('open');
-        window.openPlayerConfig = (id) => { document.getElementById('cfg_player_id').value = id; document.getElementById('config-player-container').classList.add('open'); };
-    </script>
+    window.openNpcForm = () => { document.getElementById('npc_id').value = ""; document.getElementById('npc_name').value = ""; document.getElementById('npc_img_data').value = ""; document.getElementById('npc_img_file').value = ""; document.getElementById('npc_pod').value = 0; document.getElementById('npc_hab').value = 0; document.getElementById('npc_res').value = 0; document.getElementById('npc_hp').value = 10; document.getElementById('npc_mp').value = 10; document.getElementById('npc_pa').value = 3; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; periciasIds.forEach(pid => document.getElementById(`form_skill_${pid}`).value = 0); document.getElementById('hab_editor_list').innerHTML = ""; document.getElementById('form-npc-container').classList.add('open'); };
+    window.closeNpcForm = () => document.getElementById('form-npc-container').classList.remove('open');
+    window.addHabRow = (titulo="", teste="", desc="") => { const div = document.createElement('div'); div.className = 'hab-editor-row'; div.innerHTML = `<div style="flex-grow:1"><input type="text" placeholder="Nome" class="hab-row-title" value="${titulo}" style="margin-bottom:2px"><input type="text" placeholder="Teste" class="hab-row-test" value="${teste}" style="margin-bottom:2px"><textarea placeholder="Descrição" class="hab-row-desc" rows="2">${desc}</textarea></div><button type="button" class="btn-icon" onclick="this.parentElement.remove()">✖</button>`; document.getElementById('hab_editor_list').appendChild(div); };
+    window.saveNpc = () => { const id = document.getElementById('npc_id').value; const name = document.getElementById('npc_name').value; const img = document.getElementById('npc_img_data').value; const pod = parseInt(document.getElementById('npc_pod').value)||0; const hab = parseInt(document.getElementById('npc_hab').value)||0; const res = parseInt(document.getElementById('npc_res').value)||0; const hp = parseInt(document.getElementById('npc_hp').value)||10; const mp = parseInt(document.getElementById('npc_mp').value)||10; const pa = parseInt(document.getElementById('npc_pa').value)||3; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; const skills = {}; periciasIds.forEach(pid => { skills[pid] = parseInt(document.getElementById(`form_skill_${pid}`).value) || 0; }); const habs = []; document.querySelectorAll('.hab-editor-row').forEach(row => { habs.push({ titulo: row.querySelector('.hab-row-title').value, teste: row.querySelector('.hab-row-test').value, desc: row.querySelector('.hab-row-desc').value }); }); const npcData = { name, img, pod, hab, res, hp, mp, pa, skills, habs }; if(!id) npcData.category = 'default'; if (id) update(ref(db, 'npcs/' + id), npcData).then(closeNpcForm); else push(ref(db, 'npcs'), npcData).then(closeNpcForm); };
+    window.editNpc = (id) => { onValue(ref(db, 'npcs/' + id), (snap) => { const data = snap.val(); document.getElementById('npc_id').value = id; document.getElementById('npc_name').value = data.name; document.getElementById('npc_img_data').value = data.img || ""; document.getElementById('npc_pod').value = data.pod; document.getElementById('npc_hab').value = data.hab; document.getElementById('npc_res').value = data.res; document.getElementById('npc_hp').value = data.hp; document.getElementById('npc_mp').value = data.mp; document.getElementById('npc_pa').value = data.pa; const periciasIds = ['animais', 'arte', 'esporte', 'influencia', 'luta', 'manha', 'maquinas', 'medicina', 'mistica', 'percepcao', 'saber', 'sobrevivencia']; periciasIds.forEach(pid => { document.getElementById(`form_skill_${pid}`).value = data.skills ? (data.skills[pid] || 0) : 0; }); const habList = document.getElementById('hab_editor_list'); habList.innerHTML = ""; if (data.habs) data.habs.forEach(h => addHabRow(h.titulo, h.teste, h.desc)); document.getElementById('form-npc-container').classList.add('open'); }, { onlyOnce: true }); };
+    window.deleteNpc = (id) => { if(confirm("Deletar NPC?")) remove(ref(db, 'npcs/' + id)); };
+    document.getElementById('npc_img_file').addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (re) => { const img = new Image(); img.onload = () => { const cvs = document.createElement('canvas'); const max = 300; let w = img.width, h = img.height; if(w>h){ if(w>max){h*=max/w; w=max}} else {if(h>max){w*=max/h; h=max}} cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h); document.getElementById('npc_img_data').value = cvs.toDataURL('image/jpeg', 0.7); }; img.src = re.target.result; }; reader.readAsDataURL(file); });
+    window.toggleNpcDetails = (id) => document.getElementById('details_'+id).classList.toggle('open');
+    window.toggleNpcDesc = (uid) => document.getElementById('desc_'+uid).classList.toggle('open');
+    window.toggleOverlay = (id, currentMode) => { const newMode = currentMode === 'status' ? 'nome' : 'status'; update(ref(db, `fichas/${id}`), { overlay_mode: newMode }); };
+    window.sendXP = (id) => { const input = document.getElementById(`input_xp_${id}`); const qtd = parseInt(input.value); if (qtd && qtd > 0) { const xpRef = ref(db, `fichas/${id}/xp_total`); runTransaction(xpRef, (current) => (current || 0) + qtd).then(() => { input.value = ""; }); } };
+</script>
 </body>
 </html>
