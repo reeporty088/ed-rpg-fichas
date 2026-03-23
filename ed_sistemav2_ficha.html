@@ -135,6 +135,19 @@
         .xp-display { text-align: center; }
         .xp-number { font-size: 28px; font-weight: bold; color: #ffd700; display: block; line-height: 1; }
         .btn-xp { background: var(--theme-main); border: 1px solid var(--theme-light); color: white; font-size: 10px; padding: 5px 10px; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        .ascensao-cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        .asc-card { background: linear-gradient(145deg, #130a15 0%, #08060f 100%); border: 1px solid #3a2b53; border-left: 4px solid #8b5cf6; border-radius: 12px; padding: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.35); }
+        .asc-card-title { color: #d8b4fe; font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .asc-card-meta { font-size: 10px; color: #c4b5fd; text-transform: uppercase; margin-bottom: 8px; }
+        .asc-card-desc { font-size: 12px; color: #ddd; line-height: 1.35; white-space: pre-wrap; }
+        .asc-muted { color: #999; font-size: 12px; margin-top: 8px; text-align: center; }
+        .asc-choice-card { background: rgba(0,0,0,0.4); border: 1px solid #4b5563; border-radius: 10px; padding: 12px; cursor: pointer; transition: 0.2s; }
+        .asc-choice-card:hover { border-color: #c4b5fd; transform: translateY(-1px); }
+        .asc-choice-card.selected { border-color: #8b5cf6; box-shadow: 0 0 0 1px #8b5cf6 inset, 0 0 10px rgba(139, 92, 246, 0.35); }
+        .asc-choice-title { color: #e9d5ff; font-weight: bold; margin-bottom: 5px; }
+        .asc-choice-tag { display: inline-block; font-size: 10px; background: #312e81; color: #e0e7ff; border-radius: 4px; padding: 2px 6px; margin-bottom: 8px; }
+        .asc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+        .btn-disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* MODAIS E NAVEGAÇÃO MOBILE */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
@@ -352,17 +365,17 @@
             
             <div id="xp_section" style="display:none;">
                 <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
-                <div class="header-label">Progressão</div>
+                <div class="header-label">EVOLUÇÃO DA ASCENSÃO</div>
                 <div class="xp-container">
                     <div class="xp-display">
                         <span class="xp-label" style="font-size:10px; color:#aaa; display:block;">PONTOS DE DESPERTAR / XP</span>
                         <span id="display_xp_total" class="xp-number">0</span>
                     </div>
                     <div>
-                        <button class="btn-xp" onclick="changeValXP(-1)" style="background:#444; margin-bottom:4px;">- Remover</button>
-                        <button class="btn-xp" onclick="changeValXP(1)">+ Adicionar</button>
+                        <button class="btn-xp" onclick="openAscensaoModal()" style="font-size:12px; padding:8px 16px;">Evoluir</button>
                     </div>
                 </div>
+                <div id="ascensao_cards" class="ascensao-cards-grid"></div>
             </div>
             
             <div class="header-label" style="margin-top:20px;">Anotações Rápidas</div>
@@ -414,6 +427,21 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modal-ascensao" onclick="closeModal('modal-ascensao')">
+    <div class="db-modal-container" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:10px; margin-bottom:15px;">
+            <h3 style="margin:0; color:#d8b4fe;">EVOLUÇÃO DA ASCENSÃO</h3>
+            <button style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeModal('modal-ascensao')">✖</button>
+        </div>
+        <div id="ascensao_requirements" style="font-size:12px; margin-bottom:10px; color:#ccc;"></div>
+        <div id="ascensao_modal_list" class="db-grid"></div>
+        <div class="asc-modal-actions">
+            <button class="btn-choice" style="width:auto; padding:10px 16px; margin:0; background:#444; border-color:#777;" onclick="closeModal('modal-ascensao')">Fechar</button>
+            <button class="btn-choice" id="btn_confirm_ascensao" style="width:auto; padding:10px 16px; margin:0;" onclick="confirmAscensaoChoice()">Confirmar Evolução</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, update, onValue, remove, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -437,8 +465,44 @@
 
     let globalCharData = {};
     let globalCompendium = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {} };
+    const ASCENSAO_DB = {
+        exilis: {
+            nome: "EXILIS",
+            foco: "Caminho da Fisionomia",
+            base: { id: "base_exilis", nome: "Impulso Exilis", custo: 1, desc: "Você sobrecarrega o corpo por um instante: dobre sua velocidade no turno OU adicione +1d8 de dano físico em um ataque corpo a corpo que acertou." },
+            habilidades: [
+                { id: "passos_vacuo", nome: "Passos do Vácuo", custo: 1, desc: "Desloca para um ponto Longe instantaneamente, ignorando terreno difícil, armadilhas e ataques de oportunidade." },
+                { id: "metabolismo_acelerado", nome: "Metabolismo Acelerado", custo: 2, desc: "Cura imediatamente 1 Dano Maior (2 PV) e estanca Sangramento ou Veneno." },
+                { id: "forca_colossal", nome: "Força Colossal", custo: 1, desc: "Em testes de esforço físico mundano, recebe Sucesso Crítico Automático." },
+                { id: "onda_choque", nome: "Onda de Choque", custo: 2, desc: "Ataque corpo a corpo gera cone de destruição; inimigos Perto na linha sofrem metade do dano." }
+            ]
+        },
+        nevus: {
+            nome: "NÉVUS",
+            foco: "Caminho da Presença",
+            base: { id: "base_nevus", nome: "Expansão Névus", custo: 1, desc: "Até seu próximo turno, percepção absoluta do que está Perto; alternativamente, força inimigos Perto a teste de Resistência ou ficam Assombrados por 1 rodada." },
+            habilidades: [
+                { id: "intencao_assassina", nome: "Intenção Assassina", custo: 1, desc: "Até 3 inimigos Perto/Médio fazem teste difícil de Resistência; quem falhar fica Atordoado." },
+                { id: "olhos_verdade", nome: "Olhos da Verdade", custo: 1, desc: "Até o fim da cena, enxerga no escuro, através de fumaça e cancela invisibilidade/ilusões visuais no seu campo de visão." },
+                { id: "previsao_combate", nome: "Previsão de Combate", custo: 2, desc: "Reação ao sofrer ataque: Defesa Perfeita; em Sucesso Crítico do inimigo, recebe metade do dano." },
+                { id: "ocultacao_absoluta", nome: "Ocultação Absoluta", custo: 1, desc: "Apaga presença: não emite som/calor/rastro mágico; inimigos não podem mirar em você até agressão/interação hostil." }
+            ]
+        },
+        sublime: {
+            nome: "SUBLIME",
+            foco: "Caminho da Resistência",
+            base: { id: "base_sublime", nome: "Casca Sublime", custo: 1, desc: "Reação ao sofrer dano: cria Slot de Armadura Etérea temporário que absorve completamente um ataque e se estilhaça." },
+            habilidades: [
+                { id: "revestimento_batalha", nome: "Revestimento de Batalha", custo: 1, desc: "Até o fim do combate, arma se torna indestrutível, ignora resistências físicas e recebe +1d6 de dano nos acertos." },
+                { id: "ponto_fixo", nome: "Ponto Fixo", custo: 1, desc: "Enquanto não se mover, é impossível ser empurrado, derrubado, engolido ou arremessado." },
+                { id: "muralha_intransponivel", nome: "Muralha Intransponível", custo: 2, desc: "Reação: cria parede/cúpula para aliados Perto e absorve até dois Danos Severos." },
+                { id: "corpo_obsidiana", nome: "Corpo de Obsidiana", custo: 2, desc: "Durante toda a rodada, fica imune a danos físicos (corte, impacto e perfuração)." }
+            ]
+        }
+    };
     let currentCategory = ""; 
     let currentDBItems = [];
+    let ascChoiceState = null;
     
     // Variáveis Discente
     window.isDiscenteMode = false;
@@ -592,6 +656,152 @@
         update(ref(db, dbPath), { xp_total: newXp });
     };
 
+    function getAscensaoData() {
+        const asc = globalCharData.ascensao || {};
+        return {
+            caminhos: asc.caminhos || {},
+            ordem_caminhos: Array.isArray(asc.ordem_caminhos) ? asc.ordem_caminhos : []
+        };
+    }
+
+    function getMaxedAttributesCount() {
+        const p = parseInt(globalCharData.poder) || 0;
+        const h = parseInt(globalCharData.habilidade) || 0;
+        const r = parseInt(globalCharData.resistencia) || 0;
+        return [p, h, r].filter(v => v >= 5).length;
+    }
+
+    window.openAscensaoModal = () => {
+        const ascData = getAscensaoData();
+        const nivel = parseInt(globalCharData.nivel) || 0;
+        const maxedAttrs = getMaxedAttributesCount();
+        const hasRequirements = nivel >= 5 && maxedAttrs >= 1;
+        const selectedPaths = Object.keys(ascData.caminhos);
+        const canUnlockNewPath = selectedPaths.length < maxedAttrs;
+
+        const listEl = document.getElementById('ascensao_modal_list');
+        const reqEl = document.getElementById('ascensao_requirements');
+        const btnConfirm = document.getElementById('btn_confirm_ascensao');
+        listEl.innerHTML = "";
+        ascChoiceState = null;
+
+        reqEl.innerHTML = `Requisitos: Nível <b>${nivel}</b>/5 e Atributos no valor 5: <b>${maxedAttrs}</b>.`;
+
+        if (!hasRequirements) {
+            listEl.innerHTML = `<div class="asc-muted">Você ainda não pode despertar a Ascensão. Alcance nível 5 e tenha ao menos 1 atributo em 5.</div>`;
+            btnConfirm.classList.add('btn-disabled');
+            btnConfirm.disabled = true;
+            document.getElementById('modal-ascensao').classList.add('open');
+            return;
+        }
+
+        if (selectedPaths.length === 0 || canUnlockNewPath) {
+            Object.entries(ASCENSAO_DB).forEach(([pathId, path]) => {
+                if (selectedPaths.includes(pathId)) return;
+                listEl.innerHTML += `
+                    <div class="asc-choice-card" id="asc_choice_path_${pathId}" onclick="selectAscChoice('path', '${pathId}')">
+                        <div class="asc-choice-tag">NOVO CAMINHO</div>
+                        <div class="asc-choice-title">${path.nome} — ${path.base.nome}</div>
+                        <div style="font-size:11px; color:#bbb; margin-bottom:6px;">${path.foco}</div>
+                        <div style="font-size:12px; color:#ddd;">${path.base.desc}</div>
+                    </div>`;
+            });
+        }
+
+        selectedPaths.forEach((pathId) => {
+            const path = ASCENSAO_DB[pathId];
+            if (!path) return;
+            const learned = ascData.caminhos[pathId]?.habilidades || {};
+            path.habilidades.forEach((hab) => {
+                if (learned[hab.id]) return;
+                const xpAtual = parseInt(globalCharData.xp_total) || 0;
+                const locked = xpAtual < 1;
+                listEl.innerHTML += `
+                    <div class="asc-choice-card ${locked ? 'btn-disabled' : ''}" id="asc_choice_skill_${pathId}_${hab.id}" onclick="${locked ? '' : `selectAscChoice('skill', '${pathId}', '${hab.id}')`}">
+                        <div class="asc-choice-tag">HABILIDADE • ${path.nome}</div>
+                        <div class="asc-choice-title">${hab.nome} (Custo: 1 Ponto)</div>
+                        <div style="font-size:12px; color:#ddd;">${hab.desc}</div>
+                    </div>`;
+            });
+        });
+
+        if (!listEl.innerHTML.trim()) {
+            listEl.innerHTML = `<div class="asc-muted">Nenhuma evolução disponível no momento.</div>`;
+        }
+
+        btnConfirm.classList.remove('btn-disabled');
+        btnConfirm.disabled = false;
+        document.getElementById('modal-ascensao').classList.add('open');
+    };
+
+    window.selectAscChoice = (type, pathId, skillId = null) => {
+        document.querySelectorAll('#ascensao_modal_list .asc-choice-card').forEach(card => card.classList.remove('selected'));
+        const cardId = type === 'path' ? `asc_choice_path_${pathId}` : `asc_choice_skill_${pathId}_${skillId}`;
+        const card = document.getElementById(cardId);
+        if (card) card.classList.add('selected');
+        ascChoiceState = { type, pathId, skillId };
+    };
+
+    window.confirmAscensaoChoice = () => {
+        if (!ascChoiceState) {
+            alert("Selecione uma evolução para confirmar.");
+            return;
+        }
+
+        const ascData = getAscensaoData();
+        const selectedPaths = Object.keys(ascData.caminhos);
+
+        if (ascChoiceState.type === 'path') {
+            if (!ascData.caminhos[ascChoiceState.pathId]) {
+                ascData.caminhos[ascChoiceState.pathId] = { base: true, habilidades: {} };
+                ascData.ordem_caminhos.push(ascChoiceState.pathId);
+            }
+            update(ref(db, dbPath), { ascensao: ascData }).then(() => closeModal('modal-ascensao'));
+            return;
+        }
+
+        if (!selectedPaths.includes(ascChoiceState.pathId)) {
+            alert("Você precisa desbloquear o caminho antes de escolher habilidades dele.");
+            return;
+        }
+
+        const xpAtual = parseInt(globalCharData.xp_total) || 0;
+        if (xpAtual < 1) {
+            alert("Sem Pontos de Despertar suficientes para evoluir.");
+            return;
+        }
+
+        if (!ascData.caminhos[ascChoiceState.pathId].habilidades) ascData.caminhos[ascChoiceState.pathId].habilidades = {};
+        ascData.caminhos[ascChoiceState.pathId].habilidades[ascChoiceState.skillId] = true;
+        update(ref(db, dbPath), { ascensao: ascData, xp_total: xpAtual - 1 }).then(() => closeModal('modal-ascensao'));
+    };
+
+    function renderAscensaoCards() {
+        const container = document.getElementById('ascensao_cards');
+        if (!container) return;
+        const ascData = getAscensaoData();
+        const paths = Object.keys(ascData.caminhos);
+        if (paths.length === 0) {
+            container.innerHTML = `<div class="asc-muted">Nenhuma Ascensão aprendida ainda. Clique em <b>Evoluir</b> para começar.</div>`;
+            return;
+        }
+
+        let html = "";
+        paths.forEach(pathId => {
+            const cfg = ASCENSAO_DB[pathId];
+            if (!cfg) return;
+            html += `<div class="asc-card"><div class="asc-card-title">${cfg.nome} — ${cfg.base.nome}</div><div class="asc-card-meta">TÉCNICA BASE • CUSTO ${cfg.base.custo} PA</div><div class="asc-card-desc">${cfg.base.desc}</div></div>`;
+            const learned = ascData.caminhos[pathId]?.habilidades || {};
+            Object.keys(learned).forEach(skillId => {
+                const skill = cfg.habilidades.find(h => h.id === skillId);
+                if (!skill) return;
+                html += `<div class="asc-card"><div class="asc-card-title">${cfg.nome} — ${skill.nome}</div><div class="asc-card-meta">EVOLUÇÃO • CUSTO ${skill.custo} PA</div><div class="asc-card-desc">${skill.desc}</div></div>`;
+            });
+        });
+
+        container.innerHTML = html || `<div class="asc-muted">Nenhuma Ascensão registrada.</div>`;
+    }
+
     window.addArmorSlot = (mod) => {
         let max = globalCharData.armor_max || 0;
         let newMax = max + mod; if(newMax < 0) newMax = 0;
@@ -677,6 +887,7 @@
         ['passivas', 'loadout', 'cofre', 'classe_hab', 'raca_hab', 'armas', 'inventario'].forEach(cat => renderHabs(cat, dados.habilidades?.[cat]));
         
         renderArmorSlots();
+        renderAscensaoCards();
         calculateDerivedStats();
         updateVisualModes();
     });
