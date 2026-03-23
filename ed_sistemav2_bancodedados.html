@@ -207,7 +207,9 @@
                 <select id="carta_nivel">
                     <option value="1">Nível 1</option><option value="2">Nível 2</option>
                     <option value="3">Nível 3</option><option value="4">Nível 4</option>
-                    <option value="5">Nível 5</option>
+                    <option value="5">Nível 5</option><option value="6">Nível 6</option>
+                    <option value="7">Nível 7</option><option value="8">Nível 8</option>
+                    <option value="9">Nível 9</option><option value="10">Nível 10</option>
                 </select>
             </div>
         </div>
@@ -1180,7 +1182,7 @@
 
         if (category === 'cartas') {
             const nivelConvertido = Number(item.nivel);
-            clean.nivel = Number.isFinite(nivelConvertido) ? Math.max(1, Math.min(5, Math.round(nivelConvertido))) : 1;
+            clean.nivel = Number.isFinite(nivelConvertido) ? Math.max(1, Math.min(10, Math.round(nivelConvertido))) : 1;
             if (!clean.dominio) clean.dominio = 'Domínio Arcano';
         }
 
