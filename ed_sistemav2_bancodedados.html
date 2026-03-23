@@ -87,7 +87,10 @@
     <button class="tab-btn" onclick="switchTab('classes', this)">⚔️ Classes</button>
     <button class="tab-btn" onclick="switchTab('racas', this)">🧬 Raças</button>
     <button class="tab-btn" onclick="switchTab('equipamentos', this)">🎒 Equipamentos</button>
+    <button class="tab-btn" onclick="triggerImportItems()">📥 Importar Itens</button>
+    <button class="tab-btn" onclick="downloadImportTemplate()">⬇️ Baixar Base</button>
 </div>
+<input type="file" id="import_items_input" accept=".txt,.json,.html,.htm" style="display:none;" />
 
 <div class="container">
     
@@ -379,6 +382,60 @@
     let globalData = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {} };
     let currentFilter = "Todos";
     let currentFilterEquip = "Todos";
+
+    const importTemplate = {
+        meta: {
+            versao: "1.0",
+            observacao: "Edite este arquivo e mantenha a estrutura. Você pode usar só as seções que quiser."
+        },
+        equipamentos: [
+            {
+                titulo: "Exemplo de Espada",
+                categoria: "Arma",
+                atributo: "Poder",
+                dano_slots: "1d10",
+                tipo_dano: "Corte",
+                alcance: "Corpo a Corpo",
+                custo: "500",
+                desc: "Descrição do equipamento"
+            }
+        ],
+        cartas: [
+            {
+                titulo: "Exemplo de Carta",
+                dominio: "Domínio Arcano",
+                nivel: 1,
+                tipo: "Magia",
+                custo: "1 Ponto de Esperança",
+                desc: "Descrição da carta"
+            }
+        ],
+        passivas: [
+            { titulo: "Exemplo de Passiva", desc: "Descrição da vantagem passiva" }
+        ],
+        classes: [
+            {
+                titulo: "Exemplo de Classe",
+                desc: "Lore da classe",
+                dominios: "Arcano e Sábio",
+                hab_nome: "Habilidade Base",
+                hab_desc: "Descrição da habilidade base"
+            }
+        ],
+        racas: [
+            {
+                titulo: "Exemplo de Raça",
+                linhagem: "Animalesco",
+                desc: "Descrição da raça",
+                hab1_nome: "Traço 1",
+                hab1_desc: "Descrição do traço 1",
+                hab2_nome: "Traço 2",
+                hab2_desc: "Descrição do traço 2",
+                hab3_nome: "Traço 3 (opcional)",
+                hab3_desc: "Descrição do traço 3"
+            }
+        ]
+    };
 
     // --- FUNÇÃO PARA TROCAR ABAS ---
     window.switchTab = (tabId, btnElement) => {
@@ -1082,6 +1139,108 @@
         if (id) update(ref(db, `${dbPath}/equipamentos/${id}`), data).then(() => document.getElementById('modal-equip').classList.remove('open'));
         else push(ref(db, `${dbPath}/equipamentos`), data).then(() => document.getElementById('modal-equip').classList.remove('open'));
     };
+
+    window.downloadImportTemplate = () => {
+        const conteudo = JSON.stringify(importTemplate, null, 2);
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'base_importacao_ed_rpg.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    window.triggerImportItems = () => {
+        const input = document.getElementById('import_items_input');
+        if (!input) return;
+        input.value = '';
+        input.click();
+    };
+
+    const categoryWhitelist = {
+        passivas: ['titulo', 'desc'],
+        cartas: ['titulo', 'dominio', 'nivel', 'tipo', 'custo', 'desc'],
+        classes: ['titulo', 'desc', 'dominios', 'hab_nome', 'hab_desc'],
+        racas: ['titulo', 'linhagem', 'desc', 'hab1_nome', 'hab1_desc', 'hab2_nome', 'hab2_desc', 'hab3_nome', 'hab3_desc'],
+        equipamentos: ['titulo', 'categoria', 'atributo', 'dano_slots', 'tipo_dano', 'alcance', 'custo', 'desc']
+    };
+
+    function sanitizeItem(category, item) {
+        if (!item || typeof item !== 'object') return null;
+        const clean = {};
+        categoryWhitelist[category].forEach((key) => {
+            if (item[key] !== undefined && item[key] !== null) clean[key] = String(item[key]);
+        });
+
+        if (!clean.titulo || !clean.titulo.trim()) return null;
+        clean.titulo = clean.titulo.trim();
+
+        if (category === 'cartas') {
+            const nivelConvertido = Number(item.nivel);
+            clean.nivel = Number.isFinite(nivelConvertido) ? Math.max(1, Math.min(5, Math.round(nivelConvertido))) : 1;
+            if (!clean.dominio) clean.dominio = 'Domínio Arcano';
+        }
+
+        if (category === 'racas' && !clean.linhagem) clean.linhagem = 'Animalesco';
+        if (category === 'equipamentos' && !clean.categoria) clean.categoria = 'Arma';
+
+        return clean;
+    }
+
+    function parseImportContent(rawText) {
+        const plain = rawText.trim();
+        const matchHtml = plain.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+        const jsonText = (matchHtml ? matchHtml[1] : plain).trim();
+        return JSON.parse(jsonText);
+    }
+
+    async function importItemsFromFile(file) {
+        try {
+            const rawText = await file.text();
+            const parsed = parseImportContent(rawText);
+
+            if (!parsed || typeof parsed !== 'object') {
+                alert('Arquivo inválido. Use a base de importação para montar o conteúdo.');
+                return;
+            }
+
+            const updates = {};
+            let totalImportado = 0;
+
+            Object.keys(categoryWhitelist).forEach((category) => {
+                const lista = parsed[category];
+                if (!Array.isArray(lista)) return;
+
+                lista.forEach((item) => {
+                    const clean = sanitizeItem(category, item);
+                    if (!clean) return;
+                    const newKey = push(ref(db, `${dbPath}/${category}`)).key;
+                    updates[`${dbPath}/${category}/${newKey}`] = clean;
+                    totalImportado += 1;
+                });
+            });
+
+            if (!totalImportado) {
+                alert('Nenhum item válido encontrado no arquivo.');
+                return;
+            }
+
+            await update(ref(db), updates);
+            alert(`${totalImportado} item(ns) importado(s) com sucesso!`);
+        } catch (error) {
+            console.error(error);
+            alert('Falha ao importar. Verifique se o arquivo está em JSON válido (txt/html/json).');
+        }
+    }
+
+    document.getElementById('import_items_input').addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        importItemsFromFile(file);
+    });
 
     // Deletar Geral
     window.deleteItem = (category, id) => {
