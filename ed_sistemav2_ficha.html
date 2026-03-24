@@ -141,6 +141,13 @@
         .asc-card-meta { font-size: 10px; color: #c4b5fd; text-transform: uppercase; margin-bottom: 8px; }
         .asc-card-desc { font-size: 12px; color: #ddd; line-height: 1.35; white-space: pre-wrap; }
         .asc-muted { color: #999; font-size: 12px; margin-top: 8px; text-align: center; }
+        .dadiva-controls { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 6px; }
+        .btn-dadiva { border: 1px solid #555; background: #1b1b1b; color: #ddd; border-radius: 16px; padding: 6px 10px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .btn-dadiva.active { color: #111; box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+        .dadiva-card { background: linear-gradient(145deg, #121212 0%, #090909 100%); border: 1px solid #3f3f3f; border-left: 4px solid #666; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+        .dadiva-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+        .dadiva-subtitle { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 6px; }
+        .dadiva-desc { font-size: 11px; color: #ccc; white-space: pre-wrap; line-height: 1.35; }
         .asc-choice-card { background: rgba(0,0,0,0.4); border: 1px solid #4b5563; border-radius: 10px; padding: 12px; cursor: pointer; transition: 0.2s; }
         .asc-choice-card:hover { border-color: #c4b5fd; transform: translateY(-1px); }
         .asc-choice-card.selected { border-color: #8b5cf6; box-shadow: 0 0 0 1px #8b5cf6 inset, 0 0 10px rgba(139, 92, 246, 0.35); }
@@ -377,6 +384,13 @@
                 </div>
                 <div id="ascensao_cards" class="ascensao-cards-grid"></div>
             </div>
+
+            <div id="dadivas_section" style="display:none;">
+                <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+                <div class="header-label" style="background:#3f2a00; border-color:#c0892f;">MALDIÇÕES & DÁDIVAS</div>
+                <div class="dadiva-controls" id="dadiva_buttons"></div>
+                <div id="dadivas_cards"></div>
+            </div>
             
             <div class="header-label" style="margin-top:20px;">Anotações Rápidas</div>
             <textarea id="anotacoes" style="min-height: 250px; border-radius: 10px; resize: vertical;" placeholder="Use este espaço para ferimentos persistentes, missões ou lore..."></textarea>
@@ -464,7 +478,14 @@
     const dbPath = `fichas_v2/${fichaID}`; 
 
     let globalCharData = {};
-    let globalCompendium = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {} };
+    let globalCompendium = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {} };
+    const DADIVA_COLORS = {
+        mascara_lunar: '#9aa6ff',
+        lodo_corrompido: '#6cbc6d',
+        combustao_arcana: '#ff7a2f',
+        escarcha_absoluta: '#7bd9ff',
+        tremor_abissal: '#d7a6ff'
+    };
     const ASCENSAO_DB = {
         exilis: {
             nome: "EXILIS",
@@ -802,6 +823,63 @@
         container.innerHTML = html || `<div class="asc-muted">Nenhuma Ascensão registrada.</div>`;
     }
 
+    function getDadivasPermitidas() {
+        const tg = globalCharData.toggles || {};
+        const dadivas = tg.dadivas || {};
+        return Object.keys(dadivas).filter((id) => dadivas[id] === true);
+    }
+
+    function renderDadivasSection() {
+        const section = document.getElementById('dadivas_section');
+        const cards = document.getElementById('dadivas_cards');
+        const buttons = document.getElementById('dadiva_buttons');
+        if (!section || !cards || !buttons) return;
+
+        const permitidas = getDadivasPermitidas();
+        const comp = globalCompendium.maldicoes_dadivas || {};
+        const ativas = { ...(globalCharData.toggles?.dadivas_ativas || {}) };
+        let changedAtivas = false;
+        Object.keys(ativas).forEach((key) => {
+            if (!permitidas.includes(key)) {
+                delete ativas[key];
+                changedAtivas = true;
+            }
+        });
+        if (changedAtivas) update(ref(db, dbPath), { 'toggles/dadivas_ativas': ativas });
+        if (permitidas.length === 0) {
+            section.style.display = 'none';
+            cards.innerHTML = '';
+            buttons.innerHTML = '';
+            return;
+        }
+
+        section.style.display = 'block';
+        buttons.innerHTML = permitidas.map((id) => {
+            const item = comp[id] || {};
+            const color = DADIVA_COLORS[id] || '#aaa';
+            const active = ativas[id] === true;
+            return `<button class="btn-dadiva ${active ? 'active' : ''}" onclick="toggleDadivaAtiva('${id}')" style="border-color:${color}; color:${active ? '#111' : color}; background:${active ? color : '#1b1b1b'};">${active ? '●' : '○'} ${item.titulo || id}</button>`;
+        }).join('');
+
+        cards.innerHTML = permitidas.map((id) => {
+            const item = comp[id] || {};
+            const color = DADIVA_COLORS[id] || '#666';
+            return `<div class="dadiva-card" style="border-left-color:${color}; border-color:${color}55;">
+                <div class="dadiva-title" style="color:${color};">${item.titulo || id}</div>
+                <div class="dadiva-subtitle">${item.origem || 'Origem não definida'}</div>
+                <div class="dadiva-desc">${item.desc || 'Sem descrição cadastrada no Banco de Dados.'}</div>
+            </div>`;
+        }).join('');
+    }
+
+    window.toggleDadivaAtiva = (dadivaId) => {
+        const permitidas = getDadivasPermitidas();
+        if (!permitidas.includes(dadivaId)) return;
+        const ativas = { ...(globalCharData.toggles?.dadivas_ativas || {}) };
+        ativas[dadivaId] = !ativas[dadivaId];
+        update(ref(db, dbPath), { 'toggles/dadivas_ativas': ativas });
+    };
+
     window.addArmorSlot = (mod) => {
         let max = globalCharData.armor_max || 0;
         let newMax = max + mod; if(newMax < 0) newMax = 0;
@@ -888,6 +966,7 @@
         
         renderArmorSlots();
         renderAscensaoCards();
+        renderDadivasSection();
         calculateDerivedStats();
         updateVisualModes();
     });
