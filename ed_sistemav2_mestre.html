@@ -136,6 +136,8 @@
         #config-player-container.open { display: flex; }
         .config-box { background: #222; border: 2px solid var(--accent); padding: 20px; border-radius: 10px; min-width: 320px; text-align: left; }
         .config-option { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .config-subtitle { font-size:12px; font-weight:bold; color:#ffaaaa; margin-top:15px; text-align:left; }
+        .config-hint { font-size:11px; color:#999; margin: 5px 0 10px; text-align:left; }
         .config-box h3 { text-align: center; margin-top: 0; }
         .config-box p { text-align: center; }
     </style>
@@ -244,7 +246,7 @@
                 <input type="checkbox" id="check_asc_unlocked">
             </div>
 
-            <p style="font-size:12px; font-weight:bold; color:#ffaaaa; margin-top:15px; text-align:left;">HABILIDADES DE LINHAGEM / RAÇA:</p>
+            <p class="config-subtitle">HABILIDADES DE LINHAGEM / RAÇA:</p>
             
             <div class="config-option">
                 <span>😈 Chamado do Inferno</span>
@@ -257,6 +259,29 @@
             <div class="config-option">
                 <span>👼 Vislumbre da Evolução</span>
                 <input type="checkbox" id="check_linhagem_3">
+            </div>
+
+            <p class="config-subtitle">MALDIÇÕES & DÁDIVAS (Máximo: 2):</p>
+            <p class="config-hint">Selecione até duas marcas para este personagem.</p>
+            <div class="config-option">
+                <span>🌙 Máscara Lunar</span>
+                <input type="checkbox" class="check-dadiva" id="check_dadiva_mascara_lunar">
+            </div>
+            <div class="config-option">
+                <span>🧪 Lodo Corrompido</span>
+                <input type="checkbox" class="check-dadiva" id="check_dadiva_lodo_corrompido">
+            </div>
+            <div class="config-option">
+                <span>🔥 Combustão Arcana</span>
+                <input type="checkbox" class="check-dadiva" id="check_dadiva_combustao_arcana">
+            </div>
+            <div class="config-option">
+                <span>❄️ Escarcha Absoluta</span>
+                <input type="checkbox" class="check-dadiva" id="check_dadiva_escarcha_absoluta">
+            </div>
+            <div class="config-option">
+                <span>💥 Tremor Abissal</span>
+                <input type="checkbox" class="check-dadiva" id="check_dadiva_tremor_abissal">
             </div>
 
             <button class="btn-action btn-save" onclick="savePlayerConfig()">Salvar e Enviar</button>
@@ -309,6 +334,15 @@
     });
 
     let globalPlayers = {}; let globalNpcs = {}; let globalDivisions = { players: {}, npcs: {} };
+    const DADIVAS_IDS = ['mascara_lunar', 'lodo_corrompido', 'combustao_arcana', 'escarcha_absoluta', 'tremor_abissal'];
+    document.addEventListener('change', (e) => {
+        if (!e.target.classList.contains('check-dadiva')) return;
+        const selected = Array.from(document.querySelectorAll('.check-dadiva:checked')).length;
+        if (selected > 2) {
+            e.target.checked = false;
+            alert("Limite atingido: escolha no máximo 2 Maldições/Dádivas por personagem.");
+        }
+    });
 
     function createDividerHTML(divId, divName, type) {
         const isDefault = divId === 'default';
@@ -373,6 +407,10 @@
         document.getElementById('check_linhagem_1').checked = (f.toggles && f.toggles.linhagem_1 === true);
         document.getElementById('check_linhagem_2').checked = (f.toggles && f.toggles.linhagem_2 === true);
         document.getElementById('check_linhagem_3').checked = (f.toggles && f.toggles.linhagem_3 === true);
+        DADIVAS_IDS.forEach((dadivaId) => {
+            const check = document.getElementById(`check_dadiva_${dadivaId}`);
+            if (check) check.checked = (f.toggles && f.toggles.dadivas && f.toggles.dadivas[dadivaId] === true);
+        });
         
         document.getElementById('config-player-container').classList.add('open');
     };
@@ -384,12 +422,27 @@
         const lin_1 = document.getElementById('check_linhagem_1').checked;
         const lin_2 = document.getElementById('check_linhagem_2').checked;
         const lin_3 = document.getElementById('check_linhagem_3').checked;
+        const selectedDadivas = {};
+        let totalDadivas = 0;
+        DADIVAS_IDS.forEach((dadivaId) => {
+            const checked = document.getElementById(`check_dadiva_${dadivaId}`)?.checked === true;
+            if (checked) {
+                selectedDadivas[dadivaId] = true;
+                totalDadivas++;
+            }
+        });
+
+        if (totalDadivas > 2) {
+            alert("Cada personagem pode ter no máximo 2 Maldições/Dádivas.");
+            return;
+        }
         
         update(ref(db, `${pathPlayers}/${id}`), { 
             'toggles/asc_unlocked': asc_un, 
             'toggles/linhagem_1': lin_1,
             'toggles/linhagem_2': lin_2,
-            'toggles/linhagem_3': lin_3
+            'toggles/linhagem_3': lin_3,
+            'toggles/dadivas': selectedDadivas
         });
         document.getElementById('config-player-container').classList.remove('open');
     };
@@ -426,6 +479,10 @@
         if(activeLin.length > 0) {
             linHtml = `<div style="font-size:10px; text-align:center; color:#ff5555; margin-top:3px; font-weight:bold;">FORMA ATIVA: ${activeLin.join(", ")}</div>`;
         }
+        const dadivasAtivas = Object.keys(f.toggles?.dadivas || {}).filter(key => f.toggles.dadivas[key] === true);
+        const dadivasHtml = dadivasAtivas.length > 0
+            ? `<div style="font-size:10px; text-align:center; color:#ffd78a; margin-top:3px; font-weight:bold;">MALDIÇÕES/DÁDIVAS: ${dadivasAtivas.length}/2</div>`
+            : "";
 
         const linkFicha = `${baseURL}ed_sistemav2_ficha.html?p=${id}`;
         
@@ -446,6 +503,7 @@
             <div class="status-bar" style="margin-top:4px;"><div class="bar-text">ESPERANÇA ${hoAt}/${hoMax}</div><div class="bar-fill hope" style="width:${hoP}%"></div></div>
             ${ascHtml}
             ${linHtml}
+            ${dadivasHtml}
 
             <div class="xp-control"><div class="xp-display-mini">Despertar (XP): ${f.xp_total||0}</div></div>
             <div class="xp-control">

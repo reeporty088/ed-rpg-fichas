@@ -86,6 +86,7 @@
     <button class="tab-btn" onclick="switchTab('passivas', this)">🛡️ Vantagens Passivas</button>
     <button class="tab-btn" onclick="switchTab('classes', this)">⚔️ Classes</button>
     <button class="tab-btn" onclick="switchTab('racas', this)">🧬 Raças</button>
+    <button class="tab-btn" onclick="switchTab('maldicoes_dadivas', this)">🌓 Maldições & Dádivas</button>
     <button class="tab-btn" onclick="switchTab('equipamentos', this)">🎒 Equipamentos</button>
     <button class="tab-btn" onclick="triggerImportItems()">📥 Importar Itens</button>
     <button class="tab-btn" onclick="downloadImportTemplate()">⬇️ Baixar Base</button>
@@ -143,6 +144,14 @@
             <button class="btn-add" style="background: #226622; border-color: #55cc55;" onclick="openRacaForm()">+ Criar Raça</button>
         </div>
         <div class="cards-grid" id="list_racas"></div>
+    </div>
+
+    <div class="card" id="sec_maldicoes_dadivas" style="display: none;">
+        <div class="header-label" style="background: #332600; border-color: #c0892f;">
+            <span style="color: #ffd78a;">Maldições & Dádivas</span>
+            <button class="btn-add" style="background: #7a4f00; border-color: #d8a347;" onclick="openDadivaForm()">+ Criar Marca</button>
+        </div>
+        <div class="cards-grid" id="list_maldicoes_dadivas"></div>
     </div>
 
     <div class="card" id="sec_equipamentos" style="display: none;">
@@ -363,6 +372,23 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modal-dadiva">
+    <div class="modal-box">
+        <h3 id="form_dadiva_title" style="margin-top:0; color:#ffd78a; border-bottom:1px solid #775522; padding-bottom:10px;">CRIAR MALDIÇÃO / DÁDIVA</h3>
+        <input type="hidden" id="dadiva_id">
+        <label>Nome da Marca</label>
+        <input type="text" id="dadiva_titulo" placeholder="Ex: Máscara Lunar">
+        <label>Origem</label>
+        <input type="text" id="dadiva_origem" placeholder="Ex: Intervenção Divina">
+        <label>Descrição Completa</label>
+        <textarea id="dadiva_desc" rows="10" placeholder="Descreva poder, custo e fraqueza..."></textarea>
+        <div class="form-buttons">
+            <button class="btn-cancel" onclick="document.getElementById('modal-dadiva').classList.remove('open')">Cancelar</button>
+            <button class="btn-save" onclick="saveDadiva()">Salvar no Banco</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -381,7 +407,7 @@
     const db = getDatabase(app);
     const dbPath = `banco_dados_v2`;
 
-    let globalData = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {} };
+    let globalData = { passivas: {}, cartas: {}, classes: {}, racas: {}, maldicoes_dadivas: {}, equipamentos: {} };
     let currentFilter = "Todos";
     let currentFilterEquip = "Todos";
 
@@ -436,6 +462,13 @@
                 hab3_nome: "Traço 3 (opcional)",
                 hab3_desc: "Descrição do traço 3"
             }
+        ],
+        maldicoes_dadivas: [
+            {
+                titulo: "Exemplo de Dádiva",
+                origem: "Intervenção Divina",
+                desc: "Descrição da maldição/dádiva."
+            }
         ]
     };
 
@@ -445,6 +478,7 @@
         document.getElementById('sec_passivas').style.display = 'none';
         document.getElementById('sec_classes').style.display = 'none';
         document.getElementById('sec_racas').style.display = 'none';
+        document.getElementById('sec_maldicoes_dadivas').style.display = 'none';
         document.getElementById('sec_equipamentos').style.display = 'none';
         
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -672,6 +706,14 @@
         { titulo: "Bacamarte de Caçador", categoria: "Exótico", atributo: "Distância", alcance: "Médio", dano_slots: "1d10", tipo_dano: "Perfurante", custo: "10.000+", desc: "Ao disparar, atinge o alvo e espalha estilhaços. Qualquer inimigo Corpo a Corpo do alvo principal sofre 1 Dano Leve automático." }
     ];
 
+    const maldicoesDadivasPadrao = [
+        { id: "mascara_lunar", titulo: "MÁSCARA LUNAR", origem: "Artefato Profano / Rito Lunar", desc: "PODER: +2 em todos os Atributos enquanto ativa, Ganho automático em ataques e sob Lua Cheia recebe ação extra.\nCUSTO: sofre 1 Estresse no início de cada turno com a máscara ativa.\nMALDIÇÃO: Aversão à Luz (Perda automática sob luz intensa)." },
+        { id: "lodo_corrompido", titulo: "LODO CORROMPIDO", origem: "Contágio das Águas de Yasharam", desc: "PODER: Fisiologia Maleável (gasta Esperança), Arremesso Cáustico e envenenamento progressivo.\nCUSTO/MALDIÇÃO: Fraqueza severa a Fogo, nuvem tóxica ao queimar e Diluição em submersão total." },
+        { id: "combustao_arcana", titulo: "COMBUSTÃO ARCANA", origem: "Intervenção Divina de Magmar", desc: "PODER: dobra deslocamento e ataque meteórico com ganho + dano por corrida.\nCUSTO: perde 1 PV ao ativar e 1 PV por turno ativa (dano interno absoluto).\nMALDIÇÃO: cura recebida fica reduzida pela metade durante o superaquecimento." },
+        { id: "escarcha_absoluta", titulo: "ESCARCHA ABSOLUTA", origem: "Intervenção Divina / Sobrevivência Extrema", desc: "PODER: aura de lentidão/paralisia e reação de preservação que ignora dano físico.\nCUSTO: ativar e manter custa Estresse, reduz movimento e bloqueia geração de Esperança.\nMALDIÇÃO: dano de Fogo ignora armaduras/escudos e impõe Perda na rodada seguinte." },
+        { id: "tremor_abissal", titulo: "TREMOR ABISSAL", origem: "Anomalia do Ninho / Exposição ao Vazio", desc: "PODER: ataques de pressão em níveis (1 a 3), com área e dano devastador conforme acúmulo.\nCUSTO: usa Estresse para acumular e ao liberar níveis altos fere o próprio corpo.\nMALDIÇÃO: Nervos Estilhaçados (Perda permanente em testes de precisão fina)." }
+    ];
+
     // ==========================================
     // LÓGICA PRINCIPAL DO FIREBASE
     // ==========================================
@@ -720,17 +762,27 @@
             needsUpdate = true;
         }
 
+        // Auto-povoar Maldições & Dádivas
+        if (!dados || !dados.maldicoes_dadivas) {
+            maldicoesDadivasPadrao.forEach((item, index) => {
+                const { id, ...data } = item;
+                updates[`${dbPath}/maldicoes_dadivas/${id || `dadiva_base_${index}`}`] = data;
+            });
+            needsUpdate = true;
+        }
+
         if (needsUpdate) {
             update(ref(db), updates);
             return; 
         }
 
         // Adicionando a leitura de classes, raças, equipamentos etc ao globalData
-        globalData = dados || { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {} };
+        globalData = dados || { passivas: {}, cartas: {}, classes: {}, racas: {}, maldicoes_dadivas: {}, equipamentos: {} };
         
         renderPassivas(globalData.passivas);
         renderClasses(globalData.classes);
         renderRacas(globalData.racas);
+        renderDadivas(globalData.maldicoes_dadivas);
         applyFilter(); 
         applyEquipFilter();
     });
@@ -832,6 +884,35 @@
                     <button class="btn-del" onclick="deleteItem('racas', '${item.id}')">🗑️ Apagar</button>
                 </div>
             </div>`;
+        });
+    };
+
+    window.renderDadivas = (dataObj) => {
+        const container = document.getElementById('list_maldicoes_dadivas');
+        if (!container) return;
+        container.innerHTML = "";
+        if (!dataObj) return;
+
+        let itensArray = Object.keys(dataObj).map(key => ({ id: key, ...dataObj[key] }));
+        itensArray.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+        itensArray.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'skill-card';
+            div.style.borderTop = '3px solid #c0892f';
+            div.innerHTML = `
+                <div class="card-badges">
+                    <span class="badge-domain" style="background:#332600; border-color:#c0892f; color:#ffd78a;">Maldição & Dádiva</span>
+                </div>
+                <div class="card-title" style="color:#ffd78a; border-color:#775522;">${item.titulo || 'Sem título'}</div>
+                <div class="card-meta"><strong>Origem:</strong> ${item.origem || 'Não definida'}</div>
+                <div class="card-desc">${item.desc || ''}</div>
+                <div class="card-actions">
+                    <button class="btn-edit" onclick="openDadivaForm('${item.id}')">✏️ Editar</button>
+                    <button class="btn-del" onclick="deleteItem('maldicoes_dadivas', '${item.id}')">🗑️ Apagar</button>
+                </div>
+            `;
+            container.appendChild(div);
         });
     };
 
@@ -1094,6 +1175,39 @@
         else push(ref(db, `${dbPath}/racas`), data).then(() => document.getElementById('modal-raca').classList.remove('open'));
     };
 
+    // Modais Maldições & Dádivas
+    window.openDadivaForm = (id = null) => {
+        document.getElementById('dadiva_id').value = id || "";
+        if (id && globalData.maldicoes_dadivas && globalData.maldicoes_dadivas[id]) {
+            const d = globalData.maldicoes_dadivas[id];
+            document.getElementById('form_dadiva_title').innerText = "EDITAR MALDIÇÃO / DÁDIVA";
+            document.getElementById('dadiva_titulo').value = d.titulo || "";
+            document.getElementById('dadiva_origem').value = d.origem || "";
+            document.getElementById('dadiva_desc').value = d.desc || "";
+        } else {
+            document.getElementById('form_dadiva_title').innerText = "CRIAR MALDIÇÃO / DÁDIVA";
+            document.getElementById('dadiva_titulo').value = "";
+            document.getElementById('dadiva_origem').value = "";
+            document.getElementById('dadiva_desc').value = "";
+        }
+        document.getElementById('modal-dadiva').classList.add('open');
+    };
+
+    window.saveDadiva = () => {
+        const id = document.getElementById('dadiva_id').value;
+        const titulo = document.getElementById('dadiva_titulo').value.trim();
+        if (!titulo) return alert("Preencha o nome da Maldição / Dádiva!");
+
+        const data = {
+            titulo,
+            origem: document.getElementById('dadiva_origem').value,
+            desc: document.getElementById('dadiva_desc').value
+        };
+
+        if (id) update(ref(db, `${dbPath}/maldicoes_dadivas/${id}`), data).then(() => document.getElementById('modal-dadiva').classList.remove('open'));
+        else push(ref(db, `${dbPath}/maldicoes_dadivas`), data).then(() => document.getElementById('modal-dadiva').classList.remove('open'));
+    };
+
     // Modais Equipamento
     window.openEquipForm = (id = null) => {
         document.getElementById('equip_id').value = id || "";
@@ -1167,6 +1281,7 @@
         cartas: ['titulo', 'dominio', 'nivel', 'tipo', 'custo', 'desc'],
         classes: ['titulo', 'desc', 'dominios', 'hab_nome', 'hab_desc'],
         racas: ['titulo', 'linhagem', 'desc', 'hab1_nome', 'hab1_desc', 'hab2_nome', 'hab2_desc', 'hab3_nome', 'hab3_desc'],
+        maldicoes_dadivas: ['titulo', 'origem', 'desc'],
         equipamentos: ['titulo', 'categoria', 'atributo', 'dano_slots', 'tipo_dano', 'alcance', 'custo', 'desc']
     };
 
