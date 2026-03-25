@@ -121,6 +121,8 @@
         .btn-add { background: #22aa22; color: white; border: none; border-radius: 5px; padding: 2px 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-add:hover { background: #2ebd2e; }
         .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-move-card { background: transparent; border: 1px solid var(--theme-border); color: var(--theme-light); cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-move-card:hover { border-color: var(--theme-light); background: rgba(255,255,255,0.08); }
 
         /* CARTÕES DE EQUIPAMENTO NA FICHA (Bonitinhos) */
         .equip-ficha-card { background: linear-gradient(145deg, #1a0508 0%, #0d0204 100%); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 12px; padding: 12px; border-left: 4px solid #cc4444; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
@@ -524,6 +526,7 @@
     let currentCategory = ""; 
     let currentDBItems = [];
     let ascChoiceState = null;
+    const MAX_CARTAS_EQUIPADAS = 5;
     
     // Variáveis Discente
     window.isDiscenteMode = false;
@@ -993,6 +996,7 @@
 
     // --- MODAIS ---
     window.openAddMenu = (category) => {
+        if (category === 'loadout' && !canAddToLoadout()) return;
         currentCategory = category;
         const dbBtn = document.getElementById('btn-db-add');
         if (['passivas', 'loadout', 'cofre', 'armas'].includes(category)) {
@@ -1012,6 +1016,7 @@
 
     window.createManual = () => {
         closeModal('modal-choice');
+        if (currentCategory === 'loadout' && !canAddToLoadout()) return;
         let data = { titulo: "", desc: "" };
         if (currentCategory === 'armas') {
             data = { titulo: "Novo Equipamento", atributo: "", dano_slots: "", tipo_dano: "", alcance: "", desc: "" };
@@ -1385,6 +1390,7 @@
             push(ref(db, `${dbPath}/habilidades/${currentCategory}`), data);
 
         } else {
+            if (currentCategory === 'loadout' && !canAddToLoadout()) return;
             let desc = item.desc;
             let data = { titulo: item.titulo, desc: desc };
             
@@ -1399,6 +1405,29 @@
     };
 
     // --- MANIPULAÇÃO DE ITENS DA FICHA ---
+    function getLoadoutCount() {
+        return Object.keys(globalCharData?.habilidades?.loadout || {}).length;
+    }
+
+    function canAddToLoadout() {
+        if (getLoadoutCount() >= MAX_CARTAS_EQUIPADAS) {
+            alert(`Limite atingido: você só pode ter ${MAX_CARTAS_EQUIPADAS} cartas equipadas.`);
+            return false;
+        }
+        return true;
+    }
+
+    window.moveCardBetweenLoadoutAndVault = async (category, id) => {
+        const item = globalCharData?.habilidades?.[category]?.[id];
+        if (!item) return;
+
+        const targetCategory = category === 'loadout' ? 'cofre' : 'loadout';
+        if (targetCategory === 'loadout' && !canAddToLoadout()) return;
+
+        await push(ref(db, `${dbPath}/habilidades/${targetCategory}`), item);
+        await remove(ref(db, `${dbPath}/habilidades/${category}/${id}`));
+    };
+
     window.removeItem = (category, id) => { if(confirm("Apagar item?")) remove(ref(db, `${dbPath}/habilidades/${category}/${id}`)); };
     window.toggleHab = (elementId) => { document.getElementById('body_' + elementId).classList.toggle('open'); };
     window.saveHab = (cat, id, field, val) => { update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { [field]: val }); };
@@ -1462,6 +1491,15 @@
                 let diceHTML = showDiceInput 
                     ? `<input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="${placeholderCusto}">` 
                     : '';
+
+                let moveBtnHTML = '';
+                if (category === 'loadout' || category === 'cofre') {
+                    const arrowIcon = category === 'loadout' ? '▼' : '▲';
+                    const arrowTitle = category === 'loadout'
+                        ? 'Mover para o Cofre'
+                        : 'Equipar (mover para Loadout)';
+                    moveBtnHTML = `<button class="btn-move-card" onclick="moveCardBetweenLoadoutAndVault('${category}','${id}')" title="${arrowTitle}">${arrowIcon}</button>`;
+                }
                     
                 let delBtnHTML = isFixed ? '' : `<button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>`;
 
@@ -1476,6 +1514,7 @@
                         <span class="hab-toggle" onclick="toggleHab('${category}_${id}')">▼</span>
                         ${titleHTML}
                         ${diceHTML}
+                        ${moveBtnHTML}
                         ${delBtnHTML}
                     </div>
                     <div class="hab-body ${isBodyOpen}" id="body_${category}_${id}">
