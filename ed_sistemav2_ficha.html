@@ -541,6 +541,13 @@
         }
     });
 
+    function escapeForInlineJS(value = '') {
+        return String(value)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\r?\n/g, '\\n');
+    }
+
     // --- CONTROLE MOBILE ---
     let currentCol = 0;
     const totalCols = 3;
@@ -1089,11 +1096,11 @@
             sec.innerHTML = `<div style="color:var(--theme-light); font-weight:bold; font-size:14px; text-transform:uppercase;">Herança: ${raca.titulo}</div>`;
             
             // Hab 1
-            if(raca.hab1_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_1" onclick="toggleDiscenteHab('${id}', 1, '${raca.hab1_nome.replace(/'/g,"\\'")}', '${raca.hab1_desc.replace(/'/g,"\\'")}')"><div class="discente-hab-title">${raca.hab1_nome}</div><div class="discente-hab-desc">${raca.hab1_desc}</div></div>`;
+            if(raca.hab1_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_1" onclick="toggleDiscenteHab('${id}', 1, '${escapeForInlineJS(raca.hab1_nome)}', '${escapeForInlineJS(raca.hab1_desc)}')"><div class="discente-hab-title">${raca.hab1_nome}</div><div class="discente-hab-desc">${raca.hab1_desc}</div></div>`;
             // Hab 2
-            if(raca.hab2_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_2" onclick="toggleDiscenteHab('${id}', 2, '${raca.hab2_nome.replace(/'/g,"\\'")}', '${raca.hab2_desc.replace(/'/g,"\\'")}')"><div class="discente-hab-title">${raca.hab2_nome}</div><div class="discente-hab-desc">${raca.hab2_desc}</div></div>`;
+            if(raca.hab2_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_2" onclick="toggleDiscenteHab('${id}', 2, '${escapeForInlineJS(raca.hab2_nome)}', '${escapeForInlineJS(raca.hab2_desc)}')"><div class="discente-hab-title">${raca.hab2_nome}</div><div class="discente-hab-desc">${raca.hab2_desc}</div></div>`;
             // Hab 3
-            if(raca.hab3_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_3" onclick="toggleDiscenteHab('${id}', 3, '${raca.hab3_nome.replace(/'/g,"\\'")}', '${raca.hab3_desc.replace(/'/g,"\\'")}')"><div class="discente-hab-title">${raca.hab3_nome}</div><div class="discente-hab-desc">${raca.hab3_desc}</div></div>`;
+            if(raca.hab3_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_3" onclick="toggleDiscenteHab('${id}', 3, '${escapeForInlineJS(raca.hab3_nome)}', '${escapeForInlineJS(raca.hab3_desc)}')"><div class="discente-hab-title">${raca.hab3_nome}</div><div class="discente-hab-desc">${raca.hab3_desc}</div></div>`;
             
             container.appendChild(sec);
         });
