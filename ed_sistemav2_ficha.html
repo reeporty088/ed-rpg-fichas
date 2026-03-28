@@ -168,8 +168,10 @@
         .duality-bonus { width: 58px; text-align: center; }
         .duality-dice-area { border: 1px solid var(--theme-border); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.25); margin-bottom: 10px; text-align: center; }
         .duality-dice-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 8px 0; }
-        .duality-adjust-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--theme-border); background: rgba(0,0,0,0.5); color: var(--theme-light); font-size: 18px; font-weight: bold; cursor: pointer; line-height: 1; }
-        .duality-adjust-btn:hover { border-color: var(--theme-light); box-shadow: 0 0 8px rgba(255,255,255,0.12); }
+        .duality-mode-btn { min-width: 72px; height: 34px; border-radius: 8px; border: 1px solid var(--theme-border); background: rgba(0,0,0,0.5); color: var(--theme-light); font-size: 10px; font-weight: bold; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+        .duality-mode-btn:hover { border-color: var(--theme-light); }
+        .duality-mode-btn.active { background: var(--theme-main); border-color: var(--theme-light); box-shadow: 0 0 10px rgba(255,255,255,0.12); }
+        .duality-mode-btn.disabled { opacity: 0.4; cursor: not-allowed; }
         .duality-die { width: 74px; height: 74px; border-radius: 12px; border: 2px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); transition: transform 0.2s, box-shadow 0.2s; }
         .duality-die.hope { border-color: #6cbfff; }
         .duality-die.fear { border-color: #ff6868; }
@@ -180,13 +182,13 @@
         .duality-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .duality-die.hope .duality-tag { color: #6cbfff; }
         .duality-die.fear .duality-tag { color: #ff6868; }
+        .duality-extra { min-height: 12px; margin-top: 2px; font-size: 9px; color: #cfcfcf; }
         .duality-roll-text { color: #ddd; font-size: 12px; margin-top: 6px; }
         .duality-cut-text { color: #a8a8a8; font-size: 11px; min-height: 15px; margin-top: 3px; }
         .duality-outcome { font-size: 13px; font-weight: bold; margin-top: 3px; min-height: 18px; }
         .duality-outcome.hope { color: #8fd1ff; }
         .duality-outcome.fear { color: #ff7f7f; }
         .duality-outcome.crit { color: #ffd580; }
-        .duality-count { font-size: 11px; color: #bbb; min-width: 32px; text-align: center; font-weight: bold; }
         .duality-roll-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--theme-light); background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.05)); color: var(--theme-light); font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
         .duality-roll-btn:hover { background: rgba(255,255,255,0.12); }
 
@@ -417,20 +419,18 @@
 
                 <div class="duality-dice-area">
                     <div class="duality-dice-row">
-                        <button class="duality-adjust-btn" onclick="adjustDualityFear(1)" title="+1 dado de Medo">−</button>
-                        <span class="duality-count" id="duality_fear_count">x1</span>
-
-                        <div class="duality-die hope" id="duality_hope_die">
-                            <span class="duality-val" id="duality_hope_val">—</span>
-                            <span class="duality-tag">Esperança</span>
-                        </div>
+                        <button class="duality-mode-btn" id="duality_btn_perda" onclick="setDualityMode('perda')" title="Adiciona 1 dado vermelho">Perda</button>
                         <div class="duality-die fear" id="duality_fear_die">
                             <span class="duality-val" id="duality_fear_val">—</span>
                             <span class="duality-tag">Medo</span>
+                            <span class="duality-extra" id="duality_fear_extra"></span>
                         </div>
-
-                        <span class="duality-count" id="duality_hope_count">x1</span>
-                        <button class="duality-adjust-btn" onclick="adjustDualityHope(1)" title="+1 dado de Esperança">+</button>
+                        <div class="duality-die hope" id="duality_hope_die">
+                            <span class="duality-val" id="duality_hope_val">—</span>
+                            <span class="duality-tag">Esperança</span>
+                            <span class="duality-extra" id="duality_hope_extra"></span>
+                        </div>
+                        <button class="duality-mode-btn" id="duality_btn_ganho" onclick="setDualityMode('ganho')" title="Adiciona 1 dado azul">Ganho</button>
                     </div>
                     <div class="duality-roll-text" id="duality_roll_text"></div>
                     <div class="duality-cut-text" id="duality_cut_text"></div>
@@ -816,24 +816,25 @@
         update(ref(db, dbPath), { xp_total: newXp });
     };
 
-    let extraHopeDice = 0;
-    let extraFearDice = 0;
+    let dualityMode = 'none'; // none | ganho | perda
 
-    function updateDualityCounters() {
-        const hopeCount = document.getElementById('duality_hope_count');
-        const fearCount = document.getElementById('duality_fear_count');
-        if (hopeCount) hopeCount.innerText = `x${1 + extraHopeDice}`;
-        if (fearCount) fearCount.innerText = `x${1 + extraFearDice}`;
+    function updateDualityModeButtons() {
+        const btnGanho = document.getElementById('duality_btn_ganho');
+        const btnPerda = document.getElementById('duality_btn_perda');
+        if (!btnGanho || !btnPerda) return;
+
+        btnGanho.classList.toggle('active', dualityMode === 'ganho');
+        btnPerda.classList.toggle('active', dualityMode === 'perda');
+        btnGanho.classList.toggle('disabled', dualityMode === 'perda');
+        btnPerda.classList.toggle('disabled', dualityMode === 'ganho');
     }
 
-    window.adjustDualityHope = (amount) => {
-        extraHopeDice = Math.max(0, extraHopeDice + amount);
-        updateDualityCounters();
-    };
-
-    window.adjustDualityFear = (amount) => {
-        extraFearDice = Math.max(0, extraFearDice + amount);
-        updateDualityCounters();
+    window.setDualityMode = (mode) => {
+        if (mode !== 'ganho' && mode !== 'perda') return;
+        if (dualityMode !== 'none' && dualityMode !== mode) return;
+        if (dualityMode === mode) dualityMode = 'none';
+        else dualityMode = mode;
+        updateDualityModeButtons();
     };
 
     function getKeptAndDiscarded(rolls) {
@@ -853,8 +854,10 @@
         const attrMod = parseInt(globalCharData[attrId]) || 0;
         const bonus = parseInt(document.getElementById('duality_bonus').value) || 0;
 
-        const hopeRolls = Array.from({ length: 1 + extraHopeDice }, () => Math.ceil(Math.random() * 12));
-        const fearRolls = Array.from({ length: 1 + extraFearDice }, () => Math.ceil(Math.random() * 12));
+        const hopeRolls = [Math.ceil(Math.random() * 12)];
+        const fearRolls = [Math.ceil(Math.random() * 12)];
+        if (dualityMode === 'ganho') hopeRolls.push(Math.ceil(Math.random() * 12));
+        if (dualityMode === 'perda') fearRolls.push(Math.ceil(Math.random() * 12));
         const hopeData = getKeptAndDiscarded(hopeRolls);
         const fearData = getKeptAndDiscarded(fearRolls);
 
@@ -884,6 +887,20 @@
 
         document.getElementById('duality_hope_val').innerText = hopeFinal;
         document.getElementById('duality_fear_val').innerText = fearFinal;
+        const hopeExtraEl = document.getElementById('duality_hope_extra');
+        const fearExtraEl = document.getElementById('duality_fear_extra');
+        hopeExtraEl.innerText = '';
+        fearExtraEl.innerText = '';
+        if (hopeRolls.length > 1) {
+            const extra = hopeRolls[1];
+            const status = extra === hopeFinal ? 'usado' : 'cortado';
+            hopeExtraEl.innerText = `Extra: ${extra} (${status})`;
+        }
+        if (fearRolls.length > 1) {
+            const extra = fearRolls[1];
+            const status = extra === fearFinal ? 'usado' : 'cortado';
+            fearExtraEl.innerText = `Extra: ${extra} (${status})`;
+        }
         const attrLabel = document.getElementById('duality_attr').selectedOptions[0].text;
         document.getElementById('duality_roll_text').innerText = `(${hopeFinal} + ${fearFinal}) + ${attrLabel}(${attrMod >= 0 ? '+' : ''}${attrMod}) ${bonus >= 0 ? '+' : '-'} ${Math.abs(bonus)} = ${total}`;
 
@@ -1817,7 +1834,7 @@
         });
     });
 
-    updateDualityCounters();
+    updateDualityModeButtons();
 </script>
 </body>
 </html>
