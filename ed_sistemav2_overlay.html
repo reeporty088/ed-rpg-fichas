@@ -112,6 +112,7 @@
     const stressEl = document.getElementById('stat-stress');
 
     const defaultLayout = {
+        name: { left: 20, top: 30 },
         hp: { left: 178, top: 36 },
         hope: { left: 186, top: 92 },
         stress: { left: 20, top: 96 }
@@ -142,6 +143,9 @@
     }
 
     function applyLayout() {
+        nameModeEl.style.left = `${currentLayout.name.left}px`;
+        nameModeEl.style.top = `${currentLayout.name.top}px`;
+
         hpEl.style.left = `${currentLayout.hp.left}px`;
         hpEl.style.top = `${currentLayout.hp.top}px`;
 
@@ -191,7 +195,7 @@
     }
 
     function setEditVisual(on) {
-        [hpEl, hopeEl, stressEl].forEach((el) => {
+        [nameModeEl, hpEl, hopeEl, stressEl].forEach((el) => {
             el.classList.toggle('editable', on);
         });
     }
@@ -240,8 +244,9 @@
 
     onValue(ref(db, 'overlay_v2_layout'), (snapshot) => {
         const layout = snapshot.val();
-        if (layout && layout.hp && layout.hope && layout.stress) {
+        if (layout) {
             currentLayout = {
+                name: { ...defaultLayout.name, ...layout.name },
                 hp: { ...defaultLayout.hp, ...layout.hp },
                 hope: { ...defaultLayout.hope, ...layout.hope },
                 stress: { ...defaultLayout.stress, ...layout.stress }
@@ -262,6 +267,7 @@
         renderOverlay(data);
     });
 
+    makeDraggable(nameModeEl, 'name');
     makeDraggable(hpEl, 'hp');
     makeDraggable(hopeEl, 'hope');
     makeDraggable(stressEl, 'stress');
