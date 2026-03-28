@@ -159,6 +159,37 @@
         .asc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
         .btn-disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ROLAGEM DE DUALIDADE */
+        .duality-card { margin-bottom: 15px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.35); border: 1px solid var(--theme-border); }
+        .duality-title { text-align: center; color: var(--theme-light); text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--theme-border); }
+        .duality-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .duality-row label { margin: 0; font-size: 10px; }
+        .duality-row select, .duality-row input { margin-bottom: 0; border-radius: 8px; }
+        .duality-bonus { width: 58px; text-align: center; }
+        .duality-dice-area { border: 1px solid var(--theme-border); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.25); margin-bottom: 10px; text-align: center; }
+        .duality-dice-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 8px 0; }
+        .duality-adjust-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--theme-border); background: rgba(0,0,0,0.5); color: var(--theme-light); font-size: 18px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .duality-adjust-btn:hover { border-color: var(--theme-light); box-shadow: 0 0 8px rgba(255,255,255,0.12); }
+        .duality-die { width: 74px; height: 74px; border-radius: 12px; border: 2px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+        .duality-die.hope { border-color: #6cbfff; }
+        .duality-die.fear { border-color: #ff6868; }
+        .duality-die.winner { transform: scale(1.06); box-shadow: 0 0 14px rgba(255,255,255,0.2); }
+        .duality-val { font-size: 40px; font-weight: bold; line-height: 1; }
+        .duality-die.hope .duality-val { color: #8fd1ff; }
+        .duality-die.fear .duality-val { color: #ff7f7f; }
+        .duality-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .duality-die.hope .duality-tag { color: #6cbfff; }
+        .duality-die.fear .duality-tag { color: #ff6868; }
+        .duality-roll-text { color: #ddd; font-size: 12px; margin-top: 6px; }
+        .duality-cut-text { color: #a8a8a8; font-size: 11px; min-height: 15px; margin-top: 3px; }
+        .duality-outcome { font-size: 13px; font-weight: bold; margin-top: 3px; min-height: 18px; }
+        .duality-outcome.hope { color: #8fd1ff; }
+        .duality-outcome.fear { color: #ff7f7f; }
+        .duality-outcome.crit { color: #ffd580; }
+        .duality-count { font-size: 11px; color: #bbb; min-width: 32px; text-align: center; font-weight: bold; }
+        .duality-roll-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--theme-light); background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.05)); color: var(--theme-light); font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+        .duality-roll-btn:hover { background: rgba(255,255,255,0.12); }
+
         /* MODAIS E NAVEGAÇÃO MOBILE */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-overlay.open { display: flex; }
@@ -370,6 +401,44 @@
     <div class="col" id="col-2">
         <div class="card">
             <div class="header-label">Armas e Equipamentos</div>
+
+            <div class="duality-card">
+                <div class="duality-title">Rolar Dados de Dualidade</div>
+                <div class="duality-row">
+                    <label for="duality_attr">Traço</label>
+                    <select id="duality_attr">
+                        <option value="poder">Poder</option>
+                        <option value="habilidade">Habilidade</option>
+                        <option value="resistencia">Resistência</option>
+                    </select>
+                    <label for="duality_bonus">Bônus</label>
+                    <input type="number" id="duality_bonus" class="duality-bonus" value="0">
+                </div>
+
+                <div class="duality-dice-area">
+                    <div class="duality-dice-row">
+                        <button class="duality-adjust-btn" onclick="adjustDualityFear(1)" title="+1 dado de Medo">−</button>
+                        <span class="duality-count" id="duality_fear_count">x1</span>
+
+                        <div class="duality-die hope" id="duality_hope_die">
+                            <span class="duality-val" id="duality_hope_val">—</span>
+                            <span class="duality-tag">Esperança</span>
+                        </div>
+                        <div class="duality-die fear" id="duality_fear_die">
+                            <span class="duality-val" id="duality_fear_val">—</span>
+                            <span class="duality-tag">Medo</span>
+                        </div>
+
+                        <span class="duality-count" id="duality_hope_count">x1</span>
+                        <button class="duality-adjust-btn" onclick="adjustDualityHope(1)" title="+1 dado de Esperança">+</button>
+                    </div>
+                    <div class="duality-roll-text" id="duality_roll_text"></div>
+                    <div class="duality-cut-text" id="duality_cut_text"></div>
+                    <div class="duality-outcome" id="duality_outcome"></div>
+                </div>
+
+                <button class="duality-roll-btn" onclick="rollDualityV2()">⬡ Rolar D12 + D12</button>
+            </div>
             
             <div class="section-header">
                 <label>Arsenal de Equipamentos</label>
@@ -745,6 +814,87 @@
         let xp = parseInt(globalCharData.xp_total) || 0;
         let newXp = xp + mod; if(newXp < 0) newXp = 0;
         update(ref(db, dbPath), { xp_total: newXp });
+    };
+
+    let extraHopeDice = 0;
+    let extraFearDice = 0;
+
+    function updateDualityCounters() {
+        const hopeCount = document.getElementById('duality_hope_count');
+        const fearCount = document.getElementById('duality_fear_count');
+        if (hopeCount) hopeCount.innerText = `x${1 + extraHopeDice}`;
+        if (fearCount) fearCount.innerText = `x${1 + extraFearDice}`;
+    }
+
+    window.adjustDualityHope = (amount) => {
+        extraHopeDice = Math.max(0, extraHopeDice + amount);
+        updateDualityCounters();
+    };
+
+    window.adjustDualityFear = (amount) => {
+        extraFearDice = Math.max(0, extraFearDice + amount);
+        updateDualityCounters();
+    };
+
+    function getKeptAndDiscarded(rolls) {
+        if (!rolls.length) return { kept: 0, discarded: [] };
+        const maxVal = Math.max(...rolls);
+        let keptUsed = false;
+        const discarded = [];
+        rolls.forEach((r) => {
+            if (!keptUsed && r === maxVal) keptUsed = true;
+            else discarded.push(r);
+        });
+        return { kept: maxVal, discarded };
+    }
+
+    window.rollDualityV2 = () => {
+        const attrId = document.getElementById('duality_attr').value;
+        const attrMod = parseInt(globalCharData[attrId]) || 0;
+        const bonus = parseInt(document.getElementById('duality_bonus').value) || 0;
+
+        const hopeRolls = Array.from({ length: 1 + extraHopeDice }, () => Math.ceil(Math.random() * 12));
+        const fearRolls = Array.from({ length: 1 + extraFearDice }, () => Math.ceil(Math.random() * 12));
+        const hopeData = getKeptAndDiscarded(hopeRolls);
+        const fearData = getKeptAndDiscarded(fearRolls);
+
+        const hopeFinal = hopeData.kept;
+        const fearFinal = fearData.kept;
+        const total = hopeFinal + fearFinal + attrMod + bonus;
+
+        const hopeDie = document.getElementById('duality_hope_die');
+        const fearDie = document.getElementById('duality_fear_die');
+        hopeDie.classList.remove('winner');
+        fearDie.classList.remove('winner');
+
+        let outcomeClass = 'crit';
+        let outcomeText = '✦ Crítico!';
+        if (hopeFinal > fearFinal) {
+            outcomeClass = 'hope';
+            outcomeText = '✦ Rolagem com Esperança';
+            hopeDie.classList.add('winner');
+        } else if (fearFinal > hopeFinal) {
+            outcomeClass = 'fear';
+            outcomeText = '✦ Rolagem com Medo';
+            fearDie.classList.add('winner');
+        } else {
+            hopeDie.classList.add('winner');
+            fearDie.classList.add('winner');
+        }
+
+        document.getElementById('duality_hope_val').innerText = hopeFinal;
+        document.getElementById('duality_fear_val').innerText = fearFinal;
+        const attrLabel = document.getElementById('duality_attr').selectedOptions[0].text;
+        document.getElementById('duality_roll_text').innerText = `(${hopeFinal} + ${fearFinal}) + ${attrLabel}(${attrMod >= 0 ? '+' : ''}${attrMod}) ${bonus >= 0 ? '+' : '-'} ${Math.abs(bonus)} = ${total}`;
+
+        const cuts = [];
+        if (hopeData.discarded.length) cuts.push(`Esperança cortado(s): ${hopeData.discarded.join(', ')}`);
+        if (fearData.discarded.length) cuts.push(`Medo cortado(s): ${fearData.discarded.join(', ')}`);
+        document.getElementById('duality_cut_text').innerText = cuts.join(' • ');
+
+        const outcomeEl = document.getElementById('duality_outcome');
+        outcomeEl.className = `duality-outcome ${outcomeClass}`;
+        outcomeEl.innerText = outcomeText;
     };
 
     function getAscensaoData() {
@@ -1666,6 +1816,8 @@
             e.target.value = "";
         });
     });
+
+    updateDualityCounters();
 </script>
 </body>
 </html>
