@@ -170,6 +170,7 @@
     const params = new URLSearchParams(window.location.search);
     const fichaID = params.get('p') || 'personagem_padrao_v2';
 
+    const portraitEl = document.querySelector('.portrait');
     const nameModeEl = document.getElementById('name-mode');
     const statusModeEl = document.getElementById('status-mode');
 
@@ -237,6 +238,7 @@
 
         const img = getOverlayImage(data);
         document.getElementById('portrait-img').src = img || '';
+        portraitEl.style.display = img ? 'block' : 'none';
     }
 
     onValue(ref(db, `fichas_v2/${fichaID}`), (snapshot) => {
