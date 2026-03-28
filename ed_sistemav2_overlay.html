@@ -9,23 +9,6 @@
         body { margin: 0; background: transparent; overflow: hidden; font-family: 'Cinzel', serif; }
         .overlay-wrap { width: 560px; height: 170px; position: relative; box-sizing: border-box; }
 
-        .portrait {
-            position: absolute;
-            width: 165px;
-            height: 165px;
-            left: 0;
-            top: 5px;
-            z-index: 2;
-        }
-        .portrait img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            object-position: bottom left;
-            display: block;
-            filter: drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px rgba(0,0,0,0.65));
-        }
-
         .name-mode, .status-mode {
             color: #fff;
             text-transform: uppercase;
@@ -42,22 +25,24 @@
         }
 
         .name-mode.hidden, .status-mode.hidden { opacity: 0; pointer-events: none; }
-        .name-mode { left: 182px; top: 30px; line-height: 1; letter-spacing: 2px; z-index: 3; }
+        .name-mode { left: 20px; top: 30px; line-height: 1; letter-spacing: 2px; z-index: 3; }
         .name-main { font-size: 52px; font-weight: 800; }
         .name-sub { font-size: 32px; font-weight: 700; margin-top: 3px; opacity: 0.95; }
 
         .status-mode { left: 0; top: 0; width: 100%; height: 100%; z-index: 3; }
         .stat-stress, .stat-hp, .stat-hope { position: absolute; font-weight: 800; line-height: 1; }
-        .stat-stress { left: 18px; top: 96px; font-size: 38px; }
+        .stat-stress { left: 20px; top: 96px; font-size: 38px; }
         .stat-hp { left: 178px; top: 36px; font-size: 58px; }
         .stat-hope { left: 186px; top: 92px; font-size: 50px; }
 
         .editor-toolbar {
             position: absolute;
             top: 6px;
-            right: 6px;
+            right: -190px;
             display: flex;
-            gap: 6px;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
             z-index: 20;
             opacity: 0.18;
             transition: 0.2s;
@@ -82,10 +67,6 @@
 </head>
 <body>
 <div class="overlay-wrap" id="overlay-wrap">
-    <div class="portrait" id="portrait">
-        <img id="portrait-img" alt="Retrato">
-    </div>
-
     <div class="name-mode" id="name-mode">
         <div class="name-main" id="name-main">PERSONAGEM</div>
         <div class="name-sub" id="name-sub"></div>
@@ -124,8 +105,6 @@
     const params = new URLSearchParams(window.location.search);
     const fichaID = params.get('p') || 'personagem_padrao_v2';
 
-    const portraitEl = document.getElementById('portrait');
-    const portraitImgEl = document.getElementById('portrait-img');
     const nameModeEl = document.getElementById('name-mode');
     const statusModeEl = document.getElementById('status-mode');
     const hpEl = document.getElementById('stat-hp');
@@ -133,10 +112,9 @@
     const stressEl = document.getElementById('stat-stress');
 
     const defaultLayout = {
-        portrait: { left: 0, top: 5, width: 165, height: 165 },
         hp: { left: 178, top: 36 },
         hope: { left: 186, top: 92 },
-        stress: { left: 18, top: 96 }
+        stress: { left: 20, top: 96 }
     };
     let currentLayout = structuredClone(defaultLayout);
     let editMode = false;
@@ -145,16 +123,6 @@
         const parts = String(rawName || 'Personagem').trim().split(/\s+/).filter(Boolean);
         if (parts.length <= 1) return { first: parts[0] || 'Personagem', rest: '' };
         return { first: parts[0], rest: parts.slice(1).join(' ') };
-    }
-
-    function getOverlayImage(data) {
-        const toggles = data.toggles || {};
-        const hasDadivaAtiva = Object.values(toggles.dadivas_ativas || {}).some((isOn) => isOn === true);
-        const hasFormaAtiva = !!toggles.forma_ativa;
-
-        if (hasDadivaAtiva && data.overlay_img_dadiva) return data.overlay_img_dadiva;
-        if (hasFormaAtiva && data.overlay_img_linhagem) return data.overlay_img_linhagem;
-        return data.overlay_img || data.char_img || '';
     }
 
     const themeColors = {
@@ -174,11 +142,6 @@
     }
 
     function applyLayout() {
-        portraitEl.style.left = `${currentLayout.portrait.left}px`;
-        portraitEl.style.top = `${currentLayout.portrait.top}px`;
-        portraitEl.style.width = `${currentLayout.portrait.width}px`;
-        portraitEl.style.height = `${currentLayout.portrait.height}px`;
-
         hpEl.style.left = `${currentLayout.hp.left}px`;
         hpEl.style.top = `${currentLayout.hp.top}px`;
 
@@ -189,7 +152,7 @@
         stressEl.style.top = `${currentLayout.stress.top}px`;
     }
 
-    function makeDraggable(el, key, isPortrait = false) {
+    function makeDraggable(el, key) {
         let dragging = false;
         let startX = 0;
         let startY = 0;
@@ -202,7 +165,7 @@
             el.setPointerCapture(e.pointerId);
             startX = e.clientX;
             startY = e.clientY;
-            const item = isPortrait ? currentLayout.portrait : currentLayout[key];
+            const item = currentLayout[key];
             baseLeft = item.left;
             baseTop = item.top;
             e.preventDefault();
@@ -212,13 +175,8 @@
             if (!dragging || !editMode) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            if (isPortrait) {
-                currentLayout.portrait.left = Math.round(baseLeft + dx);
-                currentLayout.portrait.top = Math.round(baseTop + dy);
-            } else {
-                currentLayout[key].left = Math.round(baseLeft + dx);
-                currentLayout[key].top = Math.round(baseTop + dy);
-            }
+            currentLayout[key].left = Math.round(baseLeft + dx);
+            currentLayout[key].top = Math.round(baseTop + dy);
             applyLayout();
         });
 
@@ -233,10 +191,9 @@
     }
 
     function setEditVisual(on) {
-        [portraitEl, hpEl, hopeEl, stressEl].forEach((el) => {
+        [hpEl, hopeEl, stressEl].forEach((el) => {
             el.classList.toggle('editable', on);
         });
-        portraitEl.style.pointerEvents = on ? 'auto' : 'none';
     }
 
     window.toggleEditMode = () => {
@@ -279,16 +236,12 @@
         nameModeEl.classList.toggle('hidden', mode !== 'nome');
         statusModeEl.classList.toggle('hidden', mode !== 'status');
 
-        const img = getOverlayImage(data);
-        portraitImgEl.src = img || '';
-        portraitEl.style.display = img ? 'block' : 'none';
     }
 
     onValue(ref(db, 'overlay_v2_layout'), (snapshot) => {
         const layout = snapshot.val();
-        if (layout && layout.portrait && layout.hp && layout.hope && layout.stress) {
+        if (layout && layout.hp && layout.hope && layout.stress) {
             currentLayout = {
-                portrait: { ...defaultLayout.portrait, ...layout.portrait },
                 hp: { ...defaultLayout.hp, ...layout.hp },
                 hope: { ...defaultLayout.hope, ...layout.hope },
                 stress: { ...defaultLayout.stress, ...layout.stress }
@@ -309,7 +262,6 @@
         renderOverlay(data);
     });
 
-    makeDraggable(portraitEl, 'portrait', true);
     makeDraggable(hpEl, 'hp');
     makeDraggable(hopeEl, 'hope');
     makeDraggable(stressEl, 'stress');
