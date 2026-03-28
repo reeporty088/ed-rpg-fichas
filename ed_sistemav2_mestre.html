@@ -485,6 +485,7 @@
             : "";
 
         const linkFicha = `${baseURL}ed_sistemav2_ficha.html?p=${id}`;
+        const linkOverlay = `${baseURL}ed_sistemav2_overlay.html?p=${id}`;
         
         el.innerHTML = `
             <div class="player-header">
@@ -493,6 +494,7 @@
                     <h2>${f.char_name || id}</h2>
                     <div class="controls-row">
                         <button class="btn-small" onclick="window.open('${linkFicha}', '_blank')" title="Abrir Ficha">📄 Ficha</button>
+                        <button class="btn-small btn-obs" onclick="window.open('${linkOverlay}', '_blank')" title="Abrir Overlay OBS">🎥 OBS</button>
                         <button class="btn-small btn-cfg" onclick="openPlayerConfig('${id}')">⚙️ Poderes</button>
                     </div>
                 </div>
