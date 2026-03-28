@@ -127,15 +127,16 @@
     }
 
     const themeColors = {
-        // Temas legados
-        sangue: '#ffaaaa', oceano: '#82b1ff', floresta: '#a5d6a7', ametista: '#e1bee7',
-        brasa: '#ff8a3d', sombra: '#bdbdbd', ouro: '#ffe082', rosa: '#ff6ed5',
+        // Temas legados (mais saturados para melhorar leitura no overlay)
+        sangue: '#ff3b3b', oceano: '#00ccff', floresta: '#45ff6a', ametista: '#d087ff',
+        brasa: '#ff8a3d', sombra: '#cfcfcf', ouro: '#ffd760', rosa: '#ff4fc7',
         // Temas atuais da ficha V2
-        rubi: '#ffcdd2', lava: '#ffccbc', deserto: '#d7ccc8', esmeralda: '#b2dfdb',
-        menta: '#b2f5ea', cobalto: '#bbdefb', safira: '#c5cae9', nevoa: '#cfd8dc',
-        violeta: '#e1bee7', magenta: '#f8bbd0', aurora: '#b2ebf2', gelo: '#b3e5fc',
-        obsidiana: '#eceff1'
+        rubi: '#ff5252', lava: '#ff7043', deserto: '#bcaaa4', esmeralda: '#26a69a',
+        menta: '#4db6ac', cobalto: '#2196f3', safira: '#5c6bc0', nevoa: '#90a4ae',
+        violeta: '#ab47bc', magenta: '#ec407a', aurora: '#26c6da', gelo: '#29b6f6',
+        obsidiana: '#90a4ae'
     };
+
 
     function getGlowColor(data) {
         const base = themeColors[data.color_theme] || '#00ccff';
