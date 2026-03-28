@@ -1584,7 +1584,8 @@
         }); 
     }
 
-    function processImageFile(file) {
+    function processImageFile(file, options = {}) {
+        const { output = 'jpeg', quality = 0.8 } = options;
         return new Promise((resolve, reject) => {
             if (!file) return reject(new Error('Arquivo inválido.'));
             const reader = new FileReader();
@@ -1608,7 +1609,8 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(image, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    if (output === 'png') resolve(canvas.toDataURL('image/png'));
+                    else resolve(canvas.toDataURL('image/jpeg', quality));
                 };
                 image.onerror = () => reject(new Error('Não foi possível processar a imagem.'));
                 image.src = readerEvent.target.result;
@@ -1647,7 +1649,8 @@
 
     async function handleImageUpload(field, file) {
         try {
-            const dataUrl = await processImageFile(file);
+            const preferPng = field.startsWith('overlay_');
+            const dataUrl = await processImageFile(file, preferPng ? { output: 'png' } : { output: 'jpeg', quality: 0.8 });
             await update(ref(db, dbPath), { [field]: dataUrl });
         } catch (err) {
             alert(err.message || 'Erro ao enviar imagem.');
