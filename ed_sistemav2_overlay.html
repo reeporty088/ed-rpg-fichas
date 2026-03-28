@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay OBS V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Cinzel', serif; }
+        .overlay-wrap { width: 560px; height: 170px; position: relative; box-sizing: border-box; }
 
+        .name-mode, .status-mode {
+            color: #fff;
+            text-transform: uppercase;
+            --glow-color: #00ccff;
+            text-shadow:
+                2px 2px 0 #000,
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                0 0 14px var(--glow-color),
+                0 0 26px var(--glow-color);
+            transition: opacity 0.25s ease;
+            position: absolute;
+        }
+
+        .name-mode.hidden, .status-mode.hidden { opacity: 0; pointer-events: none; }
+        .name-mode { left: 20px; top: 30px; line-height: 1; letter-spacing: 2px; z-index: 3; }
+        .name-main { font-size: 52px; font-weight: 800; }
+        .name-sub { font-size: 32px; font-weight: 700; margin-top: 3px; opacity: 0.95; }
+
+        .status-mode { left: 0; top: 0; width: 100%; height: 100%; z-index: 3; }
+        .stat-stress, .stat-hp, .stat-hope { position: absolute; font-weight: 800; line-height: 1; }
+        .stat-stress { left: 20px; top: 96px; font-size: 38px; }
+        .stat-hp { left: 178px; top: 36px; font-size: 58px; }
+        .stat-hope { left: 186px; top: 92px; font-size: 50px; }
+
+        .editor-toolbar {
+            position: absolute;
+            top: 6px;
+            right: -190px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            z-index: 20;
+            opacity: 0.18;
+            transition: 0.2s;
+        }
+        .editor-toolbar:hover { opacity: 1; }
+        .editor-toolbar button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #777;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 4px 8px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .editor-toolbar button:hover { border-color: #fff; }
+
+        .editable { outline: 1px dashed rgba(255,255,255,0.75); cursor: move; }
+        .empty { color: #fff; font-size: 18px; text-transform: uppercase; padding: 12px; text-shadow: 2px 2px 0 #000; }
+    </style>
+</head>
+<body>
+<div class="overlay-wrap" id="overlay-wrap">
+    <div class="name-mode" id="name-mode">
+        <div class="name-main" id="name-main">PERSONAGEM</div>
+        <div class="name-sub" id="name-sub"></div>
+    </div>
+
+    <div class="status-mode hidden" id="status-mode">
+        <div class="stat-stress" id="stat-stress">0/0</div>
+        <div class="stat-hp" id="stat-hp">0/0</div>
+        <div class="stat-hope" id="stat-hope">0/0</div>
+    </div>
+
+    <div class="editor-toolbar">
+        <button onclick="toggleEditMode()">Editar</button>
+        <button onclick="saveLayout()">Salvar</button>
+        <button onclick="resetLayout()">Reset</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const fichaID = params.get('p') || 'personagem_padrao_v2';
+
+    const nameModeEl = document.getElementById('name-mode');
+    const statusModeEl = document.getElementById('status-mode');
+    const hpEl = document.getElementById('stat-hp');
+    const hopeEl = document.getElementById('stat-hope');
+    const stressEl = document.getElementById('stat-stress');
+
+    const defaultLayout = {
+        hp: { left: 178, top: 36 },
+        hope: { left: 186, top: 92 },
+        stress: { left: 20, top: 96 }
+    };
+    let currentLayout = structuredClone(defaultLayout);
+    let editMode = false;
+
+    function splitName(rawName) {
+        const parts = String(rawName || 'Personagem').trim().split(/\s+/).filter(Boolean);
+        if (parts.length <= 1) return { first: parts[0] || 'Personagem', rest: '' };
+        return { first: parts[0], rest: parts.slice(1).join(' ') };
+    }
+
+    const themeColors = {
+        sangue: '#ff3b3b', oceano: '#00ccff', floresta: '#45ff6a', ametista: '#d087ff',
+        brasa: '#ff8a3d', sombra: '#bbbbbb', ouro: '#ffd760', rosa: '#ff6ed5'
+    };
+
+    function getGlowColor(data) {
+        const base = themeColors[data.color_theme] || '#00ccff';
+        const toggles = data.toggles || {};
+        if (toggles.forma_ativa === 'demon') return '#ff3030';
+        if (toggles.forma_ativa === 'beast') return '#56ff56';
+        if (toggles.forma_ativa === 'sacra') return '#00e5ff';
+        const hasDadivaAtiva = Object.values(toggles.dadivas_ativas || {}).some((isOn) => isOn === true);
+        if (hasDadivaAtiva) return '#cda9ff';
+        return base;
+    }
+
+    function applyLayout() {
+        hpEl.style.left = `${currentLayout.hp.left}px`;
+        hpEl.style.top = `${currentLayout.hp.top}px`;
+
+        hopeEl.style.left = `${currentLayout.hope.left}px`;
+        hopeEl.style.top = `${currentLayout.hope.top}px`;
+
+        stressEl.style.left = `${currentLayout.stress.left}px`;
+        stressEl.style.top = `${currentLayout.stress.top}px`;
+    }
+
+    function makeDraggable(el, key) {
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let baseLeft = 0;
+        let baseTop = 0;
+
+        el.addEventListener('pointerdown', (e) => {
+            if (!editMode) return;
+            dragging = true;
+            el.setPointerCapture(e.pointerId);
+            startX = e.clientX;
+            startY = e.clientY;
+            const item = currentLayout[key];
+            baseLeft = item.left;
+            baseTop = item.top;
+            e.preventDefault();
+        });
+
+        el.addEventListener('pointermove', (e) => {
+            if (!dragging || !editMode) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            currentLayout[key].left = Math.round(baseLeft + dx);
+            currentLayout[key].top = Math.round(baseTop + dy);
+            applyLayout();
+        });
+
+        const stopDrag = (e) => {
+            if (!dragging) return;
+            dragging = false;
+            try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+
+        el.addEventListener('pointerup', stopDrag);
+        el.addEventListener('pointercancel', stopDrag);
+    }
+
+    function setEditVisual(on) {
+        [hpEl, hopeEl, stressEl].forEach((el) => {
+            el.classList.toggle('editable', on);
+        });
+    }
+
+    window.toggleEditMode = () => {
+        editMode = !editMode;
+        setEditVisual(editMode);
+    };
+
+    window.saveLayout = async () => {
+        await set(ref(db, 'overlay_v2_layout'), currentLayout);
+        alert('Layout salvo! Esse posicionamento vale para todos os overlays V2.');
+    };
+
+    window.resetLayout = async () => {
+        currentLayout = structuredClone(defaultLayout);
+        applyLayout();
+        await set(ref(db, 'overlay_v2_layout'), currentLayout);
+    };
+
+    function renderOverlay(data) {
+        const { first, rest } = splitName(data.char_name || fichaID);
+        document.getElementById('name-main').textContent = first;
+        document.getElementById('name-sub').textContent = rest;
+
+        const hpAt = parseInt(data.hp_at) || 0;
+        const hpMax = parseInt(data.hp_max) || 0;
+        const hopeAt = parseInt(data.hope_at) || 0;
+        const hopeMax = parseInt(data.hope_max) || 0;
+        const stressAt = parseInt(data.stress_at) || 0;
+        const stressMax = parseInt(data.stress_max) || 0;
+
+        hpEl.textContent = `${hpAt}/${hpMax}`;
+        hopeEl.textContent = `${hopeAt}/${hopeMax}`;
+        stressEl.textContent = `${stressAt}/${stressMax}`;
+
+        const glow = getGlowColor(data);
+        nameModeEl.style.setProperty('--glow-color', glow);
+        statusModeEl.style.setProperty('--glow-color', glow);
+
+        const mode = data.overlay_mode === 'status' ? 'status' : 'nome';
+        nameModeEl.classList.toggle('hidden', mode !== 'nome');
+        statusModeEl.classList.toggle('hidden', mode !== 'status');
+
+    }
+
+    onValue(ref(db, 'overlay_v2_layout'), (snapshot) => {
+        const layout = snapshot.val();
+        if (layout && layout.hp && layout.hope && layout.stress) {
+            currentLayout = {
+                hp: { ...defaultLayout.hp, ...layout.hp },
+                hope: { ...defaultLayout.hope, ...layout.hope },
+                stress: { ...defaultLayout.stress, ...layout.stress }
+            };
+            applyLayout();
+        } else {
+            currentLayout = structuredClone(defaultLayout);
+            applyLayout();
+        }
+    });
+
+    onValue(ref(db, `fichas_v2/${fichaID}`), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            document.body.innerHTML = `<div class="empty">Ficha não encontrada: ${fichaID}</div>`;
+            return;
+        }
+        renderOverlay(data);
+    });
+
+    makeDraggable(hpEl, 'hp');
+    makeDraggable(hopeEl, 'hope');
+    makeDraggable(stressEl, 'stress');
+    applyLayout();
+    setEditVisual(false);
+</script>
+</body>
+</html>
