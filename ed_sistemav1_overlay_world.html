@@ -77,8 +77,9 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 
     </style>
+    <script src="auth.js"></script>
 </head>
-<body>
+<body data-require-auth="true" data-required-version="v1">
 
     <div id="world-widget" class="fade-in">
         <div class="top-row">
