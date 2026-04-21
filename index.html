@@ -1,103 +1,276 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escória de Deus - Hub de Sistemas</title>
-    <style>
-        :root {
-            --bg: #0f0f0f;
-            --card: #1c1c1c;
-            --border: #5a1a1f;
-            --accent: #800000;
-            --text: #f5f5f5;
-            --muted: #bdbdbd;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at top, #1b1b1b, var(--bg));
-            color: var(--text);
-            padding: 24px;
-        }
-
-        .hub {
-            width: min(560px, 100%);
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
-            padding: 28px;
-        }
-
-        h1 {
-            margin: 0 0 10px;
-            text-align: center;
-            font-size: 1.8rem;
-            letter-spacing: 0.5px;
-        }
-
-        p {
-            margin: 0 0 24px;
-            text-align: center;
-            color: var(--muted);
-        }
-
-        .buttons {
-            display: grid;
-            gap: 12px;
-        }
-
-        .system-btn {
-            width: 100%;
-            border: 1px solid #7a2a2f;
-            border-radius: 12px;
-            background: linear-gradient(180deg, #2a1215, #1a0d0f);
-            color: var(--text);
-            padding: 14px 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: not-allowed;
-            opacity: 0.9;
-        }
-
-        .tag {
-            display: inline-block;
-            margin-top: 16px;
-            background: var(--accent);
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-        }
-
-        .tag-wrap {
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escória de Deus - Painel Central</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --border: #5a1a1f;
+      --accent: #8b0000;
+      --text: #f5f5f5;
+      --muted: #a5a5a5;
+      --success: #1f8b4c;
+      --danger: #a22020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top, #222, var(--bg));
+      color: var(--text);
+      padding: 20px;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .auth-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    h1,h2,h3 { margin-top: 0; }
+    .field { display: grid; gap: 6px; margin-bottom: 10px; }
+    input, select, button {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #6a3030;
+      background: #120f0f;
+      color: var(--text);
+      padding: 10px;
+    }
+    button { cursor: pointer; background: linear-gradient(180deg, #3a1518, #220d0f); font-weight: 700; }
+    .remember { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; }
+    .remember input { width: auto; }
+    .msg { min-height: 20px; color: #ff9e9e; font-size: .9rem; }
+    .ok { color: #8ff0b2; }
+    .hidden { display: none !important; }
+    .hub-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .pill { padding: 4px 8px; border-radius: 999px; font-size: .78rem; }
+    .approved { background: #1f8b4c33; border: 1px solid #1f8b4c; }
+    .pending { background: #8b6f1f33; border: 1px solid #8b6f1f; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { border: 1px solid #4a2b2b; padding: 8px; text-align: left; }
+    .actions { display: grid; gap: 6px; }
+    .danger { border-color: #892828; background: linear-gradient(180deg, #4a1717, #2d0f0f); }
+    .success { border-color: #2b7245; background: linear-gradient(180deg, #215c38, #134126); }
+    @media (max-width: 900px) { .auth-grid { grid-template-columns: 1fr; } }
+  </style>
+  <script src="auth.js"></script>
 </head>
 <body>
-    <main class="hub">
-        <h1>Escória de Deus</h1>
-        <p>Hub principal de versões do sistema. Escolha abaixo a edição que deseja usar.</p>
+<div class="wrap">
+  <section id="authSection" class="auth-grid">
+    <div class="card">
+      <h2>Login</h2>
+      <div class="field"><label>Email</label><input id="loginEmail" type="email" /></div>
+      <div class="field"><label>Senha</label><input id="loginPassword" type="password" /></div>
+      <label class="remember"><input id="remember" type="checkbox" /> Lembre-se de mim</label>
+      <button id="btnLogin">Entrar</button>
+      <div id="loginMsg" class="msg"></div>
+      <small>Conta ADM padrão: referrey033@gmail.com / admin123</small>
+    </div>
 
-        <section class="buttons" aria-label="Seleção de versões">
-            <button class="system-btn" type="button" disabled>ED 1ºE</button>
-            <button class="system-btn" type="button" disabled>ED 2ºE</button>
-            <button class="system-btn" type="button" disabled>ED 3º</button>
-        </section>
+    <div class="card">
+      <h2>Registro</h2>
+      <div class="field"><label>Nome</label><input id="regName" type="text" /></div>
+      <div class="field"><label>Email</label><input id="regEmail" type="email" /></div>
+      <div class="field"><label>Senha</label><input id="regPass" type="password" /></div>
+      <div class="field"><label>Confirmar senha</label><input id="regPass2" type="password" /></div>
+      <button id="btnRegister">Registrar</button>
+      <div id="regMsg" class="msg"></div>
+    </div>
+  </section>
 
-        <div class="tag-wrap">
-            <span class="tag">Em breve</span>
-        </div>
-    </main>
+  <section id="hubSection" class="hidden">
+    <div class="card">
+      <h1>Painel Central</h1>
+      <p>Usuário: <strong id="userName"></strong> (<span id="userRole"></span>)</p>
+      <button id="btnLogout" class="danger">Sair</button>
+    </div>
+
+    <div class="card">
+      <h3>Versões disponíveis</h3>
+      <div id="versions" class="hub-grid"></div>
+    </div>
+
+    <div id="adminSection" class="card hidden">
+      <h3>Área do ADM - Aprovação e controle de acesso</h3>
+      <div id="adminUsers"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const authSection = document.getElementById('authSection');
+const hubSection = document.getElementById('hubSection');
+
+function render() {
+  const user = EDAuth.currentUser();
+  if (!user) {
+    authSection.classList.remove('hidden');
+    hubSection.classList.add('hidden');
+    return;
+  }
+
+  authSection.classList.add('hidden');
+  hubSection.classList.remove('hidden');
+
+  document.getElementById('userName').textContent = user.name;
+  document.getElementById('userRole').textContent = user.role === 'admin' ? 'ADM' : 'Jogador';
+
+  const versions = document.getElementById('versions');
+  versions.innerHTML = '';
+
+  const cards = [
+    { key: 'v1', label: 'ED Sistema v1', url: 'ed_sistemav1_testeindex.html' },
+    { key: 'v2', label: 'ED Sistema v2', url: 'ed_sistemav2_mestre.html' },
+    { key: 'v3', label: 'ED Sistema v3 - Painel Central', url: 'ed_sistemav3_painelcentral.html' }
+  ];
+
+  cards.forEach((item) => {
+    const allowed = user.role === 'admin' || user.versions.includes(item.key);
+    const btn = document.createElement('button');
+    btn.textContent = allowed ? `Acessar ${item.label}` : `${item.label} (Sem acesso)`;
+    btn.disabled = !allowed;
+    btn.onclick = () => { if (allowed) location.href = item.url; };
+    versions.appendChild(btn);
+  });
+
+  const adminSection = document.getElementById('adminSection');
+  if (user.role === 'admin') {
+    adminSection.classList.remove('hidden');
+    renderAdminUsers();
+  } else {
+    adminSection.classList.add('hidden');
+  }
+}
+
+function renderAdminUsers() {
+  const container = document.getElementById('adminUsers');
+  const store = EDAuth.getStore();
+
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Acessos</th><th>Ações</th></tr></thead>`;
+  const tbody = document.createElement('tbody');
+
+  store.users.forEach((u) => {
+    const tr = document.createElement('tr');
+    const statusClass = u.status === 'approved' ? 'approved' : 'pending';
+
+    const accessChecks = ['v1','v2','v3'].map((v) => {
+      const checked = u.versions.includes(v) ? 'checked' : '';
+      const disabled = u.email === EDAuth.ADMIN_EMAIL ? 'disabled' : '';
+      return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${checked} ${disabled}/> ${v.toUpperCase()}</label>`;
+    }).join('<br>');
+
+    tr.innerHTML = `
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td><span class="pill ${statusClass}">${u.status}</span></td>
+      <td>${accessChecks}</td>
+      <td class="actions" id="act-${u.id}"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.innerHTML = '';
+  container.appendChild(table);
+
+  store.users.forEach((u) => {
+    const act = document.getElementById(`act-${u.id}`);
+    const changePass = document.createElement('button');
+    changePass.textContent = 'Alterar senha';
+    changePass.onclick = () => handleChangePassword(u);
+
+    if (u.email !== EDAuth.ADMIN_EMAIL) {
+      const approve = document.createElement('button');
+      approve.className = 'success';
+      approve.textContent = 'Aprovar';
+      approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
+
+      const deny = document.createElement('button');
+      deny.className = 'danger';
+      deny.textContent = 'Negar';
+      deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
+
+      const del = document.createElement('button');
+      del.className = 'danger';
+      del.textContent = 'Excluir';
+      del.onclick = () => { if (confirm('Excluir usuário?')) { EDAuth.deleteUser(u.id); render(); } };
+
+      act.append(approve, deny, del, changePass);
+    } else {
+      act.append(changePass);
+    }
+  });
+
+  container.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+    box.addEventListener('change', () => {
+      const user = store.users.find((u) => u.id === box.dataset.user);
+      if (!user || user.email === EDAuth.ADMIN_EMAIL) return;
+      let versions = Array.isArray(user.versions) ? user.versions.slice() : [];
+      if (box.checked && !versions.includes(box.dataset.ver)) versions.push(box.dataset.ver);
+      if (!box.checked) versions = versions.filter((v) => v !== box.dataset.ver);
+      EDAuth.updateUser(user.id, { versions });
+    });
+  });
+}
+
+function handleChangePassword(user) {
+  const novaSenha = prompt(`Nova senha para ${user.name} (${user.email}):`);
+  if (novaSenha === null) return;
+  const confirmarSenha = prompt('Confirme a nova senha:');
+  if (confirmarSenha === null) return;
+  if (novaSenha !== confirmarSenha) {
+    alert('As senhas não coincidem.');
+    return;
+  }
+
+  const result = EDAuth.changeUserPassword(user.id, novaSenha);
+  if (!result.ok) {
+    alert(result.error);
+    return;
+  }
+  alert('Senha alterada com sucesso.');
+}
+
+document.getElementById('btnLogin').onclick = () => {
+  const result = EDAuth.login(
+    document.getElementById('loginEmail').value,
+    document.getElementById('loginPassword').value,
+    document.getElementById('remember').checked
+  );
+  const msg = document.getElementById('loginMsg');
+  msg.className = 'msg';
+  msg.textContent = result.ok ? 'Login realizado com sucesso.' : result.error;
+  if (result.ok) { msg.classList.add('ok'); render(); }
+};
+
+document.getElementById('btnRegister').onclick = () => {
+  const result = EDAuth.register({
+    name: document.getElementById('regName').value,
+    email: document.getElementById('regEmail').value,
+    password: document.getElementById('regPass').value,
+    confirmPassword: document.getElementById('regPass2').value
+  });
+  const msg = document.getElementById('regMsg');
+  msg.className = 'msg';
+  msg.textContent = result.ok ? result.message : result.error;
+  if (result.ok) msg.classList.add('ok');
+};
+
+document.getElementById('btnLogout').onclick = () => { EDAuth.logout(); render(); };
+
+render();
+</script>
 </body>
 </html>

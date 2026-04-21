@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ED Sistema v3 - Painel Central</title>
+  <style>
+    body { margin:0; font-family:Arial, sans-serif; background:#101010; color:#eee; padding:20px; }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; }
+    .card { background:#1b1b1b; border:1px solid #5a1a1f; border-radius:10px; padding:14px; margin-bottom:12px; }
+    button,input,select { background:#120f0f; color:#fff; border:1px solid #6a3030; border-radius:8px; padding:8px; }
+    button { cursor:pointer; font-weight:700; }
+    .grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+    .hidden { display:none; }
+    .sheet { display:flex; align-items:center; gap:10px; }
+    .photo { font-size:1.6rem; }
+    .admin-actions { display:grid; gap:8px; }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body data-require-auth="true" data-required-version="v3">
+  <div class="top">
+    <h1 style="margin:0;">ED Sistema v3 - Painel Central</h1>
+    <div>
+      <button onclick="location.href='index.html'">Voltar ao Hub</button>
+      <button onclick="EDAuth.logout(); location.href='index.html'">Sair</button>
+    </div>
+  </div>
+
+  <section id="playerArea" class="card hidden">
+    <h2>Jogador - Suas fichas anexadas</h2>
+    <div id="playerSheets" class="grid"></div>
+  </section>
+
+  <section id="adminArea" class="card hidden">
+    <h2>ADM - Painel inicial</h2>
+    <div class="grid">
+      <button onclick="openAllSheets()">Acessar todas as fichas</button>
+      <button onclick="alert('Painel de inimigos (em construção).')">Painel de inimigos</button>
+      <button onclick="location.href='ed_sistemav1_calendario.html'">Calendário do sistema (v1)</button>
+      <button onclick="location.href='ed_sistemav1_banco_habilidades.html'">Banco de habilidades</button>
+      <button onclick="document.getElementById('manageSheets').classList.toggle('hidden')">Gerenciar fichas</button>
+    </div>
+
+    <div id="manageSheets" class="card hidden" style="margin-top:10px;">
+      <h3>Gerenciar fichas (ADM)</h3>
+      <div class="admin-actions">
+        <div>
+          <h4>Criar nova ficha</h4>
+          <input id="newSheetName" placeholder="Nome da ficha">
+          <input id="newSheetPhoto" placeholder="Emoji/foto curta (ex: 🧙)">
+          <input id="newSheetUrl" placeholder="Arquivo HTML (ex: ed_sistemav2_ficha.html)">
+          <select id="newSheetVersion">
+            <option value="v1">v1</option>
+            <option value="v2">v2</option>
+            <option value="v3" selected>v3</option>
+          </select>
+          <button onclick="createSheet()">Criar ficha</button>
+        </div>
+
+        <div>
+          <h4>Anexar ficha a jogador</h4>
+          <select id="userSelect"></select>
+          <select id="sheetSelect"></select>
+          <button onclick="attachSheet()">Anexar ficha</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Todas as fichas cadastradas</h3>
+      <div id="allSheets" class="grid"></div>
+    </div>
+  </section>
+
+<script>
+const user = EDAuth.currentUser();
+
+function renderBase() {
+  if (!user) return;
+  if (user.role === 'admin') {
+    document.getElementById('adminArea').classList.remove('hidden');
+    renderAdmin();
+  } else {
+    document.getElementById('playerArea').classList.remove('hidden');
+    renderPlayer();
+  }
+}
+
+function renderPlayer() {
+  const store = EDAuth.getStore();
+  const box = document.getElementById('playerSheets');
+  box.innerHTML = '';
+
+  const owned = (user.assignedSheets || []).map((id) => store.sheets.find((s) => s.id === id)).filter(Boolean);
+  if (!owned.length) {
+    box.innerHTML = '<p>Você ainda não possui fichas anexadas. Fale com o ADM.</p>';
+    return;
+  }
+
+  owned.forEach((sheet) => {
+    const btn = document.createElement('button');
+    btn.className = 'sheet';
+    btn.innerHTML = `<span class="photo">${sheet.photo || '🧾'}</span> <span>${sheet.name}</span>`;
+    btn.onclick = () => location.href = sheet.url;
+    box.appendChild(btn);
+  });
+}
+
+function renderAdmin() {
+  const store = EDAuth.getStore();
+
+  const all = document.getElementById('allSheets');
+  all.innerHTML = '';
+  store.sheets.forEach((sheet) => {
+    const b = document.createElement('button');
+    b.className = 'sheet';
+    b.innerHTML = `<span class="photo">${sheet.photo || '🧾'}</span> <span>${sheet.name} (${sheet.version.toUpperCase()})</span>`;
+    b.onclick = () => location.href = sheet.url;
+    all.appendChild(b);
+  });
+
+  const users = store.users.filter((u) => u.role !== 'admin' && u.status === 'approved');
+  const userSelect = document.getElementById('userSelect');
+  userSelect.innerHTML = users.map((u) => `<option value="${u.id}">${u.name} (${u.email})</option>`).join('');
+
+  const sheetSelect = document.getElementById('sheetSelect');
+  sheetSelect.innerHTML = store.sheets.map((s) => `<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function createSheet() {
+  const name = document.getElementById('newSheetName').value;
+  const photo = document.getElementById('newSheetPhoto').value;
+  const url = document.getElementById('newSheetUrl').value;
+  const version = document.getElementById('newSheetVersion').value;
+
+  if (!name || !url) return alert('Preencha ao menos nome e URL da ficha.');
+  EDAuth.createSheet({ name, photo, url, version });
+  alert('Ficha criada com sucesso.');
+  renderAdmin();
+}
+
+function attachSheet() {
+  const userId = document.getElementById('userSelect').value;
+  const sheetId = document.getElementById('sheetSelect').value;
+  if (!userId || !sheetId) return alert('Selecione usuário e ficha.');
+  EDAuth.attachSheetToUser(userId, sheetId);
+  alert('Ficha anexada ao jogador.');
+}
+
+function openAllSheets() {
+  const store = EDAuth.getStore();
+  const list = store.sheets.map((s) => `${s.name} -> ${s.url}`).join('\n');
+  alert(`Fichas disponíveis:\n\n${list}\n\nClique em "Todas as fichas cadastradas" para abrir uma específica.`);
+}
+
+renderBase();
+</script>
+</body>
+</html>

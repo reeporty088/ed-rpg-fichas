@@ -45,8 +45,9 @@
 
         @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
     </style>
+    <script src="auth.js"></script>
 </head>
-<body>
+<body data-require-auth="true" data-required-version="v1">
 
     <div class="sidebar">
         <h2>Páginas do Livro</h2>

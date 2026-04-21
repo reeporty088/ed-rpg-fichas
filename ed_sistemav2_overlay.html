@@ -64,8 +64,9 @@
         .editable { outline: 1px dashed rgba(255,255,255,0.75); cursor: move; }
         .empty { color: #fff; font-size: 18px; text-transform: uppercase; padding: 12px; text-shadow: 2px 2px 0 #000; }
     </style>
+    <script src="auth.js"></script>
 </head>
-<body>
+<body data-require-auth="true" data-required-version="v2">
 <div class="overlay-wrap" id="overlay-wrap">
     <div class="name-mode" id="name-mode">
         <div class="name-main" id="name-main">PERSONAGEM</div>
