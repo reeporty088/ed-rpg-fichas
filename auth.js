@@ -148,6 +148,29 @@
     return true;
   }
 
+  function changeUserPassword(targetUserId, newPassword, actorUserId) {
+    const store = getStore();
+    const actorId = actorUserId || (getSession() ? getSession().userId : null);
+    const actor = store.users.find((u) => u.id === actorId);
+    if (!actor || actor.role !== 'admin') {
+      return { ok: false, error: 'Apenas o ADM pode alterar senhas.' };
+    }
+
+    const password = (newPassword || '').trim();
+    if (password.length < 4) {
+      return { ok: false, error: 'A nova senha deve ter ao menos 4 caracteres.' };
+    }
+
+    const target = store.users.find((u) => u.id === targetUserId);
+    if (!target) {
+      return { ok: false, error: 'Usuário não encontrado.' };
+    }
+
+    target.password = password;
+    saveStore(store);
+    return { ok: true };
+  }
+
   function createSheet({ name, photo, url, version }) {
     const store = getStore();
     const sheet = {
@@ -203,6 +226,7 @@
     logout,
     updateUser,
     deleteUser,
+    changeUserPassword,
     requireAuth,
     initGuardFromDOM,
     createSheet,

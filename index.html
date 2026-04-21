@@ -187,6 +187,10 @@ function renderAdminUsers() {
 
   store.users.forEach((u) => {
     const act = document.getElementById(`act-${u.id}`);
+    const changePass = document.createElement('button');
+    changePass.textContent = 'Alterar senha';
+    changePass.onclick = () => handleChangePassword(u);
+
     if (u.email !== EDAuth.ADMIN_EMAIL) {
       const approve = document.createElement('button');
       approve.className = 'success';
@@ -203,9 +207,9 @@ function renderAdminUsers() {
       del.textContent = 'Excluir';
       del.onclick = () => { if (confirm('Excluir usuário?')) { EDAuth.deleteUser(u.id); render(); } };
 
-      act.append(approve, deny, del);
+      act.append(approve, deny, del, changePass);
     } else {
-      act.textContent = 'ADM principal';
+      act.append(changePass);
     }
   });
 
@@ -219,6 +223,24 @@ function renderAdminUsers() {
       EDAuth.updateUser(user.id, { versions });
     });
   });
+}
+
+function handleChangePassword(user) {
+  const novaSenha = prompt(`Nova senha para ${user.name} (${user.email}):`);
+  if (novaSenha === null) return;
+  const confirmarSenha = prompt('Confirme a nova senha:');
+  if (confirmarSenha === null) return;
+  if (novaSenha !== confirmarSenha) {
+    alert('As senhas não coincidem.');
+    return;
+  }
+
+  const result = EDAuth.changeUserPassword(user.id, novaSenha);
+  if (!result.ok) {
+    alert(result.error);
+    return;
+  }
+  alert('Senha alterada com sucesso.');
 }
 
 document.getElementById('btnLogin').onclick = () => {
