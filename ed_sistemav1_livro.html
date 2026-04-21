@@ -48,8 +48,9 @@
             h1.page-title { font-size: 32px; }
         }
     </style>
+    <script src="auth.js"></script>
 </head>
-<body>
+<body data-require-auth="true" data-required-version="v1">
 
     <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ MENU</button>
 
