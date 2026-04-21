@@ -3,117 +3,584 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Escória de Deus - Painel Central</title>
+  <title>Escória de Deus — Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet" />
   <style>
+    /* === Variables === */
     :root {
-      --bg: #0f0f0f;
-      --card: #1a1a1a;
-      --border: #5a1a1f;
-      --accent: #8b0000;
-      --text: #f5f5f5;
-      --muted: #a5a5a5;
+      --bg:      #070707;
+      --card:    #130909;
+      --border:  #5c1c22;
+      --accent:  #9b1a1a;
+      --bright:  #cc2a2a;
+      --text:    #f0e6e6;
+      --muted:   #9a8585;
       --success: #1f8b4c;
-      --danger: #a22020;
     }
-    * { box-sizing: border-box; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
     body {
-      margin: 0;
       min-height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #222, var(--bg));
+      font-family: 'Raleway', 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
       color: var(--text);
-      padding: 20px;
+      overflow-x: hidden;
     }
-    .wrap { max-width: 1200px; margin: 0 auto; }
-    .auth-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+
+    /* Ambient glow backdrop */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 65% 80% at 15% 45%, rgba(139,0,0,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 60% at 85% 20%, rgba(100,10,10,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 50% 100%, rgba(80,0,0,.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
     }
+
+    /* === Layout === */
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px 70px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === Portal Header === */
+    .portal-header {
+      text-align: center;
+      padding: 60px 20px 48px;
+    }
+
+    .portal-title {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: clamp(2.4rem, 7vw, 4.6rem);
+      font-weight: 900;
+      letter-spacing: .08em;
+      line-height: 1;
+      background: linear-gradient(180deg, #f8e8e8 0%, #cc8080 55%, #8b0000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 36px rgba(160,20,20,.55));
+    }
+
+    .portal-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 18px auto 12px;
+      max-width: 340px;
+    }
+
+    .portal-rule::before,
+    .portal-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .portal-rule::before { background: linear-gradient(to right, transparent, var(--border)); }
+    .portal-rule::after  { background: linear-gradient(to left,  transparent, var(--border)); }
+
+    .portal-rule-glyph {
+      color: var(--accent);
+      font-size: 1.15rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 6px rgba(155,26,26,.6));
+    }
+
+    .portal-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: .76rem;
+      letter-spacing: .5em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* === Card === */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      position: relative;
+      overflow: hidden;
     }
-    h1,h2,h3 { margin-top: 0; }
-    .field { display: grid; gap: 6px; margin-bottom: 10px; }
-    input, select, button {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid #6a3030;
-      background: #120f0f;
+
+    /* Top shimmer line */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 12%; right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,60,60,.55), transparent);
+    }
+
+    /* Inner highlight */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.018) 0%, transparent 45%);
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .07em;
       color: var(--text);
-      padding: 10px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    button { cursor: pointer; background: linear-gradient(180deg, #3a1518, #220d0f); font-weight: 700; }
-    .remember { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; }
-    .remember input { width: auto; }
-    .msg { min-height: 20px; color: #ff9e9e; font-size: .9rem; }
-    .ok { color: #8ff0b2; }
+
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      opacity: .65;
+    }
+
+    .mb-24 { margin-bottom: 24px; }
+
+    /* === Auth Grid === */
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 760px) {
+      .auth-grid { grid-template-columns: 1fr; }
+    }
+
+    /* === Form === */
+    .field {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 13px;
+    }
+
+    .field label {
+      font-size: .71rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 13px;
+      border-radius: 7px;
+      border: 1px solid rgba(110,44,50,.65);
+      background: rgba(7,3,3,.88);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(155,26,26,.18);
+    }
+
+    .remember-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0 14px;
+      font-size: .82rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .remember-wrap input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    /* === Buttons === */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 8px;
+      border: 1px solid;
+      padding: 11px 16px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: .84rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+
+    .btn-full { width: 100%; }
+
+    .btn-primary {
+      background: linear-gradient(170deg, #4a1515 0%, #1e0808 100%);
+      border-color: var(--accent);
+      color: #f0cece;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(170deg, #6a2020 0%, #2e0e0e 100%);
+      border-color: var(--bright);
+      box-shadow: 0 0 20px rgba(155,26,26,.35);
+    }
+
+    .btn-danger {
+      background: linear-gradient(170deg, #4a1717 0%, #2d0f0f 100%);
+      border-color: #892828;
+      color: #f0c0c0;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(170deg, #5a2020 0%, #3a1010 100%);
+      box-shadow: 0 0 14px rgba(140,26,26,.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(170deg, #1a4d2e 0%, #0e2a19 100%);
+      border-color: #2b6645;
+      color: #9fe8bb;
+    }
+    .btn-success:hover {
+      background: linear-gradient(170deg, #246038 0%, #153520 100%);
+    }
+
+    .btn-neutral {
+      background: linear-gradient(170deg, #2a2020 0%, #1a1212 100%);
+      border-color: #4a3535;
+      color: var(--muted);
+    }
+    .btn-neutral:hover {
+      border-color: #6a5050;
+      color: var(--text);
+    }
+
+    .btn-sm { padding: 5px 10px; font-size: .74rem; }
+
+    /* === Messages === */
+    .msg {
+      min-height: 18px;
+      font-size: .83rem;
+      margin-top: 10px;
+      color: #ff9e9e;
+    }
+    .msg.ok { color: #7fe8a8; }
+
     .hidden { display: none !important; }
-    .hub-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .pill { padding: 4px 8px; border-radius: 999px; font-size: .78rem; }
-    .approved { background: #1f8b4c33; border: 1px solid #1f8b4c; }
-    .pending { background: #8b6f1f33; border: 1px solid #8b6f1f; }
-    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-    th, td { border: 1px solid #4a2b2b; padding: 8px; text-align: left; }
-    .actions { display: grid; gap: 6px; }
-    .danger { border-color: #892828; background: linear-gradient(180deg, #4a1717, #2d0f0f); }
-    .success { border-color: #2b7245; background: linear-gradient(180deg, #215c38, #134126); }
-    @media (max-width: 900px) { .auth-grid { grid-template-columns: 1fr; } }
+
+    /* === Hub Topbar === */
+    .hub-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .user-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5a1212, #1a0505);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(139,0,0,.3);
+    }
+
+    .user-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.06rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .user-role-wrap { margin-top: 5px; }
+
+    /* === Pills === */
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .pill-admin    { background: rgba(155,26,26,.22); border: 1px solid var(--accent); color: #ff9a9a; }
+    .pill-player   { background: rgba(30,80,160,.2);  border: 1px solid #2a5298;       color: #88aaff; }
+    .pill-approved { background: rgba(31,139,76,.18); border: 1px solid #1f8b4c;       color: #6de89e; }
+    .pill-pending  { background: rgba(200,120,0,.15); border: 1px solid #c87800;       color: #ffc060; }
+    .pill-denied   { background: rgba(155,26,26,.18); border: 1px solid #892828;       color: #ff9a9a; }
+
+    /* === Version Cards === */
+    .version-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .version-card {
+      background: rgba(10,4,4,.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 16px;
+      text-align: center;
+      transition: transform .18s, box-shadow .18s, border-color .18s;
+    }
+
+    .version-card.accessible {
+      cursor: pointer;
+    }
+    .version-card.accessible:hover {
+      transform: translateY(-3px);
+      border-color: var(--bright);
+      box-shadow: 0 8px 28px rgba(155,26,26,.24);
+    }
+
+    .version-card.locked {
+      opacity: .42;
+      filter: grayscale(.55);
+    }
+
+    .v-icon   { font-size: 2rem; margin-bottom: 10px; }
+    .v-name   { font-family: 'Cinzel', serif; font-size: .88rem; font-weight: 600; line-height: 1.3; }
+    .v-status { font-size: .72rem; color: var(--muted); margin-top: 6px; }
+    .v-status.ok { color: #5de09a; }
+
+    /* === Admin Panel === */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .admin-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      opacity: .65;
+    }
+
+    .pending-count-pill {
+      background: rgba(200,120,0,.2);
+      border: 1px solid #c87800;
+      color: #ffc060;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* === Table === */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(90,28,34,.45);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .86rem;
+    }
+
+    thead th {
+      padding: 9px 12px;
+      text-align: left;
+      font-size: .68rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(0,0,0,.4);
+      border-bottom: 1px solid #4a2b2b;
+    }
+
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(74,43,43,.3);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr.row-pending   { background: rgba(200,120,0,.04); }
+    tbody tr.row-denied    { opacity: .5; }
+
+    .access-labels { display: flex; gap: 8px; flex-wrap: wrap; }
+    .access-labels label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .access-labels input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
   </style>
   <script src="auth.js"></script>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- ══ Header ══ -->
+  <header class="portal-header">
+    <div class="portal-title">Escória de Deus</div>
+    <div class="portal-rule">
+      <span class="portal-rule-glyph">✦</span>
+    </div>
+    <p class="portal-subtitle">Sistema de Fichas RPG</p>
+  </header>
+
+  <!-- ══ Auth Section ══ -->
   <section id="authSection" class="auth-grid">
+
+    <!-- Login -->
     <div class="card">
-      <h2>Login</h2>
-      <div class="field"><label>Email</label><input id="loginEmail" type="email" /></div>
-      <div class="field"><label>Senha</label><input id="loginPassword" type="password" /></div>
-      <label class="remember"><input id="remember" type="checkbox" /> Lembre-se de mim</label>
-      <button id="btnLogin">Entrar</button>
+      <h2 class="card-title">Login</h2>
+      <div class="field">
+        <label for="loginEmail">E-mail</label>
+        <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Senha</label>
+        <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <label class="remember-wrap">
+        <input id="remember" type="checkbox" />
+        Lembre-se de mim (15 dias)
+      </label>
+      <button id="btnLogin" class="btn btn-primary btn-full">Entrar</button>
       <div id="loginMsg" class="msg"></div>
-      <small>Conta ADM padrão: referrey033@gmail.com / admin123</small>
     </div>
 
+    <!-- Register -->
     <div class="card">
-      <h2>Registro</h2>
-      <div class="field"><label>Nome</label><input id="regName" type="text" /></div>
-      <div class="field"><label>Email</label><input id="regEmail" type="email" /></div>
-      <div class="field"><label>Senha</label><input id="regPass" type="password" /></div>
-      <div class="field"><label>Confirmar senha</label><input id="regPass2" type="password" /></div>
-      <button id="btnRegister">Registrar</button>
+      <h2 class="card-title">Registro</h2>
+      <div class="field">
+        <label for="regName">Nome</label>
+        <input id="regName" type="text" placeholder="Seu nome de guerreiro" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="regEmail">E-mail</label>
+        <input id="regEmail" type="email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="regPass">Senha</label>
+        <input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <div class="field">
+        <label for="regPass2">Confirmar senha</label>
+        <input id="regPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <button id="btnRegister" class="btn btn-primary btn-full">Registrar</button>
       <div id="regMsg" class="msg"></div>
     </div>
+
   </section>
 
+  <!-- ══ Hub Section ══ -->
   <section id="hubSection" class="hidden">
-    <div class="card">
-      <h1>Painel Central</h1>
-      <p>Usuário: <strong id="userName"></strong> (<span id="userRole"></span>)</p>
-      <button id="btnLogout" class="danger">Sair</button>
+
+    <!-- User card -->
+    <div class="card mb-24">
+      <div class="hub-topbar">
+        <div class="user-identity">
+          <div class="avatar" id="hubAvatar">⚔</div>
+          <div>
+            <div class="user-name" id="userName"></div>
+            <div class="user-role-wrap">
+              <span id="userRolePill"></span>
+            </div>
+          </div>
+        </div>
+        <button id="btnLogout" class="btn btn-danger">Sair</button>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Versões disponíveis</h3>
-      <div id="versions" class="hub-grid"></div>
+    <!-- Version cards -->
+    <div class="card mb-24">
+      <h3 class="card-title">Versões Disponíveis</h3>
+      <div id="versions" class="version-grid"></div>
     </div>
 
+    <!-- Admin panel -->
     <div id="adminSection" class="card hidden">
-      <h3>Área do ADM - Aprovação e controle de acesso</h3>
+      <div class="admin-header">
+        <h3 class="admin-title">Painel Administrativo</h3>
+        <span id="pendingBadge" class="pending-count-pill hidden"></span>
+      </div>
       <div id="adminUsers"></div>
     </div>
+
   </section>
-</div>
+
+</div><!-- /wrap -->
 
 <script>
 const authSection = document.getElementById('authSection');
-const hubSection = document.getElementById('hubSection');
+const hubSection  = document.getElementById('hubSection');
 
+/* ── main render ── */
 function render() {
   const user = EDAuth.currentUser();
+
   if (!user) {
     authSection.classList.remove('hidden');
     hubSection.classList.add('hidden');
@@ -124,25 +591,19 @@ function render() {
   hubSection.classList.remove('hidden');
 
   document.getElementById('userName').textContent = user.name;
-  document.getElementById('userRole').textContent = user.role === 'admin' ? 'ADM' : 'Jogador';
 
-  const versions = document.getElementById('versions');
-  versions.innerHTML = '';
+  const rolePill = document.getElementById('userRolePill');
+  if (user.role === 'admin') {
+    rolePill.className = 'pill pill-admin';
+    rolePill.textContent = 'Administrador';
+    document.getElementById('hubAvatar').textContent = '👑';
+  } else {
+    rolePill.className = 'pill pill-player';
+    rolePill.textContent = 'Jogador';
+    document.getElementById('hubAvatar').textContent = '⚔';
+  }
 
-  const cards = [
-    { key: 'v1', label: 'ED Sistema v1', url: 'ed_sistemav1_testeindex.html' },
-    { key: 'v2', label: 'ED Sistema v2', url: 'ed_sistemav2_mestre.html' },
-    { key: 'v3', label: 'ED Sistema v3 - Painel Central', url: 'ed_sistemav3_painelcentral.html' }
-  ];
-
-  cards.forEach((item) => {
-    const allowed = user.role === 'admin' || user.versions.includes(item.key);
-    const btn = document.createElement('button');
-    btn.textContent = allowed ? `Acessar ${item.label}` : `${item.label} (Sem acesso)`;
-    btn.disabled = !allowed;
-    btn.onclick = () => { if (allowed) location.href = item.url; };
-    versions.appendChild(btn);
-  });
+  renderVersions(user);
 
   const adminSection = document.getElementById('adminSection');
   if (user.role === 'admin') {
@@ -153,123 +614,211 @@ function render() {
   }
 }
 
+/* ── version cards ── */
+const VERSION_META = [
+  { key: 'v1', label: 'ED Sistema v1',           icon: '📜', url: 'ed_sistemav1_testeindex.html'    },
+  { key: 'v2', label: 'ED Sistema v2',           icon: '⚔️',  url: 'ed_sistemav2_mestre.html'        },
+  { key: 'v3', label: 'ED Sistema v3',           icon: '🎭', url: 'ed_sistemav3_painelcentral.html' },
+];
+
+function renderVersions(user) {
+  const container = document.getElementById('versions');
+  container.innerHTML = '';
+  VERSION_META.forEach(({ key, label, icon, url }) => {
+    const allowed = user.role === 'admin' || (Array.isArray(user.versions) && user.versions.includes(key));
+    const div = document.createElement('div');
+    div.className = 'version-card ' + (allowed ? 'accessible' : 'locked');
+    div.innerHTML = `
+      <div class="v-icon">${icon}</div>
+      <div class="v-name">${label}</div>
+      <div class="v-status${allowed ? ' ok' : ''}">${allowed ? 'Acesso liberado' : 'Sem acesso'}</div>
+    `;
+    if (allowed) div.onclick = () => { location.href = url; };
+    container.appendChild(div);
+  });
+}
+
+/* ── admin panel helpers ── */
+function statusLabel(s) {
+  return { approved: 'Aprovado', pending: 'Pendente', denied: 'Negado' }[s] || s;
+}
+
+function statusPillHTML(s) {
+  const cls = { approved: 'pill-approved', pending: 'pill-pending', denied: 'pill-denied' }[s] || '';
+  return `<span class="pill ${cls}">${statusLabel(s)}</span>`;
+}
+
+/* ── render admin users ── */
 function renderAdminUsers() {
   const container = document.getElementById('adminUsers');
   const store = EDAuth.getStore();
 
+  /* pending count badge */
+  const pendingCount = store.users.filter(u => u.status === 'pending').length;
+  const badge = document.getElementById('pendingBadge');
+  if (pendingCount > 0) {
+    badge.classList.remove('hidden');
+    badge.textContent = `${pendingCount} ${pendingCount === 1 ? 'pendente' : 'pendentes'}`;
+  } else {
+    badge.classList.add('hidden');
+  }
+
+  /* sort: pending → denied → approved */
+  const ORDER = { pending: 0, denied: 1, approved: 2 };
+  const sorted = [...store.users].sort((a, b) => (ORDER[a.status] ?? 3) - (ORDER[b.status] ?? 3));
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+
   const table = document.createElement('table');
-  table.innerHTML = `<thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Acessos</th><th>Ações</th></tr></thead>`;
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Status</th>
+        <th>Acessos</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+  `;
+
   const tbody = document.createElement('tbody');
 
-  store.users.forEach((u) => {
+  sorted.forEach((u) => {
+    const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
+    const rowCls = u.status === 'pending' ? 'row-pending' : (u.status === 'denied' ? 'row-denied' : '');
+
+    const accessHTML = ['v1','v2','v3'].map((v) => {
+      const chk = u.versions.includes(v) ? 'checked' : '';
+      const dis = isAdmin ? 'disabled' : '';
+      return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${chk} ${dis}/> ${v.toUpperCase()}</label>`;
+    }).join('');
+
     const tr = document.createElement('tr');
-    const statusClass = u.status === 'approved' ? 'approved' : 'pending';
-
-    const accessChecks = ['v1','v2','v3'].map((v) => {
-      const checked = u.versions.includes(v) ? 'checked' : '';
-      const disabled = u.email === EDAuth.ADMIN_EMAIL ? 'disabled' : '';
-      return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${checked} ${disabled}/> ${v.toUpperCase()}</label>`;
-    }).join('<br>');
-
+    if (rowCls) tr.className = rowCls;
     tr.innerHTML = `
       <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td><span class="pill ${statusClass}">${u.status}</span></td>
-      <td>${accessChecks}</td>
-      <td class="actions" id="act-${u.id}"></td>
+      <td style="font-size:.8rem;color:var(--muted)">${u.email}</td>
+      <td>${statusPillHTML(u.status)}</td>
+      <td><div class="access-labels">${accessHTML}</div></td>
+      <td><div class="row-actions" id="act-${u.id}"></div></td>
     `;
     tbody.appendChild(tr);
   });
 
   table.appendChild(tbody);
+  wrap.appendChild(table);
   container.innerHTML = '';
-  container.appendChild(table);
+  container.appendChild(wrap);
 
-  store.users.forEach((u) => {
+  /* action buttons */
+  sorted.forEach((u) => {
+    const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
     const act = document.getElementById(`act-${u.id}`);
-    const changePass = document.createElement('button');
-    changePass.textContent = 'Alterar senha';
-    changePass.onclick = () => handleChangePassword(u);
+    if (!act) return;
 
-    if (u.email !== EDAuth.ADMIN_EMAIL) {
-      const approve = document.createElement('button');
-      approve.className = 'success';
-      approve.textContent = 'Aprovar';
-      approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
+    if (!isAdmin) {
+      if (u.status !== 'approved') {
+        const approve = document.createElement('button');
+        approve.className = 'btn btn-success btn-sm';
+        approve.textContent = 'Aprovar';
+        approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
+        act.appendChild(approve);
+      }
 
-      const deny = document.createElement('button');
-      deny.className = 'danger';
-      deny.textContent = 'Negar';
-      deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
+      if (u.status !== 'denied') {
+        const deny = document.createElement('button');
+        deny.className = 'btn btn-danger btn-sm';
+        deny.textContent = 'Negar';
+        deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
+        act.appendChild(deny);
+      }
 
       const del = document.createElement('button');
-      del.className = 'danger';
+      del.className = 'btn btn-danger btn-sm';
       del.textContent = 'Excluir';
-      del.onclick = () => { if (confirm('Excluir usuário?')) { EDAuth.deleteUser(u.id); render(); } };
-
-      act.append(approve, deny, del, changePass);
-    } else {
-      act.append(changePass);
+      del.onclick = () => {
+        if (confirm(`Excluir o usuário "${u.name}"?`)) { EDAuth.deleteUser(u.id); render(); }
+      };
+      act.appendChild(del);
     }
+
+    const passBtn = document.createElement('button');
+    passBtn.className = 'btn btn-neutral btn-sm';
+    passBtn.textContent = 'Senha';
+    passBtn.onclick = () => handleChangePassword(u);
+    act.appendChild(passBtn);
   });
 
+  /* checkbox version toggles — reads fresh store to avoid stale-closure bug */
   container.querySelectorAll('input[type="checkbox"]').forEach((box) => {
     box.addEventListener('change', () => {
-      const user = store.users.find((u) => u.id === box.dataset.user);
-      if (!user || user.email === EDAuth.ADMIN_EMAIL) return;
-      let versions = Array.isArray(user.versions) ? user.versions.slice() : [];
+      const fresh = EDAuth.getStore();
+      const target = fresh.users.find((u) => u.id === box.dataset.user);
+      if (!target || target.email === EDAuth.ADMIN_EMAIL) return;
+      let versions = Array.isArray(target.versions) ? [...target.versions] : [];
       if (box.checked && !versions.includes(box.dataset.ver)) versions.push(box.dataset.ver);
       if (!box.checked) versions = versions.filter((v) => v !== box.dataset.ver);
-      EDAuth.updateUser(user.id, { versions });
+      EDAuth.updateUser(target.id, { versions });
     });
   });
 }
 
+/* ── change password ── */
 function handleChangePassword(user) {
-  const novaSenha = prompt(`Nova senha para ${user.name} (${user.email}):`);
-  if (novaSenha === null) return;
-  const confirmarSenha = prompt('Confirme a nova senha:');
-  if (confirmarSenha === null) return;
-  if (novaSenha !== confirmarSenha) {
-    alert('As senhas não coincidem.');
-    return;
-  }
-
-  const result = EDAuth.changeUserPassword(user.id, novaSenha);
-  if (!result.ok) {
-    alert(result.error);
-    return;
-  }
+  const nova = prompt(`Nova senha para "${user.name}":`);
+  if (nova === null) return;
+  const conf = prompt('Confirme a nova senha:');
+  if (conf === null) return;
+  if (nova !== conf) { alert('As senhas não coincidem.'); return; }
+  const result = EDAuth.changeUserPassword(user.id, nova);
+  if (!result.ok) { alert(result.error); return; }
   alert('Senha alterada com sucesso.');
 }
 
-document.getElementById('btnLogin').onclick = () => {
+/* ── login ── */
+document.getElementById('btnLogin').addEventListener('click', () => {
   const result = EDAuth.login(
     document.getElementById('loginEmail').value,
     document.getElementById('loginPassword').value,
     document.getElementById('remember').checked
   );
   const msg = document.getElementById('loginMsg');
-  msg.className = 'msg';
+  msg.className = 'msg' + (result.ok ? ' ok' : '');
   msg.textContent = result.ok ? 'Login realizado com sucesso.' : result.error;
-  if (result.ok) { msg.classList.add('ok'); render(); }
-};
+  if (result.ok) render();
+});
 
-document.getElementById('btnRegister').onclick = () => {
+/* Enter key submits login */
+['loginEmail', 'loginPassword'].forEach((id) => {
+  document.getElementById(id).addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btnLogin').click();
+  });
+});
+
+/* ── register ── */
+document.getElementById('btnRegister').addEventListener('click', () => {
   const result = EDAuth.register({
-    name: document.getElementById('regName').value,
-    email: document.getElementById('regEmail').value,
-    password: document.getElementById('regPass').value,
-    confirmPassword: document.getElementById('regPass2').value
+    name:            document.getElementById('regName').value,
+    email:           document.getElementById('regEmail').value,
+    password:        document.getElementById('regPass').value,
+    confirmPassword: document.getElementById('regPass2').value,
   });
   const msg = document.getElementById('regMsg');
-  msg.className = 'msg';
+  msg.className = 'msg' + (result.ok ? ' ok' : '');
   msg.textContent = result.ok ? result.message : result.error;
-  if (result.ok) msg.classList.add('ok');
-};
+});
 
-document.getElementById('btnLogout').onclick = () => { EDAuth.logout(); render(); };
+/* Enter key submits register from last field */
+document.getElementById('regPass2').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btnRegister').click();
+});
 
+/* ── logout ── */
+document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.logout(); render(); });
+
+/* ── init ── */
 render();
 </script>
 </body>

@@ -150,7 +150,8 @@
 
   function changeUserPassword(targetUserId, newPassword, actorUserId) {
     const store = getStore();
-    const actorId = actorUserId || (getSession() ? getSession().userId : null);
+    const session = getSession();
+    const actorId = actorUserId || (session ? session.userId : null);
     const actor = store.users.find((u) => u.id === actorId);
     if (!actor || actor.role !== 'admin') {
       return { ok: false, error: 'Apenas o ADM pode alterar senhas.' };
