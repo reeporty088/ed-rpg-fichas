@@ -288,6 +288,18 @@
     return true;
   }
 
+
+  function detachSheetFromUser(userId, sheetId) {
+    const store = getLocalStore();
+    const user  = store.users.find(u => u.id === userId);
+    if (!user) return false;
+    user.assignedSheets = Array.isArray(user.assignedSheets) ? user.assignedSheets : [];
+    user.assignedSheets = user.assignedSheets.filter(id => id !== sheetId);
+    saveLocalStore(store);
+    fbPatch(userId, { assignedSheets: user.assignedSheets }); // persist to Firebase
+    return true;
+  }
+
   /* ─── Route guard ─── */
   function requireAuth(version) {
     const user = currentUser();
@@ -317,7 +329,7 @@
     login, register, logout,
     updateUser, deleteUser, changeUserPassword,
     requireAuth, initGuardFromDOM,
-    createSheet, attachSheetToUser
+    createSheet, attachSheetToUser, detachSheetFromUser
   };
 
   document.addEventListener('DOMContentLoaded', initGuardFromDOM);
