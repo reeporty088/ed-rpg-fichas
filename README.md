@@ -53,6 +53,7 @@ A ficha é identificada por um parâmetro de URL: `ficha_v3.html?p=nome_do_perso
 ```
 /
 ├── ficha_v3.html          # Ficha principal do sistema 3ºE
+├── banco_dados_v3.html    # Compêndio/admin do banco global da v3
 ├── ficha_v2.html          # Versão legada (2ºE) — não modificar
 ├── ficha_v1.html          # Versão legada (1ºE) — não modificar
 ├── auth.js                # Script de autenticação
@@ -217,7 +218,7 @@ fichas_v3/{fichaID}/
 
 ### Banco de Dados Global
 
-Lido em `banco_dados_v3/`:
+Lido em `banco_dados_v3/`. O painel de manutenção para mestre/ADM fica em `ed_sistemav3_bancodedados.html`:
 
 ```
 banco_dados_v3/

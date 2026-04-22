@@ -1747,19 +1747,30 @@ function calcDerived() {
     // Vida sugerida: 5 × Res + Vitalidade
     const vit = pericias['Vitalidade'] || 0;
     const hpSug = Math.max(1, (res * 5) + vit);
-    const hpMaxEl = document.getElementById('hp_max');
-    if (hpMaxEl && parseInt(hpMaxEl.value) < hpSug) {
-        hpMaxEl.value = hpSug;
-        update(ref(db, dbPath), { hp_max: hpSug });
-    }
 
     // Mana sugerida: 10 × Hab + Energia
     const energia = pericias['Energia'] || 0;
     const manaSug = Math.max(1, (hab * 10) + energia);
+
+    // Automação v3 (estilo v2): recalcula máximos pela ficha e mantém atuais dentro do teto
+    const hpAtual = parseInt(charData.hp_at) || 0;
+    const manaAtual = parseInt(charData.mana_at) || 0;
+    const hpMaxAtual = parseInt(charData.hp_max) || 0;
+    const manaMaxAtual = parseInt(charData.mana_max) || 0;
+
+    const updates = {};
+    if (hpMaxAtual !== hpSug) updates.hp_max = hpSug;
+    if (manaMaxAtual !== manaSug) updates.mana_max = manaSug;
+    if (hpAtual > hpSug) updates.hp_at = hpSug;
+    if (manaAtual > manaSug) updates.mana_at = manaSug;
+
+    const hpMaxEl = document.getElementById('hp_max');
     const manaMaxEl = document.getElementById('mana_max');
-    if (manaMaxEl && parseInt(manaMaxEl.value) < manaSug) {
-        manaMaxEl.value = manaSug;
-        update(ref(db, dbPath), { mana_max: manaSug });
+    if (hpMaxEl && document.activeElement !== hpMaxEl) hpMaxEl.value = hpSug;
+    if (manaMaxEl && document.activeElement !== manaMaxEl) manaMaxEl.value = manaSug;
+
+    if (Object.keys(updates).length) {
+        update(ref(db, dbPath), updates);
     }
 
     // PDT display

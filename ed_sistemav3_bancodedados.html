@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Banco de Dados V3 - Escória de Deus</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --text: #eee4d5;
+            --main: #7a1a1a;
+            --light: #e8a090;
+            --card: #1a0a08;
+            --border: #4a1a18;
+            --input: #120605;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 16px; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+        h1 { text-align: center; color: var(--light); margin: 0 0 16px; text-transform: uppercase; letter-spacing: 2px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tab-btn { background: #1b1110; border: 1px solid var(--border); color: #bda7a4; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-weight: 700; }
+        .tab-btn.active { background: var(--main); color: white; border-color: var(--light); }
+        .card { background: linear-gradient(160deg, var(--card), #0d0604); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+        .header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .btn { border: 1px solid var(--border); background: #1f1413; color: #f2d9d3; border-radius: 7px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+        .btn:hover { border-color: var(--light); }
+        .btn-add { background: #1b4d2f; border-color: #2f7a4e; color: #b6efc7; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+        .item { background: rgba(0,0,0,.3); border: 1px solid #37201e; border-radius: 10px; padding: 10px; }
+        .item h4 { margin: 0 0 6px; color: var(--light); }
+        .meta { font-size: 12px; color: #bca8a5; margin-bottom: 6px; }
+        .desc { white-space: pre-wrap; font-size: 13px; color: #d6c8c4; line-height: 1.4; }
+        .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+        .btn-edit { background: #66460d; border-color: #9b7433; color: #ffe5af; }
+        .btn-del { background: #5a1515; border-color: #8a2525; color: #ffc3c3; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.82); align-items: center; justify-content: center; padding: 16px; }
+        .modal.open { display: flex; }
+        .box { width: min(760px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        label { font-size: 11px; font-weight: 700; color: var(--light); text-transform: uppercase; margin: 8px 0 4px; display: block; }
+        input, textarea, select { width: 100%; border-radius: 7px; border: 1px solid #3a2422; background: var(--input); color: var(--text); padding: 8px; }
+        textarea { min-height: 80px; resize: vertical; }
+        .hidden { display: none; }
+    </style>
+    <script src="auth.js"></script>
+</head>
+<body data-require-auth="true" data-required-version="v3">
+<div class="container">
+    <h1>Compêndio do Mestre — v3</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="classes" onclick="switchTab('classes', this)">⚔️ Classes</button>
+        <button class="tab-btn" data-tab="racas" onclick="switchTab('racas', this)">🧬 Raças</button>
+        <button class="tab-btn" data-tab="equipamentos" onclick="switchTab('equipamentos', this)">🎒 Equipamentos</button>
+        <button class="tab-btn" data-tab="maldicoes_dadivas" onclick="switchTab('maldicoes_dadivas', this)">🌓 Maldições & Dádivas</button>
+    </div>
+
+    <section id="sec_classes" class="card">
+        <div class="header"><h3>Classes</h3><button class="btn btn-add" onclick="openForm('classes')">+ Nova Classe</button></div>
+        <div class="grid" id="list_classes"></div>
+    </section>
+    <section id="sec_racas" class="card hidden">
+        <div class="header"><h3>Raças</h3><button class="btn btn-add" onclick="openForm('racas')">+ Nova Raça</button></div>
+        <div class="grid" id="list_racas"></div>
+    </section>
+    <section id="sec_equipamentos" class="card hidden">
+        <div class="header"><h3>Equipamentos</h3><button class="btn btn-add" onclick="openForm('equipamentos')">+ Novo Equipamento</button></div>
+        <div class="grid" id="list_equipamentos"></div>
+    </section>
+    <section id="sec_maldicoes_dadivas" class="card hidden">
+        <div class="header"><h3>Maldições & Dádivas</h3><button class="btn btn-add" onclick="openForm('maldicoes_dadivas')">+ Nova Marca</button></div>
+        <div class="grid" id="list_maldicoes_dadivas"></div>
+    </section>
+</div>
+
+<div class="modal" id="modal">
+    <div class="box">
+        <h3 id="modalTitle" style="margin-top:0"></h3>
+        <input id="editId" type="hidden" />
+        <input id="editCategory" type="hidden" />
+
+        <label>Título</label>
+        <input id="f_titulo" type="text" />
+
+        <div id="fields_classes" class="dyn hidden">
+            <label>Descrição</label><textarea id="f_desc"></textarea>
+            <label>Domínios</label><input id="f_dominios" type="text" />
+            <label>Habilidade base (nome)</label><input id="f_hab_nome" type="text" />
+            <label>Habilidade base (descrição)</label><textarea id="f_hab_desc"></textarea>
+            <label>Habilidade 2 (nome)</label><input id="f_hab2_nome" type="text" />
+            <label>Habilidade 2 (descrição)</label><textarea id="f_hab2_desc"></textarea>
+            <label>Habilidade 3 (nome)</label><input id="f_hab3_nome" type="text" />
+            <label>Habilidade 3 (descrição)</label><textarea id="f_hab3_desc"></textarea>
+        </div>
+
+        <div id="fields_racas" class="dyn hidden">
+            <label>Linhagem</label><input id="f_linhagem" type="text" />
+            <label>Descrição</label><textarea id="f_desc_r"></textarea>
+            <label>Habilidade 1 (nome)</label><input id="f_hab1_nome" type="text" />
+            <label>Habilidade 1 (descrição)</label><textarea id="f_hab1_desc"></textarea>
+            <label>Habilidade 2 (nome)</label><input id="f_hab2_nome_r" type="text" />
+            <label>Habilidade 2 (descrição)</label><textarea id="f_hab2_desc_r"></textarea>
+            <label>Habilidade 3 (nome)</label><input id="f_hab3_nome_r" type="text" />
+            <label>Habilidade 3 (descrição)</label><textarea id="f_hab3_desc_r"></textarea>
+        </div>
+
+        <div id="fields_equipamentos" class="dyn hidden">
+            <div class="row-2">
+                <div><label>Categoria</label><select id="f_categoria"><option>Arma</option><option>Armadura</option><option>Exótico</option></select></div>
+                <div><label>Atributo</label><input id="f_atributo" type="text" /></div>
+            </div>
+            <div class="row-2">
+                <div><label>Alcance</label><input id="f_alcance" type="text" /></div>
+                <div><label>Dano / Slots</label><input id="f_dano_slots" type="text" /></div>
+            </div>
+            <div class="row-2">
+                <div><label>Tipo de Dano</label><input id="f_tipo_dano" type="text" /></div>
+                <div><label>Custo</label><input id="f_custo" type="text" /></div>
+            </div>
+            <label>Descrição</label><textarea id="f_desc_e"></textarea>
+        </div>
+
+        <div id="fields_maldicoes_dadivas" class="dyn hidden">
+            <label>Origem</label><input id="f_origem" type="text" />
+            <label>Descrição</label><textarea id="f_desc_m"></textarea>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="closeForm()">Cancelar</button>
+            <button class="btn btn-add" onclick="saveItem()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+    authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+    databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+    projectId: "ed-rpg---sistema-de-fichas",
+    storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+    messagingSenderId: "350999444010",
+    appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const dbPath = 'banco_dados_v3';
+let globalData = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {} };
+
+window.switchTab = (tab, btn) => {
+    ['classes','racas','equipamentos','maldicoes_dadivas'].forEach(k => document.getElementById(`sec_${k}`).classList.toggle('hidden', k !== tab));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+};
+
+function esc(s) { return (s ?? '').toString().replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function draw(cat) {
+    const box = document.getElementById(`list_${cat}`);
+    const obj = globalData[cat] || {};
+    const arr = Object.entries(obj).map(([id, v]) => ({ id, ...(v || {}) })).sort((a,b) => (a.titulo || '').localeCompare(b.titulo || ''));
+    if (!arr.length) {
+        box.innerHTML = '<div style="opacity:.6">Nenhum registro nessa categoria.</div>';
+        return;
+    }
+    box.innerHTML = arr.map(it => {
+        const meta = cat === 'classes' ? `Domínios: ${esc(it.dominios || '-')}`
+            : cat === 'racas' ? `Linhagem: ${esc(it.linhagem || '-')}`
+            : cat === 'equipamentos' ? `Categoria: ${esc(it.categoria || '-')} • Atributo: ${esc(it.atributo || '-')}`
+            : `Origem: ${esc(it.origem || '-')}`;
+        return `<div class="item">
+            <h4>${esc(it.titulo || it.id)}</h4>
+            <div class="meta">${meta}</div>
+            <div class="desc">${esc(it.desc || '')}</div>
+            <div class="actions">
+                <button class="btn btn-edit" onclick="openForm('${cat}','${it.id}')">Editar</button>
+                <button class="btn btn-del" onclick="deleteItem('${cat}','${it.id}')">Excluir</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+window.openForm = (cat, id = '') => {
+    document.getElementById('modal').classList.add('open');
+    document.getElementById('editId').value = id;
+    document.getElementById('editCategory').value = cat;
+    document.getElementById('modalTitle').innerText = `${id ? 'Editar' : 'Criar'} ${cat.replace('_',' ')}`;
+    document.querySelectorAll('.dyn').forEach(el => el.classList.add('hidden'));
+    document.getElementById(`fields_${cat}`).classList.remove('hidden');
+
+    const item = id ? (globalData[cat] || {})[id] || {} : {};
+    document.getElementById('f_titulo').value = item.titulo || '';
+
+    if (cat === 'classes') {
+        document.getElementById('f_desc').value = item.desc || '';
+        document.getElementById('f_dominios').value = item.dominios || '';
+        document.getElementById('f_hab_nome').value = item.hab_nome || '';
+        document.getElementById('f_hab_desc').value = item.hab_desc || '';
+        document.getElementById('f_hab2_nome').value = item.hab2_nome || '';
+        document.getElementById('f_hab2_desc').value = item.hab2_desc || '';
+        document.getElementById('f_hab3_nome').value = item.hab3_nome || '';
+        document.getElementById('f_hab3_desc').value = item.hab3_desc || '';
+    }
+    if (cat === 'racas') {
+        document.getElementById('f_linhagem').value = item.linhagem || '';
+        document.getElementById('f_desc_r').value = item.desc || '';
+        document.getElementById('f_hab1_nome').value = item.hab1_nome || '';
+        document.getElementById('f_hab1_desc').value = item.hab1_desc || '';
+        document.getElementById('f_hab2_nome_r').value = item.hab2_nome || '';
+        document.getElementById('f_hab2_desc_r').value = item.hab2_desc || '';
+        document.getElementById('f_hab3_nome_r').value = item.hab3_nome || '';
+        document.getElementById('f_hab3_desc_r').value = item.hab3_desc || '';
+    }
+    if (cat === 'equipamentos') {
+        document.getElementById('f_categoria').value = item.categoria || 'Arma';
+        document.getElementById('f_atributo').value = item.atributo || '';
+        document.getElementById('f_alcance').value = item.alcance || '';
+        document.getElementById('f_dano_slots').value = item.dano_slots || '';
+        document.getElementById('f_tipo_dano').value = item.tipo_dano || '';
+        document.getElementById('f_custo').value = item.custo || '';
+        document.getElementById('f_desc_e').value = item.desc || '';
+    }
+    if (cat === 'maldicoes_dadivas') {
+        document.getElementById('f_origem').value = item.origem || '';
+        document.getElementById('f_desc_m').value = item.desc || '';
+    }
+};
+
+window.closeForm = () => document.getElementById('modal').classList.remove('open');
+
+window.saveItem = async () => {
+    const cat = document.getElementById('editCategory').value;
+    const id = document.getElementById('editId').value;
+    const titulo = document.getElementById('f_titulo').value.trim();
+    if (!cat || !titulo) { alert('Título é obrigatório.'); return; }
+
+    let data = { titulo };
+    if (cat === 'classes') {
+        data = { ...data,
+            desc: document.getElementById('f_desc').value,
+            dominios: document.getElementById('f_dominios').value,
+            hab_nome: document.getElementById('f_hab_nome').value,
+            hab_desc: document.getElementById('f_hab_desc').value,
+            hab2_nome: document.getElementById('f_hab2_nome').value,
+            hab2_desc: document.getElementById('f_hab2_desc').value,
+            hab3_nome: document.getElementById('f_hab3_nome').value,
+            hab3_desc: document.getElementById('f_hab3_desc').value
+        };
+    }
+    if (cat === 'racas') {
+        data = { ...data,
+            linhagem: document.getElementById('f_linhagem').value,
+            desc: document.getElementById('f_desc_r').value,
+            hab1_nome: document.getElementById('f_hab1_nome').value,
+            hab1_desc: document.getElementById('f_hab1_desc').value,
+            hab2_nome: document.getElementById('f_hab2_nome_r').value,
+            hab2_desc: document.getElementById('f_hab2_desc_r').value,
+            hab3_nome: document.getElementById('f_hab3_nome_r').value,
+            hab3_desc: document.getElementById('f_hab3_desc_r').value
+        };
+    }
+    if (cat === 'equipamentos') {
+        data = { ...data,
+            categoria: document.getElementById('f_categoria').value,
+            atributo: document.getElementById('f_atributo').value,
+            alcance: document.getElementById('f_alcance').value,
+            dano_slots: document.getElementById('f_dano_slots').value,
+            tipo_dano: document.getElementById('f_tipo_dano').value,
+            custo: document.getElementById('f_custo').value,
+            desc: document.getElementById('f_desc_e').value
+        };
+    }
+    if (cat === 'maldicoes_dadivas') {
+        data = { ...data,
+            origem: document.getElementById('f_origem').value,
+            desc: document.getElementById('f_desc_m').value
+        };
+    }
+
+    if (id) {
+        await update(ref(db, `${dbPath}/${cat}/${id}`), data);
+    } else {
+        const k = push(ref(db, `${dbPath}/${cat}`)).key;
+        await update(ref(db, `${dbPath}/${cat}/${k}`), data);
+    }
+    closeForm();
+};
+
+window.deleteItem = async (cat, id) => {
+    if (!confirm('Excluir este item do banco?')) return;
+    await remove(ref(db, `${dbPath}/${cat}/${id}`));
+};
+
+onValue(ref(db, dbPath), snap => {
+    const data = snap.val() || {};
+    globalData = {
+        classes: data.classes || {},
+        racas: data.racas || {},
+        equipamentos: data.equipamentos || {},
+        maldicoes_dadivas: data.maldicoes_dadivas || {}
+    };
+    draw('classes');
+    draw('racas');
+    draw('equipamentos');
+    draw('maldicoes_dadivas');
+});
+</script>
+</body>
+</html>
