@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Mestre V3 - Escória de Deus</title>
+    <style>
+        :root { --bg:#111; --card-bg:#2a0b10; --header-bg:#800000; --text:#fff; --npc-bg:#1a0508; --accent:#ffaaaa; --divider-bg:#1e1e1e; }
+        body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; padding:20px 60px; }
+        h1 { text-align:center; color:var(--header-bg); text-transform:uppercase; letter-spacing:2px; margin-bottom:20px; text-shadow:0 0 10px rgba(128,0,0,.5); }
+        h2.section-title { border-bottom:2px solid var(--header-bg); padding-bottom:5px; margin-top:36px; color:#ccc; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
+        .world-card { background:linear-gradient(90deg,#1e1e1e 0%,#2a0a0d 100%); border:2px solid #5a1a1f; border-radius:15px; padding:15px 25px; display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:15px; }
+        .world-date { font-size:20px; font-weight:bold; color:var(--accent); text-transform:uppercase; }
+        .world-time { font-size:32px; font-weight:bold; display:flex; align-items:center; gap:10px; }
+        .weather-badge { background:rgba(0,0,0,.4); padding:5px 12px; border-radius:20px; font-size:14px; border:1px solid #555; }
+        .btn-calendar,.btn-global-toggle { background:var(--header-bg); color:#fff; border:1px solid var(--accent); padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; text-transform:uppercase; }
+        .category-container { background:var(--divider-bg); border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:20px; }
+        .category-container.drag-over,.combat-drop-zone.drag-over,.roster-drop-zone.drag-over { border-color:var(--accent); background:#2a1a1a; }
+        .category-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #444; padding-bottom:5px; }
+        .category-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:15px; min-height:50px; }
+        .btn-add-cat { background:#333; color:#fff; border:1px solid #555; border-radius:5px; cursor:pointer; padding:5px 10px; font-size:12px; }
+        .btn-del-cat { color:#f44336; background:transparent; border:none; cursor:pointer; font-size:16px; margin-left:10px; }
+        .player-card { background:var(--card-bg); border:2px solid #5a1a1f; border-radius:15px; padding:15px; box-shadow:0 4px 15px rgba(0,0,0,.6); cursor:grab; }
+        .npc-card { background:var(--npc-bg); border:1px solid #444; }
+        .player-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+        .player-img { width:55px; height:55px; border-radius:50%; border:2px solid var(--header-bg); background-size:cover; background-position:center; background-color:#222; }
+        .player-info h2 { margin:0; font-size:16px; text-transform:uppercase; }
+        .player-info p { margin:0; font-size:11px; color:#ccc; }
+        .controls-row { display:flex; gap:5px; margin-top:5px; }
+        .btn-small { flex-grow:1; background:#222; border:1px solid #555; color:#fff; border-radius:4px; font-size:10px; cursor:pointer; text-transform:uppercase; padding:4px; }
+        .btn-obs { border-color:#00ffff; color:#00ffff; }
+        .status-bar { height:18px; background:#1a1a1a; border-radius:10px; overflow:hidden; border:1px solid #444; position:relative; margin-top:5px; }
+        .bar-fill { height:100%; }
+        .hp { background:#d32f2f; } .mana { background:#1e88e5; } .pulso { background:#7b1fa2; }
+        .bar-text { position:absolute; width:100%; text-align:center; font-size:10px; font-weight:bold; line-height:18px; text-shadow:1px 1px 2px #000; }
+        .xp-control { margin-top:8px; display:flex; align-items:center; gap:5px; }
+        .xp-input { background:#222; border:1px solid #444; color:#fff; padding:5px; border-radius:5px; width:100%; text-align:center; font-size:12px; }
+        .btn-send { background:#2e7d32; color:#fff; border:none; border-radius:5px; width:30px; height:28px; font-weight:bold; cursor:pointer; }
+        .npc-expand-btn { width:100%; background:#333; border:none; color:white; padding:5px; margin-top:8px; cursor:pointer; }
+        .npc-details { display:none; padding-top:8px; border-top:1px solid #444; margin-top:8px; }
+        .npc-details.open { display:block; }
+        .npc-hab-item { background:rgba(0,0,0,.3); border-left:3px solid #666; padding:5px; margin-bottom:5px; font-size:12px; }
+
+        #roster-sidebar,#combat-sidebar { position:fixed; top:0; width:300px; height:100%; background:#111; z-index:2000; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; transition:.3s; }
+        #roster-sidebar { left:-320px; border-right:3px solid var(--header-bg); }
+        #combat-sidebar { right:-320px; border-left:3px solid var(--header-bg); }
+        #roster-sidebar.open { left:0; } #combat-sidebar.open { right:0; }
+        .roster-toggle-btn,.combat-toggle-btn { position:fixed; top:50%; transform:translateY(-50%); background:var(--header-bg); color:#fff; border:2px solid #fff; width:40px; height:60px; font-size:24px; cursor:pointer; z-index:2001; }
+        .roster-toggle-btn { left:0; border-left:none; border-radius:0 10px 10px 0; }
+        .combat-toggle-btn { right:0; border-right:none; border-radius:10px 0 0 10px; }
+        .combat-header { text-align:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:10px; font-weight:bold; color:var(--accent); }
+        .roster-drop-zone,.combat-drop-zone { flex-grow:1; border:1px dashed #444; border-radius:8px; background:rgba(0,0,0,.2); overflow-y:auto; padding:5px; display:flex; flex-direction:column; gap:6px; min-height:80px; }
+        .roster-item,.combat-item { display:flex; align-items:center; background:#222; padding:8px; border-radius:8px; border:1px solid #444; gap:10px; }
+        .combat-item { cursor:grab; }
+        .combat-item.active { border:2px solid #ffd700; background:#332b00; }
+        .roster-avatar,.combat-avatar { width:35px; height:35px; border-radius:50%; background-size:cover; background-position:center; }
+        .combat-controls { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
+        .btn-combat { width:100%; padding:8px; font-weight:bold; border-radius:5px; border:none; cursor:pointer; }
+        .btn-next { background:#ffd700; color:black; } .btn-prev { background:#444; color:white; } .btn-end { background:#c62828; color:white; }
+
+        #form-npc-container,#config-player-container { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100; }
+        #form-npc-container.open,#config-player-container.open { display:flex; justify-content:center; align-items:flex-start; overflow:auto; }
+        .npc-form,.config-box { background:#1a1a1a; padding:20px; border-radius:10px; border:2px solid var(--header-bg); width:min(680px,95%); margin:20px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+        .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+        input,textarea { width:100%; background:#333; border:1px solid #555; color:#fff; padding:8px; border-radius:5px; box-sizing:border-box; }
+        label { font-size:11px; color:#aaa; display:block; margin-bottom:2px; }
+        .btn-action { width:100%; padding:10px; font-weight:bold; border-radius:5px; border:none; margin-top:10px; cursor:pointer; }
+        .btn-save { background:#2e7d32; color:#fff; } .btn-cancel { background:#c62828; color:#fff; }
+        .btn-add-npc { background:var(--header-bg); color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold; display:block; margin:20px auto; }
+    </style>
+    <script src="auth.js"></script>
+</head>
+<body data-require-auth="true" data-required-version="v3">
+    <h1>PAINEL DO MESTRE V3</h1>
+
+    <div class="world-card" id="world_display">
+      <div>
+        <div class="world-date" id="wd_date">CARREGANDO...</div>
+        <div class="world-time"><span id="wd_time">00:00</span><div class="weather-badge"><span id="wd_weather_icon">☀</span> <span id="wd_weather_text">Normal</span></div></div>
+      </div>
+      <div><button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button></div>
+    </div>
+
+    <h2 class="section-title">JOGADORES <button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button></h2>
+    <div id="wrapper-players"></div>
+
+    <h2 class="section-title">NPCs & INIMIGOS <button class="btn-add-cat" onclick="addCategory('npcs')">+ Divisória</button></h2>
+    <button class="btn-add-npc" onclick="openNpcForm()">+ CRIAR NOVO NPC / INIMIGO</button>
+    <div id="wrapper-npcs"></div>
+
+    <div id="roster-sidebar">
+        <div class="combat-header">👥 ESTOQUE</div>
+        <div class="roster-section"><div>Jogadores</div><div id="roster_list_players" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'players')"></div></div>
+        <div class="roster-section"><div>NPCs</div><div id="roster_list_npcs" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'npcs')"></div></div>
+    </div>
+    <button class="roster-toggle-btn" onclick="toggleRosterSidebar()">👥</button>
+
+    <div id="combat-sidebar">
+      <div class="combat-header">⚔️ ORDEM DE COMBATE</div>
+      <div id="combat_list" class="combat-drop-zone" ondragover="allowDrop(event)" ondrop="dropInCombat(event)"></div>
+      <div class="combat-controls">
+        <div style="font-size:11px;color:#bbb;text-align:center;">Arraste personagens para cá e reordene rapidamente.</div>
+        <div style="display:flex;gap:5px;"><button class="btn-combat btn-prev" onclick="changeTurn(-1)">◀ Ant</button><button class="btn-combat btn-next" onclick="changeTurn(1)">Próximo ▶</button></div>
+        <button class="btn-combat btn-end" onclick="endCombat()">Limpar Ordem</button>
+      </div>
+    </div>
+    <button class="combat-toggle-btn" onclick="toggleCombatSidebar()">⚔️</button>
+
+    <div id="form-npc-container"><div class="npc-form">
+        <h3 style="text-align:center;color:var(--accent);">CRIAR / EDITAR NPC V3</h3>
+        <input type="hidden" id="npc_id">
+        <div class="form-row"><div><label>Nome</label><input id="npc_name"></div><div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div></div>
+        <div class="form-row"><div><label>Classe/Função</label><input id="npc_classe"></div><div><label>Ancestralidade</label><input id="npc_ancestralidade"></div></div>
+        <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0"></div></div>
+        <div class="form-row-3"><div><label>PV Máx</label><input type="number" id="npc_hp" value="20"></div><div><label>PM Máx</label><input type="number" id="npc_mana" value="10"></div><div><label>Pulso Máx</label><input type="number" id="npc_pulso" value="10"></div></div>
+        <label>Observações</label><textarea id="npc_obs" rows="3"></textarea>
+        <label style="margin-top:10px;">Habilidades <button type="button" onclick="addHabRow()">+</button></label><div id="hab_editor_list"></div>
+        <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button><button class="btn-action btn-cancel" onclick="closeNpcForm()">CANCELAR</button>
+    </div></div>
+
+    <div id="config-player-container"><div class="config-box">
+      <h3>Controle do Mestre</h3>
+      <input type="hidden" id="cfg_player_id">
+      <div><label><input type="checkbox" id="check_asc_unlocked"> 🌌 Desbloquear Barra de Ascensão</label></div>
+      <hr>
+      <div><label><input type="checkbox" id="check_linhagem_demon"> 😈 Linhagem Demoníaca</label></div>
+      <div><label><input type="checkbox" id="check_linhagem_beast"> 🐺 Linhagem Bestial</label></div>
+      <div><label><input type="checkbox" id="check_linhagem_sacra"> 👼 Linhagem Sacra</label></div>
+      <hr>
+      <div><label><input type="checkbox" class="check-dadiva" id="check_dadiva_mascara_lunar"> Máscara Lunar</label></div>
+      <div><label><input type="checkbox" class="check-dadiva" id="check_dadiva_lodo_corrompido"> Lodo Corrompido</label></div>
+      <div><label><input type="checkbox" class="check-dadiva" id="check_dadiva_combustao_arcana"> Combustão Arcana</label></div>
+      <div><label><input type="checkbox" class="check-dadiva" id="check_dadiva_escarcha_absoluta"> Escarcha Absoluta</label></div>
+      <div><label><input type="checkbox" class="check-dadiva" id="check_dadiva_tremor_abissal"> Tremor Abissal</label></div>
+      <button class="btn-action btn-save" onclick="savePlayerConfig()">Salvar e Enviar</button>
+      <button class="btn-action btn-cancel" onclick="document.getElementById('config-player-container').classList.remove('open')">Fechar</button>
+    </div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, runTransaction, push, remove, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",authDomain:"ed-rpg---sistema-de-fichas.firebaseapp.com",databaseURL:"https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",projectId:"ed-rpg---sistema-de-fichas",storageBucket:"ed-rpg---sistema-de-fichas.firebasestorage.app",messagingSenderId:"350999444010",appId:"1:350999444010:web:d89f31d13e449b8fbfa153"};
+const db=getDatabase(initializeApp(firebaseConfig));
+const baseURL="https://reeporty088.github.io/ed-rpg-fichas/";
+const pathPlayers='fichas_v3', pathNpcs='npcs_v3', pathDivs='divisoes_v3', pathCombat='combate_v3';
+const DADIVAS_IDS=['mascara_lunar','lodo_corrompido','combustao_arcana','escarcha_absoluta','tremor_abissal'];
+let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatData={};
+
+function createDividerHTML(divId, divName, type){ const isDefault=divId==='default'; const nameHtml=isDefault?`<span>${divName}</span>`:`<span onclick="renameCategory('${type}','${divId}','${divName}')">✎ ${divName}</span><button class="btn-del-cat" onclick="deleteCategory('${type}','${divId}')">✖</button>`; return `<div class="category-container" ondragover="allowDrop(event)" ondrop="drop(event,'${divId}','${type}')"><div class="category-header">${nameHtml}</div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`; }
+function createRosterItem(id,data,type){ const el=document.createElement('div'); el.className='roster-item'; el.draggable=true; el.ondragstart=e=>drag(e,id,type); const img=(type==='players'?data.char_img:data.img)||''; const name=(type==='players'?data.char_name:data.name)||'Sem Nome'; el.innerHTML=`<div class="roster-avatar" style="background-image:url('${img}')"></div><div>${name}</div>`; return el; }
+function renderAll(){
+  document.getElementById('roster_list_players').innerHTML=''; document.getElementById('roster_list_npcs').innerHTML='';
+  let hp=createDividerHTML('default','Geral','players'); Object.keys(globalDivisions.players||{}).forEach(k=>hp+=createDividerHTML(k,globalDivisions.players[k].name,'players')); document.getElementById('wrapper-players').innerHTML=hp;
+  let hn=createDividerHTML('default','Geral','npcs'); Object.keys(globalDivisions.npcs||{}).forEach(k=>hn+=createDividerHTML(k,globalDivisions.npcs[k].name,'npcs')); document.getElementById('wrapper-npcs').innerHTML=hn;
+  Object.entries(globalPlayers).forEach(([id,f])=>{ const cat=f.category||'default'; const target=document.getElementById(`grid_players_${cat}`); if(!target||cat==='hidden_roster') document.getElementById('roster_list_players').appendChild(createRosterItem(id,f,'players')); else target.appendChild(createPlayerCard(id,f)); });
+  Object.entries(globalNpcs).forEach(([id,n])=>{ const cat=n.category||'default'; const target=document.getElementById(`grid_npcs_${cat}`); if(!target||cat==='hidden_roster') document.getElementById('roster_list_npcs').appendChild(createRosterItem(id,n,'npcs')); else target.appendChild(createNpcCard(id,n)); });
+}
+
+function createPlayerCard(id,f){
+  const hpAt=+f.hp_at||0,hpMax=+f.hp_max||1,manaAt=+f.mana_at||0,manaMax=+f.mana_max||1,pulsoAt=+f.pulso_at||0,pulsoMax=+f.pulso_max||10;
+  const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
+  const linkFicha=`${baseURL}ed_sistemav3_ficha.html?p=${id}`;
+  const linkOverlay=`${baseURL}ed_sistemav2_overlay.html?p=${id}`;
+  const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
+  const el=document.createElement('div'); el.className='player-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'players');
+  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button><button class="btn-small" onclick="openObs('${id}')">📝 Obs</button></div></div></div>
+  <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
+  <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
+  <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div>
+  <div style="font-size:10px;color:#ffaaaa;margin-top:6px;">Linhagens: ${linhagens.join(' ')||'—'} | Forma ativa: ${f.toggles?.forma_ativa||'—'}</div>
+  <div class="xp-control"><div style="font-size:11px;color:#ccc;">XP: ${f.xp_total||0}</div></div>
+  <div class="xp-control"><input type="number" id="input_xp_${id}" class="xp-input" placeholder="Qtd"><button class="btn-send" onclick="sendXP('${id}',1)">+</button><button class="btn-send" style="background:#c62828" onclick="sendXP('${id}',-1)">-</button></div>`;
+  return el;
+}
+
+function createNpcCard(id,n){ const hpAt=+n.hp_at||+n.hp_max||1,hpMax=+n.hp_max||1,manaAt=+n.mana_at||0,manaMax=+n.mana_max||1,pulsoAt=+n.pulso_at||0,pulsoMax=+n.pulso_max||10; const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100); const habs=n.habs||[]; const el=document.createElement('div'); el.className='player-card npc-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'npcs'); el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${n.img||''}')"></div><div class="player-info"><h2>${n.name||'Inimigo'}</h2><p>${n.classe||'—'} • ${n.ancestralidade||'—'}</p><div class="controls-row"><button class="btn-small" onclick="editNpc('${id}')">✏️ Editar</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️ Apagar</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div><div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div><button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button><div id="details_${id}" class="npc-details"><div style="font-size:12px; margin-bottom:6px;">POD ${n.pod||0} | HAB ${n.hab||0} | RES ${n.res||0}</div>${habs.map(h=>`<div class='npc-hab-item'><b>${h.titulo||'Habilidade'}</b><br>${h.desc||''}</div>`).join('')||'<span style="font-size:11px;color:#777">Sem habilidades</span>'}<div style="font-size:11px;white-space:pre-wrap;margin-top:8px;color:#ccc;">${n.obs||''}</div></div>`; return el; }
+
+function renderCombat(){ const list=document.getElementById('combat_list'); list.innerHTML=''; const parts=Object.entries(combatData.participantes||{}).map(([key,v])=>({...v,key})).sort((a,b)=>(a.order??999)-(b.order??999)); parts.forEach((p,idx)=>{ const div=document.createElement('div'); div.className=`combat-item ${p.active?'active':''}`; div.draggable=true; div.ondragstart=e=>dragCombat(e,p.key); div.ondragover=e=>e.preventDefault(); div.ondrop=e=>dropCombatReorder(e,p.key); div.innerHTML=`<div style='width:18px;text-align:center;color:#999;'>${idx+1}</div><div class='combat-avatar' style="background-image:url('${p.img||''}')"></div><div style='flex:1;'>${p.name||'—'}</div><button onclick="removeCombatant('${p.key}')" style='border:none;background:none;color:#f66;cursor:pointer;'>✖</button>`; list.appendChild(div); }); }
+
+window.allowDrop=(ev)=>ev.preventDefault();
+window.drag=(ev,id,type)=>ev.dataTransfer.setData('text/plain',JSON.stringify({id,type}));
+window.drop=(ev,catId,targetType)=>{ ev.preventDefault(); const data=JSON.parse(ev.dataTransfer.getData('text/plain')); if(data.type!==targetType)return; const path=data.type==='players'?`${pathPlayers}/${data.id}`:`${pathNpcs}/${data.id}`; update(ref(db,path),{category:catId}); };
+window.dropInRoster=(ev,targetType)=>{ ev.preventDefault(); const data=JSON.parse(ev.dataTransfer.getData('text/plain')); if(data.type!==targetType)return; const path=data.type==='players'?`${pathPlayers}/${data.id}`:`${pathNpcs}/${data.id}`; update(ref(db,path),{category:'hidden_roster'}); };
+window.dropInCombat=async(ev)=>{ ev.preventDefault(); const payload=ev.dataTransfer.getData('text/plain'); if(!payload) return; const data=JSON.parse(payload); const source=data.type==='players'?globalPlayers[data.id]:globalNpcs[data.id]; if(!source)return; const list=Object.values(combatData.participantes||{}); if(list.some(p=>p.ref_id===data.id&&p.type===data.type)) return; const nextOrder=list.length?Math.max(...list.map(p=>p.order||0))+1:1; const charData=data.type==='players'?{name:source.char_name||data.id,img:source.char_img||'',hab:+source.habilidade||0}:{name:source.name||data.id,img:source.img||'',hab:+source.hab||0}; push(ref(db,`${pathCombat}/participantes`),{...charData,order:nextOrder,active:false,ref_id:data.id,type:data.type}); };
+window.dragCombat=(ev,key)=>ev.dataTransfer.setData('combat_key',key);
+window.dropCombatReorder=(ev,targetKey)=>{ ev.preventDefault(); const sourceKey=ev.dataTransfer.getData('combat_key'); if(!sourceKey||sourceKey===targetKey) return; const parts=Object.entries(combatData.participantes||{}).map(([k,v])=>({...v,key:k})).sort((a,b)=>(a.order??999)-(b.order??999)); const from=parts.findIndex(p=>p.key===sourceKey); const to=parts.findIndex(p=>p.key===targetKey); if(from<0||to<0) return; const [m]=parts.splice(from,1); parts.splice(to,0,m); const up={}; parts.forEach((p,i)=>up[`${pathCombat}/participantes/${p.key}/order`]=i+1); update(ref(db),up); };
+window.changeTurn=async(dir)=>{ const parts=Object.entries(combatData.participantes||{}).map(([k,v])=>({...v,key:k})).sort((a,b)=>(a.order??999)-(b.order??999)); if(!parts.length)return; let idx=parts.findIndex(p=>p.active); let n=idx+dir; if(idx===-1&&dir===1)n=0; if(n>=parts.length)n=0; if(n<0)n=parts.length-1; const up={}; parts.forEach(p=>up[`${pathCombat}/participantes/${p.key}/active`]=false); up[`${pathCombat}/participantes/${parts[n].key}/active`]=true; update(ref(db),up); };
+window.removeCombatant=(key)=>remove(ref(db,`${pathCombat}/participantes/${key}`));
+window.endCombat=()=>{ if(confirm('Limpar ordem de combate?')) remove(ref(db,pathCombat)); };
+window.toggleRosterSidebar=()=>{ const bar=document.getElementById('roster-sidebar'); const btn=document.querySelector('.roster-toggle-btn'); bar.classList.toggle('open'); btn.style.left=bar.classList.contains('open')?'300px':'0'; btn.innerHTML=bar.classList.contains('open')?'✖':'👥'; };
+window.toggleCombatSidebar=()=>{ const bar=document.getElementById('combat-sidebar'); const btn=document.querySelector('.combat-toggle-btn'); bar.classList.toggle('open'); btn.style.right=bar.classList.contains('open')?'300px':'0'; btn.innerHTML=bar.classList.contains('open')?'✖':'⚔️'; };
+window.addCategory=(type)=>{ const newRef=push(ref(db,`${pathDivs}/${type}`)); set(newRef,{name:'Nova Divisória'}); };
+window.renameCategory=(type,catId,oldName)=>{ const n=prompt('Nome da divisória:',oldName); if(n&&n!==oldName) update(ref(db,`${pathDivs}/${type}/${catId}`),{name:n}); };
+window.deleteCategory=(type,catId)=>{ if(!confirm('Excluir divisória e enviar fichas ao estoque?'))return; const updates={}; const source=type==='players'?globalPlayers:globalNpcs; const base=type==='players'?pathPlayers:pathNpcs; Object.keys(source).forEach(id=>{ if(source[id].category===catId) updates[`${base}/${id}/category`]='hidden_roster'; }); updates[`${pathDivs}/${type}/${catId}`]=null; update(ref(db),updates); };
+
+window.openPlayerConfig=(id)=>{ const f=globalPlayers[id]; if(!f)return; document.getElementById('cfg_player_id').value=id; document.getElementById('check_asc_unlocked').checked=f.toggles?.asc_unlocked===true; document.getElementById('check_linhagem_demon').checked=f.toggles?.linhagem_demon===true; document.getElementById('check_linhagem_beast').checked=f.toggles?.linhagem_beast===true; document.getElementById('check_linhagem_sacra').checked=f.toggles?.linhagem_sacra===true; DADIVAS_IDS.forEach(d=>{ const c=document.getElementById(`check_dadiva_${d}`); if(c) c.checked=f.toggles?.dadivas?.[d]===true; }); document.getElementById('config-player-container').classList.add('open'); };
+window.savePlayerConfig=()=>{ const id=document.getElementById('cfg_player_id').value; const selected={}; DADIVAS_IDS.forEach(d=>{ if(document.getElementById(`check_dadiva_${d}`)?.checked) selected[d]=true; }); if(Object.keys(selected).length>2){ alert('Máximo 2 dádivas.'); return; } update(ref(db,`${pathPlayers}/${id}`),{'toggles/asc_unlocked':document.getElementById('check_asc_unlocked').checked,'toggles/linhagem_demon':document.getElementById('check_linhagem_demon').checked,'toggles/linhagem_beast':document.getElementById('check_linhagem_beast').checked,'toggles/linhagem_sacra':document.getElementById('check_linhagem_sacra').checked,'toggles/dadivas':selected}); document.getElementById('config-player-container').classList.remove('open'); };
+window.openObs=(id)=>{ const d=globalPlayers[id]; const txt=prompt('Observações do personagem:',d?.anotacoes||''); if(txt!==null) update(ref(db,`${pathPlayers}/${id}`),{anotacoes:txt}); };
+window.sendXP=(id,sign)=>{ const qtd=parseInt(document.getElementById(`input_xp_${id}`).value); if(!qtd||qtd<1)return; runTransaction(ref(db,`${pathPlayers}/${id}/xp_total`),cur=>Math.max((cur||0)+(sign>0?qtd:-qtd),0)); document.getElementById(`input_xp_${id}`).value=''; };
+
+window.openNpcForm=()=>{ ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('npc_img_file').value=''; document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0; document.getElementById('npc_hp').value=20; document.getElementById('npc_mana').value=10; document.getElementById('npc_pulso').value=10; document.getElementById('hab_editor_list').innerHTML=''; document.getElementById('form-npc-container').classList.add('open'); };
+window.closeNpcForm=()=>document.getElementById('form-npc-container').classList.remove('open');
+window.addHabRow=(titulo='',desc='')=>{ const d=document.createElement('div'); d.style.display='flex'; d.style.gap='6px'; d.style.marginBottom='6px'; d.innerHTML=`<input class='hab-row-title' placeholder='Nome da habilidade' value="${titulo}"><textarea class='hab-row-desc' rows='2' placeholder='Descrição'>${desc}</textarea><button type='button' onclick='this.parentElement.remove()'>✖</button>`; document.getElementById('hab_editor_list').appendChild(d); };
+window.saveNpc=()=>{ const id=document.getElementById('npc_id').value; const habs=[...document.querySelectorAll('#hab_editor_list > div')].map(r=>({titulo:r.querySelector('.hab-row-title').value,desc:r.querySelector('.hab-row-desc').value})).filter(h=>h.titulo||h.desc); const data={name:document.getElementById('npc_name').value,img:document.getElementById('npc_img_data').value,classe:document.getElementById('npc_classe').value,ancestralidade:document.getElementById('npc_ancestralidade').value,pod:+document.getElementById('npc_pod').value||0,hab:+document.getElementById('npc_hab').value||0,res:+document.getElementById('npc_res').value||0,hp_max:+document.getElementById('npc_hp').value||20,mana_max:+document.getElementById('npc_mana').value||10,pulso_max:+document.getElementById('npc_pulso').value||10,obs:document.getElementById('npc_obs').value,habs}; if(!id){ data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.category='default'; push(ref(db,pathNpcs),data).then(closeNpcForm);} else update(ref(db,`${pathNpcs}/${id}`),data).then(closeNpcForm); };
+window.editNpc=async(id)=>{ const s=await get(ref(db,`${pathNpcs}/${id}`)); const d=s.val(); if(!d)return; document.getElementById('npc_id').value=id; document.getElementById('npc_name').value=d.name||''; document.getElementById('npc_img_data').value=d.img||''; document.getElementById('npc_classe').value=d.classe||''; document.getElementById('npc_ancestralidade').value=d.ancestralidade||''; document.getElementById('npc_pod').value=d.pod||0; document.getElementById('npc_hab').value=d.hab||0; document.getElementById('npc_res').value=d.res||0; document.getElementById('npc_hp').value=d.hp_max||20; document.getElementById('npc_mana').value=d.mana_max||10; document.getElementById('npc_pulso').value=d.pulso_max||10; document.getElementById('npc_obs').value=d.obs||''; document.getElementById('hab_editor_list').innerHTML=''; (d.habs||[]).forEach(h=>addHabRow(h.titulo,h.desc)); document.getElementById('form-npc-container').classList.add('open'); };
+window.deleteNpc=(id)=>{ if(confirm('Deletar NPC?')) remove(ref(db,`${pathNpcs}/${id}`)); };
+window.toggleNpcDetails=(id)=>document.getElementById(`details_${id}`).classList.toggle('open');
+
+document.getElementById('npc_img_file').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=x=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); const m=300; let {width:w,height:h}=i; if(w>h&&w>m){h*=m/w;w=m;} if(h>=w&&h>m){w*=m/h;h=m;} c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h); document.getElementById('npc_img_data').value=c.toDataURL('image/jpeg',0.7); }; i.src=x.target.result; }; r.readAsDataURL(f); });
+
+onValue(ref(db,pathDivs),s=>{ globalDivisions=s.val()||{players:{},npcs:{}}; renderAll(); });
+onValue(ref(db,pathPlayers),s=>{ globalPlayers=s.val()||{}; renderAll(); });
+onValue(ref(db,pathNpcs),s=>{ globalNpcs=s.val()||{}; renderAll(); });
+onValue(ref(db,pathCombat),s=>{ combatData=s.val()||{}; renderCombat(); });
+onValue(ref(db,'world_time'),(snapshot)=>{ const data=snapshot.val(); if(!data)return; const SEASONS=['Primavera','Verão','Outono','Inverno']; document.getElementById('wd_date').innerText=`Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`; document.getElementById('wd_time').innerText=`${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}`; document.getElementById('wd_weather_icon').innerText='☀'; document.getElementById('wd_weather_text').innerText='Clima'; });
+</script>
+</body>
+</html>
