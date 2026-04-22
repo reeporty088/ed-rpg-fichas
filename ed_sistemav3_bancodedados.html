@@ -61,7 +61,7 @@
   <section id="sec_main" class="card">
     <div class="header">
       <h3 id="sec_title" style="margin:0"></h3>
-      <button class="btn btn-add" onclick="openForm(currentTab)">+ Novo Item</button>
+      <button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button>
     </div>
     <div class="grid" id="list_current"></div>
   </section>
@@ -233,6 +233,7 @@ function buildFields(cat, data = {}){
 }
 
 window.switchTab = (tab) => { currentTab = tab; renderTabs(); renderCurrent(); };
+window.openCurrentTabForm = () => window.openForm(currentTab);
 
 window.openForm = (cat, id='') => {
   const item = id ? (globalData[cat] || {})[id] || {} : {};

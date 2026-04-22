@@ -1383,10 +1383,6 @@
             <!-- CAMINHOS DE ARCANA -->
             <div class="section-header">
                 <label style="color:var(--gold);">Caminhos de Arcana</label>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-add" onclick="openDBModal('arcana_habs')">📚 Banco</button>
-                    <button class="btn-add" onclick="createManual('arcana_habs')">+ Manual</button>
-                </div>
             </div>
             <div id="list_arcana_habs" style="margin-bottom:12px;"></div>
 
@@ -1408,14 +1404,8 @@
             <div class="section-header">
                 <label>Caminhos Disponíveis</label>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;">
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Aprimorar</div>
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Transmutação</div>
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Emissor</div>
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Conjurar</div>
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Manipular</div>
-                <div style="background:rgba(0,0,0,0.3); border:1px solid #2a2a2a; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:#777; text-transform:uppercase; letter-spacing:1px;">Sensorial</div>
-            </div>
+            <div id="arcana_paths_grid" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;"></div>
+            <button class="btn-add" onclick="openArcanaPathModal()" style="width:100%;">+ Adicionar Caminho</button>
 
         </div>
     </div>
@@ -1549,6 +1539,25 @@
     </div>
 </div>
 
+<!-- MODAL CAMINHO ARCANO -->
+<div class="modal-overlay" id="modal_arcana_path" onclick="closeModal('modal_arcana_path')">
+    <div class="modal-box modal-small" onclick="event.stopPropagation()">
+        <h3 style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 16px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Escolha um Caminho</h3>
+        <div id="arcana_path_buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div>
+        <button class="btn-choice cancel" onclick="closeModal('modal_arcana_path')" style="margin-top:10px;">Cancelar</button>
+    </div>
+</div>
+
+<!-- MODAL DETALHES CAMINHO ARCANO -->
+<div class="modal-overlay" id="modal_arcana_details" onclick="closeModal('modal_arcana_details')">
+    <div class="modal-box modal-small" onclick="event.stopPropagation()">
+        <h3 id="arcana_details_title" style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 10px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Caminho</h3>
+        <div id="arcana_unlocked_list" style="max-height:220px; overflow:auto; border:1px solid #3a2a28; border-radius:8px; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:10px;"></div>
+        <button class="btn-choice db-btn" onclick="openArcanaPathDBFromDetails()">+ Adicionar Habilidade desse Caminho</button>
+        <button class="btn-choice cancel" onclick="closeModal('modal_arcana_details')">Fechar</button>
+    </div>
+</div>
+
 <!-- MODAL ASCENSÃO -->
 <div class="modal-overlay" id="modal_asc" onclick="closeModal('modal_asc')">
     <div class="modal-box modal-large" onclick="event.stopPropagation()">
@@ -1631,8 +1640,37 @@ let charData = {};
 let compendium = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {} };
 let currentCategory = "";
 let currentDBItems = [];
+let selectedArcanaPath = "";
+let currentArcanaDetailsPath = "";
 let rollMode = 'none';
 let ascChoiceState = null;
+const ARCANA_PATHS = ['Aprimorar', 'Transmutação', 'Emissor', 'Conjurar', 'Manipular', 'Sensorial'];
+
+function normalizePathName(val = "") {
+    return val
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+}
+
+function getArcanaByPath(path) {
+    const all = Object.values(charData.habilidades?.arcana_habs || {});
+    const normPath = normalizePathName(path);
+    return all.filter(item => normalizePathName(item?.caminho || "") === normPath);
+}
+
+function renderArcanaPathButtons() {
+    const box = document.getElementById('arcana_paths_grid');
+    if (!box) return;
+    box.innerHTML = ARCANA_PATHS.map(path => {
+        const count = getArcanaByPath(path).length;
+        const isActive = count > 0;
+        return `<button onclick="openArcanaPathDetails('${path}')" style="background:${isActive ? 'rgba(35,80,35,0.45)' : 'rgba(0,0,0,0.3)'}; border:1px solid ${isActive ? '#4faa5f' : '#2a2a2a'}; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:${isActive ? '#baf4c5' : '#777'}; text-transform:uppercase; letter-spacing:1px; cursor:pointer;">
+            ${path}${isActive ? ` • ${count}` : ''}
+        </button>`;
+    }).join('');
+}
 
 // ============================================================
 // PERÍCIAS
@@ -2143,7 +2181,8 @@ window.openDBModal = (cat) => {
         classe_hab: 'Escolher Classe',
         raca_hab: 'Escolher Raça',
         armas: 'Equipamentos',
-        arcana_habs: 'Habilidades de Arcana'
+        arcana_habs: 'Habilidades de Arcana',
+        arcana_path_habs: `Habilidades de ${selectedArcanaPath || 'Arcana'}`
     };
     document.getElementById('db_modal_title').innerText = titles[currentCategory] || 'Compêndio';
 
@@ -2151,8 +2190,14 @@ window.openDBModal = (cat) => {
     if (currentCategory === 'classe_hab') dataObj = compendium.classes || {};
     else if (currentCategory === 'raca_hab') dataObj = compendium.racas || {};
     else if (currentCategory === 'armas') dataObj = compendium.equipamentos || {};
+    else if (currentCategory === 'arcana_path_habs') dataObj = compendium.tecnicas || {};
 
     currentDBItems = Object.keys(dataObj).map(k => ({ id: k, ...dataObj[k] }));
+    if (currentCategory === 'arcana_path_habs') {
+        currentDBItems = currentDBItems.filter(item =>
+            normalizePathName(item.caminho || '') === normalizePathName(selectedArcanaPath)
+        );
+    }
     currentDBItems.sort((a, b) => (a.titulo || "").localeCompare(b.titulo || ""));
 
     renderDBList(currentDBItems);
@@ -2189,7 +2234,8 @@ function renderDBList(items) {
 window.addFromDB = (itemId) => {
     const dataObj = currentCategory === 'classe_hab' ? compendium.classes :
                     currentCategory === 'raca_hab' ? compendium.racas :
-                    currentCategory === 'armas' ? compendium.equipamentos : {};
+                    currentCategory === 'armas' ? compendium.equipamentos :
+                    currentCategory === 'arcana_path_habs' ? compendium.tecnicas : {};
     const item = dataObj[itemId];
     if (!item) { alert("Item não encontrado no banco."); return; }
 
@@ -2223,8 +2269,53 @@ window.addFromDB = (itemId) => {
             tipo: item.tipo_dano || "",
             desc: item.desc || ""
         });
+    } else if (currentCategory === 'arcana_path_habs') {
+        push(ref(db, `${dbPath}/habilidades/arcana_habs`), {
+            titulo: item.titulo || "",
+            caminho: item.caminho || selectedArcanaPath || "",
+            pericia: item.pericia || "",
+            custo_pm: item.custo_pm || "",
+            desc: item.desc || ""
+        });
     }
     closeModal('modal_db');
+};
+
+window.openArcanaPathModal = () => {
+    const container = document.getElementById('arcana_path_buttons');
+    container.innerHTML = ARCANA_PATHS.map(path => `
+        <button class="btn-choice db-btn" style="margin:0;" onclick="selectArcanaPath('${path}')">${path}</button>
+    `).join('');
+    document.getElementById('modal_arcana_path').classList.add('open');
+};
+
+window.selectArcanaPath = (path) => {
+    selectedArcanaPath = path;
+    closeModal('modal_arcana_path');
+    openDBModal('arcana_path_habs');
+};
+
+window.openArcanaPathDetails = (path) => {
+    currentArcanaDetailsPath = path;
+    selectedArcanaPath = path;
+    const list = getArcanaByPath(path);
+    document.getElementById('arcana_details_title').innerText = `${path} — Habilidades Liberadas`;
+    document.getElementById('arcana_unlocked_list').innerHTML = list.length
+        ? list.map(item => `
+            <div style="padding:6px; border-bottom:1px solid #2f2f2f;">
+                <div style="font-family:'Cinzel',serif; color:var(--theme-light); font-size:11px;">${item.titulo || 'Sem título'}</div>
+                <div style="font-size:11px; color:#aaa;">${item.desc || 'Sem descrição.'}</div>
+            </div>
+        `).join('')
+        : `<div style="font-size:12px; color:#888; text-align:center; padding:10px;">Nenhuma habilidade liberada nesse caminho.</div>`;
+    document.getElementById('modal_arcana_details').classList.add('open');
+};
+
+window.openArcanaPathDBFromDetails = () => {
+    if (!currentArcanaDetailsPath) return;
+    selectedArcanaPath = currentArcanaDetailsPath;
+    closeModal('modal_arcana_details');
+    openDBModal('arcana_path_habs');
 };
 
 // ============================================================
@@ -2597,6 +2688,7 @@ onValue(ref(db, dbPath), snap => {
     renderAscHabs();
     renderDadivas();
     updateLinhagemBtns();
+    renderArcanaPathButtons();
 
     const habs = charData.habilidades || {};
     ['classe_hab','raca_hab','arcana_habs','tecnicas','armas','inventario'].forEach(cat => {
