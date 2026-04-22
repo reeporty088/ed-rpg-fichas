@@ -130,6 +130,31 @@
             margin-bottom: 2px;
         }
 
+        .nivel-wrap { display: flex; align-items: center; gap: 8px; }
+        .nivel-box {
+            width: 70px !important;
+            height: 54px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            padding: 0 !important;
+            border: 1px solid var(--gold-dim);
+        }
+        .nivel-bolus {
+            width: 56px !important;
+            height: 56px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            border: 1px solid #4d5e74;
+            color: #9ec7ff;
+            padding: 0 !important;
+        }
+
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -802,6 +827,25 @@
         .die-val { font-family: 'Cinzel', serif; font-size: 36px; font-weight: 900; line-height: 1; }
         .die-label { font-family: 'Cinzel', serif; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
         .die-extra { font-size: 9px; color: #888; min-height: 11px; }
+        .d4-triangle {
+            width: 0;
+            height: 0;
+            border-left: 26px solid transparent;
+            border-right: 26px solid transparent;
+            border-bottom: 46px solid #131313;
+            position: relative;
+            filter: drop-shadow(0 0 6px rgba(80, 120, 255, 0.25));
+        }
+        .d4-triangle span {
+            position: absolute;
+            left: -4px;
+            top: 18px;
+            width: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: #9ec7ff;
+        }
 
         .pericias-select {
             display: grid;
@@ -821,10 +865,12 @@
         }
         .roll-outcome {
             font-family: 'Cinzel', serif;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 4px;
-            min-height: 18px;
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 6px;
+            min-height: 34px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255,255,255,0.2);
         }
         .roll-outcome.crit { color: #ffd570; }
         .roll-outcome.success { color: #70e070; }
@@ -1173,8 +1219,14 @@
                 <div id="linhagem_btn_container" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:6px;"></div>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                <div><label>Nível</label><input type="number" id="nivel" value="1" min="1" max="10"></div>
+            <div style="display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:end; margin-bottom:6px;">
+                <div>
+                    <label>Nível</label>
+                    <div class="nivel-wrap">
+                        <input type="number" id="nivel" value="1" min="1" class="nivel-box">
+                        <input type="number" id="nivel_bonus" value="0" class="nivel-bolus" title="Bônus de nível">
+                    </div>
+                </div>
                 <div><label>Florins</label><input type="text" id="florins" value="0"></div>
             </div>
 
@@ -1189,29 +1241,6 @@
                 <button class="btn-add" onclick="openDirectDB('raca_hab')">📚 Banco</button>
             </div>
             <input type="text" id="ancestralidade" placeholder="Escolher raça..." readonly style="cursor:pointer;" onclick="openDirectDB('raca_hab')">
-
-            <hr class="hr">
-
-            <!-- ATRIBUTOS -->
-            <div class="header-label">Atributos</div>
-            <div class="attr-container">
-                <div class="attr-box">
-                    <input type="number" id="poder" value="0" min="0" max="5">
-                    <div>Poder</div>
-                </div>
-                <div class="attr-box">
-                    <input type="number" id="habilidade" value="0" min="0" max="5">
-                    <div>Habilidade</div>
-                </div>
-                <div class="attr-box">
-                    <input type="number" id="resistencia" value="0" min="0" max="5">
-                    <div>Resistência</div>
-                </div>
-            </div>
-
-            <!-- PERÍCIAS -->
-            <div class="header-label">Perícias <span style="font-size:9px; color:#888;">(10 pts — máx. 2 inicial)</span></div>
-            <div class="pericias-grid" id="pericias-grid"></div>
 
             <hr class="hr">
 
@@ -1273,6 +1302,29 @@
 
             <hr class="hr">
 
+            <!-- ATRIBUTOS -->
+            <div class="header-label">Atributos</div>
+            <div class="attr-container">
+                <div class="attr-box">
+                    <input type="number" id="poder" value="0" min="0" max="5">
+                    <div>Poder</div>
+                </div>
+                <div class="attr-box">
+                    <input type="number" id="habilidade" value="0" min="0" max="5">
+                    <div>Habilidade</div>
+                </div>
+                <div class="attr-box">
+                    <input type="number" id="resistencia" value="0" min="0" max="5">
+                    <div>Resistência</div>
+                </div>
+            </div>
+
+            <!-- PERÍCIAS -->
+            <div class="header-label">Perícias <span style="font-size:9px; color:#888;">(10 pts — máx. 2 inicial)</span></div>
+            <div class="pericias-grid" id="pericias-grid"></div>
+
+            <hr class="hr">
+
             <!-- DEFESA -->
             <div class="header-label">Defesa</div>
 
@@ -1303,22 +1355,8 @@
                 </div>
             </div>
 
-            <!-- LIMIARES -->
-            <div class="header-label" style="background: rgba(0,0,0,0.5); border-color:#444; color:#aaa; font-size:9px;">Limiares de Dano</div>
-            <div class="threshold-container">
-                <div class="thresh-box" style="border-color:#777;">
-                    <div style="color:#777;">Menor (−1 PV)</div>
-                    <div class="thresh-val" id="lim_menor" style="color:#ccc;">1</div>
-                </div>
-                <div class="thresh-box" style="border-color:#ee8833;">
-                    <div style="color:#ee8833;">Maior (−2 PV)</div>
-                    <div class="thresh-val" id="lim_maior" style="color:#ee8833;">6</div>
-                </div>
-                <div class="thresh-box" style="border-color:#cc2222;">
-                    <div style="color:#cc2222;">Severo (−3 PV)</div>
-                    <div class="thresh-val" id="lim_severo" style="color:#cc2222;">11</div>
-                </div>
-            </div>
+
+
 
         </div>
     </div>
@@ -1389,23 +1427,12 @@
 
             <!-- ROLAGEM 2D6 -->
             <div class="roll-card">
-                <div class="roll-title">Rolar 2d6 — Sistema V3</div>
-
-                <div class="roll-row">
-                    <label for="roll_attr">Atributo</label>
-                    <select id="roll_attr">
-                        <option value="poder">Poder</option>
-                        <option value="habilidade">Habilidade</option>
-                        <option value="resistencia">Resistência</option>
-                    </select>
-                    <label for="roll_bonus">Bônus</label>
-                    <input type="number" id="roll_bonus" class="roll-bonus" value="0">
-                </div>
+                <div class="roll-title">Rolar Dados — Sistema V3</div>
 
                 <div class="pericias-select">
-                    <label for="roll_pericia">Perícia</label>
+                    <label for="roll_pericia">Perícia (d4)</label>
                     <select id="roll_pericia">
-                        <option value="0">Nenhuma</option>
+                        <option value="">Nenhuma (0d4)</option>
                     </select>
                 </div>
 
@@ -1415,19 +1442,8 @@
                 </div>
 
                 <div class="dice-area">
-                    <div class="dice-row">
-                        <div class="die-box" id="die1">
-                            <span class="die-val" id="die1_val" style="color:#aaaaff;">—</span>
-                            <span class="die-label" style="color:#6666aa;">d6</span>
-                            <span class="die-extra" id="die1_extra"></span>
-                        </div>
-                        <div style="font-family:'Cinzel',serif; font-size:20px; color:#555;">+</div>
-                        <div class="die-box" id="die2">
-                            <span class="die-val" id="die2_val" style="color:#aaaaff;">—</span>
-                            <span class="die-label" style="color:#6666aa;">d6</span>
-                            <span class="die-extra" id="die2_extra"></span>
-                        </div>
-                    </div>
+                    <div class="dice-row" id="d6_container"></div>
+                    <div class="dice-row" id="d4_container" style="margin-top:8px;"></div>
                     <div class="roll-result" id="roll_result_text"></div>
                     <div class="roll-outcome" id="roll_outcome"></div>
                 </div>
@@ -1660,11 +1676,11 @@ function buildPericiasGrid() {
     // Update roll pericia select
     const sel = document.getElementById('roll_pericia');
     if (sel) {
-        sel.innerHTML = '<option value="0">Nenhuma (0d4)</option>';
+        sel.innerHTML = '<option value="">Nenhuma (0d4)</option>';
         PERICIAS.forEach(nome => {
             const v = pericias[nome] || 0;
             if (v > 0) {
-                sel.innerHTML += `<option value="${v}">${nome} (${v}d4)</option>`;
+                sel.innerHTML += `<option value="${nome}">${nome} (${v}d4)</option>`;
             }
         });
     }
@@ -1739,27 +1755,33 @@ function calcDerived() {
     const fort = pericias['Fortitude'] || 0;
     document.getElementById('defesa_val').innerText = 6 + res + fort;
 
-    // Limiares (v3: Resistência)
-    document.getElementById('lim_menor').innerText = res;
-    document.getElementById('lim_maior').innerText = res + 5;
-    document.getElementById('lim_severo').innerText = res + 10;
-
     // Vida sugerida: 5 × Res + Vitalidade
     const vit = pericias['Vitalidade'] || 0;
     const hpSug = Math.max(1, (res * 5) + vit);
-    const hpMaxEl = document.getElementById('hp_max');
-    if (hpMaxEl && parseInt(hpMaxEl.value) < hpSug) {
-        hpMaxEl.value = hpSug;
-        update(ref(db, dbPath), { hp_max: hpSug });
-    }
 
     // Mana sugerida: 10 × Hab + Energia
     const energia = pericias['Energia'] || 0;
     const manaSug = Math.max(1, (hab * 10) + energia);
+
+    // Automação v3 (estilo v2): recalcula máximos pela ficha e mantém atuais dentro do teto
+    const hpAtual = parseInt(charData.hp_at) || 0;
+    const manaAtual = parseInt(charData.mana_at) || 0;
+    const hpMaxAtual = parseInt(charData.hp_max) || 0;
+    const manaMaxAtual = parseInt(charData.mana_max) || 0;
+
+    const updates = {};
+    if (hpMaxAtual !== hpSug) updates.hp_max = hpSug;
+    if (manaMaxAtual !== manaSug) updates.mana_max = manaSug;
+    if (hpAtual > hpSug) updates.hp_at = hpSug;
+    if (manaAtual > manaSug) updates.mana_at = manaSug;
+
+    const hpMaxEl = document.getElementById('hp_max');
     const manaMaxEl = document.getElementById('mana_max');
-    if (manaMaxEl && parseInt(manaMaxEl.value) < manaSug) {
-        manaMaxEl.value = manaSug;
-        update(ref(db, dbPath), { mana_max: manaSug });
+    if (hpMaxEl && document.activeElement !== hpMaxEl) hpMaxEl.value = hpSug;
+    if (manaMaxEl && document.activeElement !== manaMaxEl) manaMaxEl.value = manaSug;
+
+    if (Object.keys(updates).length) {
+        update(ref(db, dbPath), updates);
     }
 
     // PDT display
@@ -1881,117 +1903,67 @@ function updateLinhagemBtns() {
 // ROLAGEM
 // ============================================================
 window.setRollMode = (mode) => {
-    if (rollMode !== 'none' && rollMode !== mode) return;
-    rollMode = rollMode === mode ? 'none' : mode;
+    if (rollMode === mode) rollMode = 'none';
+    else rollMode = mode;
+
     document.getElementById('btn_ganho').classList.toggle('active', rollMode === 'ganho');
     document.getElementById('btn_perda').classList.toggle('active', rollMode === 'perda');
-    document.getElementById('btn_ganho').classList.toggle('disabled', rollMode === 'perda');
-    document.getElementById('btn_perda').classList.toggle('disabled', rollMode === 'ganho');
+    renderRollPlaceholders();
 };
+
+function getD6Count() {
+    if (rollMode === 'ganho') return 3;
+    if (rollMode === 'perda') return 1;
+    return 2;
+}
+
+function renderRollPlaceholders(d6Vals = [], d4Vals = []) {
+    const d6Count = getD6Count();
+    const d6Wrap = document.getElementById('d6_container');
+    const d4Wrap = document.getElementById('d4_container');
+    if (!d6Wrap || !d4Wrap) return;
+
+    d6Wrap.innerHTML = Array.from({ length: d6Count }).map((_, i) => `
+        <div class="die-box ${i === 0 ? 'winner' : ''}">
+            <span class="die-val" style="color:#aaaaff;">${d6Vals[i] ?? '—'}</span>
+            <span class="die-label" style="color:#6666aa;">d6</span>
+        </div>
+    `).join('');
+
+    d4Wrap.innerHTML = d4Vals.map(v => `<div class="d4-triangle"><span>${v}</span></div>`).join('');
+}
 
 window.rollDice = () => {
-    const attrId = document.getElementById('roll_attr').value;
-    const attrVal = parseInt(charData[attrId]) || 0;
-    const bonus = parseInt(document.getElementById('roll_bonus').value) || 0;
-    const periciaVal = parseInt(document.getElementById('roll_pericia').value) || 0;
+    const periciaNome = document.getElementById('roll_pericia').value;
+    const periciaVal = periciaNome ? (parseInt((charData.pericias || {})[periciaNome]) || 0) : 0;
 
-    // Roll d6s
-    const d1 = Math.ceil(Math.random() * 6);
-    const d2 = Math.ceil(Math.random() * 6);
+    const d6Count = getD6Count();
+    const d6s = Array.from({ length: d6Count }, () => Math.ceil(Math.random() * 6));
+    const d4s = Array.from({ length: periciaVal }, () => Math.ceil(Math.random() * 4));
 
-    // Mode
-    let baseA = d1, baseB = d2;
-    let extraRoll = null;
-    let cutInfo = "";
+    const somaD6 = d6s.reduce((a, b) => a + b, 0);
+    const somaD4 = d4s.reduce((a, b) => a + b, 0);
+    const total = somaD6 + somaD4;
 
-    if (rollMode === 'ganho') {
-        const d3 = Math.ceil(Math.random() * 6);
-        // Sum: 3d6, use all three summed (v3 ganho = 3d6 sum)
-        extraRoll = d3;
-        cutInfo = `3d6 com Ganho: ${d1} + ${d2} + ${d3}`;
-        document.getElementById('die1_val').innerText = d1;
-        document.getElementById('die2_val').innerText = d2;
-        document.getElementById('die1_extra').innerText = `+${d3} (ganho)`;
-        document.getElementById('die2_extra').innerText = '';
-        const total = d1 + d2 + d3 + attrVal + bonus;
-        showRollResult(d1, d2, attrId, attrVal, bonus, periciaVal, total, cutInfo, d3);
-        return;
-    } else if (rollMode === 'perda') {
-        const d3 = Math.ceil(Math.random() * 6);
-        // Use only 1d6 (lowest) — v3: Perda = 1d6
-        const lowest = Math.min(d1, d2, d3);
-        cutInfo = `Perda: usou ${lowest} (menores de ${d1}, ${d2}, ${d3})`;
-        document.getElementById('die1_val').innerText = lowest;
-        document.getElementById('die2_val').innerText = "−";
-        document.getElementById('die1_extra').innerText = `perda`;
-        document.getElementById('die2_extra').innerText = `cortado`;
-        const total = lowest + attrVal + bonus;
-        showRollResult(lowest, null, attrId, attrVal, bonus, periciaVal, total, cutInfo, null);
-        return;
-    }
+    renderRollPlaceholders(d6s, d4s);
 
-    document.getElementById('die1_val').innerText = d1;
-    document.getElementById('die2_val').innerText = d2;
-    document.getElementById('die1_extra').innerText = '';
-    document.getElementById('die2_extra').innerText = '';
+    const modoTxt = rollMode === 'ganho' ? 'com GANHO' : (rollMode === 'perda' ? 'com PERDA' : 'normal');
+    const periciaTxt = periciaNome ? ` + ${periciaNome} [${d4s.join(' + ')}]` : '';
+    document.getElementById('roll_result_text').innerText = `${d6Count}d6 ${modoTxt}: [${d6s.join(' + ')}]${periciaTxt}`;
 
-    // Roll d4s for pericia
-    let periciaBonus = 0;
-    let periciaStr = "";
-    if (periciaVal > 0) {
-        let d4s = [];
-        for (let i = 0; i < periciaVal; i++) d4s.push(Math.ceil(Math.random() * 4));
-        periciaBonus = d4s.reduce((a, b) => a + b, 0);
-        periciaStr = ` + Perícia [${d4s.join("+")}]=${periciaBonus}`;
-    }
-
-    const attrLabel = document.getElementById('roll_attr').selectedOptions[0].text;
-    const total = d1 + d2 + attrVal + bonus + periciaBonus;
-    let resultText = `(${d1} + ${d2}) + ${attrLabel}(${attrVal})${periciaStr}${bonus !== 0 ? ` ${bonus > 0 ? '+' : ''}${bonus}` : ''} = ${total}`;
-    document.getElementById('roll_result_text').innerText = resultText;
-
-    // Crit check: v3 = same value
     const outcomeEl = document.getElementById('roll_outcome');
-    if (d1 === d2) {
-        if (d1 === 6) {
-            outcomeEl.className = 'roll-outcome crit';
-            outcomeEl.innerText = `✦ CRÍTICO PERFEITO! (6 e 6)`;
-        } else if (d1 === 1) {
-            outcomeEl.className = 'roll-outcome fail';
-            outcomeEl.innerText = `✖ FALHA CRÍTICA! (1 e 1)`;
-        } else {
-            outcomeEl.className = 'roll-outcome crit';
-            outcomeEl.innerText = `✦ Sucesso Crítico! (${d1} e ${d2})`;
-        }
+    const crit = d6Count >= 2 && d6s.length >= 2 && d6s.every(v => v === d6s[0]);
+    if (crit && d6s[0] === 6) {
+        outcomeEl.className = 'roll-outcome crit';
+        outcomeEl.innerText = `✦ CRÍTICO PERFEITO — ${total}`;
+    } else if (crit && d6s[0] === 1) {
+        outcomeEl.className = 'roll-outcome fail';
+        outcomeEl.innerText = `✖ FALHA CRÍTICA — ${total}`;
     } else {
         outcomeEl.className = 'roll-outcome success';
-        outcomeEl.innerText = `Total: ${total}`;
+        outcomeEl.innerText = `TOTAL: ${total}`;
     }
-
-    // Animate
-    document.getElementById('die1').classList.remove('winner');
-    document.getElementById('die2').classList.remove('winner');
-    if (d1 >= d2) document.getElementById('die1').classList.add('winner');
-    if (d2 >= d1) document.getElementById('die2').classList.add('winner');
 };
-
-function showRollResult(d1, d2, attrId, attrVal, bonus, periciaVal, total, cutInfo, extra) {
-    const attrLabel = document.getElementById('roll_attr').selectedOptions[0].text;
-    let pBonus = 0, pStr = "";
-    if (periciaVal > 0) {
-        let d4s = [];
-        for (let i = 0; i < periciaVal; i++) d4s.push(Math.ceil(Math.random() * 4));
-        pBonus = d4s.reduce((a, b) => a + b, 0);
-        pStr = ` + Perícia [${d4s.join("+")}]=${pBonus}`;
-        total += pBonus;
-    }
-    const resultText = cutInfo + `${pStr} + ${attrLabel}(${attrVal})${bonus !== 0 ? ` ${bonus > 0 ? '+' : ''}${bonus}` : ''} = ${total}`;
-    document.getElementById('roll_result_text').innerText = resultText;
-    document.getElementById('roll_outcome').className = 'roll-outcome success';
-    document.getElementById('roll_outcome').innerText = `Total: ${total}`;
-    document.getElementById('die1').classList.add('winner');
-    document.getElementById('die2').classList.remove('winner');
-}
 
 // ============================================================
 // ASCENSÃO V3
@@ -2563,7 +2535,7 @@ window.closeModal = (id) => { document.getElementById(id)?.classList.remove('ope
 // ============================================================
 // CAMPOS SIMPLES
 // ============================================================
-const SIMPLE_FIELDS = ['char_name','nivel','florins','hp_at','hp_max','mana_at','mana_max','pulso_at','pulso_max','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes'];
+const SIMPLE_FIELDS = ['char_name','nivel','nivel_bonus','florins','hp_at','hp_max','mana_at','mana_max','pulso_at','pulso_max','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes'];
 
 document.addEventListener('input', e => {
     if (SIMPLE_FIELDS.includes(e.target.id)) {
@@ -2581,7 +2553,7 @@ onValue(ref(db, 'banco_dados_v3'), snap => {
 
 onValue(ref(db, dbPath), snap => {
     if (!snap.exists()) {
-        set(ref(db, dbPath), { hp_at: 5, hp_max: 5, mana_at: 10, mana_max: 10, pulso_at: 0, pulso_max: 10, ep_max: 0, ep_temp: 0, poder: 0, habilidade: 0, resistencia: 0 });
+        set(ref(db, dbPath), { hp_at: 5, hp_max: 5, mana_at: 10, mana_max: 10, pulso_at: 0, pulso_max: 10, ep_max: 0, ep_temp: 0, poder: 0, habilidade: 0, resistencia: 0, nivel: 1, nivel_bonus: 0 });
         return;
     }
     charData = snap.val();
@@ -2618,6 +2590,7 @@ onValue(ref(db, dbPath), snap => {
     updateBar('pulso', charData.pulso_at, charData.pulso_max || 10);
 
     buildPericiasGrid();
+    renderRollPlaceholders();
     buildProficiencias();
     calcDerived();
     renderEP();

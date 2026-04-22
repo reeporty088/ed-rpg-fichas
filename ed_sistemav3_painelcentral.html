@@ -409,10 +409,10 @@
             <div class="action-note">v1</div>
           </div>
 
-          <div class="action-card" onclick="location.href='ed_sistemav1_banco_habilidades.html'">
+          <div class="action-card" onclick="location.href='ed_sistemav3_bancodedados.html'">
             <div class="action-icon">⚡</div>
-            <div class="action-label">Banco de Habilidades</div>
-            <div class="action-note">v1</div>
+            <div class="action-label">Compêndio v3</div>
+            <div class="action-note">v3</div>
           </div>
 
           <div class="action-card wip">
@@ -441,7 +441,8 @@
             </div>
             <div class="field">
               <label for="newSheetUrl">Arquivo HTML</label>
-              <input id="newSheetUrl" type="text" placeholder="ed_sistemav2_ficha.html" />
+              <input id="newSheetUrl" type="text" placeholder="ed_sistemav3_ficha.html" />
+              <small style="color:#8f7f7f;">Para v3, o painel monta automaticamente a URL única com <code>?p=nome_da_ficha</code>.</small>
             </div>
             <div class="field">
               <label for="newSheetVersion">Versão</label>
@@ -465,6 +466,11 @@
               <select id="sheetSelect"></select>
             </div>
             <button class="btn btn-primary btn-full" onclick="attachSheet()">Anexar Ficha</button>
+          </div>
+
+          <div class="sub-card" style="grid-column:1/-1;">
+            <div class="sub-card-title">Vínculos atuais (jogadores × fichas)</div>
+            <div id="assignmentList" style="display:grid; gap:10px;"></div>
           </div>
 
         </div>
@@ -555,18 +561,37 @@ function renderAdmin() {
 
   const sheetSel = document.getElementById('sheetSelect');
   sheetSel.innerHTML = store.sheets.map((s) => `<option value="${s.id}">${s.name}</option>`).join('');
+
+  renderAssignments(store);
 }
 
 function toggleManage() {
   document.getElementById('manageSheets').classList.toggle('hidden');
 }
 
+function slugifySheetName(name) {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'ficha_v3';
+}
+
 function createSheet() {
   const name    = document.getElementById('newSheetName').value.trim();
   const photo   = document.getElementById('newSheetPhoto').value.trim();
-  const url     = document.getElementById('newSheetUrl').value.trim();
+  const rawUrl  = document.getElementById('newSheetUrl').value.trim();
   const version = document.getElementById('newSheetVersion').value;
-  if (!name || !url) { alert('Preencha ao menos o nome e o arquivo da ficha.'); return; }
+  if (!name || !rawUrl) { alert('Preencha ao menos o nome e o arquivo da ficha.'); return; }
+
+  let url = rawUrl;
+  if (version === 'v3') {
+    const charId = slugifySheetName(name);
+    const hasQuery = rawUrl.includes('?');
+    url = `${rawUrl}${hasQuery ? '&' : '?'}p=${encodeURIComponent(charId)}`;
+  }
+
   EDAuth.createSheet({ name, photo, url, version });
   document.getElementById('newSheetName').value = '';
   document.getElementById('newSheetPhoto').value = '';
@@ -584,6 +609,38 @@ function attachSheet() {
   const u = store.users.find((u) => u.id === userId);
   const s = store.sheets.find((s) => s.id === sheetId);
   alert(`Ficha "${s?.name}" anexada a "${u?.name}" com sucesso.`);
+  renderAdmin();
+}
+
+function detachSheet(userId, sheetId) {
+  const store = EDAuth.getStore();
+  const u = store.users.find((x) => x.id === userId);
+  const s = store.sheets.find((x) => x.id === sheetId);
+  if (!u || !s) return;
+  if (!confirm(`Remover a ficha "${s.name}" de "${u.name}"?`)) return;
+  EDAuth.detachSheetFromUser(userId, sheetId);
+  renderAdmin();
+}
+
+function renderAssignments(store) {
+  const wrap = document.getElementById('assignmentList');
+  if (!wrap) return;
+  const approved = store.users.filter((u) => u.role !== 'admin' && u.status === 'approved');
+  if (!approved.length) {
+    wrap.innerHTML = '<p class="empty-state">Sem jogadores aprovados.</p>';
+    return;
+  }
+  wrap.innerHTML = approved.map((u) => {
+    const cards = (u.assignedSheets || [])
+      .map((sid) => store.sheets.find((s) => s.id === sid))
+      .filter(Boolean)
+      .map((sheet) => `<span style="display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border:1px solid #4a3535; border-radius:999px; background:#140d0d; margin:3px;">${sheet.photo || '🧾'} ${sheet.name}<button class="btn btn-sm btn-danger" style="padding:2px 8px;" onclick="detachSheet('${u.id}','${sheet.id}')">Remover</button></span>`)
+      .join('');
+    return `<div style="border:1px solid rgba(92,28,34,.45); border-radius:8px; padding:10px; background:rgba(7,3,3,.45);">
+      <div style="font-weight:700; margin-bottom:6px;">${u.name} <span style="color:#9a8585; font-weight:400;">(${u.email})</span></div>
+      <div>${cards || '<span style="color:#9a8585;">Sem fichas anexadas.</span>'}</div>
+    </div>`;
+  }).join('');
 }
 
 renderBase();
