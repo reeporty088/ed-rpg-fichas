@@ -820,6 +820,9 @@ document.getElementById('regPass2').addEventListener('keydown', (e) => {
 document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.logout(); render(); });
 
 /* ── init ── */
+// Firebase listener in auth.js calls this whenever remote data changes
+// (e.g. a new user registers from another browser)
+window.onAuthStoreChanged = render;
 render();
 </script>
 </body>
