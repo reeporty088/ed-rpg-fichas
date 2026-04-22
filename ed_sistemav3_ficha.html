@@ -1380,14 +1380,6 @@
 
             <hr class="hr">
 
-            <!-- CAMINHOS DE ARCANA -->
-            <div class="section-header">
-                <label style="color:var(--gold);">Caminhos de Arcana</label>
-            </div>
-            <div id="list_arcana_habs" style="margin-bottom:12px;"></div>
-
-            <hr class="hr">
-
             <!-- TÉCNICAS -->
             <div class="section-header">
                 <label style="color:#aaeeff;">Técnicas (PDT)</label>
@@ -2190,12 +2182,12 @@ window.openDBModal = (cat) => {
     if (currentCategory === 'classe_hab') dataObj = compendium.classes || {};
     else if (currentCategory === 'raca_hab') dataObj = compendium.racas || {};
     else if (currentCategory === 'armas') dataObj = compendium.equipamentos || {};
-    else if (currentCategory === 'arcana_path_habs') dataObj = compendium.tecnicas || {};
+    else if (currentCategory === 'arcana_path_habs') dataObj = compendium.caminhos_arcanos || compendium.tecnicas || {};
 
     currentDBItems = Object.keys(dataObj).map(k => ({ id: k, ...dataObj[k] }));
     if (currentCategory === 'arcana_path_habs') {
         currentDBItems = currentDBItems.filter(item =>
-            normalizePathName(item.caminho || '') === normalizePathName(selectedArcanaPath)
+            normalizePathName(item.dominio || item.caminho || '') === normalizePathName(selectedArcanaPath)
         );
     }
     currentDBItems.sort((a, b) => (a.titulo || "").localeCompare(b.titulo || ""));
@@ -2235,7 +2227,7 @@ window.addFromDB = (itemId) => {
     const dataObj = currentCategory === 'classe_hab' ? compendium.classes :
                     currentCategory === 'raca_hab' ? compendium.racas :
                     currentCategory === 'armas' ? compendium.equipamentos :
-                    currentCategory === 'arcana_path_habs' ? compendium.tecnicas : {};
+                    currentCategory === 'arcana_path_habs' ? (compendium.caminhos_arcanos || compendium.tecnicas) : {};
     const item = dataObj[itemId];
     if (!item) { alert("Item não encontrado no banco."); return; }
 
@@ -2272,7 +2264,7 @@ window.addFromDB = (itemId) => {
     } else if (currentCategory === 'arcana_path_habs') {
         push(ref(db, `${dbPath}/habilidades/arcana_habs`), {
             titulo: item.titulo || "",
-            caminho: item.caminho || selectedArcanaPath || "",
+            caminho: item.dominio || item.caminho || selectedArcanaPath || "",
             pericia: item.pericia || "",
             custo_pm: item.custo_pm || "",
             desc: item.desc || ""
