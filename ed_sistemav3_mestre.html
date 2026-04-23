@@ -162,10 +162,10 @@ function createPlayerCard(id,f){
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
   const pulsoRef=Math.max(10,pulsoAt,1);
   const linkFicha=`${baseURL}ed_sistemav3_ficha.html?p=${id}`;
-  const linkOverlay=`${baseURL}ed_sistemav2_overlay.html?p=${id}`;
+  const linkOverlay=`${baseURL}ed_sistemav3_overlay.html?p=${id}`;
   const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
   const el=document.createElement('div'); el.className='player-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'players');
-  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button><button class="btn-small" onclick="openObs('${id}')">📝 Obs</button></div></div></div>
+  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button></div></div></div>
   <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
   <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
   <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoRef)}%"></div></div>
