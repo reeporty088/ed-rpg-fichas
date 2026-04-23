@@ -1174,6 +1174,13 @@
             transition: 0.2s;
         }
         .db-card:hover { border-color: var(--theme-light); transform: translateY(-2px); }
+        .db-card.discente-selected {
+            border-color: var(--gold) !important;
+            background: linear-gradient(145deg, #1a1004 0%, #100a02 100%) !important;
+            box-shadow: 0 0 10px rgba(200,160,60,0.25);
+        }
+        .btn-choice:disabled { opacity: 0.35; cursor: not-allowed; }
+        .discente-step { flex-direction: column; flex-grow: 1; overflow: hidden; min-height: 0; }
         .db-card-title {
             font-family: 'Cinzel', serif;
             font-size: 14px;
@@ -1300,7 +1307,10 @@
 
             <div class="section-header">
                 <label>Ancestralidade / Raça</label>
-                <button class="btn-add" onclick="openDirectDB('raca_hab')">📚 Banco</button>
+                <div style="display:flex; gap:4px;">
+                    <button class="btn-add" onclick="openDirectDB('raca_hab')">📚 Banco</button>
+                    <button class="btn-add" style="background:rgba(30,60,130,0.7); border-color:#6699ff;" onclick="openDiscenteModal()">🧬 Discente</button>
+                </div>
             </div>
             <input type="text" id="ancestralidade" placeholder="Escolher raça..." readonly style="cursor:pointer;" onclick="openDirectDB('raca_hab')">
 
@@ -1585,6 +1595,41 @@
         </div>
         <input type="text" id="db_search" placeholder="Buscar..." onkeyup="filterDB(this.value)" style="margin-bottom:12px; font-size:14px;">
         <div class="db-scroll" id="db_list"></div>
+    </div>
+</div>
+
+<!-- MODAL DISCENTE -->
+<div class="modal-overlay" id="modal_discente">
+    <div class="modal-box modal-large" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="discente_modal_title">Discente — Selecionar Raças</h3>
+            <button class="btn-close" onclick="closeModal('modal_discente')">✖</button>
+        </div>
+        <!-- PASSO 1: Seleção de raças -->
+        <div id="discente_step1" class="discente-step" style="display:flex;">
+            <div style="margin-bottom:10px; flex-shrink:0;">
+                <span id="discente_counter" style="font-size:12px; color:#aaa; font-family:'Cinzel',serif;"></span>
+            </div>
+            <input type="text" id="discente_search" placeholder="Buscar raça..." oninput="filterDiscenteRaces(this.value)" style="margin-bottom:12px; font-size:14px; flex-shrink:0;">
+            <div class="db-scroll" id="discente_race_list"></div>
+            <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-shrink:0;">
+                <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="closeModal('modal_discente')">Cancelar</button>
+                <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" id="discente_btn_avancar" onclick="discenteStep2()">Avançar →</button>
+            </div>
+        </div>
+        <!-- PASSO 2: Seleção de habilidades -->
+        <div id="discente_step2" class="discente-step" style="display:none;">
+            <div id="discente_hab_info" style="font-size:12px; color:#aaa; margin-bottom:10px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; border:1px solid var(--theme-border); flex-shrink:0;"></div>
+            <div class="db-scroll" id="discente_hab_list" style="display:block;"></div>
+            <div id="discente_linhagem_section" style="display:none; margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--theme-border); flex-shrink:0;">
+                <div style="font-family:'Cinzel',serif; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); margin-bottom:10px;">Escolha a Linhagem Universal</div>
+                <div id="discente_linhagem_btns"></div>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-shrink:0;">
+                <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="discenteGoBack()">← Voltar</button>
+                <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" id="discente_btn_finalizar" onclick="finalizeDiscente()">Finalizar ✓</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -2769,6 +2814,288 @@ onValue(ref(db, dbPath), snap => {
         renderHabs(cat, habs[cat]);
     });
 });
+
+// ============================================================
+// DISCENTE
+// ============================================================
+let discenteSelectedRaces = [];
+let discenteSelectedHabs = {};
+let discenteAllRaces = [];
+let discenteSelectedLinhagem = null;
+
+window.openDiscenteModal = () => {
+    discenteSelectedRaces = [];
+    discenteSelectedHabs = {};
+    discenteSelectedLinhagem = null;
+    discenteAllRaces = Object.keys(compendium.racas || {})
+        .map(k => ({ id: k, ...compendium.racas[k] }))
+        .sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+    document.getElementById('discente_step1').style.display = 'flex';
+    document.getElementById('discente_step2').style.display = 'none';
+    document.getElementById('discente_modal_title').innerText = 'Discente — Selecionar Raças';
+    document.getElementById('discente_search').value = '';
+    renderDiscenteRaces(discenteAllRaces);
+    updateDiscenteCounter();
+    document.getElementById('modal_discente').classList.add('open');
+};
+
+function renderDiscenteRaces(races) {
+    const list = document.getElementById('discente_race_list');
+    if (!races.length) {
+        list.innerHTML = '<div style="color:#555; text-align:center; grid-column:1/-1; padding:20px; font-family:Cinzel,serif;">Nenhuma raça encontrada.</div>';
+        return;
+    }
+    list.innerHTML = races.map(race => {
+        const selected = discenteSelectedRaces.some(r => r.id === race.id);
+        return `<div class="db-card${selected ? ' discente-selected' : ''}" onclick="toggleDiscenteRace('${race.id}')">
+            ${race.linhagem ? `<div style="font-size:9px; color:#666; font-family:Cinzel,serif; text-transform:uppercase; margin-bottom:4px;">${race.linhagem}</div>` : ''}
+            <div class="db-card-title">${race.titulo || race.id}</div>
+            <div class="db-card-desc">${(race.desc || '').substring(0, 150)}${(race.desc || '').length > 150 ? '...' : ''}</div>
+            <div class="db-card-note" style="${selected ? 'color:#88ff88;' : ''}">${selected ? '✓ Selecionada' : 'Clique para selecionar →'}</div>
+        </div>`;
+    }).join('');
+}
+
+window.toggleDiscenteRace = (raceId) => {
+    const idx = discenteSelectedRaces.findIndex(r => r.id === raceId);
+    if (idx >= 0) {
+        discenteSelectedRaces.splice(idx, 1);
+    } else {
+        if (discenteSelectedRaces.length >= 3) return;
+        const race = (compendium.racas || {})[raceId];
+        if (!race) return;
+        discenteSelectedRaces.push({ id: raceId, ...race });
+    }
+    const term = document.getElementById('discente_search').value.toLowerCase();
+    renderDiscenteRaces(term
+        ? discenteAllRaces.filter(r => (r.titulo || '').toLowerCase().includes(term) || (r.linhagem || '').toLowerCase().includes(term))
+        : discenteAllRaces
+    );
+    updateDiscenteCounter();
+};
+
+function updateDiscenteCounter() {
+    const n = discenteSelectedRaces.length;
+    let text;
+    if (n === 0) text = '0 raças selecionadas (mín. 2, máx. 3)';
+    else if (n === 1) text = '1 raça selecionada — selecione mais 1 ou 2';
+    else if (n === 2) text = '2 raças — Sangue-Duplo ✓ (ou selecione mais 1 para Quimera)';
+    else text = '3 raças — Quimera ✓';
+    document.getElementById('discente_counter').innerText = text;
+    document.getElementById('discente_btn_avancar').disabled = n < 2;
+}
+
+window.filterDiscenteRaces = (term) => {
+    const t = term.toLowerCase();
+    renderDiscenteRaces(t
+        ? discenteAllRaces.filter(r => (r.titulo || '').toLowerCase().includes(t) || (r.linhagem || '').toLowerCase().includes(t))
+        : discenteAllRaces
+    );
+};
+
+window.discenteStep2 = () => {
+    const n = discenteSelectedRaces.length;
+    discenteSelectedHabs = {};
+    discenteSelectedRaces.forEach(r => { discenteSelectedHabs[r.id] = []; });
+    discenteSelectedLinhagem = null;
+
+    document.getElementById('discente_step1').style.display = 'none';
+    document.getElementById('discente_step2').style.display = 'flex';
+    document.getElementById('discente_modal_title').innerText = n === 3 ? 'Discente Quimera — Selecionar Habilidades' : 'Discente Sangue-Duplo — Selecionar Habilidades';
+
+    const linhagemSec = document.getElementById('discente_linhagem_section');
+    if (n === 3) {
+        linhagemSec.style.display = '';
+        renderDiscenteLinhagemBtns();
+    } else {
+        linhagemSec.style.display = 'none';
+    }
+    renderDiscenteHabs();
+    updateDiscenteFinalBtn();
+};
+
+function getDiscenteHabsForRace(race) {
+    const habs = [];
+    if (race.hab1_nome) habs.push({ key: 'hab_1', nome: race.hab1_nome, desc: race.hab1_desc || '' });
+    if (race.hab2_nome) habs.push({ key: 'hab_2', nome: race.hab2_nome, desc: race.hab2_desc || '' });
+    if (race.hab3_nome) habs.push({ key: 'hab_3', nome: race.hab3_nome, desc: race.hab3_desc || '' });
+    return habs;
+}
+
+function renderDiscenteHabs() {
+    const isQuimera = discenteSelectedRaces.length === 3;
+    const container = document.getElementById('discente_hab_list');
+    container.innerHTML = discenteSelectedRaces.map(race => {
+        const habs = getDiscenteHabsForRace(race);
+        const sel = discenteSelectedHabs[race.id] || [];
+        const countColor = isQuimera ? (sel.length === 1 ? '#88ff88' : '#ff8888') : '#aaa';
+        return `<div style="margin-bottom:18px;">
+            <div style="font-family:'Cinzel',serif; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); border-bottom:1px solid var(--theme-border); padding-bottom:6px; margin-bottom:10px; display:flex; justify-content:space-between;">
+                <span>${race.titulo || race.id} <span style="font-size:9px; color:#666; margin-left:6px;">${race.linhagem || ''}</span></span>
+                ${isQuimera ? `<span style="font-size:9px; color:${countColor};">${sel.length}/1</span>` : ''}
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:8px;">
+                ${habs.map(hab => {
+                    const chosen = sel.includes(hab.key);
+                    return `<div class="db-card${chosen ? ' discente-selected' : ''}" onclick="toggleDiscenteHab('${race.id}','${hab.key}',${isQuimera})">
+                        <div class="db-card-title" style="font-size:12px;">${hab.nome}</div>
+                        <div class="db-card-desc">${hab.desc.substring(0,120)}${hab.desc.length > 120 ? '...' : ''}</div>
+                        <div class="db-card-note" style="${chosen ? 'color:#88ff88;' : ''}">${chosen ? '✓ Escolhida' : 'Clique para escolher →'}</div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+window.toggleDiscenteHab = (raceId, habKey, isQuimera) => {
+    const sel = discenteSelectedHabs[raceId] || [];
+    const idx = sel.indexOf(habKey);
+    if (idx >= 0) {
+        discenteSelectedHabs[raceId] = sel.filter(k => k !== habKey);
+    } else {
+        if (isQuimera) {
+            if (sel.length >= 1) return;
+        } else {
+            const total = Object.values(discenteSelectedHabs).reduce((s, a) => s + a.length, 0);
+            if (total >= 3) return;
+        }
+        discenteSelectedHabs[raceId] = [...sel, habKey];
+    }
+    renderDiscenteHabs();
+    updateDiscenteFinalBtn();
+};
+
+function discenteTotalHabs() {
+    return Object.values(discenteSelectedHabs).reduce((s, a) => s + a.length, 0);
+}
+
+function getDiscenteAvailableLineages() {
+    const keys = new Set();
+    discenteSelectedRaces.forEach(race => {
+        const l = (race.linhagem || '').toLowerCase();
+        if (l.includes('demon')) keys.add('demon');
+        if (l.includes('animal')) keys.add('beast');
+        if (l.includes('sacr')) keys.add('sacra');
+    });
+    return [...keys];
+}
+
+function isDiscenteValid() {
+    const isQuimera = discenteSelectedRaces.length === 3;
+    if (isQuimera) {
+        const allHaveOne = discenteSelectedRaces.every(r => (discenteSelectedHabs[r.id] || []).length === 1);
+        if (!allHaveOne) return false;
+        const availableL = getDiscenteAvailableLineages();
+        if (availableL.length > 0 && discenteSelectedLinhagem === null) return false;
+        return true;
+    } else {
+        return discenteTotalHabs() === 3;
+    }
+}
+
+function updateDiscenteFinalBtn() {
+    const isQuimera = discenteSelectedRaces.length === 3;
+    const total = discenteTotalHabs();
+    const info = document.getElementById('discente_hab_info');
+    if (isQuimera) {
+        info.innerText = 'Quimera: escolha exatamente 1 habilidade por raça (total: 3).';
+    } else {
+        info.innerText = `Sangue-Duplo: escolha exatamente 3 habilidades no total — ${total}/3 selecionadas.`;
+    }
+    document.getElementById('discente_btn_finalizar').disabled = !isDiscenteValid();
+}
+
+function renderDiscenteLinhagemBtns() {
+    const linhagemLabels = {
+        demon: '😈 Chamado do Inferno (Demoníaco)',
+        beast: '🐺 Despertar Primordial (Animalesco)',
+        sacra: '👼 Vislumbre da Evolução (Sacra)'
+    };
+    const available = getDiscenteAvailableLineages();
+    const container = document.getElementById('discente_linhagem_btns');
+    if (!available.length) {
+        container.innerHTML = '<div style="color:#888; font-size:12px;">Nenhuma linhagem detectada nas raças selecionadas.</div>';
+        return;
+    }
+    container.innerHTML = available.map(key => {
+        const sel = discenteSelectedLinhagem === key;
+        return `<button onclick="selectDiscenteLinhagem('${key}')" style="
+            display:block; width:100%; padding:10px; margin:4px 0;
+            background:${sel ? 'rgba(200,160,60,0.2)' : 'rgba(0,0,0,0.4)'};
+            border:1px solid ${sel ? 'var(--gold)' : 'var(--theme-border)'};
+            color:${sel ? 'var(--gold)' : 'var(--text)'};
+            cursor:pointer; border-radius:7px;
+            font-family:'Cinzel',serif; font-size:11px; text-transform:uppercase; letter-spacing:1px;">
+            ${linhagemLabels[key] || key}
+        </button>`;
+    }).join('');
+}
+
+window.selectDiscenteLinhagem = (key) => {
+    discenteSelectedLinhagem = key;
+    renderDiscenteLinhagemBtns();
+    updateDiscenteFinalBtn();
+};
+
+window.discenteGoBack = () => {
+    document.getElementById('discente_step2').style.display = 'none';
+    document.getElementById('discente_step1').style.display = 'flex';
+    document.getElementById('discente_modal_title').innerText = 'Discente — Selecionar Raças';
+};
+
+window.finalizeDiscente = () => {
+    if (!isDiscenteValid()) return;
+    const n = discenteSelectedRaces.length;
+    const isQuimera = n === 3;
+    const names = discenteSelectedRaces.map(r => r.titulo || r.id);
+
+    const ancestStr = isQuimera
+        ? `Discente (${names[0]}, ${names[1]} & ${names[2]})`
+        : `Discente (${names[0]} & ${names[1]})`;
+
+    let pack = {};
+    const tipo = isQuimera ? 'Quimera' : 'Sangue-Duplo';
+    pack['desc_geral'] = {
+        titulo: `Sobre: Discente ${tipo}`,
+        desc: `${tipo}: descendente de ${names.join(', ')}.`
+    };
+    let habIdx = 1;
+    discenteSelectedRaces.forEach(race => {
+        (discenteSelectedHabs[race.id] || []).forEach(habKey => {
+            const num = habKey.replace('hab_', '');
+            pack[`hab_${habIdx}`] = {
+                titulo: race[`hab${num}_nome`] || habKey,
+                desc: race[`hab${num}_desc`] || ''
+            };
+            habIdx++;
+        });
+    });
+
+    let toggleUpdates = {
+        'toggles/linhagem_demon': null,
+        'toggles/linhagem_beast': null,
+        'toggles/linhagem_sacra': null
+    };
+    if (isQuimera) {
+        if (discenteSelectedLinhagem === 'demon') toggleUpdates['toggles/linhagem_demon'] = true;
+        else if (discenteSelectedLinhagem === 'beast') toggleUpdates['toggles/linhagem_beast'] = true;
+        else if (discenteSelectedLinhagem === 'sacra') toggleUpdates['toggles/linhagem_sacra'] = true;
+    } else {
+        discenteSelectedRaces.forEach(race => {
+            const l = (race.linhagem || '').toLowerCase();
+            if (l.includes('demon')) toggleUpdates['toggles/linhagem_demon'] = true;
+            if (l.includes('animal')) toggleUpdates['toggles/linhagem_beast'] = true;
+            if (l.includes('sacr')) toggleUpdates['toggles/linhagem_sacra'] = true;
+        });
+    }
+
+    update(ref(db, dbPath), { ancestralidade: ancestStr });
+    set(ref(db, `${dbPath}/habilidades/raca_hab`), pack);
+    update(ref(db, dbPath), toggleUpdates);
+    closeModal('modal_discente');
+};
 </script>
 </body>
 </html>
