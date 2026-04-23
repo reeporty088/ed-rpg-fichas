@@ -982,6 +982,13 @@
             padding: 10px;
             margin-bottom: 8px;
         }
+        .asc-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
         .asc-card-title {
             font-family: 'Cinzel', serif;
             color: #bb88ff;
@@ -1002,6 +1009,18 @@
             color: #ccc;
             line-height: 1.4;
         }
+        .asc-card-remove {
+            background: rgba(120, 20, 20, 0.3);
+            border: 1px solid #a94444;
+            color: #ff7f7f;
+            border-radius: 5px;
+            padding: 0 6px;
+            height: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .asc-card-remove:hover { background: rgba(160, 30, 30, 0.4); }
         .asc-choice-card {
             background: rgba(0,0,0,0.5);
             border: 1px solid #3a2a55;
@@ -1013,6 +1032,7 @@
         }
         .asc-choice-card:hover { border-color: #aa77ff; transform: translateY(-1px); }
         .asc-choice-card.selected { border-color: #8855cc; box-shadow: 0 0 0 1px #8855cc, 0 0 12px rgba(136,85,204,0.3); }
+        .asc-choice-card.disabled { opacity: 0.6; cursor: default; }
 
         /* DÁDIVAS */
         .dadiva-card {
@@ -1555,16 +1575,11 @@
                     Ascensão Arcana
                 </div>
 
-                <div class="xp-box">
-                    <div>
-                        <span class="xp-label">Pontos de Despertar</span>
-                        <span id="display_xp" class="xp-val">0</span>
-                    </div>
-                    <button class="btn-xp" onclick="openAscModal()">Evoluir ▸</button>
-                </div>
-
                 <div class="pulso-box">
-                    <label style="color:#9966cc;">Habilidades de Ascensão Ativas</label>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <label style="color:#9966cc;">Habilidades de Ascensão Arcana</label>
+                        <button class="btn-xp" style="padding:5px 10px; font-size:9px;" onclick="openAscModal()">Evoluir ▸</button>
+                    </div>
                     <div id="asc_hab_list" style="margin-top:8px;"></div>
                 </div>
             </div>
@@ -1685,7 +1700,6 @@
         <div class="db-scroll" id="asc_list"></div>
         <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
             <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="closeModal('modal_asc')">Fechar</button>
-            <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" id="btn_confirm_asc" onclick="confirmAsc()">Confirmar</button>
         </div>
     </div>
 </div>
@@ -1753,13 +1767,12 @@ const fichaID = urlParams.get('p') || "personagem_padrao_v3";
 const dbPath = `fichas_v3/${fichaID}`;
 
 let charData = {};
-let compendium = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {} };
+let compendium = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {}, ascensao_arcana: {} };
 let currentCategory = "";
 let currentDBItems = [];
 let selectedArcanaPath = "";
 let currentArcanaDetailsPath = "";
 let rollMode = 'none';
-let ascChoiceState = null;
 const ARCANA_PATHS = ['Aprimorar', 'Transmutação', 'Emissor', 'Conjurar', 'Manipular', 'Sensorial'];
 
 function normalizePathName(val = "") {
@@ -2128,98 +2141,51 @@ window.rollDice = () => {
 // ============================================================
 // ASCENSÃO V3
 // ============================================================
-const ASC_DB = {
-    poder: {
-        nome: "PUNHO NEGRO",
-        attr: "Poder ≥ 5",
-        habs: [{
-            id: "punho_negro",
-            nome: "Punho Negro",
-            custo: "1 Pulso (ação livre antes de atacar)",
-            desc: "O próximo ataque físico ignora todos os espaços de proteção e não pode ser reduzido. Sucesso Crítico: derruba e atura o alvo por 1 turno."
-        }]
-    },
-    habilidade: {
-        nome: "FLUXO ININTERRUPTO",
-        attr: "Habilidade ≥ 5",
-        habs: [{
-            id: "fluxo_ininterrupto",
-            nome: "Fluxo Ininterrupto",
-            custo: "1 Pulso (reação ao ser atacado)",
-            desc: "Esquiva automática sem rolar dados. Move-se até 2 blocos. Se adjacente ao atacante, contra-ataca com Ganho como parte da reação. Apenas 1× por rodada."
-        }]
-    },
-    resistencia: {
-        nome: "CORPO ABSOLUTO",
-        attr: "Resistência ≥ 5",
-        habs: [{
-            id: "corpo_absoluto",
-            nome: "Corpo Absoluto",
-            custo: "1 Pulso (reação ao sofrer dano)",
-            desc: "Dano recebido é reduzido pela metade. Se esse dano fosse te levar a 0 PV, você fica com 1 PV e ganha +1 Pulso. Por 1 turno, imune a condições negativas. Apenas 1× por rodada."
-        }]
-    }
-};
+function getAscensaoCompendiumItems() {
+    return Object.entries(compendium.ascensao_arcana || {})
+        .map(([id, item]) => ({ id, ...(item || {}) }))
+        .sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
+}
 
 window.openAscModal = () => {
-    const nivel = parseInt(charData.nivel) || 0;
-    const poder = parseInt(charData.poder) || 0;
-    const hab = parseInt(charData.habilidade) || 0;
-    const res = parseInt(charData.resistencia) || 0;
-    const xp = parseInt(charData.xp_total) || 0;
     const learned = charData.ascensao_habs || {};
+    const items = getAscensaoCompendiumItems();
 
     const reqEl = document.getElementById('asc_req_text');
-    reqEl.innerHTML = `Nível: <b>${nivel}</b>/7 | Poder: <b>${poder}</b>/5 | Hab: <b>${hab}</b>/5 | Res: <b>${res}</b>/5 | Pontos de Despertar: <b>${xp}</b>`;
+    reqEl.innerHTML = 'Selecione uma habilidade de Ascensão Arcana do banco de dados v3 para adicionar à ficha.';
 
     const list = document.getElementById('asc_list');
     list.innerHTML = "";
-    ascChoiceState = null;
 
-    const attrMap = { poder, habilidade: hab, resistencia: res };
-    const attrKeys = { poder: 'poder', habilidade: 'habilidade', resistencia: 'resistencia' };
-
-    Object.entries(ASC_DB).forEach(([key, path]) => {
-        const attrV = attrMap[key] || 0;
-        const unlocked = attrV >= 5 && nivel >= 7;
-        if (!unlocked) return;
-
-        path.habs.forEach(hab => {
-            if (learned[hab.id]) return;
-            const canBuy = xp >= 1;
-            list.innerHTML += `
-                <div class="asc-choice-card ${canBuy ? '' : 'disabled'}" id="asc_c_${hab.id}" onclick="${canBuy ? `selectAsc('${hab.id}')` : ''}">
-                    <div style="font-family:'Cinzel',serif; font-size:9px; color:#7755aa; text-transform:uppercase; margin-bottom:5px;">${path.attr}</div>
-                    <div style="font-family:'Cinzel',serif; color:#bb88ff; font-size:12px; font-weight:600; margin-bottom:4px;">${path.nome} — ${hab.nome}</div>
-                    <div style="font-size:11px; color:#777; margin-bottom:6px;">${hab.custo}</div>
-                    <div style="font-size:12px; color:#ccc;">${hab.desc}</div>
-                    ${!canBuy ? '<div style="color:#555; font-size:10px; margin-top:8px;">Sem Pontos de Despertar</div>' : ''}
-                </div>`;
-        });
+    items.forEach(item => {
+        const alreadyAdded = learned[item.id] === true;
+        list.innerHTML += `
+            <div class="asc-choice-card ${alreadyAdded ? 'disabled' : ''}" ${alreadyAdded ? '' : `onclick="addAscFromDB('${item.id}')"`}>
+                <div style="font-family:'Cinzel',serif; font-size:9px; color:#7755aa; text-transform:uppercase; margin-bottom:5px;">${item.ramo || 'Ascensão Arcana'}</div>
+                <div style="font-family:'Cinzel',serif; color:#bb88ff; font-size:12px; font-weight:600; margin-bottom:4px;">${item.titulo || item.id}</div>
+                <div style="font-size:11px; color:#777; margin-bottom:6px;">${item.custo || 'Sem custo informado'}</div>
+                <div style="font-size:12px; color:#ccc; white-space:pre-wrap;">${item.efeito || item.desc || 'Sem descrição.'}</div>
+                ${alreadyAdded ? '<div style="color:#6b5b80; font-size:10px; margin-top:8px;">Já adicionada na ficha</div>' : ''}
+            </div>`;
     });
 
     if (!list.innerHTML) {
-        list.innerHTML = '<div style="color:#555; text-align:center; padding:20px; font-family:Cinzel,serif; font-size:12px;">Nenhuma ascensão disponível. Requere nível 7 e ao menos um atributo ≥ 5.</div>';
+        list.innerHTML = '<div style="color:#555; text-align:center; padding:20px; font-family:Cinzel,serif; font-size:12px;">Nenhuma habilidade de ascensão cadastrada no banco v3.</div>';
     }
 
     document.getElementById('modal_asc').classList.add('open');
 };
 
-window.selectAsc = (id) => {
-    document.querySelectorAll('#asc_list .asc-choice-card').forEach(c => c.classList.remove('selected'));
-    const el = document.getElementById(`asc_c_${id}`);
-    if (el) el.classList.add('selected');
-    ascChoiceState = id;
+window.addAscFromDB = (id) => {
+    const learned = { ...(charData.ascensao_habs || {}) };
+    learned[id] = true;
+    update(ref(db, dbPath), { ascensao_habs: learned, 'toggles/asc_unlocked': true });
 };
 
-window.confirmAsc = () => {
-    if (!ascChoiceState) { alert("Selecione uma habilidade."); return; }
-    const xp = parseInt(charData.xp_total) || 0;
-    if (xp < 1) { alert("Sem Pontos de Despertar."); return; }
+window.removeAscHab = (id) => {
     const learned = { ...(charData.ascensao_habs || {}) };
-    learned[ascChoiceState] = true;
-    update(ref(db, dbPath), { ascensao_habs: learned, xp_total: xp - 1, 'toggles/asc_unlocked': true });
-    closeModal('modal_asc');
+    delete learned[id];
+    update(ref(db, dbPath), { ascensao_habs: learned });
 };
 
 function renderAscHabs() {
@@ -2231,15 +2197,18 @@ function renderAscHabs() {
         container.innerHTML = '<div style="color:#555; font-size:12px; text-align:center;">Nenhuma habilidade desbloqueada.</div>';
         return;
     }
+    const dbItems = compendium.ascensao_arcana || {};
     let html = "";
     keys.forEach(id => {
-        let found = null;
-        Object.values(ASC_DB).forEach(path => { path.habs.forEach(h => { if (h.id === id) found = h; }); });
+        const found = dbItems[id];
         if (!found) return;
         html += `<div class="asc-card">
-            <div class="asc-card-title">${found.nome}</div>
-            <div class="asc-card-meta">${found.custo}</div>
-            <div class="asc-card-desc">${found.desc}</div>
+            <div class="asc-card-head">
+                <div class="asc-card-title">${found.titulo || id}</div>
+                <button class="asc-card-remove" onclick="removeAscHab('${id}')" title="Remover habilidade">✖</button>
+            </div>
+            <div class="asc-card-meta">${found.ramo || 'Ascensão Arcana'} • ${found.custo || 'Sem custo informado'}</div>
+            <div class="asc-card-desc">${found.efeito || found.desc || 'Sem descrição.'}</div>
         </div>`;
     });
     container.innerHTML = html || '<div style="color:#555; font-size:12px;">Nenhuma.</div>';
@@ -2803,11 +2772,7 @@ onValue(ref(db, dbPath), snap => {
     SIMPLE_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el || document.activeElement === el) return;
-        if (id === 'xp_total') {
-            document.getElementById('display_xp').innerText = charData[id] || 0;
-        } else {
-            el.value = charData[id] ?? "";
-        }
+        el.value = charData[id] ?? "";
     });
 
     if (charData.char_img) {
