@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay OBS V3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Cinzel', serif; }
+        .overlay-wrap { width: 560px; height: 170px; position: relative; box-sizing: border-box; }
+
+        .portrait-layer {
+            position: absolute;
+            z-index: 1;
+            display: none;
+            touch-action: none;
+        }
+        .portrait-layer img {
+            display: block;
+            height: 160px;
+            width: auto;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .name-mode, .combat-mode {
+            color: #fff;
+            text-transform: uppercase;
+            --glow-color: #00ccff;
+            text-shadow:
+                2px 2px 0 #000,
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                0 0 14px var(--glow-color),
+                0 0 26px var(--glow-color);
+            transition: opacity 0.25s ease;
+            position: absolute;
+        }
+
+        .name-mode.hidden, .combat-mode.hidden { opacity: 0; pointer-events: none; }
+        .name-mode { left: 20px; top: 30px; line-height: 1; letter-spacing: 2px; z-index: 3; }
+        .name-main { font-size: 52px; font-weight: 800; }
+        .name-sub { font-size: 32px; font-weight: 700; margin-top: 3px; opacity: 0.95; }
+
+        .combat-mode { left: 0; top: 0; width: 100%; height: 100%; z-index: 3; }
+        .stat-pv, .stat-pm, .stat-pulso { position: absolute; font-weight: 800; line-height: 1; }
+        .stat-pv   { left: 20px;  top: 30px; font-size: 58px; }
+        .stat-pm   { left: 20px;  top: 96px; font-size: 50px; }
+        .stat-pulso { left: 300px; top: 30px; font-size: 38px; }
+        .stat-pulso.hidden { opacity: 0; pointer-events: none; }
+
+        .editor-toolbar {
+            position: absolute;
+            top: 6px;
+            right: -230px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: stretch;
+            z-index: 20;
+            opacity: 0.15;
+            transition: opacity 0.2s;
+            width: 210px;
+        }
+        .editor-toolbar:hover { opacity: 1; }
+        .editor-toolbar button, .editor-toolbar label.btn-file {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #777;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 5px 8px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            display: block;
+            box-sizing: border-box;
+        }
+        .editor-toolbar button:hover, .editor-toolbar label.btn-file:hover { border-color: #fff; }
+        .editor-toolbar input[type="file"] { display: none; }
+        .toolbar-sep { height: 1px; background: #555; margin: 2px 0; }
+
+        .editable { outline: 1px dashed rgba(255,255,255,0.75); cursor: move; }
+        .empty { color: #fff; font-size: 18px; text-transform: uppercase; padding: 12px; text-shadow: 2px 2px 0 #000; }
+    </style>
+</head>
+<body>
+<div class="overlay-wrap" id="overlay-wrap">
+
+    <div class="portrait-layer" id="portrait-layer">
+        <img id="portrait-img" src="" alt="">
+    </div>
+
+    <div class="name-mode" id="name-mode">
+        <div class="name-main" id="name-main">PERSONAGEM</div>
+        <div class="name-sub" id="name-sub"></div>
+    </div>
+
+    <div class="combat-mode hidden" id="combat-mode">
+        <div class="stat-pv"    id="stat-pv">0/0</div>
+        <div class="stat-pm"    id="stat-pm">0/0</div>
+        <div class="stat-pulso hidden" id="stat-pulso">0</div>
+    </div>
+
+    <div class="editor-toolbar">
+        <button onclick="toggleMode()" id="btn-mode">Modo: NOME</button>
+        <div class="toolbar-sep"></div>
+        <button onclick="toggleEditMode()" id="btn-edit">Editar Posições</button>
+        <label class="btn-file" for="portrait-upload">Subir Portrait</label>
+        <input type="file" id="portrait-upload" accept="image/*">
+        <button onclick="removePortrait()">Remover Portrait</button>
+        <div class="toolbar-sep"></div>
+        <button onclick="saveLayout()">Salvar Layout</button>
+        <button onclick="resetLayout()">Resetar Layout</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const fichaID = params.get('p') || 'personagem_padrao_v3';
+    const overlayPath = `overlay_v3_data/${fichaID}`;
+
+    const nameModeEl   = document.getElementById('name-mode');
+    const combatModeEl = document.getElementById('combat-mode');
+    const pvEl         = document.getElementById('stat-pv');
+    const pmEl         = document.getElementById('stat-pm');
+    const pulsoEl      = document.getElementById('stat-pulso');
+    const portraitLayer = document.getElementById('portrait-layer');
+    const portraitImg   = document.getElementById('portrait-img');
+
+    const defaultLayout = {
+        name:    { left: 20,  top: 30 },
+        pv:      { left: 20,  top: 30 },
+        pm:      { left: 20,  top: 96 },
+        pulso:   { left: 300, top: 30 },
+        portrait:{ left: 0,   top: 0  }
+    };
+    let currentLayout = structuredClone(defaultLayout);
+    let editMode = false;
+    let currentMode = 'nome';
+
+    const THEMES = {
+        sangue:    '#e8a090',
+        oceano:    '#7ab0ff',
+        floresta:  '#90d890',
+        ametista:  '#cc88ff',
+        sombra:    '#a0a0a0',
+        rubi:      '#ffbbbb',
+        ouro:      '#ffdd88',
+        esmeralda: '#80ffcc',
+        cobalto:   '#88ccff',
+        violeta:   '#cc88ff',
+        magenta:   '#ff88bb',
+        aurora:    '#80ffff',
+        obsidiana: '#9090cc'
+    };
+
+    function splitName(rawName) {
+        const parts = String(rawName || 'Personagem').trim().split(/\s+/).filter(Boolean);
+        if (parts.length <= 1) return { first: parts[0] || 'Personagem', rest: '' };
+        return { first: parts[0], rest: parts.slice(1).join(' ') };
+    }
+
+    function getGlowColor(data) {
+        const base = THEMES[data.color_theme] || '#00ccff';
+        const toggles = data.toggles || {};
+        if (toggles.forma_ativa === 'demon') return '#ff3030';
+        if (toggles.forma_ativa === 'beast') return '#56ff56';
+        if (toggles.forma_ativa === 'sacra') return '#00e5ff';
+        if (Object.values(toggles.dadivas || {}).some(v => v === true)) return '#cda9ff';
+        return base;
+    }
+
+    function applyLayout() {
+        nameModeEl.style.left    = `${currentLayout.name.left}px`;
+        nameModeEl.style.top     = `${currentLayout.name.top}px`;
+        pvEl.style.left          = `${currentLayout.pv.left}px`;
+        pvEl.style.top           = `${currentLayout.pv.top}px`;
+        pmEl.style.left          = `${currentLayout.pm.left}px`;
+        pmEl.style.top           = `${currentLayout.pm.top}px`;
+        pulsoEl.style.left       = `${currentLayout.pulso.left}px`;
+        pulsoEl.style.top        = `${currentLayout.pulso.top}px`;
+        portraitLayer.style.left = `${currentLayout.portrait.left}px`;
+        portraitLayer.style.top  = `${currentLayout.portrait.top}px`;
+    }
+
+    function makeDraggable(el, key) {
+        let dragging = false, startX = 0, startY = 0, baseLeft = 0, baseTop = 0;
+        el.addEventListener('pointerdown', (e) => {
+            if (!editMode) return;
+            dragging = true;
+            el.setPointerCapture(e.pointerId);
+            startX = e.clientX; startY = e.clientY;
+            baseLeft = currentLayout[key].left;
+            baseTop  = currentLayout[key].top;
+            e.preventDefault();
+        });
+        el.addEventListener('pointermove', (e) => {
+            if (!dragging || !editMode) return;
+            currentLayout[key].left = Math.round(baseLeft + (e.clientX - startX));
+            currentLayout[key].top  = Math.round(baseTop  + (e.clientY - startY));
+            applyLayout();
+        });
+        const stopDrag = (e) => {
+            if (!dragging) return;
+            dragging = false;
+            try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+        el.addEventListener('pointerup', stopDrag);
+        el.addEventListener('pointercancel', stopDrag);
+    }
+
+    function setEditVisual(on) {
+        [nameModeEl, pvEl, pmEl, pulsoEl, portraitLayer].forEach(el => el.classList.toggle('editable', on));
+    }
+
+    window.toggleEditMode = () => {
+        editMode = !editMode;
+        setEditVisual(editMode);
+        document.getElementById('btn-edit').textContent = editMode ? 'Parar Edição' : 'Editar Posições';
+    };
+
+    window.toggleMode = () => {
+        currentMode = currentMode === 'nome' ? 'combate' : 'nome';
+        applyMode();
+        set(ref(db, `${overlayPath}/mode`), currentMode);
+    };
+
+    function applyMode() {
+        nameModeEl.classList.toggle('hidden', currentMode !== 'nome');
+        combatModeEl.classList.toggle('hidden', currentMode !== 'combate');
+        document.getElementById('btn-mode').textContent =
+            currentMode === 'nome' ? 'Modo: NOME' : 'Modo: COMBATE';
+    }
+
+    window.saveLayout = async () => {
+        await set(ref(db, `${overlayPath}/layout`), currentLayout);
+        alert('Layout salvo!');
+    };
+
+    window.resetLayout = async () => {
+        currentLayout = structuredClone(defaultLayout);
+        applyLayout();
+        await set(ref(db, `${overlayPath}/layout`), currentLayout);
+    };
+
+    window.removePortrait = async () => {
+        portraitImg.src = '';
+        portraitLayer.style.display = 'none';
+        await set(ref(db, `${overlayPath}/portrait`), null);
+    };
+
+    document.getElementById('portrait-upload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = async () => {
+                const maxH = 300;
+                let w = img.width, h = img.height;
+                if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/png');
+                portraitImg.src = dataUrl;
+                portraitLayer.style.display = 'block';
+                await set(ref(db, `${overlayPath}/portrait`), dataUrl);
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    });
+
+    function renderOverlay(data) {
+        const { first, rest } = splitName(data.char_name || fichaID);
+        document.getElementById('name-main').textContent = first;
+        document.getElementById('name-sub').textContent  = rest;
+
+        const hpAt   = parseInt(data.hp_at)   || 0;
+        const hpMax  = parseInt(data.hp_max)  || 0;
+        const manaAt = parseInt(data.mana_at) || 0;
+        const manaMax= parseInt(data.mana_max)|| 0;
+        const pulsoAt= parseInt(data.pulso_at)|| 0;
+
+        pvEl.textContent = `${hpAt}/${hpMax}`;
+        pmEl.textContent = `${manaAt}/${manaMax}`;
+
+        pulsoEl.textContent = `${pulsoAt}`;
+        pulsoEl.classList.toggle('hidden', pulsoAt <= 0);
+
+        const glow = getGlowColor(data);
+        nameModeEl.style.setProperty('--glow-color', glow);
+        combatModeEl.style.setProperty('--glow-color', glow);
+    }
+
+    onValue(ref(db, overlayPath), (snapshot) => {
+        const d = snapshot.val() || {};
+
+        if (d.layout) {
+            const l = d.layout;
+            currentLayout = {
+                name:     { ...defaultLayout.name,     ...(l.name     || {}) },
+                pv:       { ...defaultLayout.pv,       ...(l.pv       || {}) },
+                pm:       { ...defaultLayout.pm,       ...(l.pm       || {}) },
+                pulso:    { ...defaultLayout.pulso,    ...(l.pulso    || {}) },
+                portrait: { ...defaultLayout.portrait, ...(l.portrait || {}) }
+            };
+            applyLayout();
+        }
+
+        if (d.mode) {
+            currentMode = d.mode;
+            applyMode();
+        }
+
+        if (d.portrait) {
+            portraitImg.src = d.portrait;
+            portraitLayer.style.display = 'block';
+        } else {
+            portraitLayer.style.display = 'none';
+        }
+    });
+
+    onValue(ref(db, `fichas_v3/${fichaID}`), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            document.body.innerHTML = `<div class="empty">Ficha não encontrada: ${fichaID}</div>`;
+            return;
+        }
+        renderOverlay(data);
+    });
+
+    makeDraggable(nameModeEl,    'name');
+    makeDraggable(pvEl,          'pv');
+    makeDraggable(pmEl,          'pm');
+    makeDraggable(pulsoEl,       'pulso');
+    makeDraggable(portraitLayer, 'portrait');
+    applyLayout();
+    setEditVisual(false);
+</script>
+</body>
+</html>

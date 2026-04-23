@@ -1601,7 +1601,7 @@
 <div class="modal-overlay" id="modal_arcana_details" onclick="closeModal('modal_arcana_details')">
     <div class="modal-box modal-small" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
-            <button class="btn-danger-mini" title="Remover caminho" onclick="removeArcanaPath(currentArcanaDetailsPath)">✖</button>
+            <button class="btn-danger-mini" title="Remover caminho" onclick="removeCurrentArcanaPath()">✖</button>
         </div>
         <h3 id="arcana_details_title" style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 10px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Caminho</h3>
         <div id="arcana_unlocked_list" style="max-height:220px; overflow:auto; border:1px solid #3a2a28; border-radius:8px; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:10px;"></div>
@@ -2375,6 +2375,8 @@ window.openArcanaPathDBFromDetails = () => {
     closeModal('modal_arcana_details');
     openDBModal('arcana_path_habs');
 };
+
+window.removeCurrentArcanaPath = () => removeArcanaPath(currentArcanaDetailsPath);
 
 window.removeArcanaPath = (path) => {
     if (!path) return;
