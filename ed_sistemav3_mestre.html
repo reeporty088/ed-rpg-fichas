@@ -19,14 +19,15 @@
         .category-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:15px; min-height:50px; }
         .btn-add-cat { background:#333; color:#fff; border:1px solid #555; border-radius:5px; cursor:pointer; padding:5px 10px; font-size:12px; }
         .btn-del-cat { color:#f44336; background:transparent; border:none; cursor:pointer; font-size:16px; margin-left:10px; }
-        .player-card { background:var(--card-bg); border:2px solid #5a1a1f; border-radius:15px; padding:15px; box-shadow:0 4px 15px rgba(0,0,0,.6); cursor:grab; }
+        .player-card { background:var(--card-bg); border:2px solid #5a1a1f; border-radius:15px; padding:15px; box-shadow:0 4px 15px rgba(0,0,0,.6); cursor:grab; min-width:0; }
         .npc-card { background:var(--npc-bg); border:1px solid #444; }
-        .player-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-        .player-img { width:55px; height:55px; border-radius:50%; border:2px solid var(--header-bg); background-size:cover; background-position:center; background-color:#222; }
+        .player-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
+        .player-img { width:55px; height:55px; flex:0 0 55px; border-radius:50%; border:2px solid var(--header-bg); background-size:cover; background-position:center; background-color:#222; }
+        .player-info { flex:1; min-width:0; }
         .player-info h2 { margin:0; font-size:16px; text-transform:uppercase; }
         .player-info p { margin:0; font-size:11px; color:#ccc; }
-        .controls-row { display:flex; gap:5px; margin-top:5px; }
-        .btn-small { flex-grow:1; background:#222; border:1px solid #555; color:#fff; border-radius:4px; font-size:10px; cursor:pointer; text-transform:uppercase; padding:4px; }
+        .controls-row { display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; }
+        .btn-small { flex:1 1 70px; background:#222; border:1px solid #555; color:#fff; border-radius:4px; font-size:10px; cursor:pointer; text-transform:uppercase; padding:4px; }
         .btn-obs { border-color:#00ffff; color:#00ffff; }
         .status-bar { height:18px; background:#1a1a1a; border-radius:10px; overflow:hidden; border:1px solid #444; position:relative; margin-top:5px; }
         .bar-fill { height:100%; }
@@ -157,8 +158,9 @@ function renderAll(){
 }
 
 function createPlayerCard(id,f){
-  const hpAt=+f.hp_at||0,hpMax=+f.hp_max||1,manaAt=+f.mana_at||0,manaMax=+f.mana_max||1,pulsoAt=+f.pulso_at||0,pulsoMax=+f.pulso_max||10;
+  const hpAt=+f.hp_at||0,hpMax=+f.hp_max||1,manaAt=+f.mana_at||0,manaMax=+f.mana_max||1,pulsoAt=+f.pulso_at||0;
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
+  const pulsoRef=Math.max(10,pulsoAt,1);
   const linkFicha=`${baseURL}ed_sistemav3_ficha.html?p=${id}`;
   const linkOverlay=`${baseURL}ed_sistemav2_overlay.html?p=${id}`;
   const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
@@ -166,7 +168,7 @@ function createPlayerCard(id,f){
   el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button><button class="btn-small" onclick="openObs('${id}')">📝 Obs</button></div></div></div>
   <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
   <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
-  <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div>
+  <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoRef)}%"></div></div>
   <div style="font-size:10px;color:#ffaaaa;margin-top:6px;">Linhagens: ${linhagens.join(' ')||'—'} | Forma ativa: ${f.toggles?.forma_ativa||'—'}</div>
   <div class="xp-control"><div style="font-size:11px;color:#ccc;">XP: ${f.xp_total||0}</div></div>
   <div class="xp-control"><input type="number" id="input_xp_${id}" class="xp-input" placeholder="Qtd"><button class="btn-send" onclick="sendXP('${id}',1)">+</button><button class="btn-send" style="background:#c62828" onclick="sendXP('${id}',-1)">-</button></div>`;

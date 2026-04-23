@@ -273,6 +273,12 @@
 
         /* BARRAS */
         .bar-container { margin-bottom: 10px; }
+        .vital-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .vital-row .bar-container { flex: 1; margin-bottom: 0; }
         .bar-label {
             margin-left: 4px;
             margin-bottom: 3px;
@@ -350,6 +356,49 @@
             padding: 0;
         }
         .bar-sep { color: rgba(255,255,255,0.5); font-size: 12px; }
+        .pulso-inline {
+            display: none;
+            min-width: 130px;
+        }
+        .pulso-inline-label {
+            margin: 0 0 5px 0;
+            color: #bb88ff;
+            text-align: center;
+        }
+        .pulso-inline-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn-math-mini {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #5d3d8a;
+            background: rgba(40, 10, 65, 0.6);
+            color: #c8a9ff;
+            font-size: 12px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .pulso-orb {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #b075ff, #5b1f94 60%, #2a0d45 100%);
+            border: 1px solid #7e47b8;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.65), 0 0 10px rgba(130,60,200,0.35);
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+        .pulso-orb:focus { outline: none; border-color: #bb88ff; }
 
         /* ATRIBUTOS */
         .attr-container {
@@ -1073,6 +1122,19 @@
             transition: color 0.2s;
         }
         .btn-close:hover { color: white; }
+        .btn-danger-mini {
+            border: 1px solid #8b2c2c;
+            background: rgba(80,0,0,0.35);
+            color: #ffb2b2;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            padding: 0;
+        }
+        .btn-danger-mini:hover { background: rgba(120, 0, 0, 0.55); }
 
         .btn-choice {
             width: 100%;
@@ -1263,38 +1325,33 @@
                 </div>
             </div>
 
-            <div class="bar-container">
-                <label class="bar-label" style="color:#4488cc;">◈ Pontos de Mana  &nbsp;<span style="opacity:0.5; font-size:8px;">(10 × Hab + Energia)</span></label>
-                <div class="bar-controls">
-                    <button class="btn-math" onclick="changeVal('mana', -1)">−</button>
-                    <div class="bar-bg">
-                        <div id="bar_mana" class="bar-fill mana-fill"></div>
-                        <div class="bar-values">
-                            <input type="number" id="mana_at" value="10">
-                            <span class="bar-sep">/</span>
-                            <input type="number" id="mana_max" value="10">
+            <div class="vital-row">
+                <div class="bar-container">
+                    <label class="bar-label" style="color:#4488cc;">◈ Pontos de Mana  &nbsp;<span style="opacity:0.5; font-size:8px;">(10 × Hab + Energia)</span></label>
+                    <div class="bar-controls">
+                        <button class="btn-math" onclick="changeVal('mana', -1)">−</button>
+                        <div class="bar-bg">
+                            <div id="bar_mana" class="bar-fill mana-fill"></div>
+                            <div class="bar-values">
+                                <input type="number" id="mana_at" value="10">
+                                <span class="bar-sep">/</span>
+                                <input type="number" id="mana_max" value="10">
+                            </div>
                         </div>
+                        <button class="btn-math" onclick="changeVal('mana', 1)">+</button>
                     </div>
-                    <button class="btn-math" onclick="changeVal('mana', 1)">+</button>
+                </div>
+                <div id="pulso_container" class="pulso-inline">
+                    <label class="bar-label pulso-inline-label">✦ Pulso</label>
+                    <div class="pulso-inline-controls">
+                        <button class="btn-math-mini" onclick="changeVal('pulso', -1)">−</button>
+                        <input type="number" id="pulso_at" class="pulso-orb" value="0">
+                        <button class="btn-math-mini" onclick="changeVal('pulso', 1)">+</button>
+                    </div>
                 </div>
             </div>
 
-            <div id="pulso_container" style="display:none;">
-                <div class="bar-container">
-                    <label class="bar-label" style="color:#aa55ff;">✦ Pulso de Ascensão  &nbsp;<span style="opacity:0.5; font-size:8px;">(começa em 0 por combate)</span></label>
-                    <div class="bar-controls">
-                        <button class="btn-math" onclick="changeVal('pulso', -1)">−</button>
-                        <div class="bar-bg">
-                            <div id="bar_pulso" class="bar-fill pulso-fill"></div>
-                            <div class="bar-values">
-                                <input type="number" id="pulso_at" value="0">
-                                <span class="bar-sep">/</span>
-                                <input type="number" id="pulso_max" value="10">
-                            </div>
-                        </div>
-                        <button class="btn-math" onclick="changeVal('pulso', 1)">+</button>
-                    </div>
-                </div>
+            <div id="pulso_note_container" style="display:none;">
                 <div class="pulso-note">
                     <strong>Ganho de Pulso:</strong> Acertar ataque (+1) · Sofrer dano (+1) · Sucesso Crítico (+1) · Aliado cair (+1)
                 </div>
@@ -1543,6 +1600,9 @@
 <!-- MODAL DETALHES CAMINHO ARCANO -->
 <div class="modal-overlay" id="modal_arcana_details" onclick="closeModal('modal_arcana_details')">
     <div class="modal-box modal-small" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
+            <button class="btn-danger-mini" title="Remover caminho" onclick="removeArcanaPath(currentArcanaDetailsPath)">✖</button>
+        </div>
         <h3 id="arcana_details_title" style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 10px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Caminho</h3>
         <div id="arcana_unlocked_list" style="max-height:220px; overflow:auto; border:1px solid #3a2a28; border-radius:8px; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:10px;"></div>
         <button class="btn-choice db-btn" onclick="openArcanaPathDBFromDetails()">+ Adicionar Habilidade desse Caminho</button>
@@ -1834,8 +1894,13 @@ function updateBar(type, cur, max) {
 
 window.changeVal = (type, mod) => {
     let cur = parseInt(charData[`${type}_at`]) || 0;
-    let max = parseInt(charData[`${type}_max`]) || (type === 'pulso' ? 10 : 5);
-    let nv = Math.max(0, Math.min(cur + mod, max));
+    let nv;
+    if (type === 'pulso') {
+        nv = Math.max(0, cur + mod);
+    } else {
+        let max = parseInt(charData[`${type}_max`]) || 5;
+        nv = Math.max(0, Math.min(cur + mod, max));
+    }
     update(ref(db, dbPath), { [`${type}_at`]: nv });
 };
 
@@ -1926,6 +1991,7 @@ function updateLinhagemBtns() {
     // Pulso Ascensão
     const ascUnlocked = tg.asc_unlocked === true;
     document.getElementById('pulso_container').style.display = ascUnlocked ? 'block' : 'none';
+    document.getElementById('pulso_note_container').style.display = ascUnlocked ? 'block' : 'none';
     document.getElementById('xp_section').style.display = ascUnlocked ? 'block' : 'none';
 }
 
@@ -2310,6 +2376,21 @@ window.openArcanaPathDBFromDetails = () => {
     openDBModal('arcana_path_habs');
 };
 
+window.removeArcanaPath = (path) => {
+    if (!path) return;
+    const list = charData.habilidades?.arcana_habs || {};
+    const ids = Object.keys(list).filter(id => normalizePathName(list[id]?.caminho || "") === normalizePathName(path));
+    if (!ids.length) {
+        alert("Não há habilidades para remover nesse caminho.");
+        return;
+    }
+    if (!confirm(`Remover o caminho ${path} e suas ${ids.length} habilidade(s)?`)) return;
+    const updates = {};
+    ids.forEach(id => { updates[`habilidades/arcana_habs/${id}`] = null; });
+    update(ref(db, dbPath), updates);
+    closeModal('modal_arcana_details');
+};
+
 // ============================================================
 // CRIAR MANUAL
 // ============================================================
@@ -2618,7 +2699,7 @@ window.closeModal = (id) => { document.getElementById(id)?.classList.remove('ope
 // ============================================================
 // CAMPOS SIMPLES
 // ============================================================
-const SIMPLE_FIELDS = ['char_name','nivel','nivel_bonus','florins','hp_at','hp_max','mana_at','mana_max','pulso_at','pulso_max','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes'];
+const SIMPLE_FIELDS = ['char_name','nivel','nivel_bonus','florins','hp_at','hp_max','mana_at','mana_max','pulso_at','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes'];
 
 document.addEventListener('input', e => {
     if (SIMPLE_FIELDS.includes(e.target.id)) {
@@ -2636,7 +2717,7 @@ onValue(ref(db, 'banco_dados_v3'), snap => {
 
 onValue(ref(db, dbPath), snap => {
     if (!snap.exists()) {
-        set(ref(db, dbPath), { hp_at: 5, hp_max: 5, mana_at: 10, mana_max: 10, pulso_at: 0, pulso_max: 10, ep_max: 0, ep_temp: 0, poder: 0, habilidade: 0, resistencia: 0, nivel: 1, nivel_bonus: 0 });
+        set(ref(db, dbPath), { hp_at: 5, hp_max: 5, mana_at: 10, mana_max: 10, pulso_at: 0, ep_max: 0, ep_temp: 0, poder: 0, habilidade: 0, resistencia: 0, nivel: 1, nivel_bonus: 0 });
         return;
     }
     charData = snap.val();
@@ -2670,7 +2751,6 @@ onValue(ref(db, dbPath), snap => {
 
     updateBar('hp', charData.hp_at, charData.hp_max);
     updateBar('mana', charData.mana_at, charData.mana_max);
-    updateBar('pulso', charData.pulso_at, charData.pulso_max || 10);
 
     buildPericiasGrid();
     renderRollPlaceholders();
