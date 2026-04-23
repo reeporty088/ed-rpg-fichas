@@ -13,6 +13,8 @@
         .world-time { font-size:32px; font-weight:bold; display:flex; align-items:center; gap:10px; }
         .weather-badge { background:rgba(0,0,0,.4); padding:5px 12px; border-radius:20px; font-size:14px; border:1px solid #555; }
         .btn-calendar,.btn-global-toggle { background:var(--header-bg); color:#fff; border:1px solid var(--accent); padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; text-transform:uppercase; }
+        .world-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .btn-global-toggle.active { background:#1f3a10; border-color:#9fff9f; }
         .category-container { background:var(--divider-bg); border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:20px; }
         .category-container.drag-over,.combat-drop-zone.drag-over,.roster-drop-zone.drag-over { border-color:var(--accent); background:#2a1a1a; }
         .category-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #444; padding-bottom:5px; }
@@ -68,10 +70,27 @@
         .btn-action { width:100%; padding:10px; font-weight:bold; border-radius:5px; border:none; margin-top:10px; cursor:pointer; }
         .btn-save { background:#2e7d32; color:#fff; } .btn-cancel { background:#c62828; color:#fff; }
         .btn-add-npc { background:var(--header-bg); color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold; display:block; margin:20px auto; }
+        .hub-back-btn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 2200;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #666;
+            background: rgba(0,0,0,0.6);
+            color: #ddd;
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 0.4px;
+            transition: 0.2s;
+        }
+        .hub-back-btn:hover { border-color: var(--accent); color: #fff; }
     </style>
     <script src="auth.js"></script>
 </head>
 <body data-require-auth="true" data-required-version="v3">
+    <a class="hub-back-btn" href="index.html">← Hub</a>
     <h1>PAINEL DO MESTRE V3</h1>
 
     <div class="world-card" id="world_display">
@@ -79,7 +98,10 @@
         <div class="world-date" id="wd_date">CARREGANDO...</div>
         <div class="world-time"><span id="wd_time">00:00</span><div class="weather-badge"><span id="wd_weather_icon">☀</span> <span id="wd_weather_text">Normal</span></div></div>
       </div>
-      <div><button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button></div>
+      <div class="world-actions">
+        <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
+        <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
+      </div>
     </div>
 
     <h2 class="section-title">JOGADORES <button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button></h2>
@@ -146,6 +168,15 @@ const baseURL="https://reeporty088.github.io/ed-rpg-fichas/";
 const pathPlayers='fichas_v3', pathNpcs='npcs_v3', pathDivs='divisoes_v3', pathCombat='combate_v3';
 const DADIVAS_IDS=['mascara_lunar','lodo_corrompido','combustao_arcana','escarcha_absoluta','tremor_abissal'];
 let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatData={};
+let overlayModeGlobal = 'nome';
+
+function updateOverlayToggleBtn(){
+  const btn = document.getElementById('btn_overlay_mode');
+  if (!btn) return;
+  const isCombate = overlayModeGlobal === 'combate';
+  btn.textContent = isCombate ? '🖥️ Overlay: Combate' : '🖥️ Overlay: Nome';
+  btn.classList.toggle('active', isCombate);
+}
 
 function createDividerHTML(divId, divName, type){ const isDefault=divId==='default'; const nameHtml=isDefault?`<span>${divName}</span>`:`<span onclick="renameCategory('${type}','${divId}','${divName}')">✎ ${divName}</span><button class="btn-del-cat" onclick="deleteCategory('${type}','${divId}')">✖</button>`; return `<div class="category-container" ondragover="allowDrop(event)" ondrop="drop(event,'${divId}','${type}')"><div class="category-header">${nameHtml}</div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`; }
 function createRosterItem(id,data,type){ const el=document.createElement('div'); el.className='roster-item'; el.draggable=true; el.ondragstart=e=>drag(e,id,type); const img=(type==='players'?data.char_img:data.img)||''; const name=(type==='players'?data.char_name:data.name)||'Sem Nome'; el.innerHTML=`<div class="roster-avatar" style="background-image:url('${img}')"></div><div>${name}</div>`; return el; }
@@ -199,6 +230,15 @@ window.openPlayerConfig=(id)=>{ const f=globalPlayers[id]; if(!f)return; documen
 window.savePlayerConfig=()=>{ const id=document.getElementById('cfg_player_id').value; const selected={}; DADIVAS_IDS.forEach(d=>{ if(document.getElementById(`check_dadiva_${d}`)?.checked) selected[d]=true; }); if(Object.keys(selected).length>2){ alert('Máximo 2 dádivas.'); return; } update(ref(db,`${pathPlayers}/${id}`),{'toggles/asc_unlocked':document.getElementById('check_asc_unlocked').checked,'toggles/linhagem_demon':document.getElementById('check_linhagem_demon').checked,'toggles/linhagem_beast':document.getElementById('check_linhagem_beast').checked,'toggles/linhagem_sacra':document.getElementById('check_linhagem_sacra').checked,'toggles/dadivas':selected}); document.getElementById('config-player-container').classList.remove('open'); };
 window.openObs=(id)=>{ const d=globalPlayers[id]; const txt=prompt('Observações do personagem:',d?.anotacoes||''); if(txt!==null) update(ref(db,`${pathPlayers}/${id}`),{anotacoes:txt}); };
 window.sendXP=(id,sign)=>{ const qtd=parseInt(document.getElementById(`input_xp_${id}`).value); if(!qtd||qtd<1)return; runTransaction(ref(db,`${pathPlayers}/${id}/xp_total`),cur=>Math.max((cur||0)+(sign>0?qtd:-qtd),0)); document.getElementById(`input_xp_${id}`).value=''; };
+window.toggleOverlayModeAll = async () => {
+  const ids = Object.keys(globalPlayers || {});
+  if (!ids.length) { alert('Nenhum jogador encontrado para alternar overlay.'); return; }
+  overlayModeGlobal = overlayModeGlobal === 'nome' ? 'combate' : 'nome';
+  const updates = {};
+  ids.forEach(id => { updates[`overlay_v3_data/${id}/mode`] = overlayModeGlobal; });
+  await update(ref(db), updates);
+  updateOverlayToggleBtn();
+};
 
 window.openNpcForm=()=>{ ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('npc_img_file').value=''; document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0; document.getElementById('npc_hp').value=20; document.getElementById('npc_mana').value=10; document.getElementById('npc_pulso').value=10; document.getElementById('hab_editor_list').innerHTML=''; document.getElementById('form-npc-container').classList.add('open'); };
 window.closeNpcForm=()=>document.getElementById('form-npc-container').classList.remove('open');
@@ -215,6 +255,12 @@ onValue(ref(db,pathPlayers),s=>{ globalPlayers=s.val()||{}; renderAll(); });
 onValue(ref(db,pathNpcs),s=>{ globalNpcs=s.val()||{}; renderAll(); });
 onValue(ref(db,pathCombat),s=>{ combatData=s.val()||{}; renderCombat(); });
 onValue(ref(db,'world_time'),(snapshot)=>{ const data=snapshot.val(); if(!data)return; const SEASONS=['Primavera','Verão','Outono','Inverno']; document.getElementById('wd_date').innerText=`Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`; document.getElementById('wd_time').innerText=`${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}`; document.getElementById('wd_weather_icon').innerText='☀'; document.getElementById('wd_weather_text').innerText='Clima'; });
+onValue(ref(db,'overlay_v3_data'),(snapshot)=>{
+  const all = snapshot.val() || {};
+  const firstMode = Object.values(all).find(v => v?.mode === 'combate' || v?.mode === 'nome')?.mode;
+  overlayModeGlobal = firstMode || 'nome';
+  updateOverlayToggleBtn();
+});
 </script>
 </body>
 </html>
