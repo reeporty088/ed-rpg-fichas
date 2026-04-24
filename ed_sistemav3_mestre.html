@@ -53,7 +53,7 @@
         .npc-def-box .def-lbl { font-size:9px; color:#888; }
         .npc-threshold-row { display:flex; gap:6px; margin:4px 0; }
         .npc-thr-box { flex:1; background:rgba(0,0,0,.3); border:1px solid #555; border-radius:5px; text-align:center; padding:4px; }
-        .npc-thr-box .thr-val { font-size:14px; font-weight:bold; color:#ffffaa; }
+        .npc-thr-box .thr-val { font-size:14px; font-weight:bold; color:#ffffff; }
         .npc-thr-box .thr-lbl { font-size:9px; color:#888; }
         .npc-ep-row { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 6px; align-items:center; }
         .ep-slot { width:18px; height:18px; border:2px solid #888; border-radius:3px; cursor:pointer; background:transparent; transition:.15s; }
@@ -72,6 +72,15 @@
         .btn-npc-type.elite { border-color:#ff9800; color:#ffcc88; }
         .btn-npc-type.chefe { border-color:#f44336; color:#ffaaaa; }
         input[readonly] { background:#1a1a1a !important; color:#aaddff; border-color:#333 !important; cursor:default; }
+        .npc-skill-toggle { width:100%; background:#2a2a2a; border:1px solid #555; color:#ccc; padding:8px; border-radius:5px; cursor:pointer; text-align:left; margin:10px 0 0; font-size:13px; }
+        .npc-skill-toggle:hover { background:#333; }
+        .npc-skill-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#222; border:1px solid #444; border-radius:5px; padding:10px; margin-top:4px; margin-bottom:10px; }
+        .npc-skill-item { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+        .npc-skill-name { font-size:11px; color:#bbb; flex:1; }
+        .npc-skill-dots { display:flex; gap:3px; }
+        .npc-skill-dot { font-size:16px; cursor:pointer; color:#555; line-height:1; transition:.1s; user-select:none; }
+        .npc-skill-dot.active { color:#ffaaaa; }
+        .npc-skill-dot:hover { color:#ff8888; }
 
         #roster-sidebar,#combat-sidebar { position:fixed; top:0; width:300px; height:100%; background:#111; z-index:2000; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; transition:.3s; }
         #roster-sidebar { left:-320px; border-right:3px solid var(--header-bg); }
@@ -182,9 +191,8 @@
           <div><label>PM Máx (10×HAB)</label><input type="number" id="npc_mana" readonly></div>
           <div><label>Pulso Máx (fixo)</label><input type="number" id="npc_pulso" readonly></div>
         </div>
-        <div class="form-row-3">
+        <div class="form-row">
           <div><label>Nível</label><input type="number" id="npc_nivel" value="1" min="1" max="10"></div>
-          <div><label>Fortitude (0–4)</label><input type="number" id="npc_fortitude" value="0" min="0" max="4" oninput="calcNpcDerived()"></div>
           <div><label>Espaços de Proteção</label><input type="number" id="npc_ep_max" value="4" min="0"></div>
         </div>
         <div class="form-row-3">
@@ -197,6 +205,8 @@
           <div><label>Limiar Maior (RES+5)</label><input type="number" id="npc_lim_maior" readonly></div>
           <div><label>Limiar Severo (RES+10)</label><input type="number" id="npc_lim_severo" readonly></div>
         </div>
+        <button type="button" class="npc-skill-toggle" onclick="toggleNpcSkills()">Perícias ▼</button>
+        <div id="npc-pericias-grid" class="npc-skill-grid" style="display:none;"></div>
         <label>Observações</label><textarea id="npc_obs" rows="3"></textarea>
         <label style="margin-top:10px;">Habilidades <button type="button" onclick="addHabRow()">+</button></label><div id="hab_editor_list"></div>
         <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button><button class="btn-action btn-cancel" onclick="closeNpcForm()">CANCELAR</button>
@@ -229,6 +239,8 @@ const baseURL="https://reeporty088.github.io/ed-rpg-fichas/";
 const pathPlayers='fichas_v3', pathNpcs='npcs_v3', pathDivs='divisoes_v3', pathCombat='combate_v3';
 const DADIVAS_IDS=['mascara_lunar','lodo_corrompido','combustao_arcana','escarcha_absoluta','tremor_abissal'];
 let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatData={};
+const NPC_SKILLS=['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','Esporte','Fortitude','Influência','Intuição','Ladinagem','Luta','Máquinas','Medicina','Mente','Mística','Percepção','Sobrevivência','Vitalidade','Vontade'];
+let npcPericias={};
 let overlayModeGlobal = 'nome';
 
 function updateOverlayToggleBtn(){
@@ -273,7 +285,7 @@ function createNpcCard(id,n){
   const pulsoAt=+n.pulso_at||0, pulsoMax=+n.pulso_max||10;
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
   const habs=n.habs||[];
-  const res=+n.res||0, hab=+n.hab||0, pod=+n.pod||0, fort=+n.fortitude||0;
+  const res=+n.res||0, hab=+n.hab||0, pod=+n.pod||0, fort=+(n.pericias?.Fortitude)||0;
   const an=6, defesa=an+res+fort;
   const nivel=n.nivel||1, epMax=+n.ep_max||0, epUsed=n.ep_used||{};
   let epSlots='';
@@ -302,9 +314,9 @@ function createNpcCard(id,n){
       <div class="npc-def-box"><div class="def-val">${defesa}</div><div class="def-lbl">Defesa Total</div></div>
     </div>
     <div class="npc-threshold-row">
-      <div class="npc-thr-box"><div class="thr-val">${res}</div><div class="thr-lbl">Lim. Menor</div></div>
-      <div class="npc-thr-box"><div class="thr-val">${res+5}</div><div class="thr-lbl">Lim. Maior</div></div>
-      <div class="npc-thr-box"><div class="thr-val">${res+10}</div><div class="thr-lbl">Lim. Severo</div></div>
+      <div class="npc-thr-box"><div class="thr-val">${res}</div><div class="thr-lbl">Menor — 1 PV</div></div>
+      <div class="npc-thr-box"><div class="thr-val">${res+5}</div><div class="thr-lbl">Maior — 2 PV</div></div>
+      <div class="npc-thr-box"><div class="thr-val">${res+10}</div><div class="thr-lbl">Severo — 3 PV</div></div>
     </div>
     ${epMax>0?`<div style="font-size:10px;color:#aaa;margin-top:4px;display:flex;align-items:center;gap:6px;">EP <button onclick="resetNpcEp('${id}')" style="font-size:9px;background:#333;border:1px solid #555;color:#ccc;border-radius:3px;cursor:pointer;padding:1px 6px;">Descanso</button></div><div class="npc-ep-row">${epSlots}</div>`:''}
     <div class="npc-bar-row">
@@ -366,7 +378,8 @@ window.openNpcForm=()=>{
   ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('npc_img_file').value='';
   document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0;
-  document.getElementById('npc_nivel').value=1; document.getElementById('npc_fortitude').value=0; document.getElementById('npc_ep_max').value=4;
+  document.getElementById('npc_nivel').value=1; document.getElementById('npc_ep_max').value=4;
+  npcPericias={}; renderAllNpcSkillDots();
   document.getElementById('npc_pulso').value=10;
   document.getElementById('hab_editor_list').innerHTML='';
   document.getElementById('npc-random-panel').classList.remove('open');
@@ -391,7 +404,7 @@ window.saveNpc=()=>{
     mana_max:hab*10,
     pulso_max:+document.getElementById('npc_pulso').value||10,
     nivel:+document.getElementById('npc_nivel').value||1,
-    fortitude:+document.getElementById('npc_fortitude').value||0,
+    pericias:{...npcPericias},
     ep_max:+document.getElementById('npc_ep_max').value||0,
     obs:document.getElementById('npc_obs').value,
     habs
@@ -412,8 +425,8 @@ window.editNpc=async(id)=>{
   document.getElementById('npc_hab').value=d.hab||0;
   document.getElementById('npc_res').value=d.res||0;
   document.getElementById('npc_nivel').value=d.nivel||1;
-  document.getElementById('npc_fortitude').value=d.fortitude||0;
   document.getElementById('npc_ep_max').value=d.ep_max||0;
+  npcPericias={}; NPC_SKILLS.forEach(s=>{npcPericias[s]=(d.pericias&&d.pericias[s])||0;}); renderAllNpcSkillDots();
   document.getElementById('npc_pulso').value=d.pulso_max||10;
   document.getElementById('npc_obs').value=d.obs||'';
   document.getElementById('hab_editor_list').innerHTML='';
@@ -428,7 +441,7 @@ window.toggleNpcDetails=(id)=>document.getElementById(`details_${id}`).classList
 window.calcNpcDerived=()=>{
   const res=+document.getElementById('npc_res').value||0;
   const hab=+document.getElementById('npc_hab').value||0;
-  const fort=+document.getElementById('npc_fortitude').value||0;
+  const fort=npcPericias['Fortitude']||0;
   document.getElementById('npc_hp').value=res*5;
   document.getElementById('npc_mana').value=hab*10;
   document.getElementById('npc_an').value=6;
@@ -452,6 +465,11 @@ window.generateRandomNpc=(type)=>{
   document.getElementById('npc_ep_max').value=cfg.ep;
   document.getElementById('npc_nivel').value=rnd(...cfg.nivel);
   document.getElementById('npc_pulso').value=cfg.pulso;
+  const skillCfg={lacaio:{count:2,range:[1,1]},combatente:{count:3,range:[1,2]},elite:{count:4,range:[1,3]},chefe:{count:5,range:[2,4]}}[type];
+  npcPericias={};
+  const shuffled=[...NPC_SKILLS].sort(()=>Math.random()-0.5);
+  shuffled.slice(0,skillCfg.count).forEach(s=>{npcPericias[s]=rnd(...skillCfg.range);});
+  renderAllNpcSkillDots();
   calcNpcDerived();
   document.getElementById('npc-random-panel').classList.remove('open');
 };
@@ -468,6 +486,40 @@ window.toggleEpSlot=(id,idx)=>{
   update(ref(db,`${pathNpcs}/${id}/ep_used`),{[key]:!used[key]});
 };
 window.resetNpcEp=(id)=>update(ref(db,`${pathNpcs}/${id}`),{ep_used:{}});
+
+window.toggleNpcSkills=()=>{
+  const grid=document.getElementById('npc-pericias-grid');
+  const btn=document.querySelector('.npc-skill-toggle');
+  const isOpen=grid.style.display!=='none';
+  grid.style.display=isOpen?'none':'grid';
+  btn.textContent=isOpen?'Perícias ▼':'Perícias ▲';
+};
+window.setNpcSkill=(idx,val)=>{
+  const skill=NPC_SKILLS[idx];
+  const cur=npcPericias[skill]||0;
+  npcPericias[skill]=cur===val?val-1:val;
+  renderNpcSkillDots(idx);
+  calcNpcDerived();
+};
+function renderNpcSkillDots(idx){
+  const dotsEl=document.getElementById(`skill_dots_${idx}`);
+  if(!dotsEl)return;
+  const val=npcPericias[NPC_SKILLS[idx]]||0;
+  dotsEl.querySelectorAll('.npc-skill-dot').forEach((dot,i)=>{dot.textContent=(i+1)<=val?'●':'○';dot.classList.toggle('active',(i+1)<=val);});
+}
+function renderAllNpcSkillDots(){NPC_SKILLS.forEach((_,idx)=>renderNpcSkillDots(idx));}
+function buildNpcSkillGrid(){
+  const grid=document.getElementById('npc-pericias-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  NPC_SKILLS.forEach((skill,idx)=>{
+    const item=document.createElement('div');
+    item.className='npc-skill-item';
+    item.innerHTML=`<span class="npc-skill-name">${skill}</span><div id="skill_dots_${idx}" class="npc-skill-dots">${[1,2,3,4].map(v=>`<span class="npc-skill-dot" onclick="setNpcSkill(${idx},${v})">○</span>`).join('')}</div>`;
+    grid.appendChild(item);
+  });
+}
+buildNpcSkillGrid();
 
 document.getElementById('npc_img_file').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=x=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); const m=300; let {width:w,height:h}=i; if(w>h&&w>m){h*=m/w;w=m;} if(h>=w&&h>m){w*=m/h;h=m;} c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h); document.getElementById('npc_img_data').value=c.toDataURL('image/jpeg',0.7); }; i.src=x.target.result; }; r.readAsDataURL(f); });
 
