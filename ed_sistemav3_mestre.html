@@ -41,7 +41,37 @@
         .npc-expand-btn { width:100%; background:#333; border:none; color:white; padding:5px; margin-top:8px; cursor:pointer; }
         .npc-details { display:none; padding-top:8px; border-top:1px solid #444; margin-top:8px; }
         .npc-details.open { display:block; }
-        .npc-hab-item { background:rgba(0,0,0,.3); border-left:3px solid #666; padding:5px; margin-bottom:5px; font-size:12px; }
+        .npc-hab-item { background:rgba(0,0,0,.3); border-left:3px solid #666; padding:7px 8px; margin-bottom:6px; font-size:12px; border-radius:0 4px 4px 0; }
+        .npc-lvl-badge { background:#800000; color:#fff; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:bold; margin-left:6px; vertical-align:middle; }
+        .npc-attr-row { display:flex; gap:6px; margin:8px 0 4px; }
+        .npc-attr-box { flex:1; background:rgba(0,0,0,.4); border:1px solid #555; border-radius:6px; text-align:center; padding:6px 4px; }
+        .npc-attr-box .attr-val { font-size:20px; font-weight:bold; color:#ffaaaa; }
+        .npc-attr-box .attr-lbl { font-size:9px; color:#999; text-transform:uppercase; }
+        .npc-defense-row { display:flex; gap:6px; margin:4px 0; }
+        .npc-def-box { flex:1; background:rgba(0,0,0,.3); border:1px solid #444; border-radius:5px; text-align:center; padding:4px; }
+        .npc-def-box .def-val { font-size:16px; font-weight:bold; color:#aaddff; }
+        .npc-def-box .def-lbl { font-size:9px; color:#888; }
+        .npc-threshold-row { display:flex; gap:6px; margin:4px 0; }
+        .npc-thr-box { flex:1; background:rgba(0,0,0,.3); border:1px solid #555; border-radius:5px; text-align:center; padding:4px; }
+        .npc-thr-box .thr-val { font-size:14px; font-weight:bold; color:#ffffaa; }
+        .npc-thr-box .thr-lbl { font-size:9px; color:#888; }
+        .npc-ep-row { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 6px; align-items:center; }
+        .ep-slot { width:18px; height:18px; border:2px solid #888; border-radius:3px; cursor:pointer; background:transparent; transition:.15s; }
+        .ep-slot.used { background:#c62828; border-color:#f44336; }
+        .npc-bar-row { display:flex; align-items:center; gap:4px; margin-top:5px; }
+        .npc-bar-wrap { flex:1; }
+        .btn-bar-adj { background:#2a2a2a; border:1px solid #555; color:#fff; width:22px; height:22px; border-radius:3px; cursor:pointer; font-size:15px; line-height:1; padding:0; flex-shrink:0; }
+        .btn-bar-adj:hover { background:#444; }
+        .npc-type-panel { display:none; background:#1e1e1e; border:1px solid #555; border-radius:8px; padding:12px; margin-bottom:10px; }
+        .npc-type-panel.open { display:block; }
+        .npc-type-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .btn-npc-type { padding:10px; border-radius:6px; border:2px solid; cursor:pointer; font-weight:bold; text-align:left; background:rgba(0,0,0,.4); transition:.15s; }
+        .btn-npc-type:hover { filter:brightness(1.2); }
+        .btn-npc-type.lacaio { border-color:#888; color:#ccc; }
+        .btn-npc-type.combatente { border-color:#4caf50; color:#9fff9f; }
+        .btn-npc-type.elite { border-color:#ff9800; color:#ffcc88; }
+        .btn-npc-type.chefe { border-color:#f44336; color:#ffaaaa; }
+        input[readonly] { background:#1a1a1a !important; color:#aaddff; border-color:#333 !important; cursor:default; }
 
         #roster-sidebar,#combat-sidebar { position:fixed; top:0; width:300px; height:100%; background:#111; z-index:2000; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; transition:.3s; }
         #roster-sidebar { left:-320px; border-right:3px solid var(--header-bg); }
@@ -132,10 +162,41 @@
     <div id="form-npc-container"><div class="npc-form">
         <h3 style="text-align:center;color:var(--accent);">CRIAR / EDITAR NPC V3</h3>
         <input type="hidden" id="npc_id">
+        <div style="text-align:right;margin-bottom:8px;">
+          <button type="button" style="background:#4a1a2a;border:1px solid var(--accent);color:var(--accent);padding:7px 14px;border-radius:5px;cursor:pointer;font-weight:bold;" onclick="toggleRandomPanel()">🎲 Gerar Aleatório</button>
+        </div>
+        <div id="npc-random-panel" class="npc-type-panel">
+          <div style="font-size:12px;color:#aaa;margin-bottom:8px;">Selecione o tipo de inimigo:</div>
+          <div class="npc-type-grid">
+            <button class="btn-npc-type lacaio" onclick="generateRandomNpc('lacaio')"><b>Lacaio</b><br><span style="font-size:11px;font-weight:normal;">Fraco, usado em grupos</span></button>
+            <button class="btn-npc-type combatente" onclick="generateRandomNpc('combatente')"><b>Combatente</b><br><span style="font-size:11px;font-weight:normal;">Desafia um personagem</span></button>
+            <button class="btn-npc-type elite" onclick="generateRandomNpc('elite')"><b>Elite</b><br><span style="font-size:11px;font-weight:normal;">Ameaça séria ao grupo</span></button>
+            <button class="btn-npc-type chefe" onclick="generateRandomNpc('chefe')"><b>Chefe</b><br><span style="font-size:11px;font-weight:normal;">Inimigo memorável de cena</span></button>
+          </div>
+        </div>
         <div class="form-row"><div><label>Nome</label><input id="npc_name"></div><div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div></div>
         <div class="form-row"><div><label>Classe/Função</label><input id="npc_classe"></div><div><label>Ancestralidade</label><input id="npc_ancestralidade"></div></div>
-        <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0"></div></div>
-        <div class="form-row-3"><div><label>PV Máx</label><input type="number" id="npc_hp" value="20"></div><div><label>PM Máx</label><input type="number" id="npc_mana" value="10"></div><div><label>Pulso Máx</label><input type="number" id="npc_pulso" value="10"></div></div>
+        <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0" oninput="calcNpcDerived()"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0" oninput="calcNpcDerived()"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0" oninput="calcNpcDerived()"></div></div>
+        <div class="form-row-3">
+          <div><label>PV Máx (5×RES)</label><input type="number" id="npc_hp" readonly></div>
+          <div><label>PM Máx (10×HAB)</label><input type="number" id="npc_mana" readonly></div>
+          <div><label>Pulso Máx (fixo)</label><input type="number" id="npc_pulso" readonly></div>
+        </div>
+        <div class="form-row-3">
+          <div><label>Nível</label><input type="number" id="npc_nivel" value="1" min="1" max="10"></div>
+          <div><label>Fortitude (0–4)</label><input type="number" id="npc_fortitude" value="0" min="0" max="4" oninput="calcNpcDerived()"></div>
+          <div><label>Espaços de Proteção</label><input type="number" id="npc_ep_max" value="4" min="0"></div>
+        </div>
+        <div class="form-row-3">
+          <div><label>Armadura Natural</label><input type="number" id="npc_an" readonly></div>
+          <div><label>Defesa Total</label><input type="number" id="npc_defesa" readonly></div>
+          <div></div>
+        </div>
+        <div class="form-row-3">
+          <div><label>Limiar Menor (RES)</label><input type="number" id="npc_lim_menor" readonly></div>
+          <div><label>Limiar Maior (RES+5)</label><input type="number" id="npc_lim_maior" readonly></div>
+          <div><label>Limiar Severo (RES+10)</label><input type="number" id="npc_lim_severo" readonly></div>
+        </div>
         <label>Observações</label><textarea id="npc_obs" rows="3"></textarea>
         <label style="margin-top:10px;">Habilidades <button type="button" onclick="addHabRow()">+</button></label><div id="hab_editor_list"></div>
         <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button><button class="btn-action btn-cancel" onclick="closeNpcForm()">CANCELAR</button>
@@ -206,7 +267,68 @@ function createPlayerCard(id,f){
   return el;
 }
 
-function createNpcCard(id,n){ const hpAt=+n.hp_at||+n.hp_max||1,hpMax=+n.hp_max||1,manaAt=+n.mana_at||0,manaMax=+n.mana_max||1,pulsoAt=+n.pulso_at||0,pulsoMax=+n.pulso_max||10; const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100); const habs=n.habs||[]; const el=document.createElement('div'); el.className='player-card npc-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'npcs'); el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${n.img||''}')"></div><div class="player-info"><h2>${n.name||'Inimigo'}</h2><p>${n.classe||'—'} • ${n.ancestralidade||'—'}</p><div class="controls-row"><button class="btn-small" onclick="editNpc('${id}')">✏️ Editar</button><button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️ Apagar</button></div></div></div><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div><div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div><button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button><div id="details_${id}" class="npc-details"><div style="font-size:12px; margin-bottom:6px;">POD ${n.pod||0} | HAB ${n.hab||0} | RES ${n.res||0}</div>${habs.map(h=>`<div class='npc-hab-item'><b>${h.titulo||'Habilidade'}</b><br>${h.desc||''}</div>`).join('')||'<span style="font-size:11px;color:#777">Sem habilidades</span>'}<div style="font-size:11px;white-space:pre-wrap;margin-top:8px;color:#ccc;">${n.obs||''}</div></div>`; return el; }
+function createNpcCard(id,n){
+  const hpAt=+n.hp_at ?? +n.hp_max ?? 0, hpMax=+n.hp_max||1;
+  const manaAt=+n.mana_at||0, manaMax=+n.mana_max||1;
+  const pulsoAt=+n.pulso_at||0, pulsoMax=+n.pulso_max||10;
+  const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
+  const habs=n.habs||[];
+  const res=+n.res||0, hab=+n.hab||0, pod=+n.pod||0, fort=+n.fortitude||0;
+  const an=6, defesa=an+res+fort;
+  const nivel=n.nivel||1, epMax=+n.ep_max||0, epUsed=n.ep_used||{};
+  let epSlots='';
+  for(let i=0;i<epMax;i++) epSlots+=`<div class="ep-slot${epUsed[`s${i}`]?' used':''}" onclick="toggleEpSlot('${id}',${i})"></div>`;
+  const el=document.createElement('div');
+  el.className='player-card npc-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'npcs');
+  el.innerHTML=`
+    <div class="player-header">
+      <div class="player-img" style="background-image:url('${n.img||''}')"></div>
+      <div class="player-info">
+        <h2>${n.name||'Inimigo'}<span class="npc-lvl-badge">Nv${nivel}</span></h2>
+        <p>${n.classe||'—'} • ${n.ancestralidade||'—'}</p>
+        <div class="controls-row">
+          <button class="btn-small" onclick="editNpc('${id}')">✏️ Editar</button>
+          <button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️ Apagar</button>
+        </div>
+      </div>
+    </div>
+    <div class="npc-attr-row">
+      <div class="npc-attr-box"><div class="attr-val">${pod}</div><div class="attr-lbl">Poder</div></div>
+      <div class="npc-attr-box"><div class="attr-val">${hab}</div><div class="attr-lbl">Habilidade</div></div>
+      <div class="npc-attr-box"><div class="attr-val">${res}</div><div class="attr-lbl">Resistência</div></div>
+    </div>
+    <div class="npc-defense-row">
+      <div class="npc-def-box"><div class="def-val">${an}</div><div class="def-lbl">Arm. Natural</div></div>
+      <div class="npc-def-box"><div class="def-val">${defesa}</div><div class="def-lbl">Defesa Total</div></div>
+    </div>
+    <div class="npc-threshold-row">
+      <div class="npc-thr-box"><div class="thr-val">${res}</div><div class="thr-lbl">Lim. Menor</div></div>
+      <div class="npc-thr-box"><div class="thr-val">${res+5}</div><div class="thr-lbl">Lim. Maior</div></div>
+      <div class="npc-thr-box"><div class="thr-val">${res+10}</div><div class="thr-lbl">Lim. Severo</div></div>
+    </div>
+    ${epMax>0?`<div style="font-size:10px;color:#aaa;margin-top:4px;display:flex;align-items:center;gap:6px;">EP <button onclick="resetNpcEp('${id}')" style="font-size:9px;background:#333;border:1px solid #555;color:#ccc;border-radius:3px;cursor:pointer;padding:1px 6px;">Descanso</button></div><div class="npc-ep-row">${epSlots}</div>`:''}
+    <div class="npc-bar-row">
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','hp',-1)">−</button>
+      <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div></div>
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','hp',1)">+</button>
+    </div>
+    <div class="npc-bar-row">
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','mana',-1)">−</button>
+      <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div></div>
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','mana',1)">+</button>
+    </div>
+    <div class="npc-bar-row">
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',-1)">−</button>
+      <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div></div>
+      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',1)">+</button>
+    </div>
+    <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
+    <div id="details_${id}" class="npc-details">
+      ${habs.map(h=>`<div class='npc-hab-item'><b style="color:var(--accent);font-size:13px;">${h.titulo||'Habilidade'}</b><br><span style="line-height:1.5;">${h.desc||''}</span></div>`).join('')||'<span style="font-size:11px;color:#777">Sem habilidades</span>'}
+      <div style="font-size:11px;white-space:pre-wrap;margin-top:8px;color:#ccc;">${n.obs||''}</div>
+    </div>`;
+  return el;
+}
 
 function renderCombat(){ const list=document.getElementById('combat_list'); list.innerHTML=''; const parts=Object.entries(combatData.participantes||{}).map(([key,v])=>({...v,key})).sort((a,b)=>(a.order??999)-(b.order??999)); parts.forEach((p,idx)=>{ const div=document.createElement('div'); div.className=`combat-item ${p.active?'active':''}`; div.draggable=true; div.ondragstart=e=>dragCombat(e,p.key); div.ondragover=e=>e.preventDefault(); div.ondrop=e=>dropCombatReorder(e,p.key); div.innerHTML=`<div style='width:18px;text-align:center;color:#999;'>${idx+1}</div><div class='combat-avatar' style="background-image:url('${p.img||''}')"></div><div style='flex:1;'>${p.name||'—'}</div><button onclick="removeCombatant('${p.key}')" style='border:none;background:none;color:#f66;cursor:pointer;'>✖</button>`; list.appendChild(div); }); }
 
@@ -240,13 +362,112 @@ window.toggleOverlayModeAll = async () => {
   updateOverlayToggleBtn();
 };
 
-window.openNpcForm=()=>{ ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('npc_img_file').value=''; document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0; document.getElementById('npc_hp').value=20; document.getElementById('npc_mana').value=10; document.getElementById('npc_pulso').value=10; document.getElementById('hab_editor_list').innerHTML=''; document.getElementById('form-npc-container').classList.add('open'); };
+window.openNpcForm=()=>{
+  ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('npc_img_file').value='';
+  document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0;
+  document.getElementById('npc_nivel').value=1; document.getElementById('npc_fortitude').value=0; document.getElementById('npc_ep_max').value=4;
+  document.getElementById('npc_pulso').value=10;
+  document.getElementById('hab_editor_list').innerHTML='';
+  document.getElementById('npc-random-panel').classList.remove('open');
+  calcNpcDerived();
+  document.getElementById('form-npc-container').classList.add('open');
+};
 window.closeNpcForm=()=>document.getElementById('form-npc-container').classList.remove('open');
 window.addHabRow=(titulo='',desc='')=>{ const d=document.createElement('div'); d.style.display='flex'; d.style.gap='6px'; d.style.marginBottom='6px'; d.innerHTML=`<input class='hab-row-title' placeholder='Nome da habilidade' value="${titulo}"><textarea class='hab-row-desc' rows='2' placeholder='Descrição'>${desc}</textarea><button type='button' onclick='this.parentElement.remove()'>✖</button>`; document.getElementById('hab_editor_list').appendChild(d); };
-window.saveNpc=()=>{ const id=document.getElementById('npc_id').value; const habs=[...document.querySelectorAll('#hab_editor_list > div')].map(r=>({titulo:r.querySelector('.hab-row-title').value,desc:r.querySelector('.hab-row-desc').value})).filter(h=>h.titulo||h.desc); const data={name:document.getElementById('npc_name').value,img:document.getElementById('npc_img_data').value,classe:document.getElementById('npc_classe').value,ancestralidade:document.getElementById('npc_ancestralidade').value,pod:+document.getElementById('npc_pod').value||0,hab:+document.getElementById('npc_hab').value||0,res:+document.getElementById('npc_res').value||0,hp_max:+document.getElementById('npc_hp').value||20,mana_max:+document.getElementById('npc_mana').value||10,pulso_max:+document.getElementById('npc_pulso').value||10,obs:document.getElementById('npc_obs').value,habs}; if(!id){ data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.category='default'; push(ref(db,pathNpcs),data).then(closeNpcForm);} else update(ref(db,`${pathNpcs}/${id}`),data).then(closeNpcForm); };
-window.editNpc=async(id)=>{ const s=await get(ref(db,`${pathNpcs}/${id}`)); const d=s.val(); if(!d)return; document.getElementById('npc_id').value=id; document.getElementById('npc_name').value=d.name||''; document.getElementById('npc_img_data').value=d.img||''; document.getElementById('npc_classe').value=d.classe||''; document.getElementById('npc_ancestralidade').value=d.ancestralidade||''; document.getElementById('npc_pod').value=d.pod||0; document.getElementById('npc_hab').value=d.hab||0; document.getElementById('npc_res').value=d.res||0; document.getElementById('npc_hp').value=d.hp_max||20; document.getElementById('npc_mana').value=d.mana_max||10; document.getElementById('npc_pulso').value=d.pulso_max||10; document.getElementById('npc_obs').value=d.obs||''; document.getElementById('hab_editor_list').innerHTML=''; (d.habs||[]).forEach(h=>addHabRow(h.titulo,h.desc)); document.getElementById('form-npc-container').classList.add('open'); };
+window.saveNpc=()=>{
+  const id=document.getElementById('npc_id').value;
+  const habs=[...document.querySelectorAll('#hab_editor_list > div')].map(r=>({titulo:r.querySelector('.hab-row-title').value,desc:r.querySelector('.hab-row-desc').value})).filter(h=>h.titulo||h.desc);
+  const res=+document.getElementById('npc_res').value||0;
+  const hab=+document.getElementById('npc_hab').value||0;
+  const data={
+    name:document.getElementById('npc_name').value,
+    img:document.getElementById('npc_img_data').value,
+    classe:document.getElementById('npc_classe').value,
+    ancestralidade:document.getElementById('npc_ancestralidade').value,
+    pod:+document.getElementById('npc_pod').value||0,
+    hab,res,
+    hp_max:res*5,
+    mana_max:hab*10,
+    pulso_max:+document.getElementById('npc_pulso').value||10,
+    nivel:+document.getElementById('npc_nivel').value||1,
+    fortitude:+document.getElementById('npc_fortitude').value||0,
+    ep_max:+document.getElementById('npc_ep_max').value||0,
+    obs:document.getElementById('npc_obs').value,
+    habs
+  };
+  if(!id){
+    data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.ep_used={}; data.category='default';
+    push(ref(db,pathNpcs),data).then(closeNpcForm);
+  } else update(ref(db,`${pathNpcs}/${id}`),data).then(closeNpcForm);
+};
+window.editNpc=async(id)=>{
+  const s=await get(ref(db,`${pathNpcs}/${id}`)); const d=s.val(); if(!d)return;
+  document.getElementById('npc_id').value=id;
+  document.getElementById('npc_name').value=d.name||'';
+  document.getElementById('npc_img_data').value=d.img||'';
+  document.getElementById('npc_classe').value=d.classe||'';
+  document.getElementById('npc_ancestralidade').value=d.ancestralidade||'';
+  document.getElementById('npc_pod').value=d.pod||0;
+  document.getElementById('npc_hab').value=d.hab||0;
+  document.getElementById('npc_res').value=d.res||0;
+  document.getElementById('npc_nivel').value=d.nivel||1;
+  document.getElementById('npc_fortitude').value=d.fortitude||0;
+  document.getElementById('npc_ep_max').value=d.ep_max||0;
+  document.getElementById('npc_pulso').value=d.pulso_max||10;
+  document.getElementById('npc_obs').value=d.obs||'';
+  document.getElementById('hab_editor_list').innerHTML='';
+  (d.habs||[]).forEach(h=>addHabRow(h.titulo,h.desc));
+  document.getElementById('npc-random-panel').classList.remove('open');
+  calcNpcDerived();
+  document.getElementById('form-npc-container').classList.add('open');
+};
 window.deleteNpc=(id)=>{ if(confirm('Deletar NPC?')) remove(ref(db,`${pathNpcs}/${id}`)); };
 window.toggleNpcDetails=(id)=>document.getElementById(`details_${id}`).classList.toggle('open');
+
+window.calcNpcDerived=()=>{
+  const res=+document.getElementById('npc_res').value||0;
+  const hab=+document.getElementById('npc_hab').value||0;
+  const fort=+document.getElementById('npc_fortitude').value||0;
+  document.getElementById('npc_hp').value=res*5;
+  document.getElementById('npc_mana').value=hab*10;
+  document.getElementById('npc_an').value=6;
+  document.getElementById('npc_defesa').value=6+res+fort;
+  document.getElementById('npc_lim_menor').value=res;
+  document.getElementById('npc_lim_maior').value=res+5;
+  document.getElementById('npc_lim_severo').value=res+10;
+};
+window.toggleRandomPanel=()=>document.getElementById('npc-random-panel').classList.toggle('open');
+window.generateRandomNpc=(type)=>{
+  const rnd=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+  const cfg={
+    lacaio:    {attr:[0,2],ep:2,nivel:[1,3],pulso:10},
+    combatente:{attr:[1,3],ep:4,nivel:[3,5],pulso:10},
+    elite:     {attr:[2,4],ep:6,nivel:[5,7],pulso:10},
+    chefe:     {attr:[3,5],ep:8,nivel:[7,10],pulso:15},
+  }[type];
+  document.getElementById('npc_pod').value=rnd(...cfg.attr);
+  document.getElementById('npc_hab').value=rnd(...cfg.attr);
+  document.getElementById('npc_res').value=rnd(...cfg.attr);
+  document.getElementById('npc_ep_max').value=cfg.ep;
+  document.getElementById('npc_nivel').value=rnd(...cfg.nivel);
+  document.getElementById('npc_pulso').value=cfg.pulso;
+  calcNpcDerived();
+  document.getElementById('npc-random-panel').classList.remove('open');
+};
+window.adjustNpcBar=(id,stat,delta)=>{
+  const n=globalNpcs[id]; if(!n)return;
+  const maxKey=stat==='hp'?'hp_max':stat==='mana'?'mana_max':'pulso_max';
+  const atKey=stat==='hp'?'hp_at':stat==='mana'?'mana_at':'pulso_at';
+  const max=+n[maxKey]||0, cur=+n[atKey]||0;
+  update(ref(db,`${pathNpcs}/${id}`),{[atKey]:Math.max(0,Math.min(max,cur+delta))});
+};
+window.toggleEpSlot=(id,idx)=>{
+  const n=globalNpcs[id]; if(!n)return;
+  const used=n.ep_used||{}, key=`s${idx}`;
+  update(ref(db,`${pathNpcs}/${id}/ep_used`),{[key]:!used[key]});
+};
+window.resetNpcEp=(id)=>update(ref(db,`${pathNpcs}/${id}`),{ep_used:{}});
 
 document.getElementById('npc_img_file').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=x=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); const m=300; let {width:w,height:h}=i; if(w>h&&w>m){h*=m/w;w=m;} if(h>=w&&h>m){w*=m/h;h=m;} c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h); document.getElementById('npc_img_data').value=c.toDataURL('image/jpeg',0.7); }; i.src=x.target.result; }; r.readAsDataURL(f); });
 
