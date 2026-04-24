@@ -13,7 +13,15 @@
         .world-time { font-size:32px; font-weight:bold; display:flex; align-items:center; gap:10px; }
         .weather-badge { background:rgba(0,0,0,.4); padding:5px 12px; border-radius:20px; font-size:14px; border:1px solid #555; }
         .btn-calendar,.btn-global-toggle { background:var(--header-bg); color:#fff; border:1px solid var(--accent); padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; text-transform:uppercase; }
-        .world-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .world-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:flex-start; }
+        .moeda-panel { background:rgba(0,0,0,.35); border:1px solid #5a1a1f; border-radius:10px; padding:8px 10px; min-width:130px; }
+        .moeda-label { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:#ffaaaa; font-weight:bold; text-align:center; }
+        .moeda-controls { margin-top:6px; display:flex; align-items:center; gap:6px; }
+        .moeda-btn { width:30px; height:30px; border:none; border-radius:6px; font-weight:bold; font-size:18px; color:#fff; cursor:pointer; }
+        .moeda-btn.plus { background:#2e7d32; }
+        .moeda-btn.minus { background:#c62828; }
+        .moeda-value { flex:1; height:30px; border-radius:6px; border:1px solid #555; background:#161616; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; }
+        .world-actions-col { display:flex; flex-direction:column; gap:8px; }
         .btn-global-toggle.active { background:#1f3a10; border-color:#9fff9f; }
         .category-container { background:var(--divider-bg); border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:20px; }
         .category-container.drag-over,.combat-drop-zone.drag-over,.roster-drop-zone.drag-over { border-color:var(--accent); background:#2a1a1a; }
@@ -138,8 +146,19 @@
         <div class="world-time"><span id="wd_time">00:00</span><div class="weather-badge"><span id="wd_weather_icon">☀</span> <span id="wd_weather_text">Normal</span></div></div>
       </div>
       <div class="world-actions">
-        <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
-        <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
+        <div class="moeda-panel">
+          <div class="moeda-label">Moeda</div>
+          <div class="moeda-controls">
+            <button class="moeda-btn minus" onclick="changeMoeda(-1)">-</button>
+            <div class="moeda-value" id="moeda_value">0</div>
+            <button class="moeda-btn plus" onclick="changeMoeda(1)">+</button>
+          </div>
+        </div>
+        <div class="world-actions-col">
+          <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
+          <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
+          <button class="btn-calendar" onclick="window.open('ed_sistemav3_overlaymoeda.html','_blank')">MOEDA OVERLAY</button>
+        </div>
       </div>
     </div>
 
@@ -242,6 +261,7 @@ let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatDa
 const NPC_SKILLS=['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','Esporte','Fortitude','Influência','Intuição','Ladinagem','Luta','Máquinas','Medicina','Mente','Mística','Percepção','Sobrevivência','Vitalidade','Vontade'];
 let npcPericias={};
 let overlayModeGlobal = 'nome';
+let moedaValor = 0;
 
 function updateOverlayToggleBtn(){
   const btn = document.getElementById('btn_overlay_mode');
@@ -250,6 +270,16 @@ function updateOverlayToggleBtn(){
   btn.textContent = isCombate ? '🖥️ Overlay: Combate' : '🖥️ Overlay: Nome';
   btn.classList.toggle('active', isCombate);
 }
+
+function renderMoeda(){
+  const el = document.getElementById('moeda_value');
+  if (el) el.textContent = String(moedaValor);
+}
+
+window.changeMoeda = async (delta) => {
+  const novoValor = Math.max(0, (Number(moedaValor) || 0) + delta);
+  await set(ref(db, 'moeda_v3/valor'), novoValor);
+};
 
 function createDividerHTML(divId, divName, type){ const isDefault=divId==='default'; const nameHtml=isDefault?`<span>${divName}</span>`:`<span onclick="renameCategory('${type}','${divId}','${divName}')">✎ ${divName}</span><button class="btn-del-cat" onclick="deleteCategory('${type}','${divId}')">✖</button>`; return `<div class="category-container" ondragover="allowDrop(event)" ondrop="drop(event,'${divId}','${type}')"><div class="category-header">${nameHtml}</div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`; }
 function createRosterItem(id,data,type){ const el=document.createElement('div'); el.className='roster-item'; el.draggable=true; el.ondragstart=e=>drag(e,id,type); const img=(type==='players'?data.char_img:data.img)||''; const name=(type==='players'?data.char_name:data.name)||'Sem Nome'; el.innerHTML=`<div class="roster-avatar" style="background-image:url('${img}')"></div><div>${name}</div>`; return el; }
@@ -528,6 +558,10 @@ onValue(ref(db,pathPlayers),s=>{ globalPlayers=s.val()||{}; renderAll(); });
 onValue(ref(db,pathNpcs),s=>{ globalNpcs=s.val()||{}; renderAll(); });
 onValue(ref(db,pathCombat),s=>{ combatData=s.val()||{}; renderCombat(); });
 onValue(ref(db,'world_time'),(snapshot)=>{ const data=snapshot.val(); if(!data)return; const SEASONS=['Primavera','Verão','Outono','Inverno']; document.getElementById('wd_date').innerText=`Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`; document.getElementById('wd_time').innerText=`${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}`; document.getElementById('wd_weather_icon').innerText='☀'; document.getElementById('wd_weather_text').innerText='Clima'; });
+onValue(ref(db,'moeda_v3/valor'),(snapshot)=>{
+  moedaValor = Number(snapshot.val()) || 0;
+  renderMoeda();
+});
 onValue(ref(db,'overlay_v3_data'),(snapshot)=>{
   const all = snapshot.val() || {};
   const firstMode = Object.values(all).find(v => v?.mode === 'combate' || v?.mode === 'nome')?.mode;
