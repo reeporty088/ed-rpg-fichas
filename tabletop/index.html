@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Tabletop VTT — ED RPG</title>
+  <link rel="stylesheet" href="tabletop.css" />
+
+  <!-- Three.js r128 + OrbitControls (globais: THREE, THREE.OrbitControls) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Konva.js (global: Konva) -->
+  <script src="https://cdn.jsdelivr.net/npm/konva@8/konva.min.js"></script>
+
+  <!-- auth.js — expõe window.EDAuth -->
+  <script src="../auth.js"></script>
+</head>
+<body data-require-auth="true" data-required-version="v3">
+
+<div id="app">
+
+  <!-- ── Viewport principal ─────────────────────────────────────────── -->
+  <div id="viewport">
+    <!-- Container do renderer 3D (Three.js adiciona o canvas aqui) -->
+    <div id="canvas3d"></div>
+    <!-- Container do renderer 2D (Konva adiciona o canvas aqui) -->
+    <div id="canvas2d"></div>
+    <!-- Overlay de pings animados -->
+    <div id="pingOverlay"></div>
+    <!-- Canvas do Fog of War (usado como textura, não visível diretamente) -->
+    <canvas id="fogCanvas"></canvas>
+  </div>
+
+  <!-- ── Toolbar ────────────────────────────────────────────────────── -->
+  <div id="toolbar"></div>
+
+  <!-- ── Painel de Propriedades do Token ───────────────────────────── -->
+  <aside id="painelPropriedades" class="painel-lateral oculto" role="complementary" aria-label="Propriedades do token">
+    <!-- Renderizado dinamicamente pelo tabletop.js -->
+  </aside>
+
+  <!-- ── Painel de Iniciativa ──────────────────────────────────────── -->
+  <aside id="painelIniciativa" class="painel-lateral oculto" role="complementary" aria-label="Ordem de iniciativa">
+    <!-- Renderizado pela classe Initiative -->
+  </aside>
+
+  <!-- ── Painel Fog of War (apenas GM) ─────────────────────────────── -->
+  <aside id="painelFog" class="oculto" aria-label="Fog of War">
+    <span class="fog-label">Névoa de Guerra</span>
+    <div class="fog-tipo">
+      <button data-pincel="circle" class="ativo" title="Pincel circular">⬤</button>
+      <button data-pincel="square"               title="Pincel quadrado">■</button>
+    </div>
+    <div class="fog-row">
+      <span class="fog-label">Tamanho</span>
+      <input type="range" id="sliderPincel" min="1" max="8" value="2" />
+    </div>
+    <div class="fog-row">
+      <label>
+        <input type="checkbox" id="chkBorracha" />
+        Borracha (revelar)
+      </label>
+    </div>
+    <div class="fog-btns">
+      <button id="btnRevelarTudo"  title="Revelar tudo">Revelar tudo</button>
+      <button id="btnEsconderTudo" title="Esconder tudo">Esconder tudo</button>
+    </div>
+  </aside>
+
+  <!-- ── Barra de progresso de upload ──────────────────────────────── -->
+  <div id="progressBar" class="oculto" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+    <div id="progressFill"></div>
+  </div>
+
+  <!-- ── Input oculto para upload de mapa ──────────────────────────── -->
+  <input type="file" id="inputUploadMapa" accept="image/*" style="display:none" />
+
+  <!-- ── Modal: Nova Variação ──────────────────────────────────────── -->
+  <div id="modalVariacao" class="modal-overlay oculto" role="dialog" aria-modal="true" aria-labelledby="modalVariacaoTitulo">
+    <div class="modal-box">
+      <span class="modal-titulo" id="modalVariacaoTitulo">Nova Variação</span>
+
+      <div class="modal-campo">
+        <label for="varNome">Nome da variação</label>
+        <input type="text" id="varNome" placeholder="Ex: Forma Fera, Equipado, etc." />
+      </div>
+
+      <div class="modal-grid">
+        <div class="modal-campo">
+          <label for="varFrente">Imagem 3D — Frente</label>
+          <input type="file" id="varFrente" accept="image/*" />
+        </div>
+        <div class="modal-campo">
+          <label for="varVerso">Imagem 3D — Verso</label>
+          <input type="file" id="varVerso" accept="image/*" />
+        </div>
+        <div class="modal-campo">
+          <label for="varImg2d">Imagem 2D (top-down)</label>
+          <input type="file" id="varImg2d" accept="image/*" />
+        </div>
+      </div>
+
+      <!-- Barra de progresso interna ao modal -->
+      <div id="progressBarModal" style="display:none; height:4px; background:var(--card-bg2); border-radius:2px; overflow:hidden;">
+        <div id="progressFillModal" style="height:100%; background:var(--accent); width:0%; transition:width 0.2s;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarVariacao">Cancelar</button>
+        <button class="btn-primary"   id="btnSalvarVariacao">Salvar variação</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Módulo principal (ES module) -->
+<script type="module" src="tabletop.js"></script>
+
+<style>
+  /* Estilo adicional inline para garantir fullscreen sem scroll */
+  html, body { height: 100%; overflow: hidden; }
+  #canvas3d, #canvas2d { position: absolute; inset: 0; }
+</style>
+
+</body>
+</html>
