@@ -158,6 +158,7 @@
           <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
           <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
           <button class="btn-calendar" onclick="window.open('ed_sistemav3_overlaymoeda.html','_blank')">MOEDA OVERLAY</button>
+          <button class="btn-calendar" style="background:#2a0b20;border-color:#9b3aff;color:#cc88ff;" onclick="abrirTabletop()">🗺 Tabletop VTT</button>
         </div>
       </div>
     </div>
@@ -262,6 +263,14 @@ const NPC_SKILLS=['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','
 let npcPericias={};
 let overlayModeGlobal = 'nome';
 let moedaValor = 0;
+
+// Abre o módulo Tabletop VTT passando a campanha como parâmetro
+function abrirTabletop() {
+  const user = window.EDAuth ? window.EDAuth.getUser() : null;
+  const campanhaId = user ? user.id : 'default';
+  window.open(`tabletop/index.html?campanha=${campanhaId}`, '_blank');
+}
+window.abrirTabletop = abrirTabletop;
 
 function updateOverlayToggleBtn(){
   const btn = document.getElementById('btn_overlay_mode');
