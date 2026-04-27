@@ -1,108 +1,111 @@
-// Toolbar do tabletop — gerencia ferramenta ativa e renderiza botões
+// Toolbar do tabletop — nova estrutura com sub-painéis
 export class Toolbar {
-  constructor(containerEl, isGM, callbacks) {
+  constructor(containerEl, isGM, cb) {
     this.container = containerEl;
     this.isGM = isGM;
-    this.cb = callbacks;  // { onTool, onToggleSnap, onToggle3D, onReset, onCenter, onUploadMapa, onAddToken, onToggleInitiativa, onToggleFog }
-    this.ferramentaAtiva = 'selecionar';
-    this.snapAtivo = true;
-    this.modo3D = true;
+    this.cb = cb;
+    // cb: { onTool, onToggleSnap, onToggle3D, onReset, onCenter,
+    //       onOpenMapa, onOpenToken, onOpenItens, onOpenBiblioteca }
+    this.ferramenta  = 'selecionar';
+    this.snapAtivo   = true;
+    this.modo3D      = true;
+    this._subPainel  = null;   // qual sub-painel está aberto: 'mapa'|'token'|'itens'|'biblioteca'|null
     this.render();
   }
 
-  setTool(nome) {
-    this.ferramentaAtiva = nome;
+  setFerramenta(nome) {
+    this.ferramenta = nome;
     this._atualizarAtivos();
-    this.cb.onTool && this.cb.onTool(nome);
+    this.cb.onTool?.(nome);
   }
 
-  setModo3D(val) {
-    this.modo3D = val;
-    this._atualizarAtivos();
-  }
+  setModo3D(v) { this.modo3D = v; this._atualizarAtivos(); }
+  setSnap(v)   { this.snapAtivo = v; this._atualizarAtivos(); }
 
-  setSnap(val) {
-    this.snapAtivo = val;
+  // Abre/fecha sub-painel (clique duplo no mesmo fecha)
+  _togglePainel(nome) {
+    const mesmo = this._subPainel === nome;
+    this._subPainel = mesmo ? null : nome;
     this._atualizarAtivos();
+    const cbMap = {
+      mapa:       this.cb.onOpenMapa,
+      token:      this.cb.onOpenToken,
+      itens:      this.cb.onOpenItens,
+      biblioteca: this.cb.onOpenBiblioteca,
+    };
+    cbMap[nome]?.(this._subPainel === nome);
   }
 
   _atualizarAtivos() {
-    this.container.querySelectorAll('[data-tool]').forEach(btn => {
-      btn.classList.toggle('ativo', btn.dataset.tool === this.ferramentaAtiva);
-    });
-    const snapBtn = this.container.querySelector('[data-toggle="snap"]');
-    if (snapBtn) snapBtn.classList.toggle('ativo', this.snapAtivo);
-    const modoBtn = this.container.querySelector('[data-toggle="modo3d"]');
-    if (modoBtn) {
-      modoBtn.textContent = this.modo3D ? '2D' : '3D';
-      modoBtn.title = this.modo3D ? 'Alternar para 2D' : 'Alternar para 3D';
-    }
+    this.container.querySelectorAll('[data-tool]').forEach(b =>
+      b.classList.toggle('ativo', b.dataset.tool === this.ferramenta)
+    );
+    this.container.querySelectorAll('[data-painel]').forEach(b =>
+      b.classList.toggle('ativo', b.dataset.painel === this._subPainel)
+    );
+    const snap = this.container.querySelector('[data-toggle="snap"]');
+    if (snap) snap.classList.toggle('ativo', this.snapAtivo);
+    const modo = this.container.querySelector('[data-toggle="modo3d"]');
+    if (modo) { modo.textContent = this.modo3D ? '2D' : '3D'; }
   }
 
   render() {
-    // Ferramentas disponíveis para todos
-    const ferramentasBase = [
-      { id: 'selecionar', icon: '⬡', label: 'Selecionar' },
-      { id: 'pan',        icon: '✋', label: 'Mover câmera' },
-      { id: 'regua',      icon: '📏', label: 'Régua de distância' },
-    ];
-    const ferramentasGM = [
-      { id: 'fog',        icon: '🌫', label: 'Fog of War' },
-      { id: 'uploadMapa', icon: '🖼', label: 'Upload de mapa' },
-      { id: 'addToken',   icon: '➕', label: 'Adicionar token' },
-    ];
-    const acoesBase = [
-      { id: 'reset',   icon: '⌂', label: 'Reset câmera',    action: true },
-      { id: 'center',  icon: '⊞', label: 'Centralizar mapa', action: true },
-    ];
-    const toggles = [
-      { id: 'snap',   icon: '⊹', label: 'Snap ao grid' },
-      { id: 'modo3d', icon: '2D', label: 'Alternar 2D/3D' },
-      { id: 'init',   icon: '⚔', label: 'Iniciativa', action: true },
-    ];
-
-    const toBtn = (item, isAction, isToggle) => {
-      const attr = isAction ? `data-action="${item.id}"` : isToggle ? `data-toggle="${item.id}"` : `data-tool="${item.id}"`;
-      return `<button class="tb-btn${item.id === 'selecionar' ? ' ativo' : ''}" ${attr} title="${item.label}">${item.icon}</button>`;
-    };
-
-    const gmHtml = this.isGM ? ferramentasGM.map(t => toBtn(t, false, false)).join('') : '';
-    const sepHtml = this.isGM ? '<div class="tb-sep"></div>' : '';
-
     this.container.innerHTML = `
       <div class="tb-inner">
-        ${ferramentasBase.map(t => toBtn(t, false, false)).join('')}
-        ${sepHtml}
-        ${gmHtml}
+        <!-- Ferramentas -->
+        <button class="tb-btn ativo" data-tool="selecionar" title="Selecionar">⬡</button>
+        <button class="tb-btn"       data-tool="regua"      title="Régua de distância">📏</button>
+        ${this.isGM ? `<button class="tb-btn" data-tool="fog" title="Fog of War">🌫</button>` : ''}
+
         <div class="tb-sep"></div>
-        ${acoesBase.map(t => toBtn(t, true, false)).join('')}
+
+        <!-- Sub-painéis -->
+        ${this.isGM ? `
+          <button class="tb-btn" data-painel="mapa"  title="Mapa">🗺</button>
+          <button class="tb-btn" data-painel="token" title="Tokens">🧙</button>
+          <button class="tb-btn" data-painel="itens" title="Itens de cenário">🪑</button>
+        ` : ''}
+
         <div class="tb-sep"></div>
-        ${toggles.map(t => toBtn(t, t.id === 'init', t.id !== 'init')).join('')}
+
+        <!-- Ações de câmera -->
+        <button class="tb-btn" data-action="reset"  title="Reset câmera">⌂</button>
+        <button class="tb-btn" data-action="center" title="Centralizar mapa">⊞</button>
+
+        <div class="tb-sep"></div>
+
+        <!-- Toggles -->
+        <button class="tb-btn" data-toggle="snap"  title="Snap ao grid">⊹</button>
+        <button class="tb-btn" data-toggle="modo3d" title="Alternar 2D/3D">2D</button>
+
+        <div class="tb-sep"></div>
+
+        <!-- Biblioteca -->
+        <button class="tb-btn" data-painel="biblioteca" title="Biblioteca de assets">📁</button>
       </div>
     `;
 
     // Ferramentas
-    this.container.querySelectorAll('[data-tool]').forEach(btn => {
-      btn.addEventListener('click', () => this.setTool(btn.dataset.tool));
-    });
-
-    // Ações pontuais
-    this.container.querySelector('[data-action="reset"]')?.addEventListener('click', () => this.cb.onReset?.());
+    this.container.querySelectorAll('[data-tool]').forEach(b =>
+      b.addEventListener('click', () => this.setFerramenta(b.dataset.tool))
+    );
+    // Sub-painéis
+    this.container.querySelectorAll('[data-painel]').forEach(b =>
+      b.addEventListener('click', () => this._togglePainel(b.dataset.painel))
+    );
+    // Ações
+    this.container.querySelector('[data-action="reset"]')?.addEventListener('click',  () => this.cb.onReset?.());
     this.container.querySelector('[data-action="center"]')?.addEventListener('click', () => this.cb.onCenter?.());
-    this.container.querySelector('[data-action="init"]')?.addEventListener('click', () => this.cb.onToggleInitiativa?.());
-    this.container.querySelector('[data-action="uploadMapa"]')?.addEventListener('click', () => this.cb.onUploadMapa?.());
-    this.container.querySelector('[data-action="addToken"]')?.addEventListener('click', () => this.cb.onAddToken?.());
-
     // Toggles
     this.container.querySelector('[data-toggle="snap"]')?.addEventListener('click', () => {
       this.snapAtivo = !this.snapAtivo;
-      this._atualizarAtivos();
       this.cb.onToggleSnap?.(this.snapAtivo);
+      this._atualizarAtivos();
     });
     this.container.querySelector('[data-toggle="modo3d"]')?.addEventListener('click', () => {
       this.modo3D = !this.modo3D;
-      this._atualizarAtivos();
       this.cb.onToggle3D?.(this.modo3D);
+      this._atualizarAtivos();
     });
 
     this._atualizarAtivos();

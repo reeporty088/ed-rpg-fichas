@@ -17,85 +17,81 @@ export function initFirebase() {
   return { db: _db, storage: _storage };
 }
 
+// ── Helpers internos ──────────────────────────────────────────────────────────
+
+const r = path => ref(_db, path);
+
+function listen(path, cb) {
+  const rf = r(path);
+  onValue(rf, s => cb(s.val()));
+  return () => off(rf);
+}
+
 // ── Tokens ────────────────────────────────────────────────────────────────────
 
-export function listenTokens(campanhaId, cb) {
-  const r = ref(_db, `tabletop_v3/${campanhaId}/tokens`);
-  onValue(r, s => cb(s.val() || {}));
-  return () => off(r);
-}
+export const listenTokens   = (id, cb) => listen(`tabletop_v3/${id}/tokens`, v => cb(v || {}));
+export const saveToken      = (id, tid, d) => set(r(`tabletop_v3/${id}/tokens/${tid}`), d);
+export const patchToken     = (id, tid, d) => update(r(`tabletop_v3/${id}/tokens/${tid}`), d);
+export const deleteToken    = (id, tid)    => remove(r(`tabletop_v3/${id}/tokens/${tid}`));
+export const pushToken      = (id, d)      => push(r(`tabletop_v3/${id}/tokens`), d);
 
-export function saveToken(campanhaId, tokenId, data) {
-  return set(ref(_db, `tabletop_v3/${campanhaId}/tokens/${tokenId}`), data);
-}
+// ── Mapas na cena ─────────────────────────────────────────────────────────────
 
-export function patchToken(campanhaId, tokenId, fields) {
-  return update(ref(_db, `tabletop_v3/${campanhaId}/tokens/${tokenId}`), fields);
-}
+export const listenMapas  = (id, cb) => listen(`tabletop_v3/${id}/mapas`, v => cb(v || {}));
+export const saveMapaItem = (id, mid, d) => set(r(`tabletop_v3/${id}/mapas/${mid}`), d);
+export const patchMapaItem = (id, mid, d) => update(r(`tabletop_v3/${id}/mapas/${mid}`), d);
+export const deleteMapaItem = (id, mid)   => remove(r(`tabletop_v3/${id}/mapas/${mid}`));
+export const pushMapaItem   = (id, d)     => push(r(`tabletop_v3/${id}/mapas`), d);
 
-export function deleteToken(campanhaId, tokenId) {
-  return remove(ref(_db, `tabletop_v3/${campanhaId}/tokens/${tokenId}`));
-}
+// ── Configuração da cena ──────────────────────────────────────────────────────
 
-export function pushToken(campanhaId, data) {
-  return push(ref(_db, `tabletop_v3/${campanhaId}/tokens`), data);
-}
-
-// ── Configuração do mapa ──────────────────────────────────────────────────────
-
-export function listenMapConfig(campanhaId, cb) {
-  const r = ref(_db, `tabletop_v3/${campanhaId}/config`);
-  onValue(r, s => cb(s.val() || {}));
-  return () => off(r);
-}
-
-export function saveMapConfig(campanhaId, data) {
-  return update(ref(_db, `tabletop_v3/${campanhaId}/config`), data);
-}
+export const listenConfig  = (id, cb) => listen(`tabletop_v3/${id}/config`, v => cb(v || {}));
+export const saveConfig    = (id, d)  => update(r(`tabletop_v3/${id}/config`), d);
 
 // ── Fog of War ────────────────────────────────────────────────────────────────
 
-export function listenFog(campanhaId, cb) {
-  const r = ref(_db, `tabletop_v3/${campanhaId}/fog`);
-  onValue(r, s => cb(s.val() || {}));
-  return () => off(r);
-}
+export const listenFog = (id, cb) => listen(`tabletop_v3/${id}/fog`, v => cb(v || {}));
+export const saveFog   = (id, d)  => set(r(`tabletop_v3/${id}/fog`), d);
 
-export function saveFog(campanhaId, fogData) {
-  return set(ref(_db, `tabletop_v3/${campanhaId}/fog`), fogData);
-}
+// ── Itens de cenário ──────────────────────────────────────────────────────────
 
-// ── Iniciativa ────────────────────────────────────────────────────────────────
+export const listenItens  = (id, cb) => listen(`tabletop_v3/${id}/itens`, v => cb(v || {}));
+export const saveItem     = (id, iid, d) => set(r(`tabletop_v3/${id}/itens/${iid}`), d);
+export const patchItem    = (id, iid, d) => update(r(`tabletop_v3/${id}/itens/${iid}`), d);
+export const deleteItem   = (id, iid)    => remove(r(`tabletop_v3/${id}/itens/${iid}`));
+export const pushItem     = (id, d)      => push(r(`tabletop_v3/${id}/itens`), d);
 
-export function listenInitiative(campanhaId, cb) {
-  const r = ref(_db, `tabletop_v3/${campanhaId}/iniciativa`);
-  onValue(r, s => cb(s.val() || []));
-  return () => off(r);
-}
+// ── Biblioteca (assets + pastas) ──────────────────────────────────────────────
 
-export function saveInitiative(campanhaId, data) {
-  return set(ref(_db, `tabletop_v3/${campanhaId}/iniciativa`), data);
-}
+export const listenBiblioteca = (id, cb) => listen(`tabletop_v3/${id}/biblioteca`, v => cb(v || {}));
 
-// ── Pings efêmeros (Realtime Database) ───────────────────────────────────────
+export const savePasta    = (id, pid, d)      => set(r(`tabletop_v3/${id}/biblioteca/pastas/${pid}`), d);
+export const pushPasta    = (id, d)           => push(r(`tabletop_v3/${id}/biblioteca/pastas`), d);
+export const deletePasta  = (id, pid)         => remove(r(`tabletop_v3/${id}/biblioteca/pastas/${pid}`));
+export const patchPasta   = (id, pid, d)      => update(r(`tabletop_v3/${id}/biblioteca/pastas/${pid}`), d);
+
+export const pushAsset    = (id, cat, d)      => push(r(`tabletop_v3/${id}/biblioteca/assets/${cat}`), d);
+export const deleteAsset  = (id, cat, aid)    => remove(r(`tabletop_v3/${id}/biblioteca/assets/${cat}/${aid}`));
+export const patchAsset   = (id, cat, aid, d) => update(r(`tabletop_v3/${id}/biblioteca/assets/${cat}/${aid}`), d);
+
+// ── Pings efêmeros ────────────────────────────────────────────────────────────
 
 export function sendPing(campanhaId, pingData) {
-  return push(ref(_db, `tabletop_v3_pings/${campanhaId}`), { ...pingData, ts: Date.now() });
+  return push(r(`tabletop_v3_pings/${campanhaId}`), { ...pingData, ts: Date.now() });
 }
 
 export function listenPings(campanhaId, cb) {
-  const r = ref(_db, `tabletop_v3_pings/${campanhaId}`);
-  onValue(r, s => {
+  const rf = r(`tabletop_v3_pings/${campanhaId}`);
+  onValue(rf, s => {
     const val = s.val();
     if (!val) return;
-    const pings = Object.values(val);
-    const recente = pings.filter(p => Date.now() - p.ts < 4000);
+    const recente = Object.values(val).filter(p => Date.now() - p.ts < 4000);
     if (recente.length) cb(recente[recente.length - 1]);
   });
-  return () => off(r);
+  return () => off(rf);
 }
 
-// ── Upload de arquivo para Storage ───────────────────────────────────────────
+// ── Upload para Storage com compressão opcional ───────────────────────────────
 
 export function uploadFile(caminho, arquivo, onProgresso) {
   return new Promise((resolve, reject) => {
@@ -103,7 +99,7 @@ export function uploadFile(caminho, arquivo, onProgresso) {
     const task = uploadBytesResumable(sRef, arquivo);
     task.on(
       'state_changed',
-      snap => onProgresso && onProgresso((snap.bytesTransferred / snap.totalBytes) * 100),
+      snap => onProgresso?.((snap.bytesTransferred / snap.totalBytes) * 100),
       reject,
       () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
     );
