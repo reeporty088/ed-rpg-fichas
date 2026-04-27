@@ -5,11 +5,12 @@ export class Toolbar {
     this.isGM = isGM;
     this.cb = cb;
     // cb: { onTool, onToggleSnap, onToggle3D, onReset, onCenter,
-    //       onOpenMapa, onOpenToken, onOpenItens, onOpenBiblioteca }
+    //       onOpenMapa, onOpenToken, onOpenItens, onOpenBiblioteca,
+    //       onOpenCenas, onOpenCeu }
     this.ferramenta  = 'selecionar';
     this.snapAtivo   = true;
     this.modo3D      = true;
-    this._subPainel  = null;   // qual sub-painel está aberto: 'mapa'|'token'|'itens'|'biblioteca'|null
+    this._subPainel  = null;   // qual sub-painel está aberto
     this.render();
   }
 
@@ -32,6 +33,8 @@ export class Toolbar {
       token:      this.cb.onOpenToken,
       itens:      this.cb.onOpenItens,
       biblioteca: this.cb.onOpenBiblioteca,
+      cenas:      this.cb.onOpenCenas,
+      ceu:        this.cb.onOpenCeu,
     };
     cbMap[nome]?.(this._subPainel === nome);
   }
@@ -62,6 +65,7 @@ export class Toolbar {
         <!-- Sub-painéis -->
         ${this.isGM ? `
           <button class="tb-btn" data-painel="mapa"  title="Mapa">🗺</button>
+          <button class="tb-btn" data-painel="cenas" title="Cenas">💾</button>
           <button class="tb-btn" data-painel="token" title="Tokens">🧙</button>
           <button class="tb-btn" data-painel="itens" title="Itens de cenário">🪑</button>
         ` : ''}
@@ -80,8 +84,9 @@ export class Toolbar {
 
         <div class="tb-sep"></div>
 
-        <!-- Biblioteca -->
+        <!-- Biblioteca e ambiente -->
         <button class="tb-btn" data-painel="biblioteca" title="Biblioteca de assets">📁</button>
+        <button class="tb-btn" data-painel="ceu"        title="Cor do Céu / Ambiente">🌅</button>
       </div>
     `;
 

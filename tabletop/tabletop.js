@@ -2,6 +2,7 @@
 import { initFirebase, listenTokens, listenMapas, listenConfig, listenFog,
          listenItens, listenBiblioteca, listenPings,
          saveConfig, sendPing, patchMapaItem } from './modules/firebase-sync.js';
+import { SceneManager } from './modules/scene-manager.js';
 import { TokenManager }  from './modules/tokens.js';
 import { Renderer3D }    from './modules/renderer3d.js';
 import { Renderer2D }    from './modules/renderer2d.js';
@@ -52,6 +53,7 @@ const painelMapa   = $('painelMapa');
 const painelToken  = $('painelToken');
 const painelItens  = $('painelItens');
 const painelLib    = $('painelBiblioteca');
+const painelCenas  = $('painelCenas');
 
 // ── Inicialização Firebase ────────────────────────────────────────────────────
 
@@ -66,10 +68,11 @@ const camera    = new CameraController();
 const fog       = new FogOfWar(campanhaId, isGM, sceneConfig.gridCols, sceneConfig.gridRows);
 const ruler     = new Ruler();
 const pings     = new PingSystem(pingOverlay);
-const mapPanel  = new MapPanel(painelMapa,  campanhaId, isGM);
-const tokenPanel = new TokenPanel(painelToken, campanhaId, isGM, userId);
-const itemsPanel = new ItemsPanel(painelItens, campanhaId, isGM);
-const library    = new Library(painelLib, campanhaId);
+const mapPanel    = new MapPanel(painelMapa,   campanhaId, isGM);
+const tokenPanel  = new TokenPanel(painelToken, campanhaId, isGM, userId);
+const itemsPanel  = new ItemsPanel(painelItens, campanhaId, isGM);
+const library     = new Library(painelLib, campanhaId);
+const sceneMgr    = new SceneManager(painelCenas, campanhaId, isGM);
 
 // ── Progresso de upload ───────────────────────────────────────────────────────
 
@@ -105,10 +108,12 @@ const toolbar = new Toolbar(toolbarEl, isGM, {
   onCenter:     () => modo3D
     ? camera.centralizar3D(sceneConfig.gridCols, sceneConfig.gridRows, r3d.gridSize)
     : camera.centralizar2D(sceneConfig.gridCols, sceneConfig.gridRows, r2d.gridSize),
-  onOpenMapa:       v => { painelMapa.classList.toggle('oculto', !v); if(v) painelToken.classList.add('oculto'), painelItens.classList.add('oculto'); },
-  onOpenToken:      v => { painelToken.classList.toggle('oculto', !v); if(v) painelMapa.classList.add('oculto'), painelItens.classList.add('oculto'); },
-  onOpenItens:      v => { painelItens.classList.toggle('oculto', !v); if(v) painelMapa.classList.add('oculto'), painelToken.classList.add('oculto'); },
+  onOpenMapa:       v => { painelMapa.classList.toggle('oculto', !v); if(v) painelToken.classList.add('oculto'), painelItens.classList.add('oculto'), painelCenas.classList.add('oculto'); },
+  onOpenToken:      v => { painelToken.classList.toggle('oculto', !v); if(v) painelMapa.classList.add('oculto'), painelItens.classList.add('oculto'), painelCenas.classList.add('oculto'); },
+  onOpenItens:      v => { painelItens.classList.toggle('oculto', !v); if(v) painelMapa.classList.add('oculto'), painelToken.classList.add('oculto'), painelCenas.classList.add('oculto'); },
   onOpenBiblioteca: v => { painelLib.classList.toggle('oculto', !v); },
+  onOpenCenas:      v => { painelCenas.classList.toggle('oculto', !v); if(v) painelMapa.classList.add('oculto'), painelToken.classList.add('oculto'), painelItens.classList.add('oculto'); },
+  onOpenCeu:        v => { $('painelCeu').classList.toggle('oculto', !v); },
 });
 
 // ── Régua ─────────────────────────────────────────────────────────────────────
@@ -212,6 +217,11 @@ listenConfig(campanhaId, cfg => {
   fog.rows = sceneConfig.gridRows;
   r3d.setGridVisible(sceneConfig.gridVisible !== false);
   r2d.setGridVisible(sceneConfig.gridVisible !== false);
+  if (cfg.corCeu) {
+    r3d.setSkyColor(cfg.corCeu);
+    const inp = $('ceuInput');
+    if (inp) inp.value = cfg.corCeu;
+  }
 });
 
 listenFog(campanhaId, data => {
@@ -339,6 +349,25 @@ function aplicarFog(e) {
   $('chkBorracha')?.checked ? fog.revelar(col, linha) : fog.pintar(col, linha);
   r2d.setFogCanvas(fogCanvas);
 }
+
+// ── Cor do Céu ────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('#ceuPresets [data-cor]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cor = btn.dataset.cor;
+    r3d.setSkyColor(cor);
+    saveConfig(campanhaId, { corCeu: cor });
+    const inp = $('ceuInput');
+    if (inp) inp.value = cor;
+  });
+});
+
+$('ceuInput')?.addEventListener('input', e => {
+  r3d.setSkyColor(e.target.value);
+});
+$('ceuInput')?.addEventListener('change', e => {
+  saveConfig(campanhaId, { corCeu: e.target.value });
+});
 
 // ── Centralizar ao carregar ───────────────────────────────────────────────────
 

@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 import {
-  getDatabase, ref, onValue, set, update, push, remove, off
+  getDatabase, ref, onValue, set, update, push, remove, off, get
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 import {
   getStorage, ref as storRef, uploadBytesResumable, getDownloadURL
@@ -73,6 +73,34 @@ export const patchPasta   = (id, pid, d)      => update(r(`tabletop_v3/${id}/bib
 export const pushAsset    = (id, cat, d)      => push(r(`tabletop_v3/${id}/biblioteca/assets/${cat}`), d);
 export const deleteAsset  = (id, cat, aid)    => remove(r(`tabletop_v3/${id}/biblioteca/assets/${cat}/${aid}`));
 export const patchAsset   = (id, cat, aid, d) => update(r(`tabletop_v3/${id}/biblioteca/assets/${cat}/${aid}`), d);
+
+// ── Cenas (snapshots de estado) ───────────────────────────────────────────────
+
+export const listenCenas = (id, cb) => listen(`tabletop_v3/${id}/cenas`, v => cb(v || {}));
+export const pushCena    = (id, d)      => push(r(`tabletop_v3/${id}/cenas`), d);
+export const saveCena    = (id, cid, d) => set(r(`tabletop_v3/${id}/cenas/${cid}`), d);
+export const deleteCena  = (id, cid)   => remove(r(`tabletop_v3/${id}/cenas/${cid}`));
+
+export async function getSnapshot(campanhaId) {
+  const [tokSnap, mapSnap, itnSnap] = await Promise.all([
+    get(r(`tabletop_v3/${campanhaId}/tokens`)),
+    get(r(`tabletop_v3/${campanhaId}/mapas`)),
+    get(r(`tabletop_v3/${campanhaId}/itens`)),
+  ]);
+  return {
+    tokens: tokSnap.val() || null,
+    mapas:  mapSnap.val() || null,
+    itens:  itnSnap.val() || null,
+  };
+}
+
+export async function restoreSnapshot(campanhaId, snapshot) {
+  await Promise.all([
+    set(r(`tabletop_v3/${campanhaId}/tokens`), snapshot.tokens || null),
+    set(r(`tabletop_v3/${campanhaId}/mapas`),  snapshot.mapas  || null),
+    set(r(`tabletop_v3/${campanhaId}/itens`),  snapshot.itens  || null),
+  ]);
+}
 
 // ── Pings efêmeros ────────────────────────────────────────────────────────────
 

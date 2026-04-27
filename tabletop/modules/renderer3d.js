@@ -108,13 +108,18 @@ export class Renderer3D {
     this._animId = requestAnimationFrame(() => this._loop());
     this.controls?.update();
 
-    // Billboarding: tokens e itens standee virados para a câmera
-    const q = this.camera.quaternion;
-    Object.values(this._tokenMeshes).forEach(({ frente, verso }) => {
-      frente?.quaternion.copy(q); verso?.quaternion.copy(q);
+    // Billboarding: Y-axis only — tokens e itens standee giram apenas horizontalmente
+    const cam = this.camera;
+    Object.values(this._tokenMeshes).forEach(({ grupo }) => {
+      const dx = cam.position.x - grupo.position.x;
+      const dz = cam.position.z - grupo.position.z;
+      grupo.rotation.y = Math.atan2(dx, dz);
     });
-    Object.values(this._itemMeshes).forEach(({ frente, verso }) => {
-      frente?.quaternion.copy(q); verso?.quaternion.copy(q);
+    Object.values(this._itemMeshes).forEach(({ grupo, frente }) => {
+      if (!frente) return; // itens 2d_chao não fazem billboard
+      const dx = cam.position.x - grupo.position.x;
+      const dz = cam.position.z - grupo.position.z;
+      grupo.rotation.y = Math.atan2(dx, dz);
     });
 
     // Pulso nos anéis de iniciativa
@@ -134,12 +139,12 @@ export class Renderer3D {
 
   upsertMapaItem(m) {
     const { id, imageUrl, posX = 0, posY = 0, escalaX = 1, escalaY = 1 } = m;
-    const gs = this.gridSize;
-    const w  = 20 * gs * escalaX, h = 20 * gs * escalaY;  // tamanho base 20 células
+    const gs   = this.gridSize;
+    const BASE = 20 * gs;   // plano base de 20×20 células; escala via mesh.scale
 
     if (this._mapaPlanes[id]) {
       const mesh = this._mapaPlanes[id];
-      mesh.position.set(posX * gs + w/2, -0.01, posY * gs + h/2);
+      mesh.position.set(posX * gs, -0.01, posY * gs);
       mesh.scale.set(escalaX, 1, escalaY);
       if (imageUrl && mesh.material.map?.image?.src !== imageUrl) {
         mesh.material.map = this._tex(imageUrl);
@@ -148,12 +153,13 @@ export class Renderer3D {
       return;
     }
 
-    const geo = new THREE.PlaneGeometry(w, h);
+    const geo = new THREE.PlaneGeometry(BASE, BASE);
     geo.rotateX(-Math.PI / 2);
-    const mat = new THREE.MeshLambertMaterial({ color: 0x1a0a0a });
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     if (imageUrl) { mat.map = this._tex(imageUrl); mat.needsUpdate = true; }
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(posX * gs + w/2, -0.01, posY * gs + h/2);
+    mesh.position.set(posX * gs, -0.01, posY * gs);
+    mesh.scale.set(escalaX, 1, escalaY);
     mesh.receiveShadow = true;
     mesh.userData.mapaId = id;
     this.scene.add(mesh);
@@ -168,6 +174,12 @@ export class Renderer3D {
 
   setGridVisible(v) { if (this._gridHelper) this._gridHelper.visible = v; }
   setMapaDragMode(v) { this._mapaDragMode = v; }
+
+  setSkyColor(hexStr) {
+    const color = new THREE.Color(hexStr);
+    this.scene.background = color;
+    this.scene.fog = new THREE.Fog(color, 60, 120);
+  }
 
   // ── Tokens ───────────────────────────────────────────────────────────────────
 

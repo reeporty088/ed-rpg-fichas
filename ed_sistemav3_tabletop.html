@@ -55,6 +55,27 @@
     <!-- Renderizado por Library -->
   </aside>
 
+  <!-- ── Painel: Cenas ──────────────────────────────────────────────── -->
+  <aside id="painelCenas" class="painel-lateral oculto" aria-label="Cenas">
+    <!-- Renderizado por SceneManager -->
+  </aside>
+
+  <!-- ── Painel: Cor do Céu ─────────────────────────────────────────── -->
+  <aside id="painelCeu" class="painel-fog-flutuante oculto" aria-label="Cor do Céu">
+    <span class="fog-label">🌅 Cor do Céu</span>
+    <div class="ceu-presets" id="ceuPresets">
+      <button data-cor="#0a0a0a" title="Noite">🌙 Noite</button>
+      <button data-cor="#1a0520" title="Névoa Púrpura">🌫 Névoa</button>
+      <button data-cor="#87ceeb" title="Dia">☀ Dia</button>
+      <button data-cor="#2d1500" title="Entardecer">🌆 Tarde</button>
+      <button data-cor="#4a6741" title="Floresta">🌲 Floresta</button>
+    </div>
+    <div class="fog-row">
+      <span class="fog-label">Personalizar</span>
+      <input type="color" id="ceuInput" value="#0a0a0a" />
+    </div>
+  </aside>
+
   <!-- ── Painel Fog of War (apenas GM) ─────────────────────────────── -->
   <aside id="painelFog" class="painel-fog-flutuante oculto" aria-label="Fog of War">
     <span class="fog-label">Névoa de Guerra</span>

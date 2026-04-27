@@ -96,6 +96,7 @@ export class MapPanel {
 
     document.getElementById('mapaPanelFechar')?.addEventListener('click', () => {
       this.panel.classList.add('oculto');
+      this.onFerrAtiva?.('none');
     });
   }
 
