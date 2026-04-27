@@ -266,9 +266,9 @@ let moedaValor = 0;
 
 // Abre o módulo Tabletop VTT passando a campanha como parâmetro
 function abrirTabletop() {
-  const user = window.EDAuth ? window.EDAuth.getUser() : null;
+  const user = window.EDAuth ? window.EDAuth.currentUser() : null;
   const campanhaId = user ? user.id : 'default';
-  window.open(`tabletop/index.html?campanha=${campanhaId}`, '_blank');
+  window.open(`ed_sistemav3_tabletop.html?campanha=${campanhaId}`, '_blank');
 }
 window.abrirTabletop = abrirTabletop;
 

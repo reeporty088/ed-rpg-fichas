@@ -11,9 +11,9 @@ import { PingSystem }     from './modules/ping.js';
 
 // ── Autenticação ──────────────────────────────────────────────────────────────
 
-const auth = window.EDAuth ? window.EDAuth.getUser() : null;
+const auth = window.EDAuth ? window.EDAuth.currentUser() : null;
 if (!auth) {
-  window.location.href = '../index.html';
+  window.location.href = 'index.html';
   throw new Error('Não autenticado');
 }
 
