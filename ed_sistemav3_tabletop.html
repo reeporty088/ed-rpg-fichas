@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Tabletop VTT — ED RPG</title>
-  <link rel="stylesheet" href="tabletop.css" />
+  <link rel="stylesheet" href="tabletop/tabletop.css" />
 
   <!-- Three.js r128 + OrbitControls (globais: THREE, THREE.OrbitControls) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/konva@8/konva.min.js"></script>
 
   <!-- auth.js — expõe window.EDAuth -->
-  <script src="../auth.js"></script>
+  <script src="auth.js"></script>
 </head>
 <body data-require-auth="true" data-required-version="v3">
 
@@ -115,11 +115,10 @@
 
 </div><!-- #app -->
 
-<!-- Módulo principal (ES module) -->
-<script type="module" src="tabletop.js"></script>
+<!-- Módulo principal (ES module) — caminho relativo ao diretório raiz -->
+<script type="module" src="tabletop/tabletop.js"></script>
 
 <style>
-  /* Estilo adicional inline para garantir fullscreen sem scroll */
   html, body { height: 100%; overflow: hidden; }
   #canvas3d, #canvas2d { position: absolute; inset: 0; }
 </style>
