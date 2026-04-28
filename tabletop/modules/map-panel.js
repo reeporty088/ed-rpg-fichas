@@ -1,7 +1,6 @@
 // Painel de gerenciamento de mapas na cena
 import { pushMapaItem, patchMapaItem, deleteMapaItem } from './firebase-sync.js';
 import { comprimirImagem } from './image-compress.js';
-import { uploadFile } from './firebase-sync.js';
 
 export class MapPanel {
   constructor(panelEl, campanhaId, isGM) {
@@ -118,19 +117,15 @@ export class MapPanel {
   async _onUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    this.onUploadProgress?.(5);
+    this.onUploadProgress?.(10);
 
-    // Comprime (mapas podem ser maiores: 2048px)
-    const blob = await comprimirImagem(file, 2048, 0.85);
-    this.onUploadProgress?.(20);
+    const dataUrl = await comprimirImagem(file, 1024, 0.82);
+    this.onUploadProgress?.(70);
 
     const nome = file.name.replace(/\.[^.]+$/, '');
     const ref  = await pushMapaItem(this.campanhaId, { nome, imageUrl: '', posX: 0, posY: 0, escalaX: 1, escalaY: 1, bloqueado: false });
     const id   = ref.key;
-    const caminho = `tabletop/${this.campanhaId}/mapas/${id}`;
-
-    const url = await uploadFile(caminho, blob, p => this.onUploadProgress?.(20 + p * 0.78));
-    await patchMapaItem(this.campanhaId, id, { imageUrl: url });
+    await patchMapaItem(this.campanhaId, id, { imageUrl: dataUrl });
     this.onUploadProgress?.(100);
     e.target.value = '';
   }

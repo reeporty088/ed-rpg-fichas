@@ -1,7 +1,6 @@
 // Painel lateral de gerenciamento de tokens
 import { pushToken, saveToken, deleteToken, patchToken } from './firebase-sync.js';
 import { comprimirImagem } from './image-compress.js';
-import { uploadFile } from './firebase-sync.js';
 
 // Altura padrão em metros e tamanho de célula em metros
 const ALTURA_PADRAO_M = 1.70;
@@ -288,10 +287,8 @@ export class TokenPanel {
   async _uploadImg2d(e) {
     const file = e.target.files[0];
     if (!file) return;
-    this.onUploadProgress?.(5);
-    const blob = await comprimirImagem(file, 512, 0.85);
-    const caminho = `tabletop/${this.campanhaId}/tokens/${this.selecionado}/img2d`;
-    const url = await uploadFile(caminho, blob, p => this.onUploadProgress?.(5 + p * 0.92));
+    this.onUploadProgress?.(10);
+    const url = await comprimirImagem(file, 512, 0.85);
     this._editando.img2d = url;
     const thumb = document.getElementById('tpImg2dThumb');
     if (thumb) { thumb.src = url; thumb.style.display = ''; }
@@ -304,12 +301,9 @@ export class TokenPanel {
     if (!file) return;
     const vi    = parseInt(e.target.dataset.vi);
     const campo = e.target.dataset.campo;
-    this.onUploadProgress?.(5);
-    const blob = await comprimirImagem(file, 512, 0.85);
-    const caminho = `tabletop/${this.campanhaId}/tokens/${this.selecionado}/var${vi}_${campo}`;
-    const url  = await uploadFile(caminho, blob, p => this.onUploadProgress?.(5 + p * 0.92));
+    this.onUploadProgress?.(10);
+    const url = await comprimirImagem(file, 512, 0.85);
     this._editando.variacoes[vi][campo] = url;
-    // Atualiza thumbnail
     const thumb = document.querySelector(`.tp-var-thumb[data-campo="${campo}"][data-vi="${vi}"]`);
     if (thumb) { thumb.src = url; thumb.style.display = ''; }
     this.onUploadProgress?.(100);

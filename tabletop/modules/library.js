@@ -1,7 +1,6 @@
 // Biblioteca de assets — organiza mapas, tokens e itens em pastas
 import { pushPasta, deletePasta, patchPasta, pushAsset, deleteAsset, patchAsset } from './firebase-sync.js';
 import { comprimirImagem } from './image-compress.js';
-import { uploadFile } from './firebase-sync.js';
 
 export class Library {
   constructor(panelEl, campanhaId) {
@@ -214,17 +213,13 @@ export class Library {
     const cat   = e.target.dataset.cat;
     const pasta = e.target.dataset.pasta || null;
 
-    this.onUploadProgress?.(5);
-    const maxLado = cat === 'mapas' ? 2048 : 512;
-    const blob = await comprimirImagem(file, maxLado, 0.85);
-    this.onUploadProgress?.(20);
+    this.onUploadProgress?.(10);
+    const maxLado = cat === 'mapas' ? 1024 : 512;
+    const url = await comprimirImagem(file, maxLado, 0.82);
+    this.onUploadProgress?.(70);
 
     const nome = file.name.replace(/\.[^.]+$/, '');
-    const ref  = await pushAsset(this.campanhaId, cat, { nome, url: '', pastaId: pasta });
-    const aid  = ref.key;
-    const caminho = `tabletop/${this.campanhaId}/biblioteca/${cat}/${aid}`;
-    const url  = await uploadFile(caminho, blob, p => this.onUploadProgress?.(20 + p * 0.78));
-    await patchAsset(this.campanhaId, cat, aid, { url });
+    await pushAsset(this.campanhaId, cat, { nome, url, pastaId: pasta });
     this.onUploadProgress?.(100);
     e.target.value = '';
   }
