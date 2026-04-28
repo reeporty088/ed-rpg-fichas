@@ -1,7 +1,6 @@
 // Gerenciador de itens de cenário (móveis, props, decoração)
 import { pushItem, saveItem, deleteItem, patchItem } from './firebase-sync.js';
 import { comprimirImagem } from './image-compress.js';
-import { uploadFile } from './firebase-sync.js';
 
 const METROS_POR_CELULA = 1.5;
 
@@ -223,10 +222,8 @@ export class ItemsPanel {
     const file = e.target.files[0];
     if (!file) return;
     const ti = parseInt(e.target.dataset.ti);
-    this.onUploadProgress?.(5);
-    const blob = await comprimirImagem(file, 512, 0.85);
-    const caminho = `tabletop/${this.campanhaId}/itens/${this.selecionado}/tex${ti}`;
-    const url = await uploadFile(caminho, blob, p => this.onUploadProgress?.(5 + p * 0.92));
+    this.onUploadProgress?.(10);
+    const url = await comprimirImagem(file, 512, 0.85);
     this._editando.texturas[ti].url = url;
     const thumb = e.target.closest('.ip-tex-row').querySelector('.tp-tex-thumb');
     if (thumb) { thumb.src = url; thumb.style.display = ''; }

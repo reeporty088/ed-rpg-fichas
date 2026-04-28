@@ -4,17 +4,12 @@ import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.8.
 import {
   getDatabase, ref, onValue, set, update, push, remove, off, get
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-import {
-  getStorage, ref as storRef, uploadBytesResumable, getDownloadURL
-} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
-
-let _db, _storage;
+let _db;
 
 export function initFirebase() {
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   _db = getDatabase(app);
-  _storage = getStorage(app);
-  return { db: _db, storage: _storage };
+  return { db: _db };
 }
 
 // ── Helpers internos ──────────────────────────────────────────────────────────
@@ -119,17 +114,3 @@ export function listenPings(campanhaId, cb) {
   return () => off(rf);
 }
 
-// ── Upload para Storage com compressão opcional ───────────────────────────────
-
-export function uploadFile(caminho, arquivo, onProgresso) {
-  return new Promise((resolve, reject) => {
-    const sRef = storRef(_storage, caminho);
-    const task = uploadBytesResumable(sRef, arquivo);
-    task.on(
-      'state_changed',
-      snap => onProgresso?.((snap.bytesTransferred / snap.totalBytes) * 100),
-      reject,
-      () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
-    );
-  });
-}

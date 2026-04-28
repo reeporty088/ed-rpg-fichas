@@ -1,7 +1,5 @@
-// Comprime uma imagem antes do upload para economizar Storage
-// Retorna um Blob JPEG redimensionado sem armazenar em cache local
-
-export async function comprimirImagem(file, maxLado = 1024, qualidade = 0.82) {
+// Comprime uma imagem e retorna base64 data URL — sem Firebase Storage
+export function comprimirImagem(file, maxLado = 1024, qualidade = 0.82) {
   return new Promise(resolve => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -17,9 +15,14 @@ export async function comprimirImagem(file, maxLado = 1024, qualidade = 0.82) {
       canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
       URL.revokeObjectURL(url);
-      canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', qualidade);
+      resolve(canvas.toDataURL('image/jpeg', qualidade));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      const reader = new FileReader();
+      reader.onload = ev => resolve(ev.target.result);
+      reader.readAsDataURL(file);
+    };
     img.src = url;
   });
 }
