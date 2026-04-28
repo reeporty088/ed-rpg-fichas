@@ -1,5 +1,5 @@
 // Gerenciamento local de tokens e sincronização de posição/variação
-import { saveToken, patchToken, deleteToken, pushToken, uploadFile } from './firebase-sync.js';
+import { saveToken, patchToken, deleteToken, pushToken } from './firebase-sync.js';
 
 export class TokenManager {
   constructor(campanhaId, isGM, userId) {
@@ -86,17 +86,6 @@ export class TokenManager {
   // Salva objeto completo do token (para edição de variações)
   async saveTokenCompleto(id, data) {
     return saveToken(this.campanhaId, id, data);
-  }
-
-  // Faz upload de imagem de variação e retorna a URL
-  async uploadImagemVariacao(tokenId, varIndex, tipo, arquivo, onProgresso) {
-    const caminho = `tabletop/${this.campanhaId}/tokens/${tokenId}/variacao_${varIndex}_${tipo}`;
-    return uploadFile(caminho, arquivo, onProgresso);
-  }
-
-  async uploadMapa(arquivo, onProgresso) {
-    const caminho = `tabletop/${this.campanhaId}/mapa`;
-    return uploadFile(caminho, arquivo, onProgresso);
   }
 
   getAll() {
