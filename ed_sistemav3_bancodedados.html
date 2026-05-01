@@ -190,6 +190,22 @@ const CATEGORIES = {
   }
 };
 
+const CUSTO_ALCANCE_DB = {'Corpo a corpo':0,'1 bloco':1,'2 blocos':2,'3 blocos':4,'4 blocos':6,'5 blocos':8,'6 blocos':10,'8 blocos':14,'10 blocos':17,'12 blocos':20};
+const CUSTO_AREA_DB    = {'Nenhuma':0,'1 bloco raio':2,'2 blocos raio':5,'3 blocos raio':9,'4 blocos raio':13,'5 blocos raio':16,'6 blocos raio':18,'Linha 3 blocos':3,'Linha 5 blocos':6,'Cone 3 blocos':4};
+const CUSTO_DADOS_DB   = {'Nenhum':0,'1d4':1,'1d6':3,'1d8':5,'1d10':8,'1d12':11,'2d4':4,'2d6':8,'2d8':12,'2d10':16,'3d6':13,'3d8':18,'4d6':18};
+const CUSTO_DURACAO_DB = {'Instantâneo':0,'1 turno':1,'2 turnos':3,'3 turnos':5,'4 turnos':8,'5 turnos':11,'Até fim da cena':15,'Sustentado':20};
+
+function calcTecnicaCustoDB() {
+  const alcance = document.getElementById('f_alcance')?.value || '';
+  const area    = document.getElementById('f_area')?.value    || '';
+  const dados   = document.getElementById('f_dados')?.value   || '';
+  const duracao = document.getElementById('f_duracao')?.value || '';
+  const total   = (CUSTO_ALCANCE_DB[alcance] ?? 0) + (CUSTO_AREA_DB[area] ?? 0) +
+                  (CUSTO_DADOS_DB[dados] ?? 0) + (CUSTO_DURACAO_DB[duracao] ?? 0);
+  const pmEl = document.getElementById('f_custo_pm');
+  if (pmEl) pmEl.value = total;
+}
+
 let currentTab = 'racas';
 let globalData = Object.fromEntries(Object.keys(CATEGORIES).map(k => [k, {}]));
 let globalPlayers = {};
@@ -318,6 +334,16 @@ window.openForm = (cat, id='') => {
   document.getElementById('modalTitle').innerText = `${id ? 'Editar' : 'Criar'} ${CATEGORIES[cat].label}`;
   document.getElementById('dynamicFields').innerHTML = buildFields(cat, item);
   document.getElementById('modal').dataset.category = cat;
+
+  if (cat === 'tecnicas') {
+    const pmEl = document.getElementById('f_custo_pm');
+    if (pmEl) { pmEl.readOnly = true; pmEl.style.cssText = 'cursor:not-allowed; opacity:0.7; width:100%; border-radius:7px; border:1px solid #3a2422; background:var(--input); color:var(--text); padding:8px;'; }
+    ['f_alcance','f_area','f_dados','f_duracao'].forEach(fid => {
+      document.getElementById(fid)?.addEventListener('change', calcTecnicaCustoDB);
+    });
+    calcTecnicaCustoDB();
+  }
+
   document.getElementById('modal').classList.add('open');
 };
 window.closeForm = () => document.getElementById('modal').classList.remove('open');

@@ -2395,6 +2395,25 @@ const TECNICA_AREAS    = ['Nenhuma','1 bloco raio','2 blocos raio','3 blocos rai
 const TECNICA_DADOS    = ['Nenhum','1d4','1d6','1d8','1d10','1d12','2d4','2d6','2d8','2d10','3d6','3d8','4d6'];
 const TECNICA_DURACOES = ['Instantâneo','1 turno','2 turnos','3 turnos','4 turnos','5 turnos','Até fim da cena','Sustentado'];
 
+const CUSTO_ALCANCE = {'Corpo a corpo':0,'1 bloco':1,'2 blocos':2,'3 blocos':4,'4 blocos':6,'5 blocos':8,'6 blocos':10,'8 blocos':14,'10 blocos':17,'12 blocos':20};
+const CUSTO_AREA    = {'Nenhuma':0,'1 bloco raio':2,'2 blocos raio':5,'3 blocos raio':9,'4 blocos raio':13,'5 blocos raio':16,'6 blocos raio':18,'Linha 3 blocos':3,'Linha 5 blocos':6,'Cone 3 blocos':4};
+const CUSTO_DADOS   = {'Nenhum':0,'1d4':1,'1d6':3,'1d8':5,'1d10':8,'1d12':11,'2d4':4,'2d6':8,'2d8':12,'2d10':16,'3d6':13,'3d8':18,'4d6':18};
+const CUSTO_DURACAO = {'Instantâneo':0,'1 turno':1,'2 turnos':3,'3 turnos':5,'4 turnos':8,'5 turnos':11,'Até fim da cena':15,'Sustentado':20};
+
+window.calcAndSaveTecnicaCusto = (cat, id) => {
+    const alcance = document.getElementById(`t_alcance_${id}`)?.value || '';
+    const area    = document.getElementById(`t_area_${id}`)?.value    || '';
+    const dados   = document.getElementById(`t_dados_${id}`)?.value   || '';
+    const duracao = document.getElementById(`t_duracao_${id}`)?.value || '';
+    const total   = (CUSTO_ALCANCE[alcance] ?? 0) + (CUSTO_AREA[area] ?? 0) +
+                    (CUSTO_DADOS[dados] ?? 0) + (CUSTO_DURACAO[duracao] ?? 0);
+    const pmEl    = document.getElementById(`t_pm_${id}`);
+    const badge   = document.getElementById(`t_badge_${id}`);
+    if (pmEl)   pmEl.value      = total;
+    if (badge)  badge.innerText = total + ' PM';
+    saveHab(cat, id, 'custo_pm', String(total));
+};
+
 function makeOpts(arr, val, placeholder) {
     return `<option value="" disabled ${!val ? 'selected' : ''}>${placeholder}</option>` +
         arr.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('');
@@ -2435,7 +2454,7 @@ function renderHabs(cat, data) {
                 <div class="tecnica-header">
                     <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
                     <div style="display:flex; gap:4px; align-items:center;">
-                        <div class="tecnica-custo">${item.custo_pm ? item.custo_pm + ' PM' : '? PM'}</div>
+                        <div class="tecnica-custo" id="t_badge_${id}">${(item.custo_pm ?? 0) + ' PM'}</div>
                         <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
                     </div>
                 </div>
@@ -2450,23 +2469,23 @@ function renderHabs(cat, data) {
                     </div>
                     <div>
                         <label style="font-size:8px;">Custo (PM)</label>
-                        <input type="number" class="tecnica-input" value="${item.custo_pm || ''}" onchange="saveHab('${cat}','${id}','custo_pm',this.value)" placeholder="0">
+                        <input type="number" id="t_pm_${id}" class="tecnica-input" value="${item.custo_pm ?? 0}" readonly style="cursor:not-allowed; opacity:0.7;">
                     </div>
                     <div>
                         <label style="font-size:8px;">Alcance</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value)">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
+                        <select id="t_alcance_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Área</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value)">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
+                        <select id="t_area_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Dados</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value)">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
+                        <select id="t_dados_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Duração</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value)">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
+                        <select id="t_duracao_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
                     </div>
                 </div>
                 <label style="font-size:8px;">Descrição / Efeito</label>
