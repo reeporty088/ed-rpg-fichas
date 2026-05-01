@@ -1503,7 +1503,6 @@
                 <label>Caminhos Disponíveis</label>
             </div>
             <div id="arcana_paths_grid" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;"></div>
-            <button class="btn-add" onclick="openArcanaPathModal()" style="width:100%;">+ Adicionar Caminho</button>
 
         </div>
     </div>
@@ -1667,27 +1666,6 @@
     </div>
 </div>
 
-<!-- MODAL CAMINHO ARCANO -->
-<div class="modal-overlay" id="modal_arcana_path" onclick="closeModal('modal_arcana_path')">
-    <div class="modal-box modal-small" onclick="event.stopPropagation()">
-        <h3 style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 16px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Escolha um Caminho</h3>
-        <div id="arcana_path_buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div>
-        <button class="btn-choice cancel" onclick="closeModal('modal_arcana_path')" style="margin-top:10px;">Cancelar</button>
-    </div>
-</div>
-
-<!-- MODAL DETALHES CAMINHO ARCANO -->
-<div class="modal-overlay" id="modal_arcana_details" onclick="closeModal('modal_arcana_details')">
-    <div class="modal-box modal-small" onclick="event.stopPropagation()">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
-            <button class="btn-danger-mini" title="Remover caminho" onclick="removeCurrentArcanaPath()">✖</button>
-        </div>
-        <h3 id="arcana_details_title" style="font-family:'Cinzel',serif; color:var(--gold); margin:0 0 10px 0; text-transform:uppercase; letter-spacing:2px; font-size:13px; text-align:center;">Caminho</h3>
-        <div id="arcana_unlocked_list" style="max-height:220px; overflow:auto; border:1px solid #3a2a28; border-radius:8px; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:10px;"></div>
-        <button class="btn-choice db-btn" onclick="openArcanaPathDBFromDetails()">+ Adicionar Habilidade desse Caminho</button>
-        <button class="btn-choice cancel" onclick="closeModal('modal_arcana_details')">Fechar</button>
-    </div>
-</div>
 
 <!-- MODAL ASCENSÃO -->
 <div class="modal-overlay" id="modal_asc" onclick="closeModal('modal_asc')">
@@ -1770,10 +1748,8 @@ let charData = {};
 let compendium = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {}, ascensao_arcana: {} };
 let currentCategory = "";
 let currentDBItems = [];
-let selectedArcanaPath = "";
-let currentArcanaDetailsPath = "";
 let rollMode = 'none';
-const ARCANA_PATHS = ['Aprimorar', 'Transmutação', 'Emissor', 'Conjurar', 'Manipular', 'Sensorial'];
+const ARCANA_PATHS = ['Aprimorar', 'Emitir', 'Moldar', 'Manipular'];
 
 function normalizePathName(val = "") {
     return val
@@ -1792,14 +1768,20 @@ function getArcanaByPath(path) {
 function renderArcanaPathButtons() {
     const box = document.getElementById('arcana_paths_grid');
     if (!box) return;
+    const ativos = charData.caminhos_ativos || {};
     box.innerHTML = ARCANA_PATHS.map(path => {
-        const count = getArcanaByPath(path).length;
-        const isActive = count > 0;
-        return `<button onclick="openArcanaPathDetails('${path}')" style="background:${isActive ? 'rgba(35,80,35,0.45)' : 'rgba(0,0,0,0.3)'}; border:1px solid ${isActive ? '#4faa5f' : '#2a2a2a'}; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:${isActive ? '#baf4c5' : '#777'}; text-transform:uppercase; letter-spacing:1px; cursor:pointer;">
-            ${path}${isActive ? ` • ${count}` : ''}
+        const isActive = ativos[path] === true;
+        return `<button onclick="toggleArcanaPath('${path}')" style="background:${isActive ? 'rgba(35,80,35,0.45)' : 'rgba(0,0,0,0.3)'}; border:1px solid ${isActive ? '#4faa5f' : '#2a2a2a'}; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:${isActive ? '#baf4c5' : '#777'}; text-transform:uppercase; letter-spacing:1px; cursor:pointer;">
+            ${path}
         </button>`;
     }).join('');
 }
+
+window.toggleArcanaPath = (path) => {
+    const ativos = charData.caminhos_ativos || {};
+    const newVal = ativos[path] === true ? null : true;
+    update(ref(db, `${dbPath}/caminhos_ativos`), { [path]: newVal });
+};
 
 // ============================================================
 // PERÍCIAS
@@ -2272,8 +2254,7 @@ window.openDBModal = (cat) => {
         classe_hab: 'Escolher Classe',
         raca_hab: 'Escolher Raça',
         armas: 'Equipamentos',
-        arcana_habs: 'Habilidades de Arcana',
-        arcana_path_habs: `Habilidades de ${selectedArcanaPath || 'Arcana'}`
+        arcana_habs: 'Habilidades de Arcana'
     };
     document.getElementById('db_modal_title').innerText = titles[currentCategory] || 'Compêndio';
 
@@ -2281,14 +2262,8 @@ window.openDBModal = (cat) => {
     if (currentCategory === 'classe_hab') dataObj = compendium.classes || {};
     else if (currentCategory === 'raca_hab') dataObj = compendium.racas || {};
     else if (currentCategory === 'armas') dataObj = compendium.equipamentos || {};
-    else if (currentCategory === 'arcana_path_habs') dataObj = compendium.caminhos_arcanos || compendium.tecnicas || {};
 
     currentDBItems = Object.keys(dataObj).map(k => ({ id: k, ...dataObj[k] }));
-    if (currentCategory === 'arcana_path_habs') {
-        currentDBItems = currentDBItems.filter(item =>
-            normalizePathName(item.dominio || item.caminho || '') === normalizePathName(selectedArcanaPath)
-        );
-    }
     currentDBItems.sort((a, b) => (a.titulo || "").localeCompare(b.titulo || ""));
 
     renderDBList(currentDBItems);
@@ -2325,8 +2300,7 @@ function renderDBList(items) {
 window.addFromDB = (itemId) => {
     const dataObj = currentCategory === 'classe_hab' ? compendium.classes :
                     currentCategory === 'raca_hab' ? compendium.racas :
-                    currentCategory === 'armas' ? compendium.equipamentos :
-                    currentCategory === 'arcana_path_habs' ? (compendium.caminhos_arcanos || compendium.tecnicas) : {};
+                    currentCategory === 'armas' ? compendium.equipamentos : {};
     const item = dataObj[itemId];
     if (!item) { alert("Item não encontrado no banco."); return; }
 
@@ -2360,71 +2334,10 @@ window.addFromDB = (itemId) => {
             tipo: item.tipo_dano || "",
             desc: item.desc || ""
         });
-    } else if (currentCategory === 'arcana_path_habs') {
-        push(ref(db, `${dbPath}/habilidades/arcana_habs`), {
-            titulo: item.titulo || "",
-            caminho: item.dominio || item.caminho || selectedArcanaPath || "",
-            pericia: item.pericia || "",
-            custo_pm: item.custo_pm || "",
-            desc: item.desc || ""
-        });
     }
     closeModal('modal_db');
 };
 
-window.openArcanaPathModal = () => {
-    const container = document.getElementById('arcana_path_buttons');
-    container.innerHTML = ARCANA_PATHS.map(path => `
-        <button class="btn-choice db-btn" style="margin:0;" onclick="selectArcanaPath('${path}')">${path}</button>
-    `).join('');
-    document.getElementById('modal_arcana_path').classList.add('open');
-};
-
-window.selectArcanaPath = (path) => {
-    selectedArcanaPath = path;
-    closeModal('modal_arcana_path');
-    openDBModal('arcana_path_habs');
-};
-
-window.openArcanaPathDetails = (path) => {
-    currentArcanaDetailsPath = path;
-    selectedArcanaPath = path;
-    const list = getArcanaByPath(path);
-    document.getElementById('arcana_details_title').innerText = `${path} — Habilidades Liberadas`;
-    document.getElementById('arcana_unlocked_list').innerHTML = list.length
-        ? list.map(item => `
-            <div style="padding:6px; border-bottom:1px solid #2f2f2f;">
-                <div style="font-family:'Cinzel',serif; color:var(--theme-light); font-size:11px;">${item.titulo || 'Sem título'}</div>
-                <div style="font-size:11px; color:#aaa;">${item.desc || 'Sem descrição.'}</div>
-            </div>
-        `).join('')
-        : `<div style="font-size:12px; color:#888; text-align:center; padding:10px;">Nenhuma habilidade liberada nesse caminho.</div>`;
-    document.getElementById('modal_arcana_details').classList.add('open');
-};
-
-window.openArcanaPathDBFromDetails = () => {
-    if (!currentArcanaDetailsPath) return;
-    selectedArcanaPath = currentArcanaDetailsPath;
-    closeModal('modal_arcana_details');
-    openDBModal('arcana_path_habs');
-};
-
-window.removeCurrentArcanaPath = () => removeArcanaPath(currentArcanaDetailsPath);
-
-window.removeArcanaPath = (path) => {
-    if (!path) return;
-    const list = charData.habilidades?.arcana_habs || {};
-    const ids = Object.keys(list).filter(id => normalizePathName(list[id]?.caminho || "") === normalizePathName(path));
-    if (!ids.length) {
-        alert("Não há habilidades para remover nesse caminho.");
-        return;
-    }
-    if (!confirm(`Remover o caminho ${path} e suas ${ids.length} habilidade(s)?`)) return;
-    const updates = {};
-    ids.forEach(id => { updates[`habilidades/arcana_habs/${id}`] = null; });
-    update(ref(db, dbPath), updates);
-    closeModal('modal_arcana_details');
-};
 
 // ============================================================
 // CRIAR MANUAL
@@ -2436,12 +2349,13 @@ window.createManual = (cat) => {
             titulo: "Nova Técnica",
             caminho: "",
             pericia: "",
-            custo_pm: "",
+            custo_pm: "0",
             alcance: "",
             area: "",
             dados: "",
             duracao: "",
-            desc: ""
+            desc: "",
+            modo_edicao: "guiado"
         });
     } else if (cat === 'armas') {
         push(ref(db, `${dbPath}/habilidades/armas`), {
@@ -2475,6 +2389,44 @@ window.openDirectDB = (cat) => {
 };
 
 // ============================================================
+// OPÇÕES DE DROPDOWNS DE TÉCNICA
+// ============================================================
+const TECNICA_ALCANCES = ['Corpo a corpo','1 bloco','2 blocos','3 blocos','4 blocos','5 blocos','6 blocos','8 blocos','10 blocos','12 blocos'];
+const TECNICA_AREAS    = ['Nenhuma','1 bloco raio','2 blocos raio','3 blocos raio','4 blocos raio','5 blocos raio','6 blocos raio','Linha 3 blocos','Linha 5 blocos','Cone 3 blocos'];
+const TECNICA_DADOS    = ['Nenhum','1d4','1d6','1d8','1d10','1d12','2d4','2d6','2d8','2d10','3d6','3d8','4d6'];
+const TECNICA_DURACOES = ['Instantâneo','1 turno','2 turnos','3 turnos','4 turnos','5 turnos','Até fim da cena','Sustentado'];
+
+const CUSTO_ALCANCE = {'Corpo a corpo':0,'1 bloco':1,'2 blocos':2,'3 blocos':4,'4 blocos':6,'5 blocos':8,'6 blocos':10,'8 blocos':14,'10 blocos':17,'12 blocos':20};
+const CUSTO_AREA    = {'Nenhuma':0,'1 bloco raio':2,'2 blocos raio':5,'3 blocos raio':9,'4 blocos raio':13,'5 blocos raio':16,'6 blocos raio':18,'Linha 3 blocos':3,'Linha 5 blocos':6,'Cone 3 blocos':4};
+const CUSTO_DADOS   = {'Nenhum':0,'1d4':1,'1d6':3,'1d8':5,'1d10':8,'1d12':11,'2d4':4,'2d6':8,'2d8':12,'2d10':16,'3d6':13,'3d8':18,'4d6':18};
+const CUSTO_DURACAO = {'Instantâneo':0,'1 turno':1,'2 turnos':3,'3 turnos':5,'4 turnos':8,'5 turnos':11,'Até fim da cena':15,'Sustentado':20};
+
+window.calcAndSaveTecnicaCusto = (cat, id) => {
+    const alcance = document.getElementById(`t_alcance_${id}`)?.value || '';
+    const area    = document.getElementById(`t_area_${id}`)?.value    || '';
+    const dados   = document.getElementById(`t_dados_${id}`)?.value   || '';
+    const duracao = document.getElementById(`t_duracao_${id}`)?.value || '';
+    const total   = (CUSTO_ALCANCE[alcance] ?? 0) + (CUSTO_AREA[area] ?? 0) +
+                    (CUSTO_DADOS[dados] ?? 0) + (CUSTO_DURACAO[duracao] ?? 0);
+    const pmEl    = document.getElementById(`t_pm_${id}`);
+    const badge   = document.getElementById(`t_badge_${id}`);
+    if (pmEl)   pmEl.value      = total;
+    if (badge)  badge.innerText = total + ' PM';
+    saveHab(cat, id, 'custo_pm', String(total));
+};
+
+window.toggleTecnicaMode = (cat, id) => {
+    const item = charData.habilidades?.[cat]?.[id] || {};
+    const next = (item.modo_edicao || 'manual') === 'guiado' ? 'manual' : 'guiado';
+    update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { modo_edicao: next });
+};
+
+function makeOpts(arr, val, placeholder) {
+    return `<option value="" disabled ${!val ? 'selected' : ''}>${placeholder}</option>` +
+        arr.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('');
+}
+
+// ============================================================
 // RENDERIZAR LISTAS
 // ============================================================
 window.removeItem = (cat, id) => {
@@ -2505,18 +2457,49 @@ function renderHabs(cat, data) {
 
         if (cat === 'tecnicas') {
             div.className = 'tecnica-card';
-            div.innerHTML = `
-                <div class="tecnica-header">
-                    <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
-                    <div style="display:flex; gap:4px; align-items:center;">
-                        <div class="tecnica-custo">${item.custo_pm ? item.custo_pm + ' PM' : '? PM'}</div>
-                        <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
-                    </div>
-                </div>
+            const mode = item.modo_edicao || 'manual';
+            const isGuiado = mode === 'guiado';
+
+            const modeBtnStyle = 'background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;white-space:nowrap;';
+            const modeBtn = `<button onclick="toggleTecnicaMode('${cat}','${id}')" style="${modeBtnStyle}" title="Alternar modo de edição">${isGuiado ? '✎ Manual' : '⊞ Guiado'}</button>`;
+
+            const gridGuiado = `
                 <div class="tecnica-grid">
                     <div>
                         <label style="font-size:8px;">Caminho</label>
-                        <input type="text" class="tecnica-input" value="${item.caminho || ''}" onchange="saveHab('${cat}','${id}','caminho',this.value)" placeholder="Ex: Emissor">
+                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','caminho',this.value)">${makeOpts(ARCANA_PATHS, item.caminho, 'Caminho...')}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Perícia</label>
+                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','pericia',this.value)">${makeOpts(PERICIAS, item.pericia, 'Perícia...')}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Custo (PM)</label>
+                        <input type="number" id="t_pm_${id}" class="tecnica-input" value="${item.custo_pm ?? 0}" readonly style="cursor:not-allowed;opacity:0.7;">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Alcance</label>
+                        <select id="t_alcance_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Área</label>
+                        <select id="t_area_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Dados</label>
+                        <select id="t_dados_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Duração</label>
+                        <select id="t_duracao_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
+                    </div>
+                </div>`;
+
+            const gridManual = `
+                <div class="tecnica-grid">
+                    <div>
+                        <label style="font-size:8px;">Caminho</label>
+                        <input type="text" class="tecnica-input" value="${item.caminho || ''}" onchange="saveHab('${cat}','${id}','caminho',this.value)" placeholder="Ex: Emitir">
                     </div>
                     <div>
                         <label style="font-size:8px;">Perícia</label>
@@ -2524,7 +2507,7 @@ function renderHabs(cat, data) {
                     </div>
                     <div>
                         <label style="font-size:8px;">Custo (PM)</label>
-                        <input type="text" class="tecnica-input" value="${item.custo_pm || ''}" onchange="saveHab('${cat}','${id}','custo_pm',this.value)" placeholder="Ex: 5">
+                        <input type="number" class="tecnica-input" value="${item.custo_pm || ''}" onchange="saveHab('${cat}','${id}','custo_pm',this.value)" placeholder="0">
                     </div>
                     <div>
                         <label style="font-size:8px;">Alcance</label>
@@ -2535,10 +2518,25 @@ function renderHabs(cat, data) {
                         <input type="text" class="tecnica-input" value="${item.area || ''}" onchange="saveHab('${cat}','${id}','area',this.value)" placeholder="Ex: 2 blocos raio">
                     </div>
                     <div>
-                        <label style="font-size:8px;">Dados / Duração</label>
-                        <input type="text" class="tecnica-input" value="${item.dados || ''}" onchange="saveHab('${cat}','${id}','dados',this.value)" placeholder="Ex: 2d6 / 3 turnos">
+                        <label style="font-size:8px;">Dados</label>
+                        <input type="text" class="tecnica-input" value="${item.dados || ''}" onchange="saveHab('${cat}','${id}','dados',this.value)" placeholder="Ex: 2d6">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Duração</label>
+                        <input type="text" class="tecnica-input" value="${item.duracao || ''}" onchange="saveHab('${cat}','${id}','duracao',this.value)" placeholder="Ex: 3 turnos">
+                    </div>
+                </div>`;
+
+            div.innerHTML = `
+                <div class="tecnica-header">
+                    <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <div class="tecnica-custo" id="t_badge_${id}">${(item.custo_pm ?? 0) + ' PM'}</div>
+                        ${modeBtn}
+                        <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
                     </div>
                 </div>
+                ${isGuiado ? gridGuiado : gridManual}
                 <label style="font-size:8px;">Descrição / Efeito</label>
                 <textarea class="tecnica-desc" onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Descreva o efeito da técnica...">${item.desc || ''}</textarea>
             `;
