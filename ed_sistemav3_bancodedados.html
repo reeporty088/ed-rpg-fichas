@@ -81,7 +81,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, push, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
@@ -95,6 +95,13 @@ const firebaseConfig = {
 
 const db = getDatabase(initializeApp(firebaseConfig));
 const dbPath = 'banco_dados_v3';
+
+const PERICIAS_LIST = ['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','Esporte','Fortitude','Influência','Intuição','Ladinagem','Luta','Máquinas','Medicina','Mente','Mística','Percepção','Sobrevivência','Vitalidade','Vontade'];
+const CAMINHOS_LIST = ['Aprimorar','Emitir','Moldar','Manipular'];
+const ALCANCES_LIST = ['Corpo a corpo','1 bloco','2 blocos','3 blocos','4 blocos','5 blocos','6 blocos','8 blocos','10 blocos','12 blocos'];
+const AREAS_LIST    = ['Nenhuma','1 bloco raio','2 blocos raio','3 blocos raio','4 blocos raio','5 blocos raio','6 blocos raio','Linha 3 blocos','Linha 5 blocos','Cone 3 blocos'];
+const DADOS_LIST    = ['Nenhum','1d4','1d6','1d8','1d10','1d12','2d4','2d6','2d8','2d10','3d6','3d8','4d6'];
+const DURACOES_LIST = ['Instantâneo','1 turno','2 turnos','3 turnos','4 turnos','5 turnos','Até fim da cena','Sustentado'];
 
 const CATEGORIES = {
   racas: {
@@ -130,15 +137,15 @@ const CATEGORIES = {
   tecnicas: {
     label: '🗡️ Técnicas',
     fields: [
-      { key:'titulo', label:'Título', type:'text', required:true },
-      { key:'caminho', label:'Caminho Arcano', type:'text' },
-      { key:'pericia', label:'Perícia', type:'text' },
-      { key:'custo_pm', label:'Custo PM', type:'text' },
-      { key:'alcance', label:'Alcance', type:'text' },
-      { key:'area', label:'Área', type:'text' },
-      { key:'dados', label:'Dados', type:'text' },
-      { key:'duracao', label:'Duração', type:'text' },
-      { key:'desc', label:'Descrição', type:'textarea' }
+      { key:'titulo',    label:'Título',        type:'text',     required:true },
+      { key:'caminho',   label:'Caminho Arcano', type:'select',   options: CAMINHOS_LIST },
+      { key:'pericia',   label:'Perícia',        type:'select',   options: PERICIAS_LIST },
+      { key:'custo_pm',  label:'Custo PM',       type:'text' },
+      { key:'alcance',   label:'Alcance',        type:'select',   options: ALCANCES_LIST },
+      { key:'area',      label:'Área',           type:'select',   options: AREAS_LIST },
+      { key:'dados',     label:'Dados',          type:'select',   options: DADOS_LIST },
+      { key:'duracao',   label:'Duração',        type:'select',   options: DURACOES_LIST },
+      { key:'desc',      label:'Descrição',      type:'textarea' }
     ],
     meta: (it) => `Caminho: ${it.caminho || '-'} • Perícia: ${it.pericia || '-'}`,
     descField: 'desc'
@@ -185,6 +192,7 @@ const CATEGORIES = {
 
 let currentTab = 'racas';
 let globalData = Object.fromEntries(Object.keys(CATEGORIES).map(k => [k, {}]));
+let globalPlayers = {};
 
 function esc(s){ return (s ?? '').toString().replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -195,10 +203,75 @@ function renderTabs(){
   ).join('');
 }
 
+function renderCompendiumItems(cat) {
+  const cfg = CATEGORIES[cat];
+  const arr = Object.entries(globalData[cat] || {})
+    .map(([id, v]) => ({ id, ...(v || {}) }))
+    .sort((a,b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+  if (!arr.length) return '<div style="opacity:.65; margin-bottom:12px;">Nenhum registro nessa categoria.</div>';
+  return '<div class="grid" style="margin-bottom:4px;">' + arr.map(it => `
+    <div class="item">
+      <h4>${esc(it.titulo || it.id)}</h4>
+      <div class="meta">${esc(cfg.meta(it))}</div>
+      <div class="desc">${esc(it[cfg.descField] || '')}</div>
+      <div class="actions">
+        <button class="btn btn-edit" onclick="openForm('${cat}','${it.id}')">Editar</button>
+        <button class="btn btn-del" onclick="deleteItem('${cat}','${it.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+function renderPlayerTecnicas() {
+  let html = '';
+  let any = false;
+
+  Object.entries(globalPlayers || {}).forEach(([fichaId, fichaData]) => {
+    const tecnicas = fichaData?.habilidades?.tecnicas || {};
+    const charName = fichaData?.char_name || fichaId;
+    const entries = Object.entries(tecnicas);
+    if (!entries.length) return;
+
+    html += `<div style="grid-column:1/-1; font-size:11px; font-weight:700; color:#bda7a4; text-transform:uppercase; letter-spacing:1px; margin:4px 0 2px; font-family:'Segoe UI',sans-serif;">${esc(charName)}</div>`;
+    entries.forEach(([techId, tech]) => {
+      any = true;
+      html += `
+        <div class="item">
+          <h4>${esc(tech.titulo || techId)}</h4>
+          <div class="meta">Caminho: ${esc(tech.caminho||'-')} • Perícia: ${esc(tech.pericia||'-')}</div>
+          <div class="meta">PM: ${esc(tech.custo_pm||'-')} • Alcance: ${esc(tech.alcance||'-')} • Área: ${esc(tech.area||'-')}</div>
+          <div class="meta">Dados: ${esc(tech.dados||'-')} • Duração: ${esc(tech.duracao||'-')}</div>
+          <div class="desc">${esc(tech.desc||'')}</div>
+          <div class="actions">
+            <button class="btn btn-warn" onclick="savePlayerTechToCompendium('${esc(fichaId)}','${esc(techId)}')">Salvar no Compêndio</button>
+            <button class="btn btn-del" onclick="deletePlayerTech('${esc(fichaId)}','${esc(techId)}')">Excluir</button>
+          </div>
+        </div>`;
+    });
+  });
+
+  if (!any) return '<div style="opacity:.65;">Nenhuma técnica criada por jogadores ainda.</div>';
+  return '<div class="grid">' + html + '</div>';
+}
+
 function renderCurrent(){
   const cfg = CATEGORIES[currentTab];
   document.getElementById('sec_title').innerText = cfg.label;
   const list = document.getElementById('list_current');
+
+  if (currentTab === 'tecnicas') {
+    list.className = '';
+    list.style.cssText = '';
+    list.innerHTML =
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas do Compêndio</div>' +
+      renderCompendiumItems('tecnicas') +
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin:16px 0 12px;">Técnicas dos Jogadores</div>' +
+      renderPlayerTecnicas();
+    return;
+  }
+
+  list.className = 'grid';
   const arr = Object.entries(globalData[currentTab] || {})
     .map(([id, v]) => ({ id, ...(v || {}) }))
     .sort((a,b) => (a.titulo || '').localeCompare(b.titulo || ''));
@@ -227,6 +300,10 @@ function buildFields(cat, data = {}){
     const value = data[f.key] ?? '';
     if (f.type === 'textarea') {
       return `<label>${f.label}${f.required?' *':''}</label><textarea id="f_${f.key}" data-key="${f.key}">${esc(value)}</textarea>`;
+    }
+    if (f.type === 'select') {
+      const opts = f.options.map(o => `<option value="${esc(o)}" ${value === o ? 'selected' : ''}>${esc(o)}</option>`).join('');
+      return `<label>${f.label}${f.required?' *':''}</label><select id="f_${f.key}" data-key="${f.key}"><option value="">-- Selecionar --</option>${opts}</select>`;
     }
     return `<label>${f.label}${f.required?' *':''}</label><input id="f_${f.key}" data-key="${f.key}" type="${f.type||'text'}" value="${esc(value)}" />`;
   }).join('');
@@ -272,6 +349,30 @@ window.saveItem = async () => {
 window.deleteItem = async (cat, id) => {
   if (!confirm('Excluir este item do banco?')) return;
   await remove(ref(db, `${dbPath}/${cat}/${id}`));
+};
+
+window.savePlayerTechToCompendium = async (fichaId, techId) => {
+  const tech = globalPlayers[fichaId]?.habilidades?.tecnicas?.[techId];
+  if (!tech) return;
+  const payload = {
+    titulo:   tech.titulo   || '',
+    caminho:  tech.caminho  || '',
+    pericia:  tech.pericia  || '',
+    custo_pm: tech.custo_pm || '',
+    alcance:  tech.alcance  || '',
+    area:     tech.area     || '',
+    dados:    tech.dados    || '',
+    duracao:  tech.duracao  || '',
+    desc:     tech.desc     || ''
+  };
+  const k = push(ref(db, `${dbPath}/tecnicas`)).key;
+  await update(ref(db, `${dbPath}/tecnicas/${k}`), payload);
+  alert('Técnica salva no Compêndio!');
+};
+
+window.deletePlayerTech = async (fichaId, techId) => {
+  if (!confirm('Excluir esta técnica da ficha do jogador?')) return;
+  await remove(ref(db, `fichas_v3/${fichaId}/habilidades/tecnicas/${techId}`));
 };
 
 function makeTemplate(cat){
@@ -373,7 +474,10 @@ onValue(ref(db, dbPath), (snap) => {
   renderCurrent();
 });
 
-window.switchTab = window.switchTab;
+onValue(ref(db, 'fichas_v3'), (snap) => {
+  globalPlayers = snap.val() || {};
+  if (currentTab === 'tecnicas') renderCurrent();
+});
 </script>
 </body>
 </html>
