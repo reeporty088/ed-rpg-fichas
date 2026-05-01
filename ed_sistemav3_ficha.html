@@ -2349,12 +2349,13 @@ window.createManual = (cat) => {
             titulo: "Nova Técnica",
             caminho: "",
             pericia: "",
-            custo_pm: "",
+            custo_pm: "0",
             alcance: "",
             area: "",
             dados: "",
             duracao: "",
-            desc: ""
+            desc: "",
+            modo_edicao: "guiado"
         });
     } else if (cat === 'armas') {
         push(ref(db, `${dbPath}/habilidades/armas`), {
@@ -2414,6 +2415,12 @@ window.calcAndSaveTecnicaCusto = (cat, id) => {
     saveHab(cat, id, 'custo_pm', String(total));
 };
 
+window.toggleTecnicaMode = (cat, id) => {
+    const item = charData.habilidades?.[cat]?.[id] || {};
+    const next = (item.modo_edicao || 'manual') === 'guiado' ? 'manual' : 'guiado';
+    update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { modo_edicao: next });
+};
+
 function makeOpts(arr, val, placeholder) {
     return `<option value="" disabled ${!val ? 'selected' : ''}>${placeholder}</option>` +
         arr.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('');
@@ -2450,14 +2457,13 @@ function renderHabs(cat, data) {
 
         if (cat === 'tecnicas') {
             div.className = 'tecnica-card';
-            div.innerHTML = `
-                <div class="tecnica-header">
-                    <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
-                    <div style="display:flex; gap:4px; align-items:center;">
-                        <div class="tecnica-custo" id="t_badge_${id}">${(item.custo_pm ?? 0) + ' PM'}</div>
-                        <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
-                    </div>
-                </div>
+            const mode = item.modo_edicao || 'manual';
+            const isGuiado = mode === 'guiado';
+
+            const modeBtnStyle = 'background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;white-space:nowrap;';
+            const modeBtn = `<button onclick="toggleTecnicaMode('${cat}','${id}')" style="${modeBtnStyle}" title="Alternar modo de edição">${isGuiado ? '✎ Manual' : '⊞ Guiado'}</button>`;
+
+            const gridGuiado = `
                 <div class="tecnica-grid">
                     <div>
                         <label style="font-size:8px;">Caminho</label>
@@ -2469,25 +2475,68 @@ function renderHabs(cat, data) {
                     </div>
                     <div>
                         <label style="font-size:8px;">Custo (PM)</label>
-                        <input type="number" id="t_pm_${id}" class="tecnica-input" value="${item.custo_pm ?? 0}" readonly style="cursor:not-allowed; opacity:0.7;">
+                        <input type="number" id="t_pm_${id}" class="tecnica-input" value="${item.custo_pm ?? 0}" readonly style="cursor:not-allowed;opacity:0.7;">
                     </div>
                     <div>
                         <label style="font-size:8px;">Alcance</label>
-                        <select id="t_alcance_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
+                        <select id="t_alcance_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Área</label>
-                        <select id="t_area_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
+                        <select id="t_area_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Dados</label>
-                        <select id="t_dados_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
+                        <select id="t_dados_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
                     </div>
                     <div>
                         <label style="font-size:8px;">Duração</label>
-                        <select id="t_duracao_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value); calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
+                        <select id="t_duracao_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
+                    </div>
+                </div>`;
+
+            const gridManual = `
+                <div class="tecnica-grid">
+                    <div>
+                        <label style="font-size:8px;">Caminho</label>
+                        <input type="text" class="tecnica-input" value="${item.caminho || ''}" onchange="saveHab('${cat}','${id}','caminho',this.value)" placeholder="Ex: Emitir">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Perícia</label>
+                        <input type="text" class="tecnica-input" value="${item.pericia || ''}" onchange="saveHab('${cat}','${id}','pericia',this.value)" placeholder="Ex: Mística">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Custo (PM)</label>
+                        <input type="number" class="tecnica-input" value="${item.custo_pm || ''}" onchange="saveHab('${cat}','${id}','custo_pm',this.value)" placeholder="0">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Alcance</label>
+                        <input type="text" class="tecnica-input" value="${item.alcance || ''}" onchange="saveHab('${cat}','${id}','alcance',this.value)" placeholder="Ex: 4 blocos">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Área</label>
+                        <input type="text" class="tecnica-input" value="${item.area || ''}" onchange="saveHab('${cat}','${id}','area',this.value)" placeholder="Ex: 2 blocos raio">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Dados</label>
+                        <input type="text" class="tecnica-input" value="${item.dados || ''}" onchange="saveHab('${cat}','${id}','dados',this.value)" placeholder="Ex: 2d6">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">Duração</label>
+                        <input type="text" class="tecnica-input" value="${item.duracao || ''}" onchange="saveHab('${cat}','${id}','duracao',this.value)" placeholder="Ex: 3 turnos">
+                    </div>
+                </div>`;
+
+            div.innerHTML = `
+                <div class="tecnica-header">
+                    <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <div class="tecnica-custo" id="t_badge_${id}">${(item.custo_pm ?? 0) + ' PM'}</div>
+                        ${modeBtn}
+                        <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
                     </div>
                 </div>
+                ${isGuiado ? gridGuiado : gridManual}
                 <label style="font-size:8px;">Descrição / Efeito</label>
                 <textarea class="tecnica-desc" onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Descreva o efeito da técnica...">${item.desc || ''}</textarea>
             `;

@@ -61,7 +61,7 @@
   <section id="sec_main" class="card">
     <div class="header">
       <h3 id="sec_title" style="margin:0"></h3>
-      <button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button>
+      <div id="btn_area_novo"><button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button></div>
     </div>
     <div class="grid" id="list_current"></div>
   </section>
@@ -209,6 +209,7 @@ function calcTecnicaCustoDB() {
 let currentTab = 'racas';
 let globalData = Object.fromEntries(Object.keys(CATEGORIES).map(k => [k, {}]));
 let globalPlayers = {};
+let tecnicaFormMode = 'guiado';
 
 function esc(s){ return (s ?? '').toString().replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -277,6 +278,11 @@ function renderCurrent(){
   const list = document.getElementById('list_current');
 
   if (currentTab === 'tecnicas') {
+    document.getElementById('btn_area_novo').innerHTML = `
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-add" onclick="openTecnicaForm('guiado')" title="Criar técnica com dropdowns e cálculo automático de PM">⊞ Guiado</button>
+        <button class="btn" style="border-color:#777;color:#ccc;" onclick="openTecnicaForm('manual')" title="Criar técnica com campos de texto livre">✎ Manual</button>
+      </div>`;
     list.className = '';
     list.style.cssText = '';
     list.innerHTML =
@@ -287,6 +293,7 @@ function renderCurrent(){
     return;
   }
 
+  document.getElementById('btn_area_novo').innerHTML = '<button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button>';
   list.className = 'grid';
   const arr = Object.entries(globalData[currentTab] || {})
     .map(([id, v]) => ({ id, ...(v || {}) }))
@@ -310,32 +317,36 @@ function renderCurrent(){
   `).join('');
 }
 
-function buildFields(cat, data = {}){
+function buildFields(cat, data = {}, forceText = false){
   const cfg = CATEGORIES[cat];
   return cfg.fields.map(f => {
     const value = data[f.key] ?? '';
     if (f.type === 'textarea') {
       return `<label>${f.label}${f.required?' *':''}</label><textarea id="f_${f.key}" data-key="${f.key}">${esc(value)}</textarea>`;
     }
-    if (f.type === 'select') {
+    if (f.type === 'select' && !forceText) {
       const opts = f.options.map(o => `<option value="${esc(o)}" ${value === o ? 'selected' : ''}>${esc(o)}</option>`).join('');
       return `<label>${f.label}${f.required?' *':''}</label><select id="f_${f.key}" data-key="${f.key}"><option value="">-- Selecionar --</option>${opts}</select>`;
     }
-    return `<label>${f.label}${f.required?' *':''}</label><input id="f_${f.key}" data-key="${f.key}" type="${f.type||'text'}" value="${esc(value)}" />`;
+    return `<label>${f.label}${f.required?' *':''}</label><input id="f_${f.key}" data-key="${f.key}" type="text" value="${esc(value)}" placeholder="${esc(f.label)}" />`;
   }).join('');
 }
 
 window.switchTab = (tab) => { currentTab = tab; renderTabs(); renderCurrent(); };
 window.openCurrentTabForm = () => window.openForm(currentTab);
+window.openTecnicaForm = (mode) => { tecnicaFormMode = mode; window.openForm('tecnicas'); };
 
 window.openForm = (cat, id='') => {
   const item = id ? (globalData[cat] || {})[id] || {} : {};
+  // Editing always uses guiado; creating respects the user-chosen mode
+  const formMode = (cat === 'tecnicas' && !id) ? tecnicaFormMode : 'guiado';
   document.getElementById('editId').value = id;
-  document.getElementById('modalTitle').innerText = `${id ? 'Editar' : 'Criar'} ${CATEGORIES[cat].label}`;
-  document.getElementById('dynamicFields').innerHTML = buildFields(cat, item);
+  const modeLabel = (cat === 'tecnicas' && !id) ? ` — ${formMode === 'guiado' ? '⊞ Guiado' : '✎ Manual'}` : '';
+  document.getElementById('modalTitle').innerText = `${id ? 'Editar' : 'Criar'} ${CATEGORIES[cat].label}${modeLabel}`;
+  document.getElementById('dynamicFields').innerHTML = buildFields(cat, item, cat === 'tecnicas' && formMode === 'manual');
   document.getElementById('modal').dataset.category = cat;
 
-  if (cat === 'tecnicas') {
+  if (cat === 'tecnicas' && formMode === 'guiado') {
     const pmEl = document.getElementById('f_custo_pm');
     if (pmEl) { pmEl.readOnly = true; pmEl.style.cssText = 'cursor:not-allowed; opacity:0.7; width:100%; border-radius:7px; border:1px solid #3a2422; background:var(--input); color:var(--text); padding:8px;'; }
     ['f_alcance','f_area','f_dados','f_duracao'].forEach(fid => {
