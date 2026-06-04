@@ -135,6 +135,11 @@
         .hub-back-btn:hover { border-color: var(--accent); color: #fff; }
     </style>
     <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body data-require-auth="true" data-required-version="v3">
     <a class="hub-back-btn" href="index.html">← Hub</a>
@@ -578,5 +583,6 @@ onValue(ref(db,'overlay_v3_data'),(snapshot)=>{
   updateOverlayToggleBtn();
 });
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Escória de Deus RPG</title>
+  <desc id="desc">Ícone vermelho escuro com sigilo luminoso em formato de losango.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="46%" r="68%">
+      <stop offset="0" stop-color="#4d1010"/>
+      <stop offset="0.56" stop-color="#1d0808"/>
+      <stop offset="1" stop-color="#070707"/>
+    </radialGradient>
+    <linearGradient id="sigil" x1="140" y1="120" x2="372" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f0cece"/>
+      <stop offset="0.38" stop-color="#cc2a2a"/>
+      <stop offset="1" stop-color="#7a1212"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <rect x="22" y="22" width="468" height="468" rx="78" fill="none" stroke="#5c1c22" stroke-width="18"/>
+  <path d="M256 92 394 256 256 420 118 256Z" fill="#130909" stroke="url(#sigil)" stroke-width="22" filter="url(#glow)"/>
+  <path d="M256 128 344 256 256 384 168 256Z" fill="#9b1a1a" opacity="0.88"/>
+  <path d="M256 152v208M152 256h208" stroke="#f0cece" stroke-width="24" stroke-linecap="round" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="34" fill="#f0cece"/>
+</svg>

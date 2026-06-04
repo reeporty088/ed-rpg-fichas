@@ -54,6 +54,11 @@
         @keyframes slideIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} }
     </style>
     <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body data-require-auth="true" data-required-version="v1">
 
@@ -443,5 +448,6 @@
     generateMap();
 
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+{
+  "name": "Escória de Deus RPG",
+  "short_name": "ED RPG",
+  "description": "Portal e sistema de fichas digitais do Escória de Deus RPG.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#070707",
+  "theme_color": "#130909",
+  "categories": ["games", "utilities"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
