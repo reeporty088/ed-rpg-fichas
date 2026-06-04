@@ -31,6 +31,11 @@
             line-height: 1;
         }
     </style>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body data-require-auth="false">
     <div class="overlay-moeda">
@@ -59,5 +64,6 @@
         document.getElementById('moeda_value').innerText = String(valor);
     });
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

@@ -153,6 +153,11 @@
         .config-option { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
     </style>
     <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body data-require-auth="true" data-required-version="v1">
 
@@ -655,5 +660,6 @@
     window.toggleOverlay = (id, currentMode) => { const newMode = currentMode === 'status' ? 'nome' : 'status'; update(ref(db, `fichas/${id}`), { overlay_mode: newMode }); };
     window.sendXP = (id) => { const input = document.getElementById(`input_xp_${id}`); const qtd = parseInt(input.value); if (qtd && qtd > 0) { const xpRef = ref(db, `fichas/${id}/xp_total`); runTransaction(xpRef, (current) => (current || 0) + qtd).then(() => { input.value = ""; }); } };
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

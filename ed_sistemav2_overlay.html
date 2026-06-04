@@ -65,6 +65,11 @@
         .empty { color: #fff; font-size: 18px; text-transform: uppercase; padding: 12px; text-shadow: 2px 2px 0 #000; }
     </style>
     <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body>
 <div class="overlay-wrap" id="overlay-wrap">
@@ -282,5 +287,6 @@
     applyLayout();
     setEditVisual(false);
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

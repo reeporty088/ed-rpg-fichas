@@ -180,6 +180,11 @@
         @media (max-width: 768px) { .container { display: block; } .col { display: none; width: 100%; animation: fadeEffect 0.5s; } .col.active { display: flex; } .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--theme-main); padding: 15px 0; justify-content: center; gap: 50px; z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.7); border-top: 1px solid var(--theme-light); } .nav-btn { background: rgba(0,0,0,0.3); border: 2px solid white; color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; } .nav-btn:active { transform: scale(0.9); background: white; color: black; } @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} } }
     </style>
     <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body data-require-auth="true" data-required-version="v1">
 <a class="hub-back-btn" href="index.html">← Hub</a>
@@ -928,5 +933,6 @@
     window.toggleSkull = (id) => { const el = document.getElementById(id); el.classList.toggle('active'); update(ref(db, 'fichas/' + fichaID), { [id]: el.classList.contains('active') ? "active" : "inactive" }); };
     document.getElementById('img_upload').addEventListener('change', (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (readerEvent) => { const image = new Image(); image.onload = () => { const canvas = document.createElement('canvas'); const maxSize = 300; let width = image.width; let height = image.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0, width, height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('avatar_display').style.backgroundImage = `url(${dataUrl})`; update(ref(db, 'fichas/' + fichaID), { char_img: dataUrl }); }; image.src = readerEvent.target.result; }; reader.readAsDataURL(file); });
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

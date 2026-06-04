@@ -475,6 +475,11 @@
     .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
   </style>
   <script src="auth.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body>
 <div class="wrap">
@@ -825,5 +830,6 @@ document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.lo
 window.onAuthStoreChanged = render;
 render();
 </script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>
