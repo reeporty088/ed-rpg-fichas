@@ -140,7 +140,7 @@ const CATEGORIES = {
     descField: 'desc'
   },
   tecnicas: {
-    label: '🗡️ Técnicas',
+    label: '🗡️ Técnicas (old)',
     fields: [
       { key:'titulo',    label:'Título',        type:'text',     required:true },
       { key:'caminho',   label:'Caminho Arcano', type:'select',   options: CAMINHOS_LIST },
@@ -154,6 +154,23 @@ const CATEGORIES = {
     ],
     meta: (it) => `Caminho: ${it.caminho || '-'} • Perícia: ${it.pericia || '-'}`,
     descField: 'desc'
+  },
+
+  tecnicas_v2: {
+    label: '🪄 Técnicas V2',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'tipo', label:'Tipo', type:'text' },
+      { key:'subtipo', label:'Subtipo', type:'text' },
+      { key:'categoria', label:'Categoria', type:'text' },
+      { key:'custo_pm', label:'Custo PM', type:'text' },
+      { key:'custo_pm_base', label:'Custo base PM', type:'text' },
+      { key:'imagem', label:'Imagem (base64/URL)', type:'textarea' },
+      { key:'detalhes_texto', label:'Detalhes', type:'textarea' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `${it.tipo || '-'}${it.subtipo ? ' • ' + it.subtipo : ''} • PM: ${it.custo_pm ?? it.custo_pm_base ?? '-'}`,
+    descField: 'detalhes_texto'
   },
   caminhos_arcanos: {
     label: '🌌 Caminhos Arcanos',
@@ -252,7 +269,7 @@ function renderPlayerTecnicas() {
   Object.entries(globalPlayers || {}).forEach(([fichaId, fichaData]) => {
     const tecnicas = fichaData?.habilidades?.tecnicas || {};
     const charName = fichaData?.char_name || fichaId;
-    const entries = Object.entries(tecnicas);
+    const entries = Object.entries(tecnicas).filter(([, tech]) => !tech?.creator_source && !tech?.custo_pm_base && !tech?.detalhes_texto);
     if (!entries.length) return;
 
     html += `<div style="grid-column:1/-1; font-size:11px; font-weight:700; color:#bda7a4; text-transform:uppercase; letter-spacing:1px; margin:4px 0 2px; font-family:'Segoe UI',sans-serif;">${esc(charName)}</div>`;
@@ -285,16 +302,26 @@ function renderCurrent(){
   if (currentTab === 'tecnicas') {
     document.getElementById('btn_area_novo').innerHTML = `
       <div style="display:flex;gap:6px;">
-        <button class="btn btn-add" onclick="openTecnicaForm('guiado')" title="Criar técnica com dropdowns e cálculo automático de PM">⊞ Guiado</button>
-        <button class="btn" style="border-color:#777;color:#ccc;" onclick="openTecnicaForm('manual')" title="Criar técnica com campos de texto livre">✎ Manual</button>
+        <button class="btn btn-add" onclick="openTecnicaForm('guiado')" title="Criar técnica antiga com dropdowns e cálculo automático de PM">⊞ Guiado old</button>
+        <button class="btn" style="border-color:#777;color:#ccc;" onclick="openTecnicaForm('manual')" title="Criar técnica antiga com campos de texto livre">✎ Manual old</button>
       </div>`;
     list.className = '';
     list.style.cssText = '';
     list.innerHTML =
-      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas do Compêndio</div>' +
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas antigas do Compêndio</div>' +
       renderCompendiumItems('tecnicas') +
-      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin:16px 0 12px;">Técnicas dos Jogadores</div>' +
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin:16px 0 12px;">Técnicas antigas dos Jogadores</div>' +
       renderPlayerTecnicas();
+    return;
+  }
+
+  if (currentTab === 'tecnicas_v2') {
+    document.getElementById('btn_area_novo').innerHTML = '<button class="btn btn-add" onclick="openTecnicaV2Creator()">+ Nova Técnica V2</button>';
+    list.className = '';
+    list.style.cssText = '';
+    list.innerHTML =
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas V2 do Compêndio</div>' +
+      renderCompendiumItems('tecnicas_v2');
     return;
   }
 
@@ -340,6 +367,7 @@ function buildFields(cat, data = {}, forceText = false){
 window.switchTab = (tab) => { currentTab = tab; renderTabs(); renderCurrent(); };
 window.openCurrentTabForm = () => window.openForm(currentTab);
 window.openTecnicaForm = (mode) => { tecnicaFormMode = mode; window.openForm('tecnicas'); };
+window.openTecnicaV2Creator = () => { window.location.href = 'ed_sistemav3_criadordetecnicas.html?source=compendium'; };
 
 window.openForm = (cat, id='') => {
   const item = id ? (globalData[cat] || {})[id] || {} : {};
