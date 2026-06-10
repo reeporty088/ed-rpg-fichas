@@ -37,6 +37,23 @@
     textarea { min-height:80px; resize:vertical; }
     .hidden { display:none; }
     .hint { font-size:12px; color:#c9b2ae; }
+    .logic-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:12px; }
+    .logic-canvas { position:relative; min-height:640px; overflow:auto; border:1px solid var(--border); border-radius:12px; background:radial-gradient(circle at top,#160b0a,#050303 58%); }
+    .logic-svg { position:absolute; inset:0; width:1400px; height:900px; pointer-events:none; }
+    .logic-node { position:absolute; width:172px; min-height:86px; border:1px solid #70403c; border-radius:12px; background:linear-gradient(160deg,#21100e,#0c0504); padding:10px; cursor:grab; box-shadow:0 10px 24px #0009; user-select:none; }
+    .logic-node.selected { border-color:var(--light); box-shadow:0 0 0 2px #e8a09033,0 10px 24px #0009; }
+    .logic-node.final { border-color:#61b36f; }
+    .logic-node.start { border-color:#78b9ff; }
+    .logic-node-title { color:var(--light); font-weight:800; font-size:13px; margin-bottom:5px; }
+    .logic-node-meta { color:#9ebbd4; font-size:11px; }
+    .logic-node-desc { color:#bca8a5; font-size:11px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .logic-side { border:1px solid var(--border); border-radius:12px; padding:12px; background:#090404; align-self:start; }
+    .logic-help { color:#c9b2ae; font-size:12px; line-height:1.45; margin-bottom:10px; }
+    .logic-edges { display:flex; flex-direction:column; gap:7px; margin-top:8px; }
+    .logic-edge-row { display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; }
+    .logic-node-actions { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+    @media (max-width:900px){ .logic-layout{grid-template-columns:1fr;} .logic-side{order:-1;} }
+
   </style>
   <script src="auth.js"></script>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -172,6 +189,15 @@ const CATEGORIES = {
     meta: (it) => `${it.tipo || '-'}${it.subtipo ? ' • ' + it.subtipo : ''} • PM: ${it.custo_pm ?? it.custo_pm_base ?? '-'}`,
     descField: 'detalhes_texto'
   },
+
+  logica_tecnicas: {
+    label: '🧩 Lógica de Técnicas',
+    fields: [
+      { key:'titulo', label:'Título', type:'text' }
+    ],
+    meta: () => 'Editor visual do fluxo do criador de técnicas',
+    descField: 'titulo'
+  },
   caminhos_arcanos: {
     label: '🌌 Caminhos Arcanos',
     fields: [
@@ -294,10 +320,179 @@ function renderPlayerTecnicas() {
   return '<div class="grid">' + html + '</div>';
 }
 
+
+let selectedLogicNode = 'start';
+let connectFromNode = '';
+let draggingLogicNode = null;
+
+function logicData() {
+  const data = globalData.logica_tecnicas || {};
+  const nodes = data.nodes || {};
+  const edges = data.edges || {};
+  return { nodes, edges };
+}
+function ensureLogicStart() {
+  const { nodes } = logicData();
+  if (nodes.start) return;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/start`]: {
+      nome: 'Começar', desc: 'Bloco inicial do criador de técnicas.', custo_pm: 0, final: false, x: 60, y: 260, locked: true
+    }
+  });
+}
+function edgeListFrom(nodeId) {
+  const { edges } = logicData();
+  return Object.entries(edges).filter(([, e]) => e?.from === nodeId).map(([id, e]) => ({ id, ...e }));
+}
+function renderTechniqueLogicEditor() {
+  ensureLogicStart();
+  const { nodes, edges } = logicData();
+  const node = nodes[selectedLogicNode] || nodes.start || {};
+  document.getElementById('btn_area_novo').innerHTML = `
+    <button class="btn btn-add" onclick="addLogicNode()">+ Bloco conectado</button>
+    <button class="btn btn-warn" onclick="addLogicFinalNode()">◆ Finalizar ramo</button>
+    <button class="btn" onclick="startLogicConnect()">↗ Conectar seta</button>`;
+  const list = document.getElementById('list_current');
+  list.className = '';
+  list.style.cssText = '';
+  const nodeOptions = Object.entries(nodes).map(([id, n]) => `<option value="${esc(id)}">${esc(n.nome || id)}</option>`).join('');
+  list.innerHTML = `
+    <div class="logic-layout">
+      <div class="logic-canvas" id="logic_canvas" onpointermove="dragLogicMove(event)" onpointerup="finishLogicDrag(event)" onpointerleave="finishLogicDrag(event)">
+        <svg class="logic-svg" viewBox="0 0 1400 900" preserveAspectRatio="none">
+          <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d89a8e"></path></marker></defs>
+          ${Object.entries(edges).map(([id, e]) => {
+            const a = nodes[e.from] || {}; const b = nodes[e.to] || {};
+            const x1 = (Number(a.x) || 0) + 172; const y1 = (Number(a.y) || 0) + 43;
+            const x2 = Number(b.x) || 0; const y2 = (Number(b.y) || 0) + 43;
+            return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#d89a8e" stroke-width="2" marker-end="url(#arrow)" opacity=".85" />`;
+          }).join('')}
+        </svg>
+        ${Object.entries(nodes).map(([id, n]) => `
+          <div data-node-id="${esc(id)}" class="logic-node ${id===selectedLogicNode?'selected':''} ${id==='start'?'start':''} ${n.final?'final':''}"
+               style="left:${Number(n.x)||40}px; top:${Number(n.y)||40}px;"
+               onclick="selectLogicNode('${esc(id)}')" onpointerdown="startLogicDrag(event,'${esc(id)}')">
+            <div class="logic-node-title">${esc(n.nome || id)}</div>
+            <div class="logic-node-meta">${n.final ? '◆ Finalizador' : 'PM: ' + (Number(n.custo_pm)||0)}</div>
+            <div class="logic-node-desc">${esc(n.desc || 'Sem descrição')}</div>
+          </div>`).join('')}
+      </div>
+      <aside class="logic-side">
+        <div class="logic-help">Crie blocos, conecte setas e marque blocos finais. O criador de técnicas lê este mapa em tempo real: cada bloco clicado soma/subtrai seu custo de PM e os blocos finais abrem a carta de conclusão.</div>
+        <h3 style="margin:0 0 8px;color:var(--light);">Editar info</h3>
+        <label>Nome do bloco</label><input id="logic_nome" value="${esc(node.nome || '')}">
+        <label>Descrição</label><textarea id="logic_desc">${esc(node.desc || '')}</textarea>
+        <div class="row-2"><div><label>Custo PM</label><input id="logic_cost" type="number" value="${Number(node.custo_pm)||0}"></div><div><label>Finalizador</label><select id="logic_final"><option value="false" ${node.final?'':'selected'}>Não</option><option value="true" ${node.final?'selected':''}>Sim</option></select></div></div>
+        <div class="logic-node-actions">
+          <button class="btn btn-add" onclick="saveLogicNodeInfo()">Salvar</button>
+          <button class="btn btn-del" onclick="deleteLogicNode()" ${selectedLogicNode==='start'?'disabled':''}>Deletar</button>
+        </div>
+        <h3 style="margin:12px 0 6px;color:var(--light);">Setas saindo deste bloco</h3>
+        <div class="logic-edges">
+          ${edgeListFrom(selectedLogicNode).map(e => `
+            <div class="logic-edge-row">
+              <select onchange="moveLogicEdge('${esc(e.id)}', this.value)">${nodeOptions.replace(`value="${esc(e.to)}"`, `value="${esc(e.to)}" selected`)}</select>
+              <button class="btn btn-del" onclick="deleteLogicEdge('${esc(e.id)}')">✖</button>
+            </div>`).join('') || '<div class="hint">Sem setas saindo daqui.</div>'}
+        </div>
+      </aside>
+    </div>`;
+}
+window.selectLogicNode = (id) => {
+  if (draggingLogicNode) return;
+  if (connectFromNode && connectFromNode !== id) {
+    const k = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+    update(ref(db, `${dbPath}/logica_tecnicas/edges/${k}`), { from: connectFromNode, to: id });
+    connectFromNode = '';
+  }
+  selectedLogicNode = id;
+  renderCurrent();
+};
+window.startLogicDrag = (event, id) => {
+  if (event.button !== 0) return;
+  selectedLogicNode = id;
+  const { nodes } = logicData();
+  const n = nodes[id] || {};
+  draggingLogicNode = { id, startX: event.clientX, startY: event.clientY, x: Number(n.x) || 0, y: Number(n.y) || 0, moved: false };
+  event.currentTarget.setPointerCapture?.(event.pointerId);
+};
+window.dragLogicMove = (event) => {
+  if (!draggingLogicNode) return;
+  const dx = event.clientX - draggingLogicNode.startX;
+  const dy = event.clientY - draggingLogicNode.startY;
+  if (Math.abs(dx) + Math.abs(dy) > 3) draggingLogicNode.moved = true;
+  const x = Math.max(0, draggingLogicNode.x + dx);
+  const y = Math.max(0, draggingLogicNode.y + dy);
+  const nodeEl = document.querySelector(`.logic-node[data-node-id="${CSS.escape(draggingLogicNode.id)}"]`);
+  if (nodeEl) { nodeEl.style.left = `${x}px`; nodeEl.style.top = `${y}px`; }
+};
+window.finishLogicDrag = (event) => {
+  if (!draggingLogicNode) return;
+  const d = draggingLogicNode;
+  draggingLogicNode = null;
+  if (!d.moved) return;
+  const x = Math.max(0, d.x + (event?.clientX || d.startX) - d.startX);
+  const y = Math.max(0, d.y + (event?.clientY || d.startY) - d.startY);
+  update(ref(db, `${dbPath}/logica_tecnicas/nodes/${d.id}`), { x, y });
+};
+window.addLogicNode = () => {
+  const { nodes } = logicData();
+  const parent = nodes[selectedLogicNode] || nodes.start || { x: 40, y: 40 };
+  const k = push(ref(db, `${dbPath}/logica_tecnicas/nodes`)).key;
+  const e = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/${k}`]: { nome: 'Novo bloco', desc: '', custo_pm: 0, final: false, x: (Number(parent.x)||40)+230, y: (Number(parent.y)||40)+40 },
+    [`${dbPath}/logica_tecnicas/edges/${e}`]: { from: selectedLogicNode || 'start', to: k }
+  });
+  selectedLogicNode = k;
+};
+window.addLogicFinalNode = () => {
+  const { nodes } = logicData();
+  const parent = nodes[selectedLogicNode] || nodes.start || { x: 40, y: 40 };
+  const k = push(ref(db, `${dbPath}/logica_tecnicas/nodes`)).key;
+  const e = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/${k}`]: { nome: 'Finalizar', desc: 'Finaliza este ramo e abre a carta da técnica.', custo_pm: 0, final: true, x: (Number(parent.x)||40)+230, y: (Number(parent.y)||40)+80 },
+    [`${dbPath}/logica_tecnicas/edges/${e}`]: { from: selectedLogicNode || 'start', to: k }
+  });
+  selectedLogicNode = k;
+};
+window.startLogicConnect = () => {
+  connectFromNode = selectedLogicNode || 'start';
+  alert('Clique no bloco de destino para criar a seta.');
+};
+window.saveLogicNodeInfo = () => {
+  const payload = {
+    nome: document.getElementById('logic_nome').value.trim() || 'Sem nome',
+    desc: document.getElementById('logic_desc').value.trim(),
+    custo_pm: Number(document.getElementById('logic_cost').value || 0),
+    final: document.getElementById('logic_final').value === 'true'
+  };
+  update(ref(db, `${dbPath}/logica_tecnicas/nodes/${selectedLogicNode}`), payload);
+};
+window.deleteLogicNode = async () => {
+  if (selectedLogicNode === 'start') return;
+  if (!confirm('Deletar este bloco e todas as setas ligadas a ele?')) return;
+  const { edges } = logicData();
+  const updates = { [`${dbPath}/logica_tecnicas/nodes/${selectedLogicNode}`]: null };
+  Object.entries(edges).forEach(([id, e]) => {
+    if (e.from === selectedLogicNode || e.to === selectedLogicNode) updates[`${dbPath}/logica_tecnicas/edges/${id}`] = null;
+  });
+  selectedLogicNode = 'start';
+  await update(ref(db), updates);
+};
+window.moveLogicEdge = (edgeId, to) => update(ref(db, `${dbPath}/logica_tecnicas/edges/${edgeId}`), { to });
+window.deleteLogicEdge = (edgeId) => remove(ref(db, `${dbPath}/logica_tecnicas/edges/${edgeId}`));
+
 function renderCurrent(){
   const cfg = CATEGORIES[currentTab];
   document.getElementById('sec_title').innerText = cfg.label;
   const list = document.getElementById('list_current');
+
+  if (currentTab === 'logica_tecnicas') {
+    renderTechniqueLogicEditor();
+    return;
+  }
 
   if (currentTab === 'tecnicas') {
     document.getElementById('btn_area_novo').innerHTML = `
