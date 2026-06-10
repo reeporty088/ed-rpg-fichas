@@ -2921,10 +2921,10 @@ onValue(ref(db, dbPath), snap => {
     renderArcanaPathButtons();
 
     const habs = charData.habilidades || {};
-    ['classe_hab','raca_hab','arcana_habs','armas','inventario'].forEach(cat => {
-        renderHabs(cat, habs[cat]);
+    const habsForRender = { ...habs, tecnicas: collectFichaTechniques(habs) };
+    ['classe_hab','raca_hab','arcana_habs','tecnicas','armas','inventario'].forEach(cat => {
+        renderHabs(cat, habsForRender[cat]);
     });
-    renderHabs('tecnicas', collectFichaTechniques(habs));
 });
 
 // ============================================================
