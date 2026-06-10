@@ -767,6 +767,91 @@
             line-height: 1.4;
         }
 
+
+        .tech-v2-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+            gap: 9px;
+        }
+        .tech-v2-mini {
+            position: relative;
+            overflow: hidden;
+            min-height: 108px;
+            border: 1px solid var(--theme-border);
+            border-radius: 10px;
+            cursor: pointer;
+            background: #0d0608;
+            box-shadow: inset 0 0 22px rgba(0,0,0,0.65);
+        }
+        .tech-v2-mini::before {
+            content: "";
+            position: absolute;
+            inset: -10px;
+            background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.35), rgba(40,8,12,.8)));
+            background-size: cover;
+            background-position: center;
+            filter: blur(9px);
+            opacity: .65;
+            transform: scale(1.08);
+        }
+        .tech-v2-mini::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.82));
+        }
+        .tech-v2-mini-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            min-height: 108px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+        }
+        .tech-v2-mini-title {
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f7d18b;
+            line-height: 1.2;
+            text-shadow: 0 1px 6px #000;
+        }
+        .tech-v2-mini-cost {
+            align-self: flex-start;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            color: #bfe8ff;
+            border: 1px solid rgba(120,190,255,.55);
+            background: rgba(8,30,65,.68);
+            border-radius: 999px;
+            padding: 3px 8px;
+        }
+        .tech-discount-active {
+            background: rgba(45,110,70,0.9) !important;
+            border-color: #86e39a !important;
+            color: #dcffe4 !important;
+            box-shadow: 0 0 10px rgba(80,220,130,.25);
+        }
+        .tech-detail-card {
+            display: grid;
+            grid-template-columns: minmax(180px, 260px) 1fr;
+            gap: 14px;
+        }
+        .tech-detail-image {
+            min-height: 270px;
+            border-radius: 12px;
+            border: 1px solid var(--theme-border);
+            background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.35), rgba(40,8,12,.8)));
+            background-size: cover;
+            background-position: center;
+        }
+        .tech-detail-title { font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin:0 0 4px; }
+        .tech-detail-meta { color:#9dd9ff; font-family:'Cinzel',serif; font-size:12px; margin-bottom:10px; }
+        .tech-detail-section { border-top:1px solid #332; padding-top:8px; margin-top:8px; color:#d7cdc4; font-size:13px; line-height:1.45; white-space:pre-wrap; }
+        @media (max-width: 720px) { .tech-detail-card { grid-template-columns: 1fr; } }
+
         /* EQUIPAMENTOS */
         .equip-card {
             background: linear-gradient(145deg, #0f0a05 0%, #080604 100%);
@@ -1493,13 +1578,15 @@
 
             <!-- TÉCNICAS -->
             <div class="section-header">
-                <label style="color:#aaeeff;">Técnicas (PDT)</label>
-                <div style="display:flex; gap:5px; align-items:center;">
-                    <span style="font-family:'Cinzel',serif; font-size:10px; color:#3399ff;" id="pdt_display">PDT: 1</span>
-                    <button class="btn-add" onclick="createManual('tecnicas')">+ Nova</button>
+                <label style="color:#aaeeff;">Técnicas</label>
+                <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+                    <button class="btn-add" onclick="toggleSpellDiscount('conjuracao')" id="btn_foco_arcano" title="Reduz o custo atual das conjurações em 25%">Foco Arcano</button>
+                    <button class="btn-add" onclick="toggleSpellDiscount('clamor')" id="btn_simbolo_sagrado" title="Reduz o custo atual dos clamores em 25%">Símbolo Sagrado</button>
+                    <button class="btn-add" onclick="openDBModal('tecnicas')">📚 Banco</button>
+                    <button class="btn-add" onclick="openTechniqueCreator()">+ Nova</button>
                 </div>
             </div>
-            <div id="list_tecnicas" style="margin-bottom:12px;"></div>
+            <div id="list_tecnicas" class="tech-v2-grid" style="margin-bottom:12px;"></div>
 
             <hr class="hr">
 
@@ -1672,6 +1759,18 @@
 </div>
 
 
+
+<!-- MODAL TÉCNICA V2 -->
+<div class="modal-overlay" id="modal_tecnica_v2" onclick="closeModal('modal_tecnica_v2')">
+    <div class="modal-box modal-large" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 style="color:#aaeeff;">Técnica</h3>
+            <button class="btn-close" onclick="closeModal('modal_tecnica_v2')">✖</button>
+        </div>
+        <div id="tecnica_v2_detail"></div>
+    </div>
+</div>
+
 <!-- MODAL ASCENSÃO -->
 <div class="modal-overlay" id="modal_asc" onclick="closeModal('modal_asc')">
     <div class="modal-box modal-large" onclick="event.stopPropagation()">
@@ -1750,7 +1849,7 @@ const fichaID = urlParams.get('p') || "personagem_padrao_v3";
 const dbPath = `fichas_v3/${fichaID}`;
 
 let charData = {};
-let compendium = { classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {}, ascensao_arcana: {} };
+let compendium = { classes: {}, racas: {}, equipamentos: {}, tecnicas_v2: {}, maldicoes_dadivas: {}, ascensao_arcana: {} };
 let currentCategory = "";
 let currentDBItems = [];
 let rollMode = 'none';
@@ -2248,6 +2347,71 @@ window.toggleDadiva = (id) => {
     update(ref(db, dbPath), { 'toggles/dadivas_ativas': ativas });
 };
 
+
+function escHtml(s = "") {
+    return String(s ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+}
+function normalizeTechniqueSubtype(tech = {}) {
+    return normalizePathName(tech.subtipo || tech.spell_subtype || '');
+}
+function getTechniqueBaseCost(tech = {}) {
+    const raw = tech.custo_pm_base ?? tech.custo_pm ?? tech.custo ?? 0;
+    const n = parseInt(String(raw).replace(/[^0-9-]/g, ''), 10);
+    return Number.isFinite(n) ? n : 0;
+}
+function getTechniqueDisplayCost(tech = {}) {
+    const base = getTechniqueBaseCost(tech);
+    const subtype = normalizeTechniqueSubtype(tech);
+    const discounts = charData.tecnica_descontos || {};
+    const applies = (subtype.includes('conjuracao') && discounts.conjuracao) || (subtype.includes('clamor') && discounts.clamor);
+    return applies ? Math.ceil(base * 0.75) : base;
+}
+function updateTechniqueDiscountButtons() {
+    const discounts = charData.tecnica_descontos || {};
+    document.getElementById('btn_foco_arcano')?.classList.toggle('tech-discount-active', discounts.conjuracao === true);
+    document.getElementById('btn_simbolo_sagrado')?.classList.toggle('tech-discount-active', discounts.clamor === true);
+}
+window.toggleSpellDiscount = (subtype) => {
+    const discounts = charData.tecnica_descontos || {};
+    update(ref(db, `${dbPath}/tecnica_descontos`), { [subtype]: discounts[subtype] === true ? null : true });
+};
+window.openTechniqueCreator = () => {
+    window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}`;
+};
+window.openTechniqueDetail = (id) => {
+    const tech = charData.habilidades?.tecnicas?.[id];
+    if (!tech) return;
+    const img = tech.imagem || tech.image || '';
+    const details = tech.detalhes_texto || buildTechniqueDetailsText(tech);
+    const cost = getTechniqueDisplayCost(tech);
+    const base = getTechniqueBaseCost(tech);
+    const discountNote = cost !== base ? ` <span style="color:#8ff0a4;">(base ${base} PM com redução de 25%)</span>` : '';
+    const bg = img ? `style="--tech-bg:url('${String(img).replace(/'/g, '%27')}')"` : '';
+    document.getElementById('tecnica_v2_detail').innerHTML = `
+        <div class="tech-detail-card" ${bg}>
+            <div class="tech-detail-image"></div>
+            <div>
+                <h2 class="tech-detail-title">${escHtml(tech.titulo || 'Técnica sem nome')}</h2>
+                <div class="tech-detail-meta">${cost} PM${discountNote}</div>
+                <div class="tech-detail-section"><b>Detalhes da habilidade</b>\n${escHtml(details || 'Sem detalhes.')}</div>
+                <div class="tech-detail-section"><b>Descrição</b>\n${escHtml(tech.desc || 'Sem descrição.')}</div>
+                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
+                    <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="editTechnique('${id}')">Editar</button>
+                    <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="removeItem('tecnicas','${id}'); closeModal('modal_tecnica_v2')">Excluir</button>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('modal_tecnica_v2').classList.add('open');
+};
+window.editTechnique = (id) => {
+    window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}&edit=${encodeURIComponent(id)}`;
+};
+function buildTechniqueDetailsText(tech = {}) {
+    if (Array.isArray(tech.detalhes)) return tech.detalhes.map(d => `${d.label}: ${d.value}`).join('\n');
+    return [tech.tipo, tech.subtipo, tech.categoria, tech.ramo, tech.elemento, tech.dados, tech.alcance, tech.area, tech.alvos, tech.duracao]
+        .filter(Boolean).join(' • ');
+}
+
 // ============================================================
 // COMPÊNDIO / DB MODAL
 // ============================================================
@@ -2259,7 +2423,8 @@ window.openDBModal = (cat) => {
         classe_hab: 'Escolher Classe',
         raca_hab: 'Escolher Raça',
         armas: 'Equipamentos',
-        arcana_habs: 'Habilidades de Arcana'
+        arcana_habs: 'Habilidades de Arcana',
+        tecnicas: 'Técnicas V2'
     };
     document.getElementById('db_modal_title').innerText = titles[currentCategory] || 'Compêndio';
 
@@ -2267,6 +2432,7 @@ window.openDBModal = (cat) => {
     if (currentCategory === 'classe_hab') dataObj = compendium.classes || {};
     else if (currentCategory === 'raca_hab') dataObj = compendium.racas || {};
     else if (currentCategory === 'armas') dataObj = compendium.equipamentos || {};
+    else if (currentCategory === 'tecnicas') dataObj = compendium.tecnicas_v2 || {};
 
     currentDBItems = Object.keys(dataObj).map(k => ({ id: k, ...dataObj[k] }));
     currentDBItems.sort((a, b) => (a.titulo || "").localeCompare(b.titulo || ""));
@@ -2305,7 +2471,8 @@ function renderDBList(items) {
 window.addFromDB = (itemId) => {
     const dataObj = currentCategory === 'classe_hab' ? compendium.classes :
                     currentCategory === 'raca_hab' ? compendium.racas :
-                    currentCategory === 'armas' ? compendium.equipamentos : {};
+                    currentCategory === 'armas' ? compendium.equipamentos :
+                    currentCategory === 'tecnicas' ? compendium.tecnicas_v2 : {};
     const item = dataObj[itemId];
     if (!item) { alert("Item não encontrado no banco."); return; }
 
@@ -2339,6 +2506,10 @@ window.addFromDB = (itemId) => {
             tipo: item.tipo_dano || "",
             desc: item.desc || ""
         });
+    } else if (currentCategory === 'tecnicas') {
+        const payload = { ...item, compendium_id: itemId };
+        delete payload.id;
+        push(ref(db, `${dbPath}/habilidades/tecnicas`), payload);
     }
     closeModal('modal_db');
 };
@@ -2350,18 +2521,7 @@ window.addFromDB = (itemId) => {
 window.createManual = (cat) => {
     currentCategory = cat;
     if (cat === 'tecnicas') {
-        push(ref(db, `${dbPath}/habilidades/tecnicas`), {
-            titulo: "Nova Técnica",
-            caminho: "",
-            pericia: "",
-            custo_pm: "0",
-            alcance: "",
-            area: "",
-            dados: "",
-            duracao: "",
-            desc: "",
-            modo_edicao: "guiado"
-        });
+        openTechniqueCreator();
     } else if (cat === 'armas') {
         push(ref(db, `${dbPath}/habilidades/armas`), {
             titulo: "Novo Equipamento",
@@ -2461,90 +2621,16 @@ function renderHabs(cat, data) {
         const div = document.createElement('div');
 
         if (cat === 'tecnicas') {
-            div.className = 'tecnica-card';
-            const mode = item.modo_edicao || 'manual';
-            const isGuiado = mode === 'guiado';
-
-            const modeBtnStyle = 'background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;white-space:nowrap;';
-            const modeBtn = `<button onclick="toggleTecnicaMode('${cat}','${id}')" style="${modeBtnStyle}" title="Alternar modo de edição">${isGuiado ? '✎ Manual' : '⊞ Guiado'}</button>`;
-
-            const gridGuiado = `
-                <div class="tecnica-grid">
-                    <div>
-                        <label style="font-size:8px;">Caminho</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','caminho',this.value)">${makeOpts(ARCANA_PATHS, item.caminho, 'Caminho...')}</select>
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Perícia</label>
-                        <select class="tecnica-input" onchange="saveHab('${cat}','${id}','pericia',this.value)">${makeOpts(PERICIAS, item.pericia, 'Perícia...')}</select>
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Custo (PM)</label>
-                        <input type="number" id="t_pm_${id}" class="tecnica-input" value="${item.custo_pm ?? 0}" readonly style="cursor:not-allowed;opacity:0.7;">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Alcance</label>
-                        <select id="t_alcance_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','alcance',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_ALCANCES, item.alcance, 'Alcance...')}</select>
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Área</label>
-                        <select id="t_area_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','area',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_AREAS, item.area, 'Área...')}</select>
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Dados</label>
-                        <select id="t_dados_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','dados',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DADOS, item.dados, 'Dados...')}</select>
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Duração</label>
-                        <select id="t_duracao_${id}" class="tecnica-input" onchange="saveHab('${cat}','${id}','duracao',this.value);calcAndSaveTecnicaCusto('${cat}','${id}')">${makeOpts(TECNICA_DURACOES, item.duracao, 'Duração...')}</select>
-                    </div>
-                </div>`;
-
-            const gridManual = `
-                <div class="tecnica-grid">
-                    <div>
-                        <label style="font-size:8px;">Caminho</label>
-                        <input type="text" class="tecnica-input" value="${item.caminho || ''}" onchange="saveHab('${cat}','${id}','caminho',this.value)" placeholder="Ex: Emitir">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Perícia</label>
-                        <input type="text" class="tecnica-input" value="${item.pericia || ''}" onchange="saveHab('${cat}','${id}','pericia',this.value)" placeholder="Ex: Mística">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Custo (PM)</label>
-                        <input type="number" class="tecnica-input" value="${item.custo_pm || ''}" onchange="saveHab('${cat}','${id}','custo_pm',this.value)" placeholder="0">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Alcance</label>
-                        <input type="text" class="tecnica-input" value="${item.alcance || ''}" onchange="saveHab('${cat}','${id}','alcance',this.value)" placeholder="Ex: 4 blocos">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Área</label>
-                        <input type="text" class="tecnica-input" value="${item.area || ''}" onchange="saveHab('${cat}','${id}','area',this.value)" placeholder="Ex: 2 blocos raio">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Dados</label>
-                        <input type="text" class="tecnica-input" value="${item.dados || ''}" onchange="saveHab('${cat}','${id}','dados',this.value)" placeholder="Ex: 2d6">
-                    </div>
-                    <div>
-                        <label style="font-size:8px;">Duração</label>
-                        <input type="text" class="tecnica-input" value="${item.duracao || ''}" onchange="saveHab('${cat}','${id}','duracao',this.value)" placeholder="Ex: 3 turnos">
-                    </div>
-                </div>`;
-
+            div.className = 'tech-v2-mini';
+            const img = item.imagem || item.image || '';
+            if (img) div.style.setProperty('--tech-bg', `url('${String(img).replace(/'/g, "%27")}')`);
+            const displayCost = getTechniqueDisplayCost(item);
+            div.onclick = () => openTechniqueDetail(id);
             div.innerHTML = `
-                <div class="tecnica-header">
-                    <input type="text" class="tecnica-title-input" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Nome da Técnica">
-                    <div style="display:flex;gap:4px;align-items:center;">
-                        <div class="tecnica-custo" id="t_badge_${id}">${(item.custo_pm ?? 0) + ' PM'}</div>
-                        ${modeBtn}
-                        <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
-                    </div>
-                </div>
-                ${isGuiado ? gridGuiado : gridManual}
-                <label style="font-size:8px;">Descrição / Efeito</label>
-                <textarea class="tecnica-desc" onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Descreva o efeito da técnica...">${item.desc || ''}</textarea>
-            `;
+                <div class="tech-v2-mini-content">
+                    <div class="tech-v2-mini-title">${item.titulo || 'Técnica sem nome'}</div>
+                    <div class="tech-v2-mini-cost">${displayCost} PM</div>
+                </div>`;
         } else if (cat === 'armas') {
             div.className = 'equip-card';
             div.innerHTML = `
@@ -2787,6 +2873,7 @@ onValue(ref(db, dbPath), snap => {
     updateBar('mana', charData.mana_at, charData.mana_max);
 
     buildPericiasGrid();
+    updateTechniqueDiscountButtons();
     renderRollPlaceholders();
     buildProficiencias();
     calcDerived();
