@@ -770,63 +770,56 @@
 
         .tech-v2-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-            gap: 9px;
+            grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+            gap: 7px;
         }
         .tech-v2-mini {
             position: relative;
             overflow: hidden;
-            min-height: 108px;
-            border: 1px solid var(--theme-border);
-            border-radius: 10px;
+            min-height: 74px;
+            border: 1px solid rgba(143,216,255,0.22);
+            border-radius: 9px;
             cursor: pointer;
-            background: #0d0608;
-            box-shadow: inset 0 0 22px rgba(0,0,0,0.65);
+            background: #070406;
+            box-shadow: inset 0 0 18px rgba(0,0,0,0.72), 0 4px 10px rgba(0,0,0,0.22);
+            transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+        }
+        .tech-v2-mini:hover {
+            transform: translateY(-1px);
+            border-color: rgba(214,168,95,0.72);
+            box-shadow: inset 0 0 18px rgba(0,0,0,0.72), 0 0 12px rgba(214,168,95,0.16);
         }
         .tech-v2-mini::before {
             content: "";
             position: absolute;
-            inset: -10px;
-            background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.35), rgba(40,8,12,.8)));
+            inset: 0;
+            background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.32), rgba(40,8,12,.76)));
             background-size: cover;
             background-position: center;
-            filter: blur(9px);
-            opacity: .65;
-            transform: scale(1.08);
+            opacity: .38;
         }
         .tech-v2-mini::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.82));
+            background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.76));
         }
         .tech-v2-mini-content {
             position: relative;
             z-index: 1;
-            height: 100%;
-            min-height: 108px;
+            min-height: 74px;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
+            align-items: flex-end;
+            padding: 8px;
         }
         .tech-v2-mini-title {
             font-family: 'Cinzel', serif;
-            font-size: 12px;
-            font-weight: 700;
-            color: #f7d18b;
-            line-height: 1.2;
-            text-shadow: 0 1px 6px #000;
-        }
-        .tech-v2-mini-cost {
-            align-self: flex-start;
-            font-family: 'Cinzel', serif;
             font-size: 11px;
-            color: #bfe8ff;
-            border: 1px solid rgba(120,190,255,.55);
-            background: rgba(8,30,65,.68);
-            border-radius: 999px;
-            padding: 3px 8px;
+            font-weight: 800;
+            color: #f7d18b;
+            line-height: 1.15;
+            text-shadow: 0 1px 7px #000;
+            overflow-wrap: anywhere;
         }
         .tech-discount-active {
             background: rgba(45,110,70,0.9) !important;
@@ -834,23 +827,26 @@
             color: #dcffe4 !important;
             box-shadow: 0 0 10px rgba(80,220,130,.25);
         }
-        .tech-detail-card {
-            display: grid;
-            grid-template-columns: minmax(180px, 260px) 1fr;
-            gap: 14px;
+        .tech-detail-card-preview {
+            max-width: 380px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid var(--theme-border);
+            border-radius: 16px;
+            background: #080404;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.48);
         }
         .tech-detail-image {
-            min-height: 270px;
-            border-radius: 12px;
-            border: 1px solid var(--theme-border);
-            background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.35), rgba(40,8,12,.8)));
+            min-height: 190px;
+            background: var(--tech-bg, radial-gradient(circle at top,#25364d,#210808));
             background-size: cover;
             background-position: center;
         }
-        .tech-detail-title { font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin:0 0 4px; }
+        .tech-detail-body { padding: 14px; }
+        .tech-detail-title { font-family:'Cinzel',serif; color:var(--gold); font-size:20px; margin:0 0 4px; }
         .tech-detail-meta { color:#9dd9ff; font-family:'Cinzel',serif; font-size:12px; margin-bottom:10px; }
         .tech-detail-section { border-top:1px solid #332; padding-top:8px; margin-top:8px; color:#d7cdc4; font-size:13px; line-height:1.45; white-space:pre-wrap; }
-        @media (max-width: 720px) { .tech-detail-card { grid-template-columns: 1fr; } }
+        .tech-detail-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:14px; }
 
         /* EQUIPAMENTOS */
         .equip-card {
@@ -1854,6 +1850,8 @@ let currentCategory = "";
 let currentDBItems = [];
 let rollMode = 'none';
 const ARCANA_PATHS = ['Aprimorar', 'Emitir', 'Moldar', 'Manipular'];
+const FICHA_TECH_CAT = 'tecnicas_v2';
+const LEGACY_TECH_CAT = 'tecnicas';
 
 function normalizePathName(val = "") {
     return val
@@ -2378,33 +2376,74 @@ window.toggleSpellDiscount = (subtype) => {
 window.openTechniqueCreator = () => {
     window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}`;
 };
-window.openTechniqueDetail = (id) => {
-    const tech = charData.habilidades?.tecnicas?.[id];
-    if (!tech) return;
+function makeTechniqueStorageKey(cat, id) {
+    return `${cat || FICHA_TECH_CAT}::${id}`;
+}
+function splitTechniqueStorageKey(storageKey = '') {
+    const [cat, ...rest] = String(storageKey).split('::');
+    return { cat: rest.length ? cat : FICHA_TECH_CAT, id: rest.length ? rest.join('::') : cat };
+}
+function isNewTechniqueRecord(tech = {}) {
+    return !!(tech?.creator_source || tech?.custo_pm_base !== undefined || tech?.detalhes_texto || tech?.tecnica_path_ids || tech?.compendium_id);
+}
+function collectFichaTechniques(habs = {}) {
+    const out = {};
+    Object.entries(habs[FICHA_TECH_CAT] || {}).forEach(([id, tech]) => {
+        out[makeTechniqueStorageKey(FICHA_TECH_CAT, id)] = { ...tech, __storageCat: FICHA_TECH_CAT, __storageId: id };
+    });
+    Object.entries(habs[LEGACY_TECH_CAT] || {}).forEach(([id, tech]) => {
+        if (!isNewTechniqueRecord(tech)) return;
+        out[makeTechniqueStorageKey(LEGACY_TECH_CAT, id)] = { ...tech, __storageCat: LEGACY_TECH_CAT, __storageId: id };
+    });
+    return out;
+}
+function getFichaTechniqueByKey(storageKey) {
+    const { cat, id } = splitTechniqueStorageKey(storageKey);
+    const tech = charData.habilidades?.[cat]?.[id];
+    return tech ? { tech, cat, id } : null;
+}
+window.openTechniqueDetail = (storageKey) => {
+    const found = getFichaTechniqueByKey(storageKey);
+    if (!found) return;
+    const { tech, cat, id } = found;
     const img = tech.imagem || tech.image || '';
     const details = tech.detalhes_texto || buildTechniqueDetailsText(tech);
     const cost = getTechniqueDisplayCost(tech);
     const base = getTechniqueBaseCost(tech);
     const discountNote = cost !== base ? ` <span style="color:#8ff0a4;">(base ${base} PM com redução de 25%)</span>` : '';
     const bg = img ? `style="--tech-bg:url('${String(img).replace(/'/g, '%27')}')"` : '';
+    const editKey = makeTechniqueStorageKey(cat, id);
     document.getElementById('tecnica_v2_detail').innerHTML = `
-        <div class="tech-detail-card" ${bg}>
+        <div class="tech-detail-card-preview" ${bg}>
             <div class="tech-detail-image"></div>
-            <div>
+            <div class="tech-detail-body">
                 <h2 class="tech-detail-title">${escHtml(tech.titulo || 'Técnica sem nome')}</h2>
                 <div class="tech-detail-meta">${cost} PM${discountNote}</div>
-                <div class="tech-detail-section"><b>Detalhes da habilidade</b>\n${escHtml(details || 'Sem detalhes.')}</div>
-                <div class="tech-detail-section"><b>Descrição</b>\n${escHtml(tech.desc || 'Sem descrição.')}</div>
-                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
-                    <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="editTechnique('${id}')">Editar</button>
-                    <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="removeItem('tecnicas','${id}'); closeModal('modal_tecnica_v2')">Excluir</button>
+                <div class="tech-detail-section"><b>Construção</b>
+${escHtml(details || 'Sem construção.')}</div>
+                <div class="tech-detail-section"><b>Descrição</b>
+${escHtml(tech.desc || 'Sem descrição.')}</div>
+                ${tech.obs ? `<div class="tech-detail-section"><b>Observações</b>
+${escHtml(tech.obs)}</div>` : ''}
+                <div class="tech-detail-actions">
+                    <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="editTechnique('${editKey}')">Editar</button>
+                    <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="closeModal('modal_tecnica_v2')">Fechar</button>
+                    <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="deleteTechnique('${editKey}')">Excluir</button>
                 </div>
             </div>
         </div>`;
     document.getElementById('modal_tecnica_v2').classList.add('open');
 };
-window.editTechnique = (id) => {
-    window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}&edit=${encodeURIComponent(id)}`;
+window.deleteTechnique = (storageKey) => {
+    const { cat, id } = splitTechniqueStorageKey(storageKey);
+    if (!confirm('Excluir esta técnica da ficha? Esta ação não pode ser desfeita.')) return;
+    remove(ref(db, `${dbPath}/habilidades/${cat}/${id}`));
+    closeModal('modal_tecnica_v2');
+};
+window.editTechnique = (storageKey) => {
+    const { cat, id } = splitTechniqueStorageKey(storageKey);
+    const extra = cat === LEGACY_TECH_CAT ? '&legacy=1' : '';
+    window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}&edit=${encodeURIComponent(id)}${extra}`;
 };
 function buildTechniqueDetailsText(tech = {}) {
     if (Array.isArray(tech.detalhes)) return tech.detalhes.map(d => `${d.label}: ${d.value}`).join('\n');
@@ -2509,7 +2548,7 @@ window.addFromDB = (itemId) => {
     } else if (currentCategory === 'tecnicas') {
         const payload = { ...item, compendium_id: itemId };
         delete payload.id;
-        push(ref(db, `${dbPath}/habilidades/tecnicas`), payload);
+        push(ref(db, `${dbPath}/habilidades/${FICHA_TECH_CAT}`), payload);
     }
     closeModal('modal_db');
 };
@@ -2624,12 +2663,10 @@ function renderHabs(cat, data) {
             div.className = 'tech-v2-mini';
             const img = item.imagem || item.image || '';
             if (img) div.style.setProperty('--tech-bg', `url('${String(img).replace(/'/g, "%27")}')`);
-            const displayCost = getTechniqueDisplayCost(item);
             div.onclick = () => openTechniqueDetail(id);
             div.innerHTML = `
                 <div class="tech-v2-mini-content">
-                    <div class="tech-v2-mini-title">${item.titulo || 'Técnica sem nome'}</div>
-                    <div class="tech-v2-mini-cost">${displayCost} PM</div>
+                    <div class="tech-v2-mini-title">${escHtml(item.titulo || 'Técnica sem nome')}</div>
                 </div>`;
         } else if (cat === 'armas') {
             div.className = 'equip-card';
@@ -2884,9 +2921,10 @@ onValue(ref(db, dbPath), snap => {
     renderArcanaPathButtons();
 
     const habs = charData.habilidades || {};
-    ['classe_hab','raca_hab','arcana_habs','tecnicas','armas','inventario'].forEach(cat => {
+    ['classe_hab','raca_hab','arcana_habs','armas','inventario'].forEach(cat => {
         renderHabs(cat, habs[cat]);
     });
+    renderHabs('tecnicas', collectFichaTechniques(habs));
 });
 
 // ============================================================

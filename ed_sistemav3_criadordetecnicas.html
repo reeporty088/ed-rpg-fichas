@@ -37,7 +37,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getDatabase, ref, push, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 const firebaseConfig={apiKey:"AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",authDomain:"ed-rpg---sistema-de-fichas.firebaseapp.com",databaseURL:"https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",projectId:"ed-rpg---sistema-de-fichas",storageBucket:"ed-rpg---sistema-de-fichas.firebasestorage.app",messagingSenderId:"350999444010",appId:"1:350999444010:web:d89f31d13e449b8fbfa153"};
 const db=getDatabase(initializeApp(firebaseConfig));
-const params=new URLSearchParams(location.search);const source=params.get('source')||'compendium';const ficha=params.get('ficha')||'';const editId=params.get('edit')||'';
+const params=new URLSearchParams(location.search);
+const source=params.get('source')||'compendium';
+const ficha=params.get('ficha')||'';
+const editId=params.get('edit')||'';
+const legacyEdit=params.get('legacy')==='1';
+const FICHA_TECH_CAT='tecnicas_v2';
+const LEGACY_TECH_CAT='tecnicas';
 let logic={nodes:{},edges:{}};let currentNodeId='';let selectedNextId='';let pathIds=[];let imageData='';let editCompendiumId='';
 function esc(s=''){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function norm(s=''){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
@@ -59,9 +65,56 @@ function renderPreview(){document.getElementById('pmTotal').textContent=totalCos
 function bindFinal(){['titulo','desc','obs'].forEach(id=>document.getElementById(id).addEventListener('input',renderPreview));document.getElementById('imagemFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;imageData=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)});renderPreview()})}
 function deriveSubtype(){const names=pathNodes().map(n=>norm(n.nome)).join(' ');if(names.includes('conjur'))return 'CONJURAÇÃO';if(names.includes('clamor'))return 'CLAMOR';if(names.includes('feit'))return 'FEITIÇO';if(names.includes('fisic'))return 'FÍSICO';if(names.includes('perjur'))return 'PERJURAÇÃO';return pathNodes()[1]?.nome||''}
 function deriveType(){const names=pathNodes().map(n=>norm(n.nome)).join(' ');if(names.includes('feit')||names.includes('conjur')||names.includes('clamor'))return 'FEITIÇOS';if(names.includes('perjur'))return 'PERJURAÇÃO';if(names.includes('fisic'))return 'FÍSICO';return pathNodes()[1]?.nome||'Técnica'}
-async function loadEdit(){if(!editId||!ficha)return;const snap=await get(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas/${editId}`));const t=snap.val();if(!t)return;editCompendiumId=t.compendium_id||'';document.getElementById('titulo').value=t.titulo||'';document.getElementById('desc').value=t.desc||'';document.getElementById('obs').value=t.obs||'';imageData=t.imagem||'';pathIds=t.tecnica_path_ids||[];currentNodeId=pathIds[pathIds.length-1]||'';showFinal()}
+async function loadEdit(){
+  if(!editId||!ficha)return;
+  const cat=legacyEdit?LEGACY_TECH_CAT:FICHA_TECH_CAT;
+  let snap=await get(ref(db,`fichas_v3/${ficha}/habilidades/${cat}/${editId}`));
+  if(!snap.exists()&&!legacyEdit){
+    snap=await get(ref(db,`fichas_v3/${ficha}/habilidades/${LEGACY_TECH_CAT}/${editId}`));
+  }
+  const t=snap.val();
+  if(!t)return;
+  editCompendiumId=t.compendium_id||'';
+  document.getElementById('titulo').value=t.titulo||'';
+  document.getElementById('desc').value=t.desc||'';
+  document.getElementById('obs').value=t.obs||'';
+  imageData=t.imagem||'';
+  pathIds=t.tecnica_path_ids||[];
+  currentNodeId=pathIds[pathIds.length-1]||'';
+  showFinal();
+}
 window.goBack=()=>{location.href=source==='ficha'&&ficha?`ed_sistemav3_ficha.html?p=${encodeURIComponent(ficha)}`:'ed_sistemav3_bancodedados.html'};
-window.saveTechnique=async()=>{const title=document.getElementById('titulo').value.trim();if(!title){alert('Informe o título da técnica.');return}const details=pathNodes().map(n=>`${n.nome || 'Sem nome'}${Number(n.custo_pm)?` (${Number(n.custo_pm)} PM)`:''}${n.desc?` — ${n.desc}`:''}`);const payload={titulo:title,tipo:deriveType(),subtipo:deriveSubtype(),categoria:pathNodes()[2]?.nome||'',custo_pm:totalCost(),custo_pm_base:totalCost(),imagem:imageData,detalhes:pathNodes().map(n=>({label:n.nome||'Sem nome',value:n.desc||'',custo_pm:Number(n.custo_pm)||0})),detalhes_texto:details.join('\n'),tecnica_path_ids:pathIds,desc:document.getElementById('desc').value.trim(),obs:document.getElementById('obs').value.trim(),created_at:new Date().toISOString(),creator_source:source};let compKey=editCompendiumId||push(ref(db,'banco_dados_v3/tecnicas_v2')).key;const updates={[`banco_dados_v3/tecnicas_v2/${compKey}`]:payload};if(source==='ficha'&&ficha){const key=editId||push(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas`)).key;updates[`fichas_v3/${ficha}/habilidades/tecnicas/${key}`]={...payload,compendium_id:compKey}}await update(ref(db),updates);alert('Técnica salva com sucesso!');goBack()};
+window.saveTechnique=async()=>{
+  const title=document.getElementById('titulo').value.trim();
+  if(!title){alert('Informe o título da técnica.');return}
+  const details=pathNodes().map(n=>`${n.nome || 'Sem nome'}${Number(n.custo_pm)?` (${Number(n.custo_pm)} PM)`:''}${n.desc?` — ${n.desc}`:''}`);
+  const payload={
+    titulo:title,
+    tipo:deriveType(),
+    subtipo:deriveSubtype(),
+    categoria:pathNodes()[2]?.nome||'',
+    custo_pm:totalCost(),
+    custo_pm_base:totalCost(),
+    imagem:imageData,
+    detalhes:pathNodes().map(n=>({label:n.nome||'Sem nome',value:n.desc||'',custo_pm:Number(n.custo_pm)||0})),
+    detalhes_texto:details.join('\n'),
+    tecnica_path_ids:pathIds,
+    desc:document.getElementById('desc').value.trim(),
+    obs:document.getElementById('obs').value.trim(),
+    created_at:new Date().toISOString(),
+    creator_source:source
+  };
+  let compKey=editCompendiumId||push(ref(db,'banco_dados_v3/tecnicas_v2')).key;
+  const updates={[`banco_dados_v3/tecnicas_v2/${compKey}`]:payload};
+  if(source==='ficha'&&ficha){
+    const cat=legacyEdit?LEGACY_TECH_CAT:FICHA_TECH_CAT;
+    const key=editId||push(ref(db,`fichas_v3/${ficha}/habilidades/${FICHA_TECH_CAT}`)).key;
+    updates[`fichas_v3/${ficha}/habilidades/${cat}/${key}`]={...payload,compendium_id:compKey,attached_ficha_id:ficha};
+  }
+  await update(ref(db),updates);
+  alert('Técnica salva com sucesso!');
+  goBack();
+};
 onValue(ref(db,'banco_dados_v3/logica_tecnicas'),snap=>{logic=snap.val()||{};ensureStart();if(!currentNodeId&&!pathIds.length)renderStep();else if(!document.getElementById('finalPanel').classList.contains('hidden'))renderPreview();else renderStep()});
 bindFinal();loadEdit();renderStep();
 </script><script src="pwa.js" defer></script>
