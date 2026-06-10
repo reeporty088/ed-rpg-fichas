@@ -2647,6 +2647,7 @@ function renderHabs(cat, data) {
     const container = document.getElementById(`list_${cat}`);
     if (!container) return;
     container.innerHTML = "";
+    if (cat === 'tecnicas') data = collectFichaTechniques(charData.habilidades || {});
     if (!data) {
         if (cat === 'classe_hab') container.innerHTML = "<p style='font-size:11px; color:#444; text-align:center; font-family:Cinzel,serif;'>Nenhuma classe selecionada.</p>";
         if (cat === 'raca_hab') container.innerHTML = "<p style='font-size:11px; color:#444; text-align:center; font-family:Cinzel,serif;'>Nenhuma raça selecionada.</p>";
@@ -2921,9 +2922,8 @@ onValue(ref(db, dbPath), snap => {
     renderArcanaPathButtons();
 
     const habs = charData.habilidades || {};
-    const habsForRender = { ...habs, tecnicas: collectFichaTechniques(habs) };
     ['classe_hab','raca_hab','arcana_habs','tecnicas','armas','inventario'].forEach(cat => {
-        renderHabs(cat, habsForRender[cat]);
+        renderHabs(cat, habs[cat]);
     });
 });
 
