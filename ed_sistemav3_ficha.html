@@ -2482,7 +2482,10 @@ window.addFromDB = (itemId) => {
         pack['desc_geral'] = { titulo: `Sobre: ${item.titulo}`, desc: item.desc || "" };
         if (item.hab_nome) pack['hab_1'] = { titulo: item.hab_nome, desc: item.hab_desc || "" };
         if (item.hab2_nome) pack['hab_2'] = { titulo: item.hab2_nome, desc: item.hab2_desc || "" };
+        
+        // Força a atualização da caixa de habilidades substituindo os dados na ficha
         set(ref(db, `${dbPath}/habilidades/classe_hab`), pack);
+        
     } else if (currentCategory === 'raca_hab') {
         update(ref(db, dbPath), { ancestralidade: item.titulo });
         let pack = {};
@@ -2490,7 +2493,9 @@ window.addFromDB = (itemId) => {
         if (item.hab1_nome) pack['hab_1'] = { titulo: item.hab1_nome, desc: item.hab1_desc || "" };
         if (item.hab2_nome) pack['hab_2'] = { titulo: item.hab2_nome, desc: item.hab2_desc || "" };
         if (item.hab3_nome) pack['hab_3'] = { titulo: item.hab3_nome, desc: item.hab3_desc || "" };
+        
         set(ref(db, `${dbPath}/habilidades/raca_hab`), pack);
+        
         const linha = (item.linhagem || "").toLowerCase();
         update(ref(db, dbPath), {
             'toggles/linhagem_demon': linha.includes('demon') || null,
@@ -2501,9 +2506,9 @@ window.addFromDB = (itemId) => {
         push(ref(db, `${dbPath}/habilidades/armas`), {
             titulo: item.titulo || "",
             atributo: item.atributo || "",
-            dano: item.dano_slots || "",
+            dano: item.dano || "", // <-- BUG CORRIGIDO (era item.dano_slots)
             alcance: item.alcance || "",
-            tipo: item.tipo_dano || "",
+            tipo: item.tipo || "", // <-- BUG CORRIGIDO (era item.tipo_dano)
             desc: item.desc || ""
         });
     } else if (currentCategory === 'tecnicas') {
@@ -2608,9 +2613,11 @@ function renderHabs(cat, data) {
     const container = document.getElementById(`list_${cat}`);
     if (!container) return;
     container.innerHTML = "";
-    if (!data) {
-        if (cat === 'classe_hab') container.innerHTML = "<p style='font-size:11px; color:#444; text-align:center; font-family:Cinzel,serif;'>Nenhuma classe selecionada.</p>";
-        if (cat === 'raca_hab') container.innerHTML = "<p style='font-size:11px; color:#444; text-align:center; font-family:Cinzel,serif;'>Nenhuma raça selecionada.</p>";
+    
+    // CORREÇÃO 1: Identifica corretamente objetos vazios vindos do Firebase
+    if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        if (cat === 'classe_hab') container.innerHTML = "<p style='font-size:11px; color:#777; text-align:center; font-family:Cinzel,serif;'>Nenhuma habilidade de classe detectada no banco.</p>";
+        if (cat === 'raca_hab') container.innerHTML = "<p style='font-size:11px; color:#777; text-align:center; font-family:Cinzel,serif;'>Nenhuma habilidade de raça detectada no banco.</p>";
         return;
     }
 
@@ -2618,6 +2625,9 @@ function renderHabs(cat, data) {
 
     Object.keys(data).forEach(id => {
         const item = data[id];
+        // CORREÇÃO 2: Segurança extra contra dados corrompidos
+        if (!item || typeof item !== 'object') return; 
+
         const div = document.createElement('div');
 
         if (cat === 'tecnicas') {
