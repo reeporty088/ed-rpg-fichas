@@ -2604,6 +2604,35 @@ window.saveHab = (cat, id, field, val) => {
     update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { [field]: val });
 };
 
+function getEffectiveAbilities(cat) {
+    const habs = charData.habilidades || {};
+    if (cat === 'classe_hab') {
+        const selected = charData.classe;
+        const comp = Object.values(compendium.classes || {}).find(c => c.titulo === selected);
+        if (comp) {
+            let pack = {};
+            pack['desc_geral'] = { titulo: `Sobre: ${comp.titulo}`, desc: comp.desc || "" };
+            if (comp.hab_nome) pack['hab_1'] = { titulo: comp.hab_nome, desc: comp.hab_desc || "" };
+            if (comp.hab2_nome) pack['hab_2'] = { titulo: comp.hab2_nome, desc: comp.hab2_desc || "" };
+            return pack;
+        }
+    }
+    if (cat === 'raca_hab') {
+        const selected = charData.ancestralidade || "";
+        if (selected.startsWith("Discente")) return habs['raca_hab'];
+        const comp = Object.values(compendium.racas || {}).find(r => r.titulo === selected);
+        if (comp) {
+            let pack = {};
+            pack['desc_geral'] = { titulo: `Sobre: ${comp.titulo}`, desc: comp.desc || "" };
+            if (comp.hab1_nome) pack['hab_1'] = { titulo: comp.hab1_nome, desc: comp.hab1_desc || "" };
+            if (comp.hab2_nome) pack['hab_2'] = { titulo: comp.hab2_nome, desc: comp.hab2_desc || "" };
+            if (comp.hab3_nome) pack['hab_3'] = { titulo: comp.hab3_nome, desc: comp.hab3_desc || "" };
+            return pack;
+        }
+    }
+    return habs[cat];
+}
+
 function renderHabs(cat, data) {
     const container = document.getElementById(`list_${cat}`);
     if (!container) return;
@@ -2836,7 +2865,13 @@ document.addEventListener('input', e => {
 // FIREBASE LISTENER
 // ============================================================
 onValue(ref(db, 'banco_dados_v3'), snap => {
-    if (snap.exists()) compendium = snap.val();
+    if (snap.exists()) {
+        compendium = snap.val();
+        if (charData.habilidades) {
+            renderHabs('classe_hab', getEffectiveAbilities('classe_hab'));
+            renderHabs('raca_hab', getEffectiveAbilities('raca_hab'));
+        }
+    }
 });
 
 onValue(ref(db, dbPath), snap => {
@@ -2885,7 +2920,8 @@ onValue(ref(db, dbPath), snap => {
 
     const habs = charData.habilidades || {};
     ['classe_hab','raca_hab','arcana_habs','tecnicas','armas','inventario'].forEach(cat => {
-        renderHabs(cat, habs[cat]);
+        const data = (cat === 'classe_hab' || cat === 'raca_hab') ? getEffectiveAbilities(cat) : habs[cat];
+        renderHabs(cat, data);
     });
 });
 
