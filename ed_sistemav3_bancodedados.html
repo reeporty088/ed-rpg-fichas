@@ -40,7 +40,7 @@
     .logic-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:12px; }
     .logic-canvas { position:relative; min-height:640px; overflow:auto; border:1px solid var(--border); border-radius:12px; background:radial-gradient(circle at top,#160b0a,#050303 58%); cursor: grab; }
     .logic-canvas:active { cursor: grabbing; }
-    .logic-svg { position:absolute; inset:0; width:5000px; height:3000px; pointer-events:none; }
+    .logic-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
     .logic-node { position:absolute; width:172px; min-height:86px; border:1px solid #70403c; border-radius:12px; background:linear-gradient(160deg,#21100e,#0c0504); padding:10px; cursor:move; box-shadow:0 10px 24px #0009; user-select:none; }
     .logic-node.selected { border-color:var(--light); box-shadow:0 0 0 2px #e8a09033,0 10px 24px #0009; }
     .logic-node.final { border-color:#61b36f; }
@@ -328,6 +328,29 @@ let draggingLogicNode = null;
 
 let isPanning = false;
 let panStart = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 };
+let zoomLevel = 1.0;
+
+window.handleCanvasWheel = (e) => {
+  e.preventDefault();
+  const canvas = document.getElementById('logic_canvas');
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left + canvas.scrollLeft;
+  const mouseY = e.clientY - rect.top + canvas.scrollTop;
+
+  const oldZoom = zoomLevel;
+  zoomLevel = Math.max(0.15, Math.min(2.5, zoomLevel + e.deltaY * -0.001));
+
+  const workspace = document.getElementById('logic_workspace');
+  if (workspace) {
+    workspace.style.transform = `scale(${zoomLevel})`;
+
+    const scaleRatio = zoomLevel / oldZoom;
+    canvas.scrollLeft = mouseX * scaleRatio - (e.clientX - rect.left);
+    canvas.scrollTop = mouseY * scaleRatio - (e.clientY - rect.top);
+  }
+};
 
 window.startCanvasPan = (e) => {
   if (e.button !== 0) return;
@@ -413,23 +436,25 @@ function renderTechniqueLogicEditor() {
   list.innerHTML = `
     <div class="logic-layout">
       <div class="logic-canvas" id="logic_canvas" onpointerdown="startCanvasPan(event)" onpointermove="handleCanvasPointerMove(event)" onpointerup="endCanvasPan(event)" onpointerleave="endCanvasPan(event)">
-        <svg class="logic-svg" viewBox="0 0 5000 3000" preserveAspectRatio="none">
-          <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d89a8e"></path></marker></defs>
-          ${Object.entries(edges).map(([id, e]) => {
-            const a = nodes[e.from] || {}; const b = nodes[e.to] || {};
-            const x1 = (Number(a.x) || 0) + 172; const y1 = (Number(a.y) || 0) + 43;
-            const x2 = Number(b.x) || 0; const y2 = (Number(b.y) || 0) + 43;
-            return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#d89a8e" stroke-width="2" marker-end="url(#arrow)" opacity=".85" />`;
-          }).join('')}
-        </svg>
-        ${Object.entries(nodes).map(([id, n]) => `
-          <div data-node-id="${esc(id)}" class="logic-node ${id===selectedLogicNode?'selected':''} ${id==='start'?'start':''} ${n.final?'final':''}"
-               style="left:${Number(n.x)||40}px; top:${Number(n.y)||40}px;"
-               onclick="selectLogicNode('${esc(id)}')" onpointerdown="startLogicDrag(event,'${esc(id)}')">
-            <div class="logic-node-title">${esc(n.nome || id)}</div>
-            <div class="logic-node-meta">${n.final ? '◆ Finalizador' : 'PM: ' + (Number(n.custo_pm)||0)}</div>
-            <div class="logic-node-desc">${esc(n.desc || 'Sem descrição')}</div>
-          </div>`).join('')}
+        <div id="logic_workspace" style="position: relative; width: 10000px; height: 6000px; transform-origin: 0 0; transform: scale(${zoomLevel});">
+          <svg class="logic-svg" viewBox="0 0 10000 6000" preserveAspectRatio="none">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d89a8e"></path></marker></defs>
+            ${Object.entries(edges).map(([id, e]) => {
+              const a = nodes[e.from] || {}; const b = nodes[e.to] || {};
+              const x1 = (Number(a.x) || 0) + 172; const y1 = (Number(a.y) || 0) + 43;
+              const x2 = Number(b.x) || 0; const y2 = (Number(b.y) || 0) + 43;
+              return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#d89a8e" stroke-width="2" marker-end="url(#arrow)" opacity=".85" />`;
+            }).join('')}
+          </svg>
+          ${Object.entries(nodes).map(([id, n]) => `
+            <div data-node-id="${esc(id)}" class="logic-node ${id===selectedLogicNode?'selected':''} ${id==='start'?'start':''} ${n.final?'final':''}"
+                 style="left:${Number(n.x)||40}px; top:${Number(n.y)||40}px;"
+                 onclick="selectLogicNode('${esc(id)}')" onpointerdown="startLogicDrag(event,'${esc(id)}')">
+              <div class="logic-node-title">${esc(n.nome || id)}</div>
+              <div class="logic-node-meta">${n.final ? '◆ Finalizador' : 'PM: ' + (Number(n.custo_pm)||0)}</div>
+              <div class="logic-node-desc">${esc(n.desc || 'Sem descrição')}</div>
+            </div>`).join('')}
+        </div>
       </div>
       <aside class="logic-side">
         <div class="logic-help">Crie blocos, conecte setas e marque blocos finais. O criador de técnicas lê este mapa em tempo real: cada bloco clicado soma/subtrai seu custo de PM e os blocos finais abrem a carta de conclusão.</div>
@@ -456,6 +481,7 @@ function renderTechniqueLogicEditor() {
   if (newCanvas) {
     newCanvas.scrollLeft = savedScrollLeft;
     newCanvas.scrollTop = savedScrollTop;
+    newCanvas.addEventListener('wheel', window.handleCanvasWheel, { passive: false });
   }
 }
 window.selectLogicNode = (id) => {
@@ -478,9 +504,11 @@ window.startLogicDrag = (event, id) => {
 };
 window.dragLogicMove = (event) => {
   if (!draggingLogicNode) return;
-  const dx = event.clientX - draggingLogicNode.startX;
-  const dy = event.clientY - draggingLogicNode.startY;
-  if (Math.abs(dx) + Math.abs(dy) > 3) draggingLogicNode.moved = true;
+  const dx = (event.clientX - draggingLogicNode.startX) / zoomLevel;
+  const dy = (event.clientY - draggingLogicNode.startY) / zoomLevel;
+  if (Math.abs(event.clientX - draggingLogicNode.startX) + Math.abs(event.clientY - draggingLogicNode.startY) > 3) {
+    draggingLogicNode.moved = true;
+  }
   const x = Math.max(0, draggingLogicNode.x + dx);
   const y = Math.max(0, draggingLogicNode.y + dy);
   const nodeEl = document.querySelector(`.logic-node[data-node-id="${CSS.escape(draggingLogicNode.id)}"]`);
@@ -491,8 +519,12 @@ window.finishLogicDrag = (event) => {
   const d = draggingLogicNode;
   draggingLogicNode = null;
   if (!d.moved) return;
-  const x = Math.max(0, d.x + (event?.clientX || d.startX) - d.startX);
-  const y = Math.max(0, d.y + (event?.clientY || d.startY) - d.startY);
+  const clientX = event?.clientX ?? d.startX;
+  const clientY = event?.clientY ?? d.startY;
+  const dx = (clientX - d.startX) / zoomLevel;
+  const dy = (clientY - d.startY) / zoomLevel;
+  const x = Math.max(0, d.x + dx);
+  const y = Math.max(0, d.y + dy);
   update(ref(db, `${dbPath}/logica_tecnicas/nodes/${d.id}`), { x, y });
 };
 window.addLogicNode = () => {
