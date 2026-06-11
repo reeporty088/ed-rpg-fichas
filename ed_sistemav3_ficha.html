@@ -1633,8 +1633,9 @@
             <!-- PROFICIÊNCIAS DE ARMA -->
             <div class="section-header" style="margin-top:4px;">
                 <label style="color:var(--gold);">Proficiência em Armas (PP)</label>
-                <div style="display:flex; gap:5px; align-items:center;">
+                <div style="display:flex; gap:10px; align-items:center;">
                     <span style="font-family:'Cinzel',serif; font-size:10px; color:var(--gold-dim);" id="pp_display">PP: 2</span>
+                    <span style="font-family:'Cinzel',serif; font-size:10px; color:var(--gold-dim);" id="pdt_display">PDT: 0</span>
                 </div>
             </div>
             <div id="proficiencias_container" style="margin-bottom:12px;"></div>
@@ -2040,8 +2041,10 @@ function calcDerived() {
     // PDT display
     const nivel = parseInt(charData.nivel) || 1;
     const pdtBase = nivel; // 1 por nível
-    document.getElementById('pdt_display').innerText = `PDT disponíveis: ${charData.pdt_total || pdtBase}`;
-    document.getElementById('pp_display').innerText = `PP: ${charData.pp_total || 2}`;
+    const pdtEl = document.getElementById('pdt_display');
+    if (pdtEl) pdtEl.innerText = `PDT disponíveis: ${charData.pdt_total || pdtBase}`;
+    const ppEl = document.getElementById('pp_display');
+    if (ppEl) ppEl.innerText = `PP: ${charData.pp_total || 2}`;
 }
 
 // ============================================================
