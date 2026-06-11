@@ -848,8 +848,51 @@
             background-position: center;
         }
         .tech-detail-title { font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin:0 0 4px; }
-        .tech-detail-meta { color:#9dd9ff; font-family:'Cinzel',serif; font-size:12px; margin-bottom:10px; }
+        .tech-detail-meta {
+            color: #bfe8ff;
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: rgba(19, 74, 138, 0.25);
+            border: 1px solid rgba(120, 190, 255, 0.45);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
         .tech-detail-section { border-top:1px solid #332; padding-top:8px; margin-top:8px; color:#d7cdc4; font-size:13px; line-height:1.45; white-space:pre-wrap; }
+        .tech-resource-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .tech-resource-card {
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid var(--theme-border);
+            border-left: 3px solid var(--gold);
+            border-radius: 6px;
+            padding: 8px 12px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .tech-resource-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 2px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .tech-resource-desc {
+            color: #d7cdc4;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: normal;
+        }
         @media (max-width: 720px) { .tech-detail-card { grid-template-columns: 1fr; } }
 
         /* EQUIPAMENTOS */
@@ -2381,6 +2424,31 @@ window.toggleSpellDiscount = (subtype) => {
 window.openTechniqueCreator = () => {
     window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}`;
 };
+function renderTechniqueResources(details) {
+    const lines = (details || '').split('\n').map(l => l.trim()).filter(Boolean);
+    return `<div class="tech-resource-grid">` + lines.map(line => {
+        let title = line;
+        let desc = "";
+        const separatorMatch = line.match(/\s*[—–-]\s*(.*)/);
+        if (separatorMatch) {
+            desc = separatorMatch[1];
+            title = line.substring(0, line.indexOf(separatorMatch[0])).trim();
+        }
+        if (desc) {
+            return `
+                <div class="tech-resource-card">
+                    <div class="tech-resource-title">${escHtml(title)}</div>
+                    <div class="tech-resource-desc">${escHtml(desc)}</div>
+                </div>`;
+        } else {
+            return `
+                <div class="tech-resource-card">
+                    <div class="tech-resource-title" style="margin-bottom:0;">${escHtml(title)}</div>
+                </div>`;
+        }
+    }).join('') + `</div>`;
+}
+
 window.openTechniqueDetail = (id) => {
     const tech = charData.habilidades?.tecnicas?.[id];
     if (!tech) return;
@@ -2396,8 +2464,8 @@ window.openTechniqueDetail = (id) => {
             <div>
                 <h2 class="tech-detail-title">${escHtml(tech.titulo || 'Técnica sem nome')}</h2>
                 <div class="tech-detail-meta">${cost} PM${discountNote}</div>
-                <div class="tech-detail-section"><b>Detalhes da habilidade</b>\n${escHtml(details || 'Sem detalhes.')}</div>
-                <div class="tech-detail-section"><b>Descrição</b>\n${escHtml(tech.desc || 'Sem descrição.')}</div>
+                <div class="tech-detail-section" style="border-bottom:1px solid #332; padding-bottom:8px; margin-bottom:8px;"><b>Construção da habilidade</b>${renderTechniqueResources(details)}</div>
+                <div class="tech-detail-section" style="border-top:none; margin-top:0; padding-top:0;"><b>Descrição</b>\n${escHtml(tech.desc || 'Sem descrição.')}</div>
                 <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
                     <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="editTechnique('${id}')">Editar</button>
                     <button class="btn-choice cancel" style="width:auto; padding:9px 16px; margin:0;" onclick="removeItem('tecnicas','${id}'); closeModal('modal_tecnica_v2')">Excluir</button>
