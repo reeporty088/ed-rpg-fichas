@@ -376,41 +376,23 @@
         .bar-sep { color: rgba(255,255,255,0.5); font-size: 12px; }
         .pulso-inline {
             display: none;
-            min-width: 130px;
+            flex: 0 0 auto;
+            min-width: 110px;
         }
         .pulso-inline-label {
-            margin: 0 0 5px 0;
+            margin: 0 0 3px 4px;
             color: #bb88ff;
-            text-align: center;
-        }
-        .pulso-inline-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        .btn-math-mini {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1px solid #5d3d8a;
-            background: rgba(40, 10, 65, 0.6);
-            color: #c8a9ff;
-            font-size: 12px;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0;
         }
         .pulso-orb {
-            width: 56px;
-            height: 56px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #b075ff, #5b1f94 60%, #2a0d45 100%);
             border: 1px solid #7e47b8;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.65), 0 0 10px rgba(130,60,200,0.35);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.65), 0 0 5px rgba(130,60,200,0.35);
             color: #fff;
             font-family: 'Cinzel', serif;
-            font-size: 22px;
+            font-size: 14px;
             font-weight: 700;
             text-align: center;
             padding: 0;
@@ -840,7 +822,10 @@
             gap: 14px;
         }
         .tech-detail-image {
-            min-height: 270px;
+            width: 100%;
+            max-width: 260px;
+            aspect-ratio: 1/1;
+            margin: 0 auto;
             border-radius: 12px;
             border: 1px solid var(--theme-border);
             background: var(--tech-bg, radial-gradient(circle at top, rgba(80,130,200,.35), rgba(40,8,12,.8)));
@@ -860,7 +845,7 @@
             border-radius: 4px;
             display: inline-block;
         }
-        .tech-detail-section { border-top:1px solid #332; padding-top:8px; margin-top:8px; color:#d7cdc4; font-size:13px; line-height:1.45; white-space:pre-wrap; }
+        .tech-detail-section { border-top:1px solid #332; padding-top:8px; margin-top:8px; color:#d7cdc4; font-size:13px; line-height:1.45; white-space:pre-wrap; word-break: break-word; }
         .tech-resource-grid {
             display: flex;
             flex-wrap: wrap;
@@ -1250,7 +1235,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.9);
         }
         .modal-small { width: 300px; text-align: center; }
-        .modal-large { width: 95%; max-width: 860px; max-height: 85vh; display: flex; flex-direction: column; }
+        .modal-large { width: 95%; max-width: 860px; max-height: 85vh; display: flex; flex-direction: column; overflow-y: auto; }
 
         .modal-header {
             display: flex;
@@ -1512,12 +1497,12 @@
                         <button class="btn-math" onclick="changeVal('mana', 1)">+</button>
                     </div>
                 </div>
-                <div id="pulso_container" class="pulso-inline">
+                <div id="pulso_container" class="bar-container pulso-inline">
                     <label class="bar-label pulso-inline-label">✦ Pulso</label>
-                    <div class="pulso-inline-controls">
-                        <button class="btn-math-mini" onclick="changeVal('pulso', -1)">−</button>
+                    <div class="bar-controls" style="justify-content: center; gap: 8px;">
+                        <button class="btn-math" onclick="changeVal('pulso', -1)" style="font-size: 16px; width: 20px;">−</button>
                         <input type="number" id="pulso_at" class="pulso-orb" value="0">
-                        <button class="btn-math-mini" onclick="changeVal('pulso', 1)">+</button>
+                        <button class="btn-math" onclick="changeVal('pulso', 1)" style="font-size: 16px; width: 20px;">+</button>
                     </div>
                 </div>
             </div>
@@ -1622,11 +1607,20 @@
 
             <hr class="hr">
 
-            <!-- CAMINHOS DISPLAY -->
+            <!-- RECURSO CUSTOMIZÁVEL -->
             <div class="section-header">
-                <label>Caminhos Disponíveis</label>
+                <label>Recurso Customizável</label>
             </div>
-            <div id="arcana_paths_grid" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label for="vida_adicional">Vida Adicional</label>
+                    <input type="number" id="vida_adicional" value="0" placeholder="Ex: 5">
+                </div>
+                <div>
+                    <label for="mana_adicional">Mana Adicional</label>
+                    <input type="number" id="mana_adicional" value="0" placeholder="Ex: 10">
+                </div>
+            </div>
 
         </div>
     </div>
@@ -1903,21 +1897,11 @@ function getArcanaByPath(path) {
 }
 
 function renderArcanaPathButtons() {
-    const box = document.getElementById('arcana_paths_grid');
-    if (!box) return;
-    const ativos = charData.caminhos_ativos || {};
-    box.innerHTML = ARCANA_PATHS.map(path => {
-        const isActive = ativos[path] === true;
-        return `<button onclick="toggleArcanaPath('${path}')" style="background:${isActive ? 'rgba(35,80,35,0.45)' : 'rgba(0,0,0,0.3)'}; border:1px solid ${isActive ? '#4faa5f' : '#2a2a2a'}; border-radius:6px; padding:6px; text-align:center; font-family:'Cinzel',serif; font-size:9px; color:${isActive ? '#baf4c5' : '#777'}; text-transform:uppercase; letter-spacing:1px; cursor:pointer;">
-            ${path}
-        </button>`;
-    }).join('');
+    // Removido - substituído por recurso customizável
 }
 
 window.toggleArcanaPath = (path) => {
-    const ativos = charData.caminhos_ativos || {};
-    const newVal = ativos[path] === true ? null : true;
-    update(ref(db, `${dbPath}/caminhos_ativos`), { [path]: newVal });
+    // Removido - substituído por recurso customizável
 };
 
 // ============================================================
@@ -2033,6 +2017,8 @@ function calcDerived() {
     const res = parseInt(charData.resistencia) || 0;
     const hab = parseInt(charData.habilidade) || 0;
     const pericias = charData.pericias || {};
+    const vida_adicional = parseInt(charData.vida_adicional) || 0;
+    const mana_adicional = parseInt(charData.mana_adicional) || 0;
 
     // AN sempre 6 para personagem nível 1+
     document.getElementById('an_val').innerText = 6;
@@ -2041,13 +2027,13 @@ function calcDerived() {
     const fort = pericias['Fortitude'] || 0;
     document.getElementById('defesa_val').innerText = 6 + res + fort;
 
-    // Vida sugerida: 5 × Res + Vitalidade
+    // Vida sugerida: 5 × Res + Vitalidade + Vida Adicional
     const vit = pericias['Vitalidade'] || 0;
-    const hpSug = Math.max(1, (res * 5) + vit);
+    const hpSug = Math.max(1, (res * 5) + vit + vida_adicional);
 
-    // Mana sugerida: 10 × Hab + Energia
+    // Mana sugerida: 10 × Hab + Energia + Mana Adicional
     const energia = pericias['Energia'] || 0;
-    const manaSug = Math.max(1, (hab * 10) + energia);
+    const manaSug = Math.max(1, (hab * 10) + energia + mana_adicional);
 
     // Automação v3 (estilo v2): recalcula máximos pela ficha e mantém atuais dentro do teto
     const hpAtual = parseInt(charData.hp_at) || 0;
@@ -2440,7 +2426,13 @@ window.openTechniqueDetail = (id) => {
             <div>
                 <h2 class="tech-detail-title">${escHtml(tech.titulo || 'Técnica sem nome')}</h2>
                 <div class="tech-detail-meta">${cost} PM${discountNote}</div>
-                <div class="tech-detail-section"><b>Detalhes da habilidade</b>${renderTechniqueResources(details)}</div>
+                <div class="tech-detail-section">
+                    <b>Detalhes da habilidade</b>
+                    <button class="btn-choice" id="btn_toggle_properties" onclick="toggleTechProperties()" style="width:100%; margin: 8px 0; font-size:11px; padding: 6px 12px; background: rgba(255,255,255,0.05); border-color: var(--theme-border);">Ver Propriedades</button>
+                    <div id="tech_properties_content" style="display: none;">
+                        ${renderTechniqueResources(details)}
+                    </div>
+                </div>
                 <div class="tech-detail-section"><b>Descrição</b>\n${escHtml(tech.desc || 'Sem descrição.')}</div>
                 <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
                     <button class="btn-choice" style="width:auto; padding:9px 16px; margin:0;" onclick="editTechnique('${id}')">Editar</button>
@@ -2449,6 +2441,16 @@ window.openTechniqueDetail = (id) => {
             </div>
         </div>`;
     document.getElementById('modal_tecnica_v2').classList.add('open');
+};
+
+window.toggleTechProperties = () => {
+    const content = document.getElementById('tech_properties_content');
+    const btn = document.getElementById('btn_toggle_properties');
+    if (content && btn) {
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'block' : 'none';
+        btn.innerText = isHidden ? 'Ocultar Propriedades' : 'Ver Propriedades';
+    }
 };
 window.editTechnique = (id) => {
     window.location.href = `ed_sistemav3_criadordetecnicas.html?source=ficha&ficha=${encodeURIComponent(fichaID)}&edit=${encodeURIComponent(id)}`;
@@ -2880,7 +2882,7 @@ window.closeModal = (id) => { document.getElementById(id)?.classList.remove('ope
 // ============================================================
 // CAMPOS SIMPLES
 // ============================================================
-const SIMPLE_FIELDS = ['char_name','nivel','nivel_bonus','florins','classe','ancestralidade','hp_at','hp_max','mana_at','mana_max','pulso_at','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes'];
+const SIMPLE_FIELDS = ['char_name','nivel','nivel_bonus','florins','classe','ancestralidade','hp_at','hp_max','mana_at','mana_max','pulso_at','poder','habilidade','resistencia','xp_total','pdt_total','pp_total','anotacoes','vida_adicional','mana_adicional'];
 
 document.addEventListener('input', e => {
     if (SIMPLE_FIELDS.includes(e.target.id)) {

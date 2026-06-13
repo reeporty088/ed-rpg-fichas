@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Criador de Técnicas V2 - ED RPG</title>
 <style>
-:root{--bg:#020202;--panel:#080606;--card:#150908;--border:#3d1917;--text:#eee4d5;--muted:#a99590;--gold:#d6a85f;--blue:#8fd8ff;--input:#0e0605;--green:#2f7a4e}*{box-sizing:border-box}body{margin:0;background:#000;color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;padding:20px}.wrap{max-width:1120px;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.title{margin:0;color:var(--gold);font-family:Georgia,serif;text-transform:uppercase;letter-spacing:3px}.btn{border:1px solid var(--border);background:#1b1110;color:#f2d9d3;border-radius:9px;padding:10px 15px;cursor:pointer;font-weight:800}.btn:hover{border-color:var(--gold)}.btn-save{background:#164327;border-color:#368f58;color:#d9ffe5}.hero{background:radial-gradient(circle at top,#111,#030303 65%);border:1px solid #24100f;border-radius:18px;min-height:520px;padding:22px;box-shadow:0 20px 60px #000}.pmbar{display:flex;justify-content:space-between;align-items:center;border:1px solid #1d2c38;background:#061019;border-radius:14px;padding:12px 16px;margin-bottom:16px}.pmbar strong{color:var(--blue);font-size:28px}.stage-title{text-align:center;color:var(--gold);font-family:Georgia,serif;font-size:36px;margin:28px 0 8px}.stage-desc{text-align:center;color:var(--muted);max-width:720px;margin:0 auto 28px;line-height:1.5;white-space:pre-wrap}.choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;max-width:880px;margin:0 auto}.choice{border:1px solid #3a2422;background:linear-gradient(160deg,#180c0b,#070404);border-radius:14px;padding:16px;min-height:96px;color:var(--text);cursor:pointer;text-align:left}.choice.selected{border-color:var(--gold);box-shadow:0 0 0 2px #d6a85f33}.choice-title{color:#f2c76f;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.choice-meta{color:#9ed6ff;font-size:12px}.choice-desc{font-size:12px;color:#bfaeaa;margin-top:6px;line-height:1.35}.nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}.path{font-size:12px;color:#b7aaa5;text-align:center;margin-bottom:12px}.final-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}.section{border:1px solid var(--border);border-radius:14px;background:#090504;padding:14px}label{display:block;color:#e7a99a;font-size:11px;font-weight:900;text-transform:uppercase;margin:0 0 6px}input,textarea{width:100%;border:1px solid #3a2422;background:var(--input);color:var(--text);border-radius:8px;padding:10px}textarea{min-height:130px;resize:vertical}.card-preview{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:#080404;min-height:460px}.card-img{height:190px;background:var(--tech-bg,radial-gradient(circle at top,#25364d,#210808));background-size:cover;background-position:center}.card-body{padding:14px}.card-title{font-family:Georgia,serif;color:var(--gold);font-size:24px;margin:0}.details{border-top:1px solid #33201f;margin-top:10px;padding-top:10px;color:#d8cac4;white-space:pre-wrap;font-size:13px;line-height:1.45}.hidden{display:none!important}.empty{color:#846f6a;text-align:center;padding:30px;border:1px dashed #33201f;border-radius:14px}.warn{color:#ffcf8f;text-align:center;margin:14px 0}@media(max-width:800px){.final-grid{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}.stage-title{font-size:28px}}
+:root{--bg:#020202;--panel:#080606;--card:#150908;--border:#3d1917;--text:#eee4d5;--muted:#a99590;--gold:#d6a85f;--blue:#8fd8ff;--input:#0e0605;--green:#2f7a4e}*{box-sizing:border-box}body{margin:0;background:#000;color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;padding:20px}.wrap{max-width:1120px;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.title{margin:0;color:var(--gold);font-family:Georgia,serif;text-transform:uppercase;letter-spacing:3px}.btn{border:1px solid var(--border);background:#1b1110;color:#f2d9d3;border-radius:9px;padding:10px 15px;cursor:pointer;font-weight:800}.btn:hover{border-color:var(--gold)}.btn-save{background:#164327;border-color:#368f58;color:#d9ffe5}.hero{background:radial-gradient(circle at top,#111,#030303 65%);border:1px solid #24100f;border-radius:18px;min-height:520px;padding:22px;box-shadow:0 20px 60px #000}.pmbar{display:flex;justify-content:space-between;align-items:center;border:1px solid #1d2c38;background:#061019;border-radius:14px;padding:12px 16px;margin-bottom:16px}.pmbar strong{color:var(--blue);font-size:28px}.stage-title{text-align:center;color:var(--gold);font-family:Georgia,serif;font-size:36px;margin:28px 0 8px}.stage-desc{text-align:center;color:var(--muted);max-width:720px;margin:0 auto 28px;line-height:1.5;white-space:pre-wrap}.choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;max-width:880px;margin:0 auto}.choice{border:1px solid #3a2422;background:linear-gradient(160deg,#180c0b,#070404);border-radius:14px;padding:16px;min-height:96px;color:var(--text);cursor:pointer;text-align:left}.choice.selected{border-color:var(--gold);box-shadow:0 0 0 2px #d6a85f33}.choice-title{color:#f2c76f;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.choice-meta{color:#9ed6ff;font-size:12px}.choice-desc{font-size:12px;color:#bfaeaa;margin-top:6px;line-height:1.35}.nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}.path{font-size:12px;color:#b7aaa5;text-align:center;margin-bottom:12px}.final-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}.section{border:1px solid var(--border);border-radius:14px;background:#090504;padding:14px}label{display:block;color:#e7a99a;font-size:11px;font-weight:900;text-transform:uppercase;margin:0 0 6px}input,textarea{width:100%;border:1px solid #3a2422;background:var(--input);color:var(--text);border-radius:8px;padding:10px}textarea{min-height:130px;resize:vertical}.card-preview{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:#080404;min-height:460px}.card-img{width:100%;aspect-ratio:1/1;overflow:hidden;position:relative;background:radial-gradient(circle at top,#25364d,#210808);cursor:grab;user-select:none}.card-img:active{cursor:grabbing}.card-img img{position:absolute;pointer-events:none;transform-origin:center center}.card-body{padding:14px}.card-title{font-family:Georgia,serif;color:var(--gold);font-size:24px;margin:0}.details{border-top:1px solid #33201f;margin-top:10px;padding-top:10px;color:#d8cac4;white-space:pre-wrap;font-size:13px;line-height:1.45}.hidden{display:none!important}.empty{color:#846f6a;text-align:center;padding:30px;border:1px dashed #33201f;border-radius:14px}.warn{color:#ffcf8f;text-align:center;margin:14px 0}@media(max-width:800px){.final-grid{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}.stage-title{font-size:28px}}
 </style>
 <script src="auth.js"></script>
 <link rel="manifest" href="manifest.webmanifest" />
@@ -26,8 +26,8 @@
     </div>
     <div id="finalPanel" class="hidden">
       <div class="final-grid">
-        <section class="section"><label>Título da técnica</label><input id="titulo" placeholder="Nome da técnica"><label style="margin-top:12px">Descrição</label><textarea id="desc" placeholder="Escreva a descrição da técnica..."></textarea><label style="margin-top:12px">Imagem opcional</label><input id="imagemFile" type="file" accept="image/*"><label style="margin-top:12px">Observações extras</label><textarea id="obs" placeholder="Regras extras, testes, restrições..."></textarea><div class="nav"><button class="btn" onclick="returnToChoices()">← Rever escolhas</button><button class="btn btn-save" onclick="saveTechnique()">Salvar Técnica</button></div></section>
-        <aside class="card-preview" id="preview"><div class="card-img"></div><div class="card-body"><h2 class="card-title" id="pvTitle">Técnica sem nome</h2><div class="details"><b>Custo</b><br><span id="pvCost">0 PM</span></div><div class="details"><b>Construção</b><br><span id="pvPath"></span></div><div class="details"><b>Descrição</b><br><span id="pvDesc">Sem descrição.</span></div></div></aside>
+        <section class="section"><label>Título da técnica</label><input id="titulo" placeholder="Nome da técnica"><label style="margin-top:12px">Descrição</label><textarea id="desc" placeholder="Escreva a descrição da técnica..."></textarea><label style="margin-top:12px">Imagem opcional</label><input id="imagemFile" type="file" accept="image/*"><div style="display:flex;gap:8px;margin-top:6px;"><button type="button" class="btn" onclick="zoomImage(0.1)" style="flex:1;padding:6px;font-size:11px;">🔍+ Zoom</button><button type="button" class="btn" onclick="zoomImage(-0.1)" style="flex:1;padding:6px;font-size:11px;">🔍− Zoom</button></div><label style="margin-top:12px">Observações extras</label><textarea id="obs" placeholder="Regras extras, testes, restrições..."></textarea><div class="nav"><button class="btn" onclick="returnToChoices()">← Rever escolhas</button><button class="btn btn-save" onclick="saveTechnique()">Salvar Técnica</button></div></section>
+        <aside class="card-preview" id="preview"><div class="card-img" id="pvImgContainer"><img id="pvImg" style="display:none;"></div><div class="card-body"><h2 class="card-title" id="pvTitle">Técnica sem nome</h2><div class="details"><b>Custo</b><br><span id="pvCost">0 PM</span></div><div class="details"><b>Construção</b><br><span id="pvPath"></span></div><div class="details"><b>Descrição</b><br><span id="pvDesc">Sem descrição.</span></div></div></aside>
       </div>
     </div>
   </main>
@@ -39,6 +39,15 @@ const firebaseConfig={apiKey:"AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",authDomai
 const db=getDatabase(initializeApp(firebaseConfig));
 const params=new URLSearchParams(location.search);const source=params.get('source')||'compendium';const ficha=params.get('ficha')||'';const editId=params.get('edit')||'';
 let logic={nodes:{},edges:{}};let currentNodeId='';let selectedNextId='';let pathIds=[];let imageData='';let editCompendiumId='';
+
+// Variaveis de pan/zoom e recorte
+let originalImage = null;
+let imgW = 0, imgH = 0;
+let dragX = 0, dragY = 0;
+let scaleMultiplier = 1.0;
+let isDragging = false;
+let startX = 0, startY = 0;
+
 function esc(s=''){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function norm(s=''){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function node(id){return logic.nodes?.[id]||{nome:id,desc:'',custo_pm:0}}
@@ -55,14 +64,244 @@ window.stepBack=()=>{if(!pathIds.length)return;pathIds.pop();currentNodeId=pathI
 function showFinal(){document.getElementById('builderPanel').classList.add('hidden');document.getElementById('finalPanel').classList.remove('hidden');document.getElementById('saveTop').classList.remove('hidden');renderPreview()}
 function hideFinal(){document.getElementById('builderPanel').classList.remove('hidden');document.getElementById('finalPanel').classList.add('hidden');document.getElementById('saveTop').classList.add('hidden')}
 window.returnToChoices=()=>{hideFinal();renderStep()};
-function renderPreview(){document.getElementById('pmTotal').textContent=totalCost();document.getElementById('pvTitle').textContent=document.getElementById('titulo').value||'Técnica sem nome';document.getElementById('pvCost').textContent=totalCost()+' PM';document.getElementById('pvPath').textContent=pathText()||'Sem construção.';document.getElementById('pvDesc').textContent=document.getElementById('desc').value||'Sem descrição.';document.getElementById('preview').style.setProperty('--tech-bg',imageData?`url('${imageData}')`:'radial-gradient(circle at top,#25364d,#210808)')}
-function bindFinal(){['titulo','desc','obs'].forEach(id=>document.getElementById(id).addEventListener('input',renderPreview));document.getElementById('imagemFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;imageData=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)});renderPreview()})}
+
+function updatePreviewTransform() {
+    const pvImg = document.getElementById('pvImg');
+    if (pvImg) {
+        pvImg.style.transform = `translate(${dragX}px, ${dragY}px) scale(${scaleMultiplier})`;
+    }
+}
+
+window.zoomImage = (amount) => {
+    if (!originalImage) return;
+    scaleMultiplier = Math.max(0.1, scaleMultiplier + amount);
+    updatePreviewTransform();
+};
+
+function setupDragEvents() {
+    const container = document.getElementById('pvImgContainer');
+    if (!container) return;
+
+    const startDrag = (e) => {
+        if (!originalImage) return;
+        isDragging = true;
+        if (e.cancelable) e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startX = clientX - dragX;
+        startY = clientY - dragY;
+        container.style.cursor = 'grabbing';
+    };
+
+    const doDrag = (e) => {
+        if (!isDragging) return;
+        if (e.cancelable) e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        dragX = clientX - startX;
+        dragY = clientY - startY;
+        updatePreviewTransform();
+    };
+
+    const endDrag = () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    };
+
+    container.addEventListener('mousedown', startDrag);
+    container.addEventListener('mousemove', doDrag);
+    window.addEventListener('mouseup', endDrag);
+
+    container.addEventListener('touchstart', startDrag, { passive: false });
+    container.addEventListener('touchmove', doDrag, { passive: false });
+    window.addEventListener('touchend', endDrag);
+}
+
+function renderPreview(){
+    document.getElementById('pmTotal').textContent=totalCost();
+    document.getElementById('pvTitle').textContent=document.getElementById('titulo').value||'Técnica sem nome';
+    document.getElementById('pvCost').textContent=totalCost()+' PM';
+    document.getElementById('pvPath').textContent=pathText()||'Sem construção.';
+    document.getElementById('pvDesc').textContent=document.getElementById('desc').value||'Sem descrição.';
+    const pvImg = document.getElementById('pvImg');
+    if (pvImg) {
+        if (originalImage) {
+            pvImg.src = originalImage.src;
+            pvImg.style.display = 'block';
+        } else if (imageData) {
+            pvImg.src = imageData;
+            pvImg.style.display = 'block';
+        } else {
+            pvImg.src = '';
+            pvImg.style.display = 'none';
+        }
+    }
+}
+
+function bindFinal(){
+    ['titulo','desc','obs'].forEach(id=>document.getElementById(id).addEventListener('input',renderPreview));
+    
+    document.getElementById('imagemFile').addEventListener('change', e => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                originalImage = img;
+                imgW = img.width;
+                imgH = img.height;
+                dragX = 0;
+                dragY = 0;
+                scaleMultiplier = 1.0;
+                imageData = img.src;
+                
+                const pvImg = document.getElementById('pvImg');
+                pvImg.src = img.src;
+                pvImg.style.display = 'block';
+                
+                const container = document.getElementById('pvImgContainer');
+                const C = container.clientWidth || 340;
+                const previewBaseScale = Math.max(C / imgW, C / imgH);
+                const pBaseW = imgW * previewBaseScale;
+                const pBaseH = imgH * previewBaseScale;
+                const pX = (C - pBaseW) / 2;
+                const pY = (C - pBaseH) / 2;
+                
+                pvImg.style.width = pBaseW + 'px';
+                pvImg.style.height = pBaseH + 'px';
+                pvImg.style.left = pX + 'px';
+                pvImg.style.top = pY + 'px';
+                pvImg.style.transform = 'translate(0px, 0px) scale(1)';
+                
+                renderPreview();
+            };
+            img.src = r.result;
+        };
+        r.readAsDataURL(f);
+    });
+}
+
 function deriveSubtype(){const names=pathNodes().map(n=>norm(n.nome)).join(' ');if(names.includes('conjur'))return 'CONJURAÇÃO';if(names.includes('clamor'))return 'CLAMOR';if(names.includes('feit'))return 'FEITIÇO';if(names.includes('fisic'))return 'FÍSICO';if(names.includes('perjur'))return 'PERJURAÇÃO';return pathNodes()[1]?.nome||''}
 function deriveType(){const names=pathNodes().map(n=>norm(n.nome)).join(' ');if(names.includes('feit')||names.includes('conjur')||names.includes('clamor'))return 'FEITIÇOS';if(names.includes('perjur'))return 'PERJURAÇÃO';if(names.includes('fisic'))return 'FÍSICO';return pathNodes()[1]?.nome||'Técnica'}
-async function loadEdit(){if(!editId||!ficha)return;const snap=await get(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas/${editId}`));const t=snap.val();if(!t)return;editCompendiumId=t.compendium_id||'';document.getElementById('titulo').value=t.titulo||'';document.getElementById('desc').value=t.desc||'';document.getElementById('obs').value=t.obs||'';imageData=t.imagem||'';pathIds=t.tecnica_path_ids||[];currentNodeId=pathIds[pathIds.length-1]||'';showFinal()}
+
+async function loadEdit(){
+    if(!editId||!ficha)return;
+    const snap=await get(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas/${editId}`));
+    const t=snap.val();
+    if(!t)return;
+    editCompendiumId=t.compendium_id||'';
+    document.getElementById('titulo').value=t.titulo||'';
+    document.getElementById('desc').value=t.desc||'';
+    document.getElementById('obs').value=t.obs||'';
+    imageData=t.imagem||'';
+    pathIds=t.tecnica_path_ids||[];
+    currentNodeId=pathIds[pathIds.length-1]||'';
+    
+    if (imageData) {
+        const img = new Image();
+        img.onload = () => {
+            originalImage = img;
+            imgW = img.width;
+            imgH = img.height;
+            dragX = 0;
+            dragY = 0;
+            scaleMultiplier = 1.0;
+            
+            const pvImg = document.getElementById('pvImg');
+            pvImg.src = img.src;
+            pvImg.style.display = 'block';
+            
+            const container = document.getElementById('pvImgContainer');
+            const C = container.clientWidth || 340;
+            const previewBaseScale = Math.max(C / imgW, C / imgH);
+            const pBaseW = imgW * previewBaseScale;
+            const pBaseH = imgH * previewBaseScale;
+            const pX = (C - pBaseW) / 2;
+            const pY = (C - pBaseH) / 2;
+            
+            pvImg.style.width = pBaseW + 'px';
+            pvImg.style.height = pBaseH + 'px';
+            pvImg.style.left = pX + 'px';
+            pvImg.style.top = pY + 'px';
+            pvImg.style.transform = 'translate(0px, 0px) scale(1)';
+            
+            renderPreview();
+        };
+        img.src = imageData;
+    }
+    
+    showFinal();
+}
+
 window.goBack=()=>{location.href=source==='ficha'&&ficha?`ed_sistemav3_ficha.html?p=${encodeURIComponent(ficha)}`:'ed_sistemav3_bancodedados.html'};
-window.saveTechnique=async()=>{const title=document.getElementById('titulo').value.trim();if(!title){alert('Informe o título da técnica.');return}const details=pathNodes().map(n=>`${n.nome || 'Sem nome'}${Number(n.custo_pm)?` (${Number(n.custo_pm)} PM)`:''}${n.desc?` — ${n.desc}`:''}`);const payload={titulo:title,tipo:deriveType(),subtipo:deriveSubtype(),categoria:pathNodes()[2]?.nome||'',custo_pm:totalCost(),custo_pm_base:totalCost(),imagem:imageData,detalhes:pathNodes().map(n=>({label:n.nome||'Sem nome',value:n.desc||'',custo_pm:Number(n.custo_pm)||0})),detalhes_texto:details.join('\n'),tecnica_path_ids:pathIds,desc:document.getElementById('desc').value.trim(),obs:document.getElementById('obs').value.trim(),created_at:new Date().toISOString(),creator_source:source};let compKey=editCompendiumId||push(ref(db,'banco_dados_v3/tecnicas_v2')).key;const updates={[`banco_dados_v3/tecnicas_v2/${compKey}`]:payload};if(source==='ficha'&&ficha){const key=editId||push(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas`)).key;updates[`fichas_v3/${ficha}/habilidades/tecnicas/${key}`]={...payload,compendium_id:compKey}}await update(ref(db),updates);alert('Técnica salva com sucesso!');goBack()};
+
+window.saveTechnique=async()=>{
+    const title=document.getElementById('titulo').value.trim();
+    if(!title){alert('Informe o título da técnica.');return}
+    
+    let finalImageData = imageData;
+    if (originalImage) {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#080404';
+            ctx.fillRect(0, 0, 600, 600);
+            
+            const container = document.getElementById('pvImgContainer');
+            const C = container.clientWidth || 340;
+            const ratio = 600 / C;
+            
+            const baseScale = Math.max(600 / imgW, 600 / imgH);
+            const baseW = imgW * baseScale;
+            const baseH = imgH * baseScale;
+            
+            ctx.save();
+            ctx.translate(300 + dragX * ratio, 300 + dragY * ratio);
+            ctx.scale(scaleMultiplier, scaleMultiplier);
+            ctx.drawImage(originalImage, -baseW / 2, -baseH / 2, baseW, baseH);
+            ctx.restore();
+            
+            finalImageData = canvas.toDataURL('image/jpeg', 0.85);
+        } catch (err) {
+            console.error('Erro ao recortar imagem:', err);
+            finalImageData = imageData;
+        }
+    }
+    
+    const details=pathNodes().map(n=>`${n.nome || 'Sem nome'}${Number(n.custo_pm)?` (${Number(n.custo_pm)} PM)`:''}${n.desc?` — ${n.desc}`:''}`);
+    const payload={
+        titulo:title,
+        tipo:deriveType(),
+        subtipo:deriveSubtype(),
+        categoria:pathNodes()[2]?.nome||'',
+        custo_pm:totalCost(),
+        custo_pm_base:totalCost(),
+        imagem:finalImageData,
+        detalhes:pathNodes().map(n=>({label:n.nome||'Sem nome',value:n.desc||'',custo_pm:Number(n.custo_pm)||0})),
+        detalhes_texto:details.join('\n'),
+        tecnica_path_ids:pathIds,
+        desc:document.getElementById('desc').value.trim(),
+        obs:document.getElementById('obs').value.trim(),
+        created_at:new Date().toISOString(),
+        creator_source:source
+    };
+    
+    let compKey=editCompendiumId||push(ref(db,'banco_dados_v3/tecnicas_v2')).key;
+    const updates={[`banco_dados_v3/tecnicas_v2/${compKey}`]:payload};
+    if(source==='ficha'&&ficha){
+        const key=editId||push(ref(db,`fichas_v3/${ficha}/habilidades/tecnicas`)).key;
+        updates[`fichas_v3/${ficha}/habilidades/tecnicas/${key}`]={...payload,compendium_id:compKey}
+    }
+    await update(ref(db),updates);
+    alert('Técnica salva com sucesso!');
+    goBack()
+};
+
 onValue(ref(db,'banco_dados_v3/logica_tecnicas'),snap=>{logic=snap.val()||{};ensureStart();if(!currentNodeId&&!pathIds.length)renderStep();else if(!document.getElementById('finalPanel').classList.contains('hidden'))renderPreview();else renderStep()});
-bindFinal();loadEdit();renderStep();
+bindFinal();loadEdit();renderStep();setupDragEvents();
 </script><script src="pwa.js" defer></script>
 </body></html>
