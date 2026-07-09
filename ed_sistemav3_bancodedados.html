@@ -225,6 +225,16 @@ const CATEGORIES = {
     meta: (it) => `Categoria: ${it.categoria || '-'} • Atributo: ${it.atributo || '-'}`,
     descField: 'desc'
   },
+  efeitos_secundarios: {
+    label: '🔥 Efeitos Secundários',
+    fields: [
+      { key:'titulo', label:'Nome do efeito', type:'text', required:true },
+      { key:'emoji', label:'Emoji', type:'text' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Marcador: ${it.emoji || '✦'}`,
+    descField: 'desc'
+  },
   ascensao_arcana: {
     label: '✨ Ascensão Arcana',
     fields: [

@@ -51,15 +51,18 @@
       status: 'approved',
       versions: ['v1', 'v2', 'v3'],
       assignedSheets: ['v1_ficha', 'v2_ficha', 'v3_ficha_base'],
-      createdAt: now()
+      createdAt: now(),
+      avatar: '',
+      requests: {}
     });
     writeJSON(STORAGE_KEY, store);
   }
 
   function getLocalStore() {
-    const store = readJSON(STORAGE_KEY, { users: [], sheets: [...defaultSheets] });
+    const store = readJSON(STORAGE_KEY, { users: [], sheets: [...defaultSheets], notifications: [] });
     if (!Array.isArray(store.users))  store.users  = [];
     if (!Array.isArray(store.sheets)) store.sheets = [...defaultSheets];
+    if (!Array.isArray(store.notifications)) store.notifications = [];
     ensureAdmin(store);
     return store;
   }
@@ -76,22 +79,24 @@
 
   function normalizeUser(u) {
     if (!u) return null;
-    return { ...u, versions: toArray(u.versions), assignedSheets: toArray(u.assignedSheets) };
+    return { ...u, versions: toArray(u.versions), assignedSheets: toArray(u.assignedSheets), requests: u.requests || {}, avatar: u.avatar || '' };
   }
 
   function storeFromFirebase(data) {
     return {
       users:  data?.users  ? Object.values(data.users).map(normalizeUser).filter(Boolean) : [],
-      sheets: data?.sheets ? Object.values(data.sheets).filter(Boolean) : [...defaultSheets]
+      sheets: data?.sheets ? Object.values(data.sheets).filter(Boolean) : [...defaultSheets],
+      notifications: data?.notifications ? Object.values(data.notifications).filter(Boolean) : []
     };
   }
 
   // Convert arrays → objects keyed by id (Firebase prefers this for collections)
   function storeToFirebase(store) {
-    const users = {}, sheets = {};
+    const users = {}, sheets = {}, notifications = {};
     store.users.forEach(u  => { users[u.id]   = u; });
     store.sheets.forEach(s => { sheets[s.id]  = s; });
-    return { users, sheets };
+    (store.notifications || []).forEach(n => { notifications[n.id] = n; });
+    return { users, sheets, notifications };
   }
 
   /* ─── Firebase callback ─── */
@@ -206,7 +211,9 @@
       status:         isAdmin ? 'approved' : 'pending',
       versions:       isAdmin ? ['v1', 'v2', 'v3'] : [],
       assignedSheets: [],
-      createdAt: now()
+      createdAt: now(),
+      avatar: '',
+      requests: {}
     };
 
     store.users.push(newUser);
@@ -300,6 +307,63 @@
     return true;
   }
 
+
+
+  function addNotification({ type, userId, title, message }) {
+    const store = getLocalStore();
+    const notification = { id: crypto.randomUUID(), type, userId, title, message, read: false, createdAt: now() };
+    store.notifications = Array.isArray(store.notifications) ? store.notifications : [];
+    store.notifications.unshift(notification);
+    saveLocalStore(store);
+    if (db) _update(_ref(db, `${DB_PATH}/notifications`), { [notification.id]: notification }).catch(console.error);
+    return notification;
+  }
+
+  function markNotificationRead(notificationId) {
+    const store = getLocalStore();
+    const item = (store.notifications || []).find(n => n.id === notificationId);
+    if (!item) return false;
+    item.read = true;
+    saveLocalStore(store);
+    if (db) _update(_ref(db, `${DB_PATH}/notifications/${notificationId}`), { read: true }).catch(console.error);
+    return true;
+  }
+
+  function updateCurrentProfile({ name, avatar }) {
+    const user = currentUser();
+    if (!user) return { ok: false, error: 'Faça login novamente.' };
+    const patch = {};
+    if (typeof name === 'string' && name.trim()) patch.name = name.trim();
+    if (typeof avatar === 'string') patch.avatar = avatar;
+    updateUser(user.id, patch);
+    return { ok: true };
+  }
+
+  function requestCredentialChange(kind, value) {
+    const user = currentUser();
+    if (!user) return { ok: false, error: 'Faça login novamente.' };
+    if (!['email', 'password'].includes(kind)) return { ok: false, error: 'Tipo de solicitação inválido.' };
+    const clean = (value || '').trim();
+    if (!clean) return { ok: false, error: 'Informe o novo valor solicitado.' };
+    const requests = { ...(user.requests || {}), [kind]: { value: clean, status: 'pending', requestedAt: now() } };
+    updateUser(user.id, { requests });
+    addNotification({ type: `${kind}_change`, userId: user.id, title: kind === 'email' ? 'Troca de e-mail solicitada' : 'Troca de senha solicitada', message: `${user.name} solicitou alteração de ${kind === 'email' ? 'e-mail' : 'senha'}.` });
+    return { ok: true };
+  }
+
+  function approveCredentialChange(userId, kind) {
+    const store = getLocalStore();
+    const user = store.users.find(u => u.id === userId);
+    const req = user?.requests?.[kind];
+    if (!user || !req || req.status !== 'pending') return { ok: false, error: 'Solicitação não encontrada.' };
+    const patch = { requests: { ...(user.requests || {}), [kind]: { ...req, status: 'approved', approvedAt: now() } } };
+    if (kind === 'email') patch.email = normalizeEmail(req.value);
+    if (kind === 'password') patch.password = req.value;
+    updateUser(userId, patch);
+    addNotification({ type: `${kind}_approved`, userId, title: 'Solicitação aprovada', message: `A alteração de ${kind === 'email' ? 'e-mail' : 'senha'} de ${user.name} foi aprovada.` });
+    return { ok: true };
+  }
+
   /* ─── Route guard ─── */
   function requireAuth(version) {
     const user = currentUser();
@@ -329,7 +393,8 @@
     login, register, logout,
     updateUser, deleteUser, changeUserPassword,
     requireAuth, initGuardFromDOM,
-    createSheet, attachSheetToUser, detachSheetFromUser
+    createSheet, attachSheetToUser, detachSheetFromUser,
+    addNotification, markNotificationRead, updateCurrentProfile, requestCredentialChange, approveCredentialChange
   };
 
   document.addEventListener('DOMContentLoaded', initGuardFromDOM);

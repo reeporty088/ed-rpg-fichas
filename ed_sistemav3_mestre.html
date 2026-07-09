@@ -39,6 +39,7 @@
         .controls-row { display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; }
         .btn-small { flex:1 1 70px; background:#222; border:1px solid #555; color:#fff; border-radius:4px; font-size:10px; cursor:pointer; text-transform:uppercase; padding:4px; }
         .btn-obs { border-color:#00ffff; color:#00ffff; }
+        .effect-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.effect-badge{background:#2b1717;border:1px solid #7a3030;border-radius:999px;padding:3px 8px;font-size:11px}.effect-menu{display:none;margin-top:8px;background:#111;border:1px solid #555;border-radius:8px;padding:8px}.effect-menu.open{display:block}.effect-option{display:block;width:100%;text-align:left;margin:4px 0;background:#222;border:1px solid #555;color:#fff;border-radius:6px;padding:6px;cursor:pointer}
         .status-bar { height:18px; background:#1a1a1a; border-radius:10px; overflow:hidden; border:1px solid #444; position:relative; margin-top:5px; }
         .bar-fill { height:100%; }
         .hp { background:#d32f2f; } .mana { background:#1e88e5; } .pulso { background:#7b1fa2; }
@@ -163,7 +164,6 @@
           <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
           <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
           <button class="btn-calendar" onclick="window.open('ed_sistemav3_overlaymoeda.html','_blank')">MOEDA OVERLAY</button>
-          <button class="btn-calendar" style="background:#2a0b20;border-color:#9b3aff;color:#cc88ff;" onclick="abrirTabletop()">🗺 Tabletop VTT</button>
         </div>
       </div>
     </div>
@@ -261,9 +261,9 @@ import { getDatabase, ref, onValue, update, runTransaction, push, remove, set, g
 const firebaseConfig={apiKey:"AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",authDomain:"ed-rpg---sistema-de-fichas.firebaseapp.com",databaseURL:"https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",projectId:"ed-rpg---sistema-de-fichas",storageBucket:"ed-rpg---sistema-de-fichas.firebasestorage.app",messagingSenderId:"350999444010",appId:"1:350999444010:web:d89f31d13e449b8fbfa153"};
 const db=getDatabase(initializeApp(firebaseConfig));
 const baseURL="https://reeporty088.github.io/ed-rpg-fichas/";
-const pathPlayers='fichas_v3', pathNpcs='npcs_v3', pathDivs='divisoes_v3', pathCombat='combate_v3';
+const pathPlayers='fichas_v3', pathNpcs='npcs_v3', pathDivs='divisoes_v3', pathCombat='combate_v3', pathEffects='banco_dados_v3/efeitos_secundarios';
 const DADIVAS_IDS=['mascara_lunar','lodo_corrompido','combustao_arcana','escarcha_absoluta','tremor_abissal'];
-let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatData={};
+let globalPlayers={},globalNpcs={},globalDivisions={players:{},npcs:{}},combatData={},secondaryEffects={};
 const NPC_SKILLS=['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','Esporte','Fortitude','Influência','Intuição','Ladinagem','Luta','Máquinas','Medicina','Mente','Mística','Percepção','Sobrevivência','Vitalidade','Vontade'];
 let npcPericias={};
 let overlayModeGlobal = 'nome';
@@ -305,6 +305,19 @@ function renderAll(){
   Object.entries(globalNpcs).forEach(([id,n])=>{ const cat=n.category||'default'; const target=document.getElementById(`grid_npcs_${cat}`); if(!target||cat==='hidden_roster') document.getElementById('roster_list_npcs').appendChild(createRosterItem(id,n,'npcs')); else target.appendChild(createNpcCard(id,n)); });
 }
 
+
+function renderEffectBadges(data){
+  const ids = Object.keys(data.secondary_effects || {}).filter(k => data.secondary_effects[k]);
+  if(!ids.length) return '';
+  return `<div class="effect-badges">${ids.map(id=>{const e=secondaryEffects[id]||{};return `<span class="effect-badge" title="${e.desc||''}">${e.emoji||'✦'} ${e.titulo||id}</span>`}).join('')}</div>`;
+}
+function renderEffectMenu(id,type){
+  const list=Object.entries(secondaryEffects||{});
+  if(!list.length) return `<div id="effects_${type}_${id}" class="effect-menu"><span style="font-size:11px;color:#999">Crie efeitos no Compêndio em “Efeitos Secundários”.</span></div>`;
+  return `<div id="effects_${type}_${id}" class="effect-menu">${list.map(([eid,e])=>`<button class="effect-option" onclick="toggleSecondaryEffect('${id}','${type}','${eid}')">${e.emoji||'✦'} ${e.titulo||eid}</button>`).join('')}</div>`;
+}
+window.toggleEffectMenu=(id,type)=>document.getElementById(`effects_${type}_${id}`)?.classList.toggle('open');
+window.toggleSecondaryEffect=(id,type,eid)=>{const source=type==='players'?globalPlayers:globalNpcs;const base=type==='players'?pathPlayers:pathNpcs;const cur=!!source[id]?.secondary_effects?.[eid]; update(ref(db,`${base}/${id}/secondary_effects`),{[eid]:!cur});};
 function createPlayerCard(id,f){
   const hpAt=+f.hp_at||0,hpMax=+f.hp_max||1,manaAt=+f.mana_at||0,manaMax=+f.mana_max||1,pulsoAt=+f.pulso_at||0;
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
@@ -313,7 +326,7 @@ function createPlayerCard(id,f){
   const linkOverlay=`${baseURL}ed_sistemav3_overlay.html?p=${id}`;
   const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
   const el=document.createElement('div'); el.className='player-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'players');
-  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button></div></div></div>
+  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button><button class="btn-small" onclick="toggleEffectMenu('${id}','players')">🔥 Efeito</button></div></div></div>${renderEffectBadges(f)}${renderEffectMenu(id,'players')}
   <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
   <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
   <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoRef)}%"></div></div>
@@ -378,7 +391,7 @@ function createNpcCard(id,n){
       <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div></div>
       <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',1)">+</button>
     </div>
-    <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
+    ${renderEffectBadges(n)}${renderEffectMenu(id,'npcs')}<button class="npc-expand-btn" onclick="toggleEffectMenu('${id}','npcs')">🔥 EFEITO SECUNDÁRIO</button><button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
     <div id="details_${id}" class="npc-details">
       ${habs.map(h=>`<div class='npc-hab-item'><b style="color:var(--accent);font-size:13px;">${h.titulo||'Habilidade'}</b><br><span style="line-height:1.5;">${h.desc||''}</span></div>`).join('')||'<span style="font-size:11px;color:#777">Sem habilidades</span>'}
       <div style="font-size:11px;white-space:pre-wrap;margin-top:8px;color:#ccc;">${n.obs||''}</div>
@@ -571,6 +584,7 @@ onValue(ref(db,pathDivs),s=>{ globalDivisions=s.val()||{players:{},npcs:{}}; ren
 onValue(ref(db,pathPlayers),s=>{ globalPlayers=s.val()||{}; renderAll(); });
 onValue(ref(db,pathNpcs),s=>{ globalNpcs=s.val()||{}; renderAll(); });
 onValue(ref(db,pathCombat),s=>{ combatData=s.val()||{}; renderCombat(); });
+onValue(ref(db,pathEffects),s=>{ secondaryEffects=s.val()||{}; renderAll(); });
 onValue(ref(db,'world_time'),(snapshot)=>{ const data=snapshot.val(); if(!data)return; const SEASONS=['Primavera','Verão','Outono','Inverno']; document.getElementById('wd_date').innerText=`Anno ${data.year} | ${SEASONS[data.season]} | Dia ${data.day}`; document.getElementById('wd_time').innerText=`${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}`; document.getElementById('wd_weather_icon').innerText='☀'; document.getElementById('wd_weather_text').innerText='Clima'; });
 onValue(ref(db,'moeda_v3/valor'),(snapshot)=>{
   moedaValor = Number(snapshot.val()) || 0;
