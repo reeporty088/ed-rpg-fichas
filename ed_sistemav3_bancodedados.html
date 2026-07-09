@@ -236,6 +236,16 @@ const CATEGORIES = {
     ],
     meta: (it) => `Ramo: ${it.ramo || '-'} • Custo: ${it.custo || '-'}`,
     descField: 'desc'
+  },
+  efeitos_secundarios: {
+    label: '✨ Efeitos Secundários',
+    fields: [
+      { key:'titulo', label:'Nome', type:'text', required:true },
+      { key:'emoji', label:'Emoji (ex: 🔥)', type:'text', required:true },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Emoji: ${it.emoji || '-'}`,
+    descField: 'desc'
   }
 };
 

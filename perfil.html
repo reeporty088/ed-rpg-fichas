@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escória de Deus — Perfil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* === Variables === */
+    :root {
+      --bg:      #070707;
+      --card:    #130909;
+      --border:  #5c1c22;
+      --accent:  #9b1a1a;
+      --bright:  #cc2a2a;
+      --text:    #f0e6e6;
+      --muted:   #9a8585;
+      --success: #1f8b4c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Raleway', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* Ambient glow backdrop */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 65% 80% at 15% 45%, rgba(139,0,0,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 60% at 85% 20%, rgba(100,10,10,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 50% 100%, rgba(80,0,0,.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* === Layout === */
+    .wrap {
+      max-width: 600px;
+      width: 100%;
+      margin: 40px auto 70px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === Header === */
+    .profile-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .profile-title {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(180deg, #f8e8e8 0%, #cc8080 55%, #8b0000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 12px rgba(160,20,20,.35));
+    }
+
+    /* === Card === */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      margin-bottom: 20px;
+    }
+
+    /* Top shimmer line */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 12%; right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,60,60,.55), transparent);
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      opacity: .65;
+    }
+
+    /* === Form === */
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      font-size: .71rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 7px;
+      border: 1px solid rgba(110,44,50,.65);
+      background: rgba(7,3,3,.88);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(155,26,26,.18);
+    }
+
+    .avatar-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .avatar-circle {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      background: #0f0505;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 2.8rem;
+      box-shadow: 0 0 20px rgba(139,0,0,.35);
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .avatar-circle:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(155,26,26,.65);
+    }
+
+    .avatar-circle::after {
+      content: "📷";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .avatar-circle:hover::after {
+      opacity: 1;
+    }
+
+    /* === Buttons === */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 8px;
+      border: 1px solid;
+      padding: 11px 16px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: .84rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+
+    .btn-full { width: 100%; }
+
+    .btn-primary {
+      background: linear-gradient(170deg, #4a1515 0%, #1e0808 100%);
+      border-color: var(--accent);
+      color: #f0cece;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(170deg, #6a2020 0%, #2e0e0e 100%);
+      border-color: var(--bright);
+      box-shadow: 0 0 20px rgba(155,26,26,.35);
+    }
+
+    .btn-neutral {
+      background: linear-gradient(170deg, #2a2020 0%, #1a1212 100%);
+      border-color: #4a3535;
+      color: var(--muted);
+    }
+    .btn-neutral:hover {
+      border-color: #6a5050;
+      color: var(--text);
+    }
+
+    .msg {
+      min-height: 18px;
+      font-size: .83rem;
+      margin-top: 10px;
+      color: #ff9e9e;
+      text-align: center;
+    }
+    .msg.ok { color: #7fe8a8; }
+
+    .req-pending-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(200,120,0,.15);
+      border: 1px solid #c87800;
+      color: #ffc060;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    /* === Sidebar CSS === */
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      height: 100%;
+      background: rgba(19, 9, 9, 0.98);
+      border-right: 1px solid var(--border);
+      box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+      z-index: 2000;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+    .sidebar-nav.open {
+      left: 0;
+    }
+    .sidebar-trigger {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1900;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .sidebar-trigger:hover {
+      border-color: var(--bright);
+      color: var(--bright);
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(92,28,34,0.4);
+      margin-bottom: 20px;
+    }
+    .sidebar-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5a1212, #1a0505);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .sidebar-user-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(155,26,26,0.15);
+      color: var(--text);
+      border-left: 3px solid var(--accent);
+    }
+    .sidebar-footer {
+      padding-top: 15px;
+      border-top: 1px solid rgba(92,28,34,0.4);
+    }
+    /* Backdrop for sidebar */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1999;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-backdrop.open {
+      display: block;
+    }
+  </style>
+</head>
+<body data-require-auth="true" data-required-version="v3">
+
+  <!-- Sidebar Trigger -->
+  <div class="sidebar-trigger" onclick="toggleSidebar()">☰</div>
+
+  <!-- Sidebar Backdrop -->
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-header">
+      <div class="sidebar-avatar" id="sideAvatar">⚔</div>
+      <div class="sidebar-user-name" id="sideUserName">Jogador</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a class="sidebar-link active" href="perfil.html">👤 Perfil</a></li>
+      <li><a class="sidebar-link" href="index.html?tab=fichas">🎭 Fichas</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=users">👥 Gerenciar Usuários</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav1_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=notifications">🔔 Notificações</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-link" onclick="handleLogout()">🚪 Sair</div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header class="profile-header">
+      <h1 class="profile-title">Meu Perfil</h1>
+    </header>
+
+    <main class="card">
+      <h2 class="card-title">Dados Gerais</h2>
+      
+      <!-- Avatar Upload -->
+      <div class="avatar-upload-container">
+        <div class="avatar-circle" id="profileAvatar" onclick="document.getElementById('fileInput').click()">⚔</div>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+      </div>
+
+      <!-- Account Name -->
+      <div class="field">
+        <label for="accName">Nome da Conta</label>
+        <input id="accName" type="text" placeholder="Seu nome" />
+      </div>
+
+      <button id="btnSaveGeneral" class="btn btn-primary btn-full">Salvar Informações</button>
+      <div id="generalMsg" class="msg"></div>
+    </main>
+
+    <!-- Credential Change Requests -->
+    <main class="card">
+      <h2 class="card-title">Alterar Credenciais</h2>
+
+      <!-- Email Request -->
+      <div class="field" style="margin-top: 10px;">
+        <label>E-mail Atual</label>
+        <input id="currentEmail" type="text" readonly style="opacity: 0.65; cursor: not-allowed;" />
+      </div>
+      <div class="field">
+        <label for="newEmail">Solicitar Novo E-mail</label>
+        <input id="newEmail" type="email" placeholder="novo@email.com" />
+        <div id="emailReqStatus" class="hidden"></div>
+      </div>
+      <button id="btnRequestEmail" class="btn btn-neutral btn-full" style="margin-bottom: 20px;">Solicitar Mudança de E-mail</button>
+
+      <!-- Password Request -->
+      <div class="field">
+        <label for="newPassword">Solicitar Nova Senha</label>
+        <input id="newPassword" type="password" placeholder="Nova Senha" />
+        <div id="passReqStatus" class="hidden"></div>
+      </div>
+      <button id="btnRequestPassword" class="btn btn-neutral btn-full">Solicitar Mudança de Senha</button>
+      
+      <div id="credentialsMsg" class="msg"></div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Initialize Firebase local references
+    const firebaseConfig = {
+      apiKey:            'AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ',
+      authDomain:        'ed-rpg---sistema-de-fichas.firebaseapp.com',
+      databaseURL:       'https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com',
+      projectId:         'ed-rpg---sistema-de-fichas',
+      storageBucket:     'ed-rpg---sistema-de-fichas.firebasestorage.app',
+      messagingSenderId: '350999444010',
+      appId:             '1:350999444010:web:d89f31d13e449b8fbfa153'
+    };
+    initializeApp(firebaseConfig);
+
+    let currentUser = null;
+
+    // Sidebar Toggle
+    window.toggleSidebar = () => {
+      const nav = document.getElementById('sidebarNav');
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      nav.classList.toggle('open');
+      backdrop.classList.toggle('open');
+    };
+
+    window.handleLogout = () => {
+      EDAuth.logout();
+      window.location.href = 'index.html';
+    };
+
+    // Compress uploaded avatar image using Canvas
+    async function processImg(file) {
+      return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const max = 200;
+            let w = img.width, h = img.height;
+            if (w > max) { h = h * max / w; w = max; }
+            if (h > max) { w = w * max / h; h = max; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            res(canvas.toDataURL('image/jpeg', 0.8));
+          };
+          img.onerror = rej;
+          img.src = e.target.result;
+        };
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Handle avatar upload click
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const dataUrl = await processImg(file);
+        document.getElementById('profileAvatar').style.backgroundImage = `url(${dataUrl})`;
+        document.getElementById('profileAvatar').textContent = '';
+        
+        // Save to Firebase immediately
+        EDAuth.updateUser(currentUser.id, { photo: dataUrl });
+        showMsg('generalMsg', 'Foto de perfil atualizada com sucesso!', 'ok');
+      } catch (err) {
+        showMsg('generalMsg', 'Erro ao carregar a imagem.', 'error');
+      }
+    });
+
+    // Save Display Name
+    document.getElementById('btnSaveGeneral').addEventListener('click', () => {
+      const newName = document.getElementById('accName').value.trim();
+      if (!newName) {
+        showMsg('generalMsg', 'O nome da conta não pode ser vazio.', 'error');
+        return;
+      }
+      EDAuth.updateUser(currentUser.id, { name: newName });
+      showMsg('generalMsg', 'Nome atualizado com sucesso!', 'ok');
+    });
+
+    // Request E-mail Change
+    document.getElementById('btnRequestEmail').addEventListener('click', () => {
+      const newEmail = document.getElementById('newEmail').value.trim().toLowerCase();
+      if (!newEmail || !newEmail.includes('@')) {
+        showMsg('credentialsMsg', 'Por favor, informe um e-mail válido.', 'error');
+        return;
+      }
+      if (newEmail === currentUser.email) {
+        showMsg('credentialsMsg', 'O e-mail é o mesmo da conta atual.', 'error');
+        return;
+      }
+      EDAuth.updateUser(currentUser.id, { requestedEmail: newEmail });
+      showMsg('credentialsMsg', 'Solicitação de e-mail enviada ao ADM!', 'ok');
+      document.getElementById('newEmail').value = '';
+    });
+
+    // Request Password Change
+    document.getElementById('btnRequestPassword').addEventListener('click', () => {
+      const newPass = document.getElementById('newPassword').value.trim();
+      if (newPass.length < 4) {
+        showMsg('credentialsMsg', 'A nova senha deve ter no mínimo 4 caracteres.', 'error');
+        return;
+      }
+      EDAuth.updateUser(currentUser.id, { requestedPassword: newPass });
+      showMsg('credentialsMsg', 'Solicitação de nova senha enviada ao ADM!', 'ok');
+      document.getElementById('newPassword').value = '';
+    });
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type;
+      setTimeout(() => { el.textContent = ''; }, 4000);
+    }
+
+    // Refresh UI on auth changes
+    function renderProfile() {
+      currentUser = EDAuth.currentUser();
+      if (!currentUser) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Populate static fields
+      document.getElementById('sideUserName').textContent = currentUser.name;
+      document.getElementById('accName').value = currentUser.name;
+      document.getElementById('currentEmail').value = currentUser.email;
+
+      // Handle sidebar avatar
+      const sideAv = document.getElementById('sideAvatar');
+      if (currentUser.photo) {
+        sideAv.style.backgroundImage = `url(${currentUser.photo})`;
+        sideAv.textContent = '';
+      } else {
+        sideAv.style.backgroundImage = '';
+        sideAv.textContent = currentUser.role === 'admin' ? '👑' : '⚔';
+      }
+
+      // Handle profile avatar
+      const profAv = document.getElementById('profileAvatar');
+      if (currentUser.photo) {
+        profAv.style.backgroundImage = `url(${currentUser.photo})`;
+        profAv.textContent = '';
+      } else {
+        profAv.style.backgroundImage = '';
+        profAv.textContent = currentUser.role === 'admin' ? '👑' : '⚔';
+      }
+
+      // Handle change request status displays
+      const emailStatus = document.getElementById('emailReqStatus');
+      if (currentUser.requestedEmail) {
+        emailStatus.className = 'req-pending-badge';
+        emailStatus.textContent = `Pendente de aprovação: ${currentUser.requestedEmail}`;
+      } else {
+        emailStatus.className = 'hidden';
+      }
+
+      const passStatus = document.getElementById('passReqStatus');
+      if (currentUser.requestedPassword) {
+        passStatus.className = 'req-pending-badge';
+        passStatus.textContent = `Pendente de aprovação: Nova Senha`;
+      } else {
+        passStatus.className = 'hidden';
+      }
+
+      // Display admin options
+      if (currentUser.role === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      } else {
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+      }
+    }
+
+    // Setup real-time listener from Firebase via auth.js
+    window.onAuthStoreChanged = renderProfile;
+    renderProfile();
+  </script>
+  <script src="pwa.js" defer></script>
+</body>
+</html>
