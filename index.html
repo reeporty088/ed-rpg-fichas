@@ -725,6 +725,7 @@
       <div class="sidebar-user-name" id="sideUserName">Jogador</div>
     </div>
     <ul class="sidebar-menu">
+      <li><div class="sidebar-link" onclick="switchHubTab('dashboard')">🏠 Hub</div></li>
       <li><a class="sidebar-link" href="perfil.html">👤 Perfil</a></li>
       <li><div class="sidebar-link" onclick="switchHubTab('fichas')">🎭 Fichas</div></li>
       <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
@@ -845,12 +846,6 @@
             <div class="v-status ok">Editar Contas & Fichas</div>
           </div>
         </div>
-      </div>
-
-      <!-- Version cards (Legacy version list) -->
-      <div class="card mb-24">
-        <h3 class="card-title">Outras Versões do Sistema</h3>
-        <div id="versions" class="version-grid"></div>
       </div>
     </div>
 
@@ -1052,47 +1047,25 @@
     }
 
     const rolePill = document.getElementById('userRolePill');
+    const tabsContainer = document.getElementById('hubTabsContainer');
     if (user.role === 'admin') {
       rolePill.className = 'pill pill-admin';
       rolePill.textContent = 'Administrador';
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      if (tabsContainer) tabsContainer.classList.remove('hidden');
     } else {
       rolePill.className = 'pill pill-player';
       rolePill.textContent = 'Jogador';
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+      if (tabsContainer) tabsContainer.classList.add('hidden');
     }
 
-    renderVersions(user);
     renderMyFichas();
 
     if (user.role === 'admin') {
       renderAdminUsers();
       renderNotifications();
     }
-  }
-
-  /* ── version cards ── */
-  const VERSION_META = [
-    { key: 'v1', label: 'ED Sistema v1',           icon: '📜', url: 'ed_sistemav1_mestre.html'    },
-    { key: 'v2', label: 'ED Sistema v2',           icon: '⚔️',  url: 'ed_sistemav2_mestre.html'    },
-    { key: 'v3', label: 'ED Sistema v3',           icon: '🎭', url: 'ed_sistemav3_mestre.html'    }, // Point to Master Panel V3
-  ];
-
-  function renderVersions(user) {
-    const container = document.getElementById('versions');
-    container.innerHTML = '';
-    VERSION_META.forEach(({ key, label, icon, url }) => {
-      const allowed = user.role === 'admin' || (Array.isArray(user.versions) && user.versions.includes(key));
-      const div = document.createElement('div');
-      div.className = 'version-card ' + (allowed ? 'accessible' : 'locked');
-      div.innerHTML = `
-        <div class="v-icon">${icon}</div>
-        <div class="v-name">${label}</div>
-        <div class="v-status${allowed ? ' ok' : ''}">${allowed ? 'Acesso liberado' : 'Sem acesso'}</div>
-      `;
-      if (allowed) div.onclick = () => { location.href = url; };
-      container.appendChild(div);
-    });
   }
 
   /* ── render my fichas ── */
@@ -1123,7 +1096,7 @@
         <div class="char-card-level">Nível ${data.nivel || 1}</div>
       `;
       card.onclick = () => {
-        window.open(`ed_sistemav3_ficha.html?p=${id}`, '_blank');
+        window.location.href = `ed_sistemav3_ficha.html?p=${id}`;
       };
       container.appendChild(card);
     });

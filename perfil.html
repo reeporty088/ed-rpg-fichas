@@ -261,6 +261,7 @@
       font-weight: 600;
       margin-top: 5px;
     }
+    .hidden { display: none !important; }
 
     /* === Sidebar CSS === */
     .sidebar-nav {
@@ -374,6 +375,7 @@
       display: block;
     }
   </style>
+  <script src="auth.js"></script>
 </head>
 <body data-require-auth="true" data-required-version="v3">
 
@@ -390,6 +392,7 @@
       <div class="sidebar-user-name" id="sideUserName">Jogador</div>
     </div>
     <ul class="sidebar-menu">
+      <li><a class="sidebar-link" href="index.html">🏠 Hub</a></li>
       <li><a class="sidebar-link active" href="perfil.html">👤 Perfil</a></li>
       <li><a class="sidebar-link" href="index.html?tab=fichas">🎭 Fichas</a></li>
       <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
@@ -520,6 +523,7 @@
         
         // Save to Firebase immediately
         EDAuth.updateUser(currentUser.id, { photo: dataUrl });
+        renderProfile();
         showMsg('generalMsg', 'Foto de perfil atualizada com sucesso!', 'ok');
       } catch (err) {
         showMsg('generalMsg', 'Erro ao carregar a imagem.', 'error');
@@ -534,6 +538,7 @@
         return;
       }
       EDAuth.updateUser(currentUser.id, { name: newName });
+      renderProfile();
       showMsg('generalMsg', 'Nome atualizado com sucesso!', 'ok');
     });
 
