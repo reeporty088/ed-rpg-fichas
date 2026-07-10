@@ -107,6 +107,58 @@
         .btn-combat { width:100%; padding:8px; font-weight:bold; border-radius:5px; border:none; cursor:pointer; }
         .btn-next { background:#ffd700; color:black; } .btn-prev { background:#444; color:white; } .btn-end { background:#c62828; color:white; }
 
+        /* Card config popovers */
+        .config-popover {
+          position: absolute;
+          background: #110405;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.85);
+          z-index: 1000;
+          display: none;
+          flex-direction: column;
+          padding: 6px;
+          min-width: 140px;
+          left: 10px;
+          top: 38px;
+        }
+        .config-popover.open {
+          display: flex;
+        }
+        .config-popover button {
+          background: transparent;
+          border: none;
+          color: #eee;
+          padding: 8px 10px;
+          text-align: left;
+          font-size: 11px;
+          cursor: pointer;
+          text-transform: uppercase;
+          font-weight: bold;
+          transition: all 0.2s;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .config-popover button:last-child {
+          border-bottom: none;
+        }
+        .config-popover button:hover {
+          background: rgba(155,26,26,0.3);
+          color: #fff;
+        }
+
+        /* Efeitos Secundários Badges */
+        .effect-badge {
+          display: inline-block;
+          font-size: 1.25rem;
+          cursor: help;
+          filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+          transition: transform 0.2s;
+        }
+        .effect-badge:hover {
+          transform: scale(1.2);
+        }
+        .hidden { display: none !important; }
+
         #form-npc-container,#config-player-container { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100; }
         #form-npc-container.open,#config-player-container.open { display:flex; justify-content:center; align-items:flex-start; overflow:auto; }
         .npc-form,.config-box { background:#1a1a1a; padding:20px; border-radius:10px; border:2px solid var(--header-bg); width:min(680px,95%); margin:20px; }
@@ -117,22 +169,119 @@
         .btn-action { width:100%; padding:10px; font-weight:bold; border-radius:5px; border:none; margin-top:10px; cursor:pointer; }
         .btn-save { background:#2e7d32; color:#fff; } .btn-cancel { background:#c62828; color:#fff; }
         .btn-add-npc { background:var(--header-bg); color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold; display:block; margin:20px auto; }
-        .hub-back-btn {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 2200;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid #666;
-            background: rgba(0,0,0,0.6);
-            color: #ddd;
-            text-decoration: none;
-            font-size: 11px;
-            letter-spacing: 0.4px;
-            transition: 0.2s;
+        /* === Sidebar CSS === */
+        .sidebar-nav {
+          position: fixed;
+          top: 0;
+          left: -280px;
+          width: 260px;
+          height: 100%;
+          background: rgba(19, 9, 9, 0.98);
+          border-right: 1px solid var(--border);
+          box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+          z-index: 3000;
+          transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          flex-direction: column;
+          padding: 24px;
         }
-        .hub-back-btn:hover { border-color: var(--accent); color: #fff; }
+        .sidebar-nav.open {
+          left: 0;
+        }
+        .sidebar-trigger {
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          z-index: 2900;
+          background: var(--card-bg, #1a1012);
+          border: 1px solid var(--border);
+          color: white;
+          border-radius: 6px;
+          width: 38px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.2s;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .sidebar-trigger:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+        .sidebar-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid rgba(92,28,34,0.4);
+          margin-bottom: 20px;
+        }
+        .sidebar-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #5a1212, #1a0505);
+          border: 2px solid var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+          flex-shrink: 0;
+          background-size: cover;
+          background-position: center;
+        }
+        .sidebar-user-name {
+          font-family: 'Cinzel', serif;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: white;
+        }
+        .sidebar-menu {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          flex-grow: 1;
+          padding: 0;
+          margin: 0;
+        }
+        .sidebar-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #9a8585;
+          text-decoration: none;
+          padding: 10px 12px;
+          border-radius: 6px;
+          font-size: 0.88rem;
+          font-weight: 600;
+          transition: all 0.2s;
+          cursor: pointer;
+          font-family: 'Cinzel', serif;
+        }
+        .sidebar-link:hover {
+          background: rgba(155,26,26,0.15);
+          color: white;
+          border-left: 3px solid var(--accent);
+        }
+        .sidebar-footer {
+          padding-top: 15px;
+          border-top: 1px solid rgba(92,28,34,0.4);
+        }
+        .sidebar-backdrop {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 2999;
+          backdrop-filter: blur(2px);
+        }
+        .sidebar-backdrop.open {
+          display: block;
+        }
     </style>
     <script src="auth.js"></script>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -141,8 +290,32 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
-<body data-require-auth="true" data-required-version="v3">
-    <a class="hub-back-btn" href="index.html">← Hub</a>
+<!-- Sidebar Trigger -->
+<div class="sidebar-trigger" onclick="toggleSidebar()">☰</div>
+
+<!-- Sidebar Backdrop -->
+<div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-header">
+      <div class="sidebar-avatar" id="sideAvatar">⚔</div>
+      <div class="sidebar-user-name" id="sideUserName">Jogador</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a class="sidebar-link" href="index.html">🏠 Hub</a></li>
+      <li><a class="sidebar-link" href="perfil.html">👤 Perfil</a></li>
+      <li><a class="sidebar-link" href="index.html?tab=fichas">🎭 Fichas</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=users">👥 Gerenciar Usuários</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav1_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=notifications">🔔 Notificações</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-link" onclick="handleLogout()">🚪 Sair</div>
+    </div>
+</nav>
+
     <h1>PAINEL DO MESTRE V3</h1>
 
     <div class="world-card" id="world_display">
@@ -161,9 +334,8 @@
         </div>
         <div class="world-actions-col">
           <button class="btn-global-toggle" id="btn_overlay_mode" onclick="toggleOverlayModeAll()">🖥️ Overlay: Nome</button>
-          <button class="btn-calendar" onclick="window.open('ed_sistemav3_bancodedados.html','_blank')">📚 Compêndio v3</button>
+          <button class="btn-calendar" onclick="window.location.href='ed_sistemav3_bancodedados.html'">📚 Compêndio v3</button>
           <button class="btn-calendar" onclick="window.open('ed_sistemav3_overlaymoeda.html','_blank')">MOEDA OVERLAY</button>
-          <button class="btn-calendar" style="background:#2a0b20;border-color:#9b3aff;color:#cc88ff;" onclick="abrirTabletop()">🗺 Tabletop VTT</button>
         </div>
       </div>
     </div>
@@ -175,10 +347,13 @@
     <button class="btn-add-npc" onclick="openNpcForm()">+ CRIAR NOVO NPC / INIMIGO</button>
     <div id="wrapper-npcs"></div>
 
-    <div id="roster-sidebar">
+    <div id="roster-sidebar" style="overflow-y: auto;">
         <div class="combat-header">👥 ESTOQUE</div>
-        <div class="roster-section"><div>Jogadores</div><div id="roster_list_players" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'players')"></div></div>
-        <div class="roster-section"><div>NPCs</div><div id="roster_list_npcs" class="roster-drop-zone" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'npcs')"></div></div>
+        <div style="display:flex; gap:5px; margin-bottom:15px; padding:0 5px;">
+          <input type="text" id="new_folder_name" placeholder="Nova Pasta" style="padding:6px; font-size:12px; background:#222; border:1px solid #5a1a1f; color:white; border-radius:4px;" />
+          <button onclick="createRosterFolder()" style="background:#2e7d32; border:none; color:white; border-radius:4px; font-weight:bold; cursor:pointer; padding:6px 10px; font-size:12px;">+ Pasta</button>
+        </div>
+        <div id="roster_folders_container"></div>
     </div>
     <button class="roster-toggle-btn" onclick="toggleRosterSidebar()">👥</button>
 
@@ -255,6 +430,18 @@
       <button class="btn-action btn-cancel" onclick="document.getElementById('config-player-container').classList.remove('open')">Fechar</button>
     </div></div>
 
+    <!-- Active Effects Selection Modal -->
+    <div id="config-effects-container" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100; align-items:center; justify-content:center;">
+      <div class="config-box" style="width:min(450px,95%);">
+        <h3 id="effectsModalTitle" style="text-align:center; color:var(--accent);">Efeitos Ativos</h3>
+        <input type="hidden" id="effects_char_id">
+        <input type="hidden" id="effects_char_type">
+        <div id="effects_checkbox_list" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto; margin:15px 0;"></div>
+        <button class="btn-action btn-save" onclick="saveActiveEffects()">Salvar e Enviar</button>
+        <button class="btn-action btn-cancel" onclick="closeEffectsModal()">Fechar</button>
+      </div>
+    </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, update, runTransaction, push, remove, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -268,14 +455,48 @@ const NPC_SKILLS=['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','
 let npcPericias={};
 let overlayModeGlobal = 'nome';
 let moedaValor = 0;
+let globalRosterFolders = {};
+let globalCompendiumEffects = {};
+let expandedFolders = {};
+let currentUser = null;
 
-// Abre o módulo Tabletop VTT passando a campanha como parâmetro
-function abrirTabletop() {
-  const user = window.EDAuth ? window.EDAuth.currentUser() : null;
-  const campanhaId = user ? user.id : 'default';
-  window.open(`ed_sistemav3_tabletop.html?campanha=${campanhaId}`, '_blank');
+window.toggleSidebar = () => {
+    const nav = document.getElementById('sidebarNav');
+    const backdrop = document.querySelector('.sidebar-backdrop');
+    if (nav && backdrop) {
+        nav.classList.toggle('open');
+        backdrop.classList.toggle('open');
+    }
+};
+
+window.handleLogout = () => {
+    EDAuth.logout();
+    window.location.href = 'index.html';
+};
+
+function renderSidebar() {
+    currentUser = EDAuth.currentUser();
+    if (!currentUser) return;
+    const sideUserName = document.getElementById('sideUserName');
+    if (sideUserName) sideUserName.textContent = currentUser.name;
+    const sideAv = document.getElementById('sideAvatar');
+    if (sideAv) {
+        if (currentUser.photo) {
+            sideAv.style.backgroundImage = `url(${currentUser.photo})`;
+            sideAv.textContent = '';
+        } else {
+            sideAv.style.backgroundImage = '';
+            sideAv.textContent = currentUser.role === 'admin' ? '👑' : '⚔';
+        }
+    }
+    if (currentUser.role === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    } else {
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+    }
 }
-window.abrirTabletop = abrirTabletop;
+window.onAuthStoreChanged = renderSidebar;
+setTimeout(renderSidebar, 200);
 
 function updateOverlayToggleBtn(){
   const btn = document.getElementById('btn_overlay_mode');
@@ -296,13 +517,175 @@ window.changeMoeda = async (delta) => {
 };
 
 function createDividerHTML(divId, divName, type){ const isDefault=divId==='default'; const nameHtml=isDefault?`<span>${divName}</span>`:`<span onclick="renameCategory('${type}','${divId}','${divName}')">✎ ${divName}</span><button class="btn-del-cat" onclick="deleteCategory('${type}','${divId}')">✖</button>`; return `<div class="category-container" ondragover="allowDrop(event)" ondrop="drop(event,'${divId}','${type}')"><div class="category-header">${nameHtml}</div><div class="category-grid" id="grid_${type}_${divId}"></div></div>`; }
-function createRosterItem(id,data,type){ const el=document.createElement('div'); el.className='roster-item'; el.draggable=true; el.ondragstart=e=>drag(e,id,type); const img=(type==='players'?data.char_img:data.img)||''; const name=(type==='players'?data.char_name:data.name)||'Sem Nome'; el.innerHTML=`<div class="roster-avatar" style="background-image:url('${img}')"></div><div>${name}</div>`; return el; }
+
+window.createRosterFolder = () => {
+  const input = document.getElementById('new_folder_name');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) return;
+  push(ref(db, 'pastas_roster_v3'), { name }).then(() => {
+    input.value = '';
+  }).catch(err => {
+    alert('Erro ao criar pasta: ' + err.message);
+  });
+};
+
+window.renameRosterFolder = (folderId, oldName) => {
+  const n = prompt('Nome da pasta:', oldName);
+  if (n && n !== oldName) {
+    update(ref(db, `pastas_roster_v3/${folderId}`), { name: n });
+  }
+};
+
+window.deleteRosterFolder = (folderId) => {
+  if (folderId === 'geral') return;
+  if (!confirm('Deseja excluir esta pasta? Todas as fichas dentro dela retornarão para a pasta Geral.')) return;
+  const updates = {};
+  Object.entries(globalPlayers).forEach(([id, f]) => {
+    if (f.category === 'hidden_roster' && f.stock_folder === folderId) {
+      updates[`fichas_v3/${id}/stock_folder`] = 'geral';
+    }
+  });
+  Object.entries(globalNpcs).forEach(([id, n]) => {
+    if (n.category === 'hidden_roster' && n.stock_folder === folderId) {
+      updates[`npcs_v3/${id}/stock_folder`] = 'geral';
+    }
+  });
+  updates[`pastas_roster_v3/${folderId}`] = null;
+  update(ref(db), updates);
+};
+
+window.toggleFolderExpand = (folderId) => {
+  expandedFolders[folderId] = !expandedFolders[folderId];
+  renderRosterSidebar();
+};
+
+function renderRosterSidebar() {
+  const container = document.getElementById('roster_folders_container');
+  if (!container) return;
+  container.innerHTML = '';
+  const folders = Object.entries(globalRosterFolders);
+  folders.forEach(([folderId, folder]) => {
+    const isGeral = folderId === 'geral';
+    const isExpanded = !!expandedFolders[folderId];
+    const div = document.createElement('div');
+    div.className = 'roster-folder-box';
+    div.style.cssText = 'border:1px solid #3a1a1f; border-radius:8px; padding:10px; margin-bottom:12px; background:rgba(10,5,5,0.7);';
+    const nameHTML = isGeral 
+      ? `<span style="cursor:pointer;" onclick="toggleFolderExpand('${folderId}')">📂 ${isExpanded ? '▼' : '▶'} <b>${folder.name}</b></span>`
+      : `<span style="cursor:pointer;" onclick="toggleFolderExpand('${folderId}')">📂 ${isExpanded ? '▼' : '▶'} <b>${folder.name}</b></span>
+         <div style="display:inline-flex; gap:10px; float:right;">
+           <button onclick="event.stopPropagation(); renameRosterFolder('${folderId}', '${folder.name}')" style="background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:12px;">✎</button>
+           <button onclick="event.stopPropagation(); deleteRosterFolder('${folderId}')" style="background:transparent; border:none; color:#f44336; cursor:pointer; font-size:12px;">✖</button>
+         </div>`;
+    div.innerHTML = `
+      <div style="border-bottom:1px solid rgba(92,28,34,0.4); padding-bottom:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; font-family:'Cinzel',serif; font-size:0.85rem; user-select:none;">
+        ${nameHTML}
+      </div>
+      <div id="folder-content-${folderId}" class="${isExpanded ? '' : 'hidden'}">
+        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">Jogadores</div>
+        <div id="roster_players_${folderId}" class="roster-drop-zone" style="min-height:45px; margin-bottom:10px; border:1px dashed rgba(92,28,34,0.3); background:rgba(0,0,0,0.15);" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'players','${folderId}')"></div>
+        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">NPCs</div>
+        <div id="roster_npcs_${folderId}" class="roster-drop-zone" style="min-height:45px; border:1px dashed rgba(92,28,34,0.3); background:rgba(0,0,0,0.15);" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'npcs','${folderId}')"></div>
+      </div>
+    `;
+    container.appendChild(div);
+    
+    if (isExpanded) {
+      const playZone = document.getElementById(`roster_players_${folderId}`);
+      Object.entries(globalPlayers).forEach(([id, f]) => {
+        if (f.category === 'hidden_roster' && (f.stock_folder || 'geral') === folderId) {
+          playZone.appendChild(createRosterItem(id, f, 'players'));
+        }
+      });
+      const npcZone = document.getElementById(`roster_npcs_${folderId}`);
+      Object.entries(globalNpcs).forEach(([id, n]) => {
+        if (n.category === 'hidden_roster' && (n.stock_folder || 'geral') === folderId) {
+          npcZone.appendChild(createRosterItem(id, n, 'npcs'));
+        }
+      });
+    }
+  });
+}
+
+function createRosterItem(id, data, type) {
+  const el = document.createElement('div');
+  el.className = 'roster-item';
+  el.style.cssText = 'position:relative; display:flex; align-items:center; background:#1c0f10; padding:8px; border-radius:8px; border:1px solid rgba(92,28,34,0.4); gap:10px; margin-bottom:4px;';
+  el.draggable = true;
+  el.ondragstart = e => drag(e, id, type);
+  const img = (type === 'players' ? data.char_img : data.img) || '';
+  const name = (type === 'players' ? data.char_name : data.name) || 'Sem Nome';
+  el.innerHTML = `
+    <div class="roster-avatar" style="width:35px; height:35px; border-radius:50%; background-size:cover; background-position:center; background-image:url('${img}')"></div>
+    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--text);">${name}</div>
+    <div class="roster-dots" onclick="toggleRosterItemMenu(event, '${id}', '${type}')" style="cursor:pointer; padding:0 6px; font-weight:bold; font-size:16px; color:var(--muted);">⋮</div>
+    <div class="roster-item-menu hidden" id="menu-${type}-${id}" style="position:absolute; right:10px; top:32px; background:#110405; border:1.5px solid var(--border); border-radius:6px; z-index:2100; box-shadow:0 4px 15px rgba(0,0,0,0.85); display:flex; flex-direction:column; padding:4px; min-width:80px;">
+      <button onclick="moveRosterItemPrompt('${id}', '${type}')" style="background:transparent; border:none; color:white; padding:6px 10px; font-size:10px; cursor:pointer; text-align:left; font-weight:bold;">MOVER</button>
+      <button onclick="deleteRosterItemConfirm('${id}', '${type}')" style="background:transparent; border:none; color:#ff8888; padding:6px 10px; font-size:10px; cursor:pointer; text-align:left; font-weight:bold;">EXCLUIR</button>
+    </div>
+  `;
+  return el;
+}
+
+window.toggleRosterItemMenu = (event, id, type) => {
+  event.stopPropagation();
+  document.querySelectorAll('.roster-item-menu').forEach(menu => {
+    if (menu.id !== `menu-${type}-${id}`) menu.classList.add('hidden');
+  });
+  const m = document.getElementById(`menu-${type}-${id}`);
+  m.classList.toggle('hidden');
+};
+
+window.moveRosterItemPrompt = (id, type) => {
+  const folders = Object.entries(globalRosterFolders);
+  const listStr = folders.map(([key, f], idx) => `${idx + 1} - ${f.name}`).join('\n');
+  const choice = prompt(`Selecione a pasta para mover:\n${listStr}`);
+  if (choice) {
+    const num = parseInt(choice);
+    if (num > 0 && num <= folders.length) {
+      const targetFolderId = folders[num - 1][0];
+      const path = type === 'players' ? `fichas_v3/${id}` : `npcs_v3/${id}`;
+      update(ref(db, path), { stock_folder: targetFolderId });
+    }
+  }
+};
+
+window.deleteRosterItemConfirm = (id, type) => {
+  if (type === 'players') {
+    if (confirm('Deletar esta ficha de jogador permanentemente do banco de dados?')) {
+      remove(ref(db, `fichas_v3/${id}`));
+    }
+  } else {
+    if (confirm('Deletar este NPC permanentemente?')) {
+      remove(ref(db, `npcs_v3/${id}`));
+    }
+  }
+};
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.roster-item-menu').forEach(menu => menu.classList.add('hidden'));
+  document.querySelectorAll('.config-popover').forEach(pop => pop.classList.remove('open'));
+});
+
 function renderAll(){
-  document.getElementById('roster_list_players').innerHTML=''; document.getElementById('roster_list_npcs').innerHTML='';
-  let hp=createDividerHTML('default','Geral','players'); Object.keys(globalDivisions.players||{}).forEach(k=>hp+=createDividerHTML(k,globalDivisions.players[k].name,'players')); document.getElementById('wrapper-players').innerHTML=hp;
-  let hn=createDividerHTML('default','Geral','npcs'); Object.keys(globalDivisions.npcs||{}).forEach(k=>hn+=createDividerHTML(k,globalDivisions.npcs[k].name,'npcs')); document.getElementById('wrapper-npcs').innerHTML=hn;
-  Object.entries(globalPlayers).forEach(([id,f])=>{ const cat=f.category||'default'; const target=document.getElementById(`grid_players_${cat}`); if(!target||cat==='hidden_roster') document.getElementById('roster_list_players').appendChild(createRosterItem(id,f,'players')); else target.appendChild(createPlayerCard(id,f)); });
-  Object.entries(globalNpcs).forEach(([id,n])=>{ const cat=n.category||'default'; const target=document.getElementById(`grid_npcs_${cat}`); if(!target||cat==='hidden_roster') document.getElementById('roster_list_npcs').appendChild(createRosterItem(id,n,'npcs')); else target.appendChild(createNpcCard(id,n)); });
+  renderRosterSidebar();
+  let hp=createDividerHTML('default','Geral','players'); 
+  Object.keys(globalDivisions.players||{}).forEach(k=>hp+=createDividerHTML(k,globalDivisions.players[k].name,'players')); 
+  document.getElementById('wrapper-players').innerHTML=hp;
+  let hn=createDividerHTML('default','Geral','npcs'); 
+  Object.keys(globalDivisions.npcs||{}).forEach(k=>hn+=createDividerHTML(k,globalDivisions.npcs[k].name,'npcs')); 
+  document.getElementById('wrapper-npcs').innerHTML=hn;
+  Object.entries(globalPlayers).forEach(([id,f])=>{ 
+    const cat=f.category||'default'; 
+    const target=document.getElementById(`grid_players_${cat}`); 
+    if(target && cat!=='hidden_roster') target.appendChild(createPlayerCard(id,f)); 
+  });
+  Object.entries(globalNpcs).forEach(([id,n])=>{ 
+    const cat=n.category||'default'; 
+    const target=document.getElementById(`grid_npcs_${cat}`); 
+    if(target && cat!=='hidden_roster') target.appendChild(createNpcCard(id,n)); 
+  });
 }
 
 function createPlayerCard(id,f){
@@ -312,14 +695,39 @@ function createPlayerCard(id,f){
   const linkFicha=`${baseURL}ed_sistemav3_ficha.html?p=${id}`;
   const linkOverlay=`${baseURL}ed_sistemav3_overlay.html?p=${id}`;
   const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
+  let effectsHTML = '';
+  if (f.efeitos_ativos) {
+    Object.entries(globalCompendiumEffects).forEach(([effId, eff]) => {
+      if (f.efeitos_ativos[effId] === true) {
+        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji}</span>`;
+      }
+    });
+  }
   const el=document.createElement('div'); el.className='player-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'players');
-  el.innerHTML=`<div class="player-header"><div class="player-img" style="background-image:url('${f.char_img||''}')"></div><div class="player-info"><h2>${f.char_name||id}</h2><p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p><div class="controls-row"><button class="btn-small" onclick="window.open('${linkFicha}','_blank')">📄 Ficha</button><button class="btn-small btn-obs" onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button><button class="btn-small" onclick="openPlayerConfig('${id}')">⚙️ Config</button></div></div></div>
-  <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
-  <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
-  <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoRef)}%"></div></div>
-  <div style="font-size:10px;color:#ffaaaa;margin-top:6px;">Linhagens: ${linhagens.join(' ')||'—'} | Forma ativa: ${f.toggles?.forma_ativa||'—'}</div>
-  <div class="xp-control"><div style="font-size:11px;color:#ccc;">XP: ${f.xp_total||0}</div></div>
-  <div class="xp-control"><input type="number" id="input_xp_${id}" class="xp-input" placeholder="Qtd"><button class="btn-send" onclick="sendXP('${id}',1)">+</button><button class="btn-send" style="background:#c62828" onclick="sendXP('${id}',-1)">-</button></div>`;
+  el.innerHTML=`
+    <div class="player-header" style="position:relative;">
+      <div class="player-img" style="background-image:url('${f.char_img||''}')"></div>
+      <div class="player-info">
+        <h2>${f.char_name||id}</h2>
+        <p>${f.classe||'Sem classe'} • ${f.ancestralidade||'Sem ancestralidade'}</p>
+        <div class="controls-row">
+          <button class="btn-small" onclick="toggleConfigPopover(event, '${id}', 'players')">⚙️ Config</button>
+          <div class="config-popover" id="popover-players-${id}">
+            <button onclick="window.location.href='${linkFicha}'">📄 Ficha</button>
+            <button onclick="window.open('${linkOverlay}','_blank')">🎥 OBS</button>
+            <button onclick="openPlayerConfig('${id}')">⚙️ Ajustes</button>
+            <button onclick="openEffectsModal('${id}', 'players')">✨ Efeitos</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div>
+    <div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div>
+    <div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoRef)}%"></div></div>
+    <div style="font-size:10px;color:#ffaaaa;margin-top:6px;">Linhagens: ${linhagens.join(' ')||'—'} | Forma ativa: ${f.toggles?.forma_ativa||'—'}</div>
+    ${effectsHTML ? `<div style="margin-top:6px; display:flex; align-items:center; gap:4px;">${effectsHTML}</div>` : ''}
+    <div class="xp-control"><div style="font-size:11px;color:#ccc;">XP: ${f.xp_total||0}</div></div>
+    <div class="xp-control"><input type="number" id="input_xp_${id}" class="xp-input" placeholder="Qtd"><button class="btn-send" onclick="sendXP('${id}',1)">+</button><button class="btn-send" style="background:#c62828" onclick="sendXP('${id}',-1)">-</button></div>`;
   return el;
 }
 
@@ -334,17 +742,29 @@ function createNpcCard(id,n){
   const nivel=n.nivel||1, epMax=+n.ep_max||0, epUsed=n.ep_used||{};
   let epSlots='';
   for(let i=0;i<epMax;i++) epSlots+=`<div class="ep-slot${epUsed[`s${i}`]?' used':''}" onclick="toggleEpSlot('${id}',${i})"></div>`;
+  let effectsHTML = '';
+  if (n.efeitos_ativos) {
+    Object.entries(globalCompendiumEffects).forEach(([effId, eff]) => {
+      if (n.efeitos_ativos[effId] === true) {
+        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji}</span>`;
+      }
+    });
+  }
   const el=document.createElement('div');
   el.className='player-card npc-card'; el.draggable=true; el.ondragstart=e=>drag(e,id,'npcs');
   el.innerHTML=`
-    <div class="player-header">
+    <div class="player-header" style="position:relative;">
       <div class="player-img" style="background-image:url('${n.img||''}')"></div>
       <div class="player-info">
         <h2>${n.name||'Inimigo'}<span class="npc-lvl-badge">Nv${nivel}</span></h2>
         <p>${n.classe||'—'} • ${n.ancestralidade||'—'}</p>
         <div class="controls-row">
-          <button class="btn-small" onclick="editNpc('${id}')">✏️ Editar</button>
-          <button class="btn-small" style="background:#c62828" onclick="deleteNpc('${id}')">🗑️ Apagar</button>
+          <button class="btn-small" onclick="toggleConfigPopover(event, '${id}', 'npcs')">⚙️ Config</button>
+          <div class="config-popover" id="popover-npcs-${id}">
+            <button onclick="editNpc('${id}')">✏️ Editar</button>
+            <button onclick="openEffectsModal('${id}', 'npcs')">✨ Efeitos</button>
+            <button style="color:#ff8888;" onclick="deleteNpc('${id}')">🗑️ Apagar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -378,6 +798,7 @@ function createNpcCard(id,n){
       <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div></div>
       <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',1)">+</button>
     </div>
+    ${effectsHTML ? `<div style="margin-top:6px; display:flex; align-items:center; gap:4px;">${effectsHTML}</div>` : ''}
     <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
     <div id="details_${id}" class="npc-details">
       ${habs.map(h=>`<div class='npc-hab-item'><b style="color:var(--accent);font-size:13px;">${h.titulo||'Habilidade'}</b><br><span style="line-height:1.5;">${h.desc||''}</span></div>`).join('')||'<span style="font-size:11px;color:#777">Sem habilidades</span>'}
@@ -386,12 +807,69 @@ function createNpcCard(id,n){
   return el;
 }
 
+window.toggleConfigPopover = (event, id, type) => {
+  event.stopPropagation();
+  document.querySelectorAll('.config-popover').forEach(pop => {
+    if (pop.id !== `popover-${type}-${id}`) pop.classList.remove('open');
+  });
+  const pop = document.getElementById(`popover-${type}-${id}`);
+  pop.classList.toggle('open');
+};
+
+window.openEffectsModal = (charId, type) => {
+  document.getElementById('effects_char_id').value = charId;
+  document.getElementById('effects_char_type').value = type;
+  const character = type === 'players' ? globalPlayers[charId] : globalNpcs[charId];
+  const name = type === 'players' ? (character.char_name || charId) : (character.name || charId);
+  document.getElementById('effectsModalTitle').textContent = `Efeitos Ativos: ${name}`;
+  const container = document.getElementById('effects_checkbox_list');
+  container.innerHTML = '';
+  const activeObj = character.efeitos_ativos || {};
+  let count = 0;
+  Object.entries(globalCompendiumEffects).forEach(([effId, eff]) => {
+    count++;
+    const isChecked = activeObj[effId] === true ? 'checked' : '';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom: 6px;';
+    div.innerHTML = `
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:#fff;">
+        <input type="checkbox" class="effect-checkbox" data-id="${effId}" ${isChecked} style="width:auto; margin:0;" />
+        <span style="font-size:1.2rem;">${eff.emoji}</span>
+        <b>${eff.titulo}</b>
+      </label>
+    `;
+    container.appendChild(div);
+  });
+  if (count === 0) {
+    container.innerHTML = '<div style="font-size:12px; color:#aaa; text-align:center;">Nenhum efeito secundário criado no Compêndio.</div>';
+  }
+  document.getElementById('config-effects-container').style.display = 'flex';
+};
+
+window.closeEffectsModal = () => {
+  document.getElementById('config-effects-container').style.display = 'none';
+};
+
+window.saveActiveEffects = () => {
+  const charId = document.getElementById('effects_char_id').value;
+  const type = document.getElementById('effects_char_type').value;
+  if (!charId || !type) return;
+  const list = {};
+  document.querySelectorAll('#effects_checkbox_list input[type="checkbox"]').forEach(box => {
+    if (box.checked) {
+      list[box.dataset.id] = true;
+    }
+  });
+  const path = type === 'players' ? `${pathPlayers}/${charId}/efeitos_ativos` : `${pathNpcs}/${charId}/efeitos_ativos`;
+  set(ref(db, path), list).then(closeEffectsModal);
+};
+
 function renderCombat(){ const list=document.getElementById('combat_list'); list.innerHTML=''; const parts=Object.entries(combatData.participantes||{}).map(([key,v])=>({...v,key})).sort((a,b)=>(a.order??999)-(b.order??999)); parts.forEach((p,idx)=>{ const div=document.createElement('div'); div.className=`combat-item ${p.active?'active':''}`; div.draggable=true; div.ondragstart=e=>dragCombat(e,p.key); div.ondragover=e=>e.preventDefault(); div.ondrop=e=>dropCombatReorder(e,p.key); div.innerHTML=`<div style='width:18px;text-align:center;color:#999;'>${idx+1}</div><div class='combat-avatar' style="background-image:url('${p.img||''}')"></div><div style='flex:1;'>${p.name||'—'}</div><button onclick="removeCombatant('${p.key}')" style='border:none;background:none;color:#f66;cursor:pointer;'>✖</button>`; list.appendChild(div); }); }
 
 window.allowDrop=(ev)=>ev.preventDefault();
 window.drag=(ev,id,type)=>ev.dataTransfer.setData('text/plain',JSON.stringify({id,type}));
 window.drop=(ev,catId,targetType)=>{ ev.preventDefault(); const data=JSON.parse(ev.dataTransfer.getData('text/plain')); if(data.type!==targetType)return; const path=data.type==='players'?`${pathPlayers}/${data.id}`:`${pathNpcs}/${data.id}`; update(ref(db,path),{category:catId}); };
-window.dropInRoster=(ev,targetType)=>{ ev.preventDefault(); const data=JSON.parse(ev.dataTransfer.getData('text/plain')); if(data.type!==targetType)return; const path=data.type==='players'?`${pathPlayers}/${data.id}`:`${pathNpcs}/${data.id}`; update(ref(db,path),{category:'hidden_roster'}); };
+window.dropInRoster=(ev,targetType,folderId)=>{ ev.preventDefault(); const data=JSON.parse(ev.dataTransfer.getData('text/plain')); if(data.type!==targetType)return; const path=data.type==='players'?`${pathPlayers}/${data.id}`:`${pathNpcs}/${data.id}`; update(ref(db,path),{category:'hidden_roster', stock_folder:folderId}); };
 window.dropInCombat=async(ev)=>{ ev.preventDefault(); const payload=ev.dataTransfer.getData('text/plain'); if(!payload) return; const data=JSON.parse(payload); const source=data.type==='players'?globalPlayers[data.id]:globalNpcs[data.id]; if(!source)return; const list=Object.values(combatData.participantes||{}); if(list.some(p=>p.ref_id===data.id&&p.type===data.type)) return; const nextOrder=list.length?Math.max(...list.map(p=>p.order||0))+1:1; const charData=data.type==='players'?{name:source.char_name||data.id,img:source.char_img||'',hab:+source.habilidade||0}:{name:source.name||data.id,img:source.img||'',hab:+source.hab||0}; push(ref(db,`${pathCombat}/participantes`),{...charData,order:nextOrder,active:false,ref_id:data.id,type:data.type}); };
 window.dragCombat=(ev,key)=>ev.dataTransfer.setData('combat_key',key);
 window.dropCombatReorder=(ev,targetKey)=>{ ev.preventDefault(); const sourceKey=ev.dataTransfer.getData('combat_key'); if(!sourceKey||sourceKey===targetKey) return; const parts=Object.entries(combatData.participantes||{}).map(([k,v])=>({...v,key:k})).sort((a,b)=>(a.order??999)-(b.order??999)); const from=parts.findIndex(p=>p.key===sourceKey); const to=parts.findIndex(p=>p.key===targetKey); if(from<0||to<0) return; const [m]=parts.splice(from,1); parts.splice(to,0,m); const up={}; parts.forEach((p,i)=>up[`${pathCombat}/participantes/${p.key}/order`]=i+1); update(ref(db),up); };
@@ -403,7 +881,6 @@ window.toggleCombatSidebar=()=>{ const bar=document.getElementById('combat-sideb
 window.addCategory=(type)=>{ const newRef=push(ref(db,`${pathDivs}/${type}`)); set(newRef,{name:'Nova Divisória'}); };
 window.renameCategory=(type,catId,oldName)=>{ const n=prompt('Nome da divisória:',oldName); if(n&&n!==oldName) update(ref(db,`${pathDivs}/${type}/${catId}`),{name:n}); };
 window.deleteCategory=(type,catId)=>{ if(!confirm('Excluir divisória e enviar fichas ao estoque?'))return; const updates={}; const source=type==='players'?globalPlayers:globalNpcs; const base=type==='players'?pathPlayers:pathNpcs; Object.keys(source).forEach(id=>{ if(source[id].category===catId) updates[`${base}/${id}/category`]='hidden_roster'; }); updates[`${pathDivs}/${type}/${catId}`]=null; update(ref(db),updates); };
-
 window.openPlayerConfig=(id)=>{ const f=globalPlayers[id]; if(!f)return; document.getElementById('cfg_player_id').value=id; document.getElementById('check_asc_unlocked').checked=f.toggles?.asc_unlocked===true; document.getElementById('check_linhagem_demon').checked=f.toggles?.linhagem_demon===true; document.getElementById('check_linhagem_beast').checked=f.toggles?.linhagem_beast===true; document.getElementById('check_linhagem_sacra').checked=f.toggles?.linhagem_sacra===true; DADIVAS_IDS.forEach(d=>{ const c=document.getElementById(`check_dadiva_${d}`); if(c) c.checked=f.toggles?.dadivas?.[d]===true; }); document.getElementById('config-player-container').classList.add('open'); };
 window.savePlayerConfig=()=>{ const id=document.getElementById('cfg_player_id').value; const selected={}; DADIVAS_IDS.forEach(d=>{ if(document.getElementById(`check_dadiva_${d}`)?.checked) selected[d]=true; }); if(Object.keys(selected).length>2){ alert('Máximo 2 dádivas.'); return; } update(ref(db,`${pathPlayers}/${id}`),{'toggles/asc_unlocked':document.getElementById('check_asc_unlocked').checked,'toggles/linhagem_demon':document.getElementById('check_linhagem_demon').checked,'toggles/linhagem_beast':document.getElementById('check_linhagem_beast').checked,'toggles/linhagem_sacra':document.getElementById('check_linhagem_sacra').checked,'toggles/dadivas':selected}); document.getElementById('config-player-container').classList.remove('open'); };
 window.openObs=(id)=>{ const d=globalPlayers[id]; const txt=prompt('Observações do personagem:',d?.anotacoes||''); if(txt!==null) update(ref(db,`${pathPlayers}/${id}`),{anotacoes:txt}); };
@@ -417,7 +894,6 @@ window.toggleOverlayModeAll = async () => {
   await update(ref(db), updates);
   updateOverlayToggleBtn();
 };
-
 window.openNpcForm=()=>{
   ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('npc_img_file').value='';
@@ -454,7 +930,7 @@ window.saveNpc=()=>{
     habs
   };
   if(!id){
-    data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.ep_used={}; data.category='default';
+    data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.ep_used={}; data.category='default'; data.stock_folder='geral';
     push(ref(db,pathNpcs),data).then(closeNpcForm);
   } else update(ref(db,`${pathNpcs}/${id}`),data).then(closeNpcForm);
 };
@@ -481,7 +957,6 @@ window.editNpc=async(id)=>{
 };
 window.deleteNpc=(id)=>{ if(confirm('Deletar NPC?')) remove(ref(db,`${pathNpcs}/${id}`)); };
 window.toggleNpcDetails=(id)=>document.getElementById(`details_${id}`).classList.toggle('open');
-
 window.calcNpcDerived=()=>{
   const res=+document.getElementById('npc_res').value||0;
   const hab=+document.getElementById('npc_hab').value||0;
@@ -530,7 +1005,6 @@ window.toggleEpSlot=(id,idx)=>{
   update(ref(db,`${pathNpcs}/${id}/ep_used`),{[key]:!used[key]});
 };
 window.resetNpcEp=(id)=>update(ref(db,`${pathNpcs}/${id}`),{ep_used:{}});
-
 window.toggleNpcSkills=()=>{
   const grid=document.getElementById('npc-pericias-grid');
   const btn=document.querySelector('.npc-skill-toggle');
@@ -564,9 +1038,7 @@ function buildNpcSkillGrid(){
   });
 }
 buildNpcSkillGrid();
-
 document.getElementById('npc_img_file').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=x=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); const m=300; let {width:w,height:h}=i; if(w>h&&w>m){h*=m/w;w=m;} if(h>=w&&h>m){w*=m/h;h=m;} c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h); document.getElementById('npc_img_data').value=c.toDataURL('image/jpeg',0.7); }; i.src=x.target.result; }; r.readAsDataURL(f); });
-
 onValue(ref(db,pathDivs),s=>{ globalDivisions=s.val()||{players:{},npcs:{}}; renderAll(); });
 onValue(ref(db,pathPlayers),s=>{ globalPlayers=s.val()||{}; renderAll(); });
 onValue(ref(db,pathNpcs),s=>{ globalNpcs=s.val()||{}; renderAll(); });
@@ -581,6 +1053,15 @@ onValue(ref(db,'overlay_v3_data'),(snapshot)=>{
   const firstMode = Object.values(all).find(v => v?.mode === 'combate' || v?.mode === 'nome')?.mode;
   overlayModeGlobal = firstMode || 'nome';
   updateOverlayToggleBtn();
+});
+onValue(ref(db, 'pastas_roster_v3'), snap => {
+  const val = snap.val() || {};
+  globalRosterFolders = { geral: { name: 'Geral' }, ...val };
+  renderRosterSidebar();
+});
+onValue(ref(db, 'banco_dados_v3/efeitos_secundarios'), snap => {
+  globalCompendiumEffects = snap.val() || {};
+  renderAll();
 });
 </script>
   <script src="pwa.js" defer></script>

@@ -110,9 +110,10 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 28px 28px 24px;
+      padding: 28px;
       position: relative;
       overflow: hidden;
+      margin-bottom: 24px;
     }
 
     /* Top shimmer line */
@@ -154,8 +155,6 @@
       opacity: .65;
     }
 
-    .mb-24 { margin-bottom: 24px; }
-
     /* === Auth Grid === */
     .auth-grid {
       display: grid;
@@ -173,6 +172,7 @@
       display: grid;
       gap: 5px;
       margin-bottom: 13px;
+      position: relative;
     }
 
     .field label {
@@ -185,7 +185,8 @@
 
     input[type="text"],
     input[type="email"],
-    input[type="password"] {
+    input[type="password"],
+    select {
       width: 100%;
       padding: 10px 13px;
       border-radius: 7px;
@@ -200,7 +201,8 @@
 
     input[type="text"]:focus,
     input[type="email"]:focus,
-    input[type="password"]:focus {
+    input[type="password"]:focus,
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(155,26,26,.18);
     }
@@ -321,6 +323,8 @@
       font-size: 1.3rem;
       flex-shrink: 0;
       box-shadow: 0 0 16px rgba(139,0,0,.3);
+      background-size: cover;
+      background-position: center;
     }
 
     .user-name {
@@ -383,45 +387,6 @@
     .v-status { font-size: .72rem; color: var(--muted); margin-top: 6px; }
     .v-status.ok { color: #5de09a; }
 
-    /* === Admin Panel === */
-    .admin-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .admin-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.15rem;
-      font-weight: 600;
-      letter-spacing: .07em;
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .admin-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-      opacity: .65;
-    }
-
-    .pending-count-pill {
-      background: rgba(200,120,0,.2);
-      border: 1px solid #c87800;
-      color: #ffc060;
-      padding: 3px 12px;
-      border-radius: 999px;
-      font-size: .78rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
     /* === Table === */
     .table-wrap {
       overflow-x: auto;
@@ -473,6 +438,270 @@
     }
 
     .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    /* === Sidebar CSS === */
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      height: 100%;
+      background: rgba(19, 9, 9, 0.98);
+      border-right: 1px solid var(--border);
+      box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+      z-index: 2000;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+    .sidebar-nav.open {
+      left: 0;
+    }
+    .sidebar-trigger {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1900;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .sidebar-trigger:hover {
+      border-color: var(--bright);
+      color: var(--bright);
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(92,28,34,0.4);
+      margin-bottom: 20px;
+    }
+    .sidebar-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5a1212, #1a0505);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .sidebar-user-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(155,26,26,0.15);
+      color: var(--text);
+      border-left: 3px solid var(--accent);
+    }
+    .sidebar-footer {
+      padding-top: 15px;
+      border-top: 1px solid rgba(92,28,34,0.4);
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1999;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-backdrop.open {
+      display: block;
+    }
+
+    /* === Hub tabs & dynamic views === */
+    .hub-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(92,28,34,0.4);
+      padding-bottom: 10px;
+      overflow-x: auto;
+    }
+    .hub-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .hub-tab-btn.active, .hub-tab-btn:hover {
+      color: var(--text);
+      background: rgba(155, 26, 26, 0.15);
+      box-shadow: 0 0 10px rgba(155,26,26,0.25);
+    }
+
+    /* === Fichas Cards Grid === */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .char-card {
+      background: rgba(10, 4, 4, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      position: relative;
+    }
+    .char-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--bright);
+      box-shadow: 0 8px 24px rgba(155, 26, 26, 0.35);
+    }
+    .char-card-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      margin: 0 auto 12px;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background-color: #1a0505;
+    }
+    .char-card-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-card-level {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .char-card-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(137, 40, 40, 0.2);
+      border: 1px solid #892828;
+      color: #ff9a9a;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+    .char-card-remove:hover {
+      background: #892828;
+      color: #fff;
+    }
+
+    /* User editor field eyeball */
+    .eye-icon {
+      position: absolute;
+      right: 12px;
+      top: 31px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 1.1rem;
+    }
+
+    /* Modal dialog */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 2500;
+      backdrop-filter: blur(4px);
+    }
+    .modal.open { display: flex; }
+    .modal-box {
+      width: min(500px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    /* Notification items */
+    .notification-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
   </style>
   <script src="auth.js"></script>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -482,6 +711,33 @@
   <meta name="apple-mobile-web-app-title" content="ED RPG" />
 </head>
 <body>
+
+  <!-- Sidebar Trigger -->
+  <div class="sidebar-trigger id-logged hidden" onclick="toggleSidebar()">☰</div>
+
+  <!-- Sidebar Backdrop -->
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-header">
+      <div class="sidebar-avatar" id="sideAvatar">⚔</div>
+      <div class="sidebar-user-name" id="sideUserName">Jogador</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><div class="sidebar-link" onclick="switchHubTab('dashboard')">🏠 Hub</div></li>
+      <li><a class="sidebar-link" href="perfil.html">👤 Perfil</a></li>
+      <li><div class="sidebar-link" onclick="switchHubTab('fichas')">🎭 Fichas</div></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('users')">👥 Gerenciar Usuários</div></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav1_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('notifications')">🔔 Notificações</div></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-link" onclick="handleLogout()">🚪 Sair</div>
+    </div>
+  </nav>
+
 <div class="wrap">
 
   <!-- ══ Header ══ -->
@@ -495,7 +751,6 @@
 
   <!-- ══ Auth Section ══ -->
   <section id="authSection" class="auth-grid">
-
     <!-- Login -->
     <div class="card">
       <h2 class="card-title">Login</h2>
@@ -537,13 +792,11 @@
       <button id="btnRegister" class="btn btn-primary btn-full">Registrar</button>
       <div id="regMsg" class="msg"></div>
     </div>
-
   </section>
 
   <!-- ══ Hub Section ══ -->
   <section id="hubSection" class="hidden">
-
-    <!-- User card -->
+    <!-- User identity card -->
     <div class="card mb-24">
       <div class="hub-topbar">
         <div class="user-identity">
@@ -559,277 +812,699 @@
       </div>
     </div>
 
-    <!-- Version cards -->
-    <div class="card mb-24">
-      <h3 class="card-title">Versões Disponíveis</h3>
-      <div id="versions" class="version-grid"></div>
+    <!-- Navigation Hub Tabs -->
+    <div class="hub-tabs" id="hubTabsContainer">
+      <button class="hub-tab-btn active" id="tabBtn_dashboard" onclick="switchHubTab('dashboard')">🏠 Hub</button>
+      <button class="hub-tab-btn" id="tabBtn_fichas" onclick="switchHubTab('fichas')">🎭 Fichas</button>
+      <button class="hub-tab-btn admin-only hidden" id="tabBtn_users" onclick="switchHubTab('users')">👥 Usuários</button>
+      <button class="hub-tab-btn admin-only hidden" id="tabBtn_notifications" onclick="switchHubTab('notifications')">🔔 Notificações</button>
     </div>
 
-    <!-- Admin panel -->
-    <div id="adminSection" class="card hidden">
-      <div class="admin-header">
-        <h3 class="admin-title">Painel Administrativo</h3>
-        <span id="pendingBadge" class="pending-count-pill hidden"></span>
-        <button class="btn btn-neutral btn-sm" onclick="renderAdminUsers()" title="Recarregar lista de usuários">↺ Atualizar</button>
+    <!-- View: Dashboard -->
+    <div id="view_dashboard" class="hub-view">
+      <div class="card">
+        <h3 class="card-title">Acesso Rápido</h3>
+        <div class="version-grid" id="quickActionsGrid">
+          <div class="version-card accessible" onclick="switchHubTab('fichas')">
+            <div class="v-icon">🎭</div>
+            <div class="v-name">Fichas de Personagem</div>
+            <div class="v-status ok">Ver minhas fichas</div>
+          </div>
+          <div class="version-card accessible" onclick="window.location.href='perfil.html'">
+            <div class="v-icon">👤</div>
+            <div class="v-name">Configurar Perfil</div>
+            <div class="v-status ok">Avatar & Detalhes</div>
+          </div>
+          <div class="version-card accessible admin-only hidden" onclick="window.location.href='ed_sistemav3_mestre.html'">
+            <div class="v-icon">👑</div>
+            <div class="v-name">Painel do Mestre</div>
+            <div class="v-status ok">Abrir Painel Mestre</div>
+          </div>
+          <div class="version-card accessible admin-only hidden" onclick="switchHubTab('users')">
+            <div class="v-icon">👥</div>
+            <div class="v-name">Gerenciar Usuários</div>
+            <div class="v-status ok">Editar Contas & Fichas</div>
+          </div>
+        </div>
       </div>
-      <div id="adminUsers"></div>
+    </div>
+
+    <!-- View: Fichas -->
+    <div id="view_fichas" class="hub-view hidden">
+      <div class="card">
+        <h3 class="card-title">Minhas Fichas</h3>
+        <div class="char-grid" id="myFichasGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- View: Gerenciar Usuários (ADM) -->
+    <div id="view_users" class="hub-view hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px;">
+          <h3 class="card-title" style="margin-bottom:0">Gerenciador de Usuários</h3>
+          <button class="btn btn-neutral btn-sm" onclick="triggerRefreshUsers()">↺ Atualizar</button>
+        </div>
+        <div id="adminUsersList"></div>
+      </div>
+    </div>
+
+    <!-- View: Notificações (ADM) -->
+    <div id="view_notifications" class="hub-view hidden">
+      <div class="card">
+        <h3 class="card-title">Notificações Pendentes</h3>
+        <div id="notificationsList" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
     </div>
 
   </section>
 
 </div><!-- /wrap -->
 
-<script>
-const authSection = document.getElementById('authSection');
-const hubSection  = document.getElementById('hubSection');
+<!-- User Editing Modal -->
+<div class="modal" id="editUserModal">
+  <div class="modal-box">
+    <h3 class="card-title" id="editUserTitle">Editar Usuário</h3>
+    <input type="hidden" id="editUserId" />
+    
+    <div class="field">
+      <label for="editUserName">Nome de Guerreiro</label>
+      <input id="editUserName" type="text" />
+    </div>
+    
+    <div class="field">
+      <label for="editUserEmail">E-mail</label>
+      <input id="editUserEmail" type="email" />
+      <span class="eye-icon" onclick="toggleVisibility('editUserEmail')">👁️</span>
+      <div id="editUserReqEmailBlock" class="hidden" style="margin-top: 5px;">
+        <span style="font-size:0.75rem; color:#ffc060;">Solicitou alteração para: <b id="editUserReqEmailVal"></b></span>
+        <button class="btn btn-success btn-sm" style="margin-left: 10px; padding: 2px 6px;" onclick="approveFieldChange('email')">Aprovar</button>
+      </div>
+    </div>
 
-/* ── main render ── */
-function render() {
-  const user = EDAuth.currentUser();
+    <div class="field">
+      <label for="editUserPass">Senha</label>
+      <input id="editUserPass" type="password" />
+      <span class="eye-icon" onclick="toggleVisibility('editUserPass')">👁️</span>
+      <div id="editUserReqPassBlock" class="hidden" style="margin-top: 5px;">
+        <span style="font-size:0.75rem; color:#ffc060;">Solicitou alteração de Senha</span>
+        <button class="btn btn-success btn-sm" style="margin-left: 10px; padding: 2px 6px;" onclick="approveFieldChange('password')">Aprovar</button>
+      </div>
+    </div>
 
-  if (!user) {
-    authSection.classList.remove('hidden');
-    hubSection.classList.add('hidden');
-    return;
+    <h4 style="margin: 18px 0 8px; font-family:'Cinzel',serif; font-size:0.9rem;">Fichas V3 Associadas</h4>
+    <div class="char-grid" id="editUserFichasGrid" style="margin-bottom: 12px;"></div>
+    <button class="btn btn-neutral btn-full btn-sm" onclick="openAddSheetModal()">+ Associar Nova Ficha</button>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUserEdit()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Select Character Sheet Modal -->
+<div class="modal" id="addSheetModal" style="z-index: 2600;">
+  <div class="modal-box" style="max-width: 400px;">
+    <h3 class="card-title">Anexar Nova Ficha</h3>
+    <div class="field">
+      <label for="sheetSelector">Selecione o Personagem V3</label>
+      <select id="sheetSelector"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAddSheetModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="confirmAttachSheet()">Anexar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  // Initialize Firebase app
+  const firebaseConfig = {
+    apiKey:            'AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ',
+    authDomain:        'ed-rpg---sistema-de-fichas.firebaseapp.com',
+    databaseURL:       'https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com',
+    projectId:         'ed-rpg---sistema-de-fichas',
+    storageBucket:     'ed-rpg---sistema-de-fichas.firebasestorage.app',
+    messagingSenderId: '350999444010',
+    appId:             '1:350999444010:web:d89f31d13e449b8fbfa153'
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const authSection = document.getElementById('authSection');
+  const hubSection  = document.getElementById('hubSection');
+
+  let globalFichasV3 = {};
+  let currentActiveTab = 'dashboard';
+
+  // Toggle Sidebar
+  window.toggleSidebar = () => {
+    const nav = document.getElementById('sidebarNav');
+    const backdrop = document.querySelector('.sidebar-backdrop');
+    nav.classList.toggle('open');
+    backdrop.classList.toggle('open');
+  };
+
+  window.handleLogout = () => {
+    EDAuth.logout();
+    render();
+  };
+
+  // Eyeball visibility toggle
+  window.toggleVisibility = (id) => {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+  };
+
+  // Navigation tab switcher
+  window.switchHubTab = (tab) => {
+    // Hide sidebar
+    document.getElementById('sidebarNav').classList.remove('open');
+    document.querySelector('.sidebar-backdrop').classList.remove('open');
+
+    currentActiveTab = tab;
+    document.querySelectorAll('.hub-view').forEach(view => view.classList.add('hidden'));
+    document.querySelectorAll('.hub-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    const activeView = document.getElementById(`view_${tab}`);
+    if (activeView) activeView.classList.remove('hidden');
+
+    const activeBtn = document.getElementById(`tabBtn_${tab}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    if (tab === 'fichas') renderMyFichas();
+    if (tab === 'users') renderAdminUsers();
+    if (tab === 'notifications') renderNotifications();
+  };
+
+  // Initial routing if query param exists
+  function handleQueryTab() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      // Clear query parameter from URL history quietly
+      window.history.replaceState({}, document.title, window.location.pathname);
+      switchHubTab(tab);
+    }
   }
 
-  authSection.classList.add('hidden');
-  hubSection.classList.remove('hidden');
+  /* ── main render ── */
+  function render() {
+    const user = EDAuth.currentUser();
 
-  document.getElementById('userName').textContent = user.name;
-
-  const rolePill = document.getElementById('userRolePill');
-  if (user.role === 'admin') {
-    rolePill.className = 'pill pill-admin';
-    rolePill.textContent = 'Administrador';
-    document.getElementById('hubAvatar').textContent = '👑';
-  } else {
-    rolePill.className = 'pill pill-player';
-    rolePill.textContent = 'Jogador';
-    document.getElementById('hubAvatar').textContent = '⚔';
-  }
-
-  renderVersions(user);
-
-  const adminSection = document.getElementById('adminSection');
-  if (user.role === 'admin') {
-    adminSection.classList.remove('hidden');
-    renderAdminUsers();
-  } else {
-    adminSection.classList.add('hidden');
-  }
-}
-
-/* ── version cards ── */
-const VERSION_META = [
-  { key: 'v1', label: 'ED Sistema v1',           icon: '📜', url: 'ed_sistemav1_mestre.html'    },
-  { key: 'v2', label: 'ED Sistema v2',           icon: '⚔️',  url: 'ed_sistemav2_mestre.html'        },
-  { key: 'v3', label: 'ED Sistema v3',           icon: '🎭', url: 'ed_sistemav3_painelcentral.html' },
-];
-
-function renderVersions(user) {
-  const container = document.getElementById('versions');
-  container.innerHTML = '';
-  VERSION_META.forEach(({ key, label, icon, url }) => {
-    const allowed = user.role === 'admin' || (Array.isArray(user.versions) && user.versions.includes(key));
-    const div = document.createElement('div');
-    div.className = 'version-card ' + (allowed ? 'accessible' : 'locked');
-    div.innerHTML = `
-      <div class="v-icon">${icon}</div>
-      <div class="v-name">${label}</div>
-      <div class="v-status${allowed ? ' ok' : ''}">${allowed ? 'Acesso liberado' : 'Sem acesso'}</div>
-    `;
-    if (allowed) div.onclick = () => { location.href = url; };
-    container.appendChild(div);
-  });
-}
-
-/* ── admin panel helpers ── */
-function statusLabel(s) {
-  return { approved: 'Aprovado', pending: 'Pendente', denied: 'Negado' }[s] || s;
-}
-
-function statusPillHTML(s) {
-  const cls = { approved: 'pill-approved', pending: 'pill-pending', denied: 'pill-denied' }[s] || '';
-  return `<span class="pill ${cls}">${statusLabel(s)}</span>`;
-}
-
-/* ── render admin users ── */
-function renderAdminUsers() {
-  const container = document.getElementById('adminUsers');
-  const store = EDAuth.getStore();
-
-  /* pending count badge */
-  const pendingCount = store.users.filter(u => u.status === 'pending').length;
-  const badge = document.getElementById('pendingBadge');
-  if (pendingCount > 0) {
-    badge.classList.remove('hidden');
-    badge.textContent = `${pendingCount} ${pendingCount === 1 ? 'pendente' : 'pendentes'}`;
-  } else {
-    badge.classList.add('hidden');
-  }
-
-  /* sort: pending → denied → approved */
-  const ORDER = { pending: 0, denied: 1, approved: 2 };
-  const sorted = [...store.users].sort((a, b) => (ORDER[a.status] ?? 3) - (ORDER[b.status] ?? 3));
-
-  const wrap = document.createElement('div');
-  wrap.className = 'table-wrap';
-
-  const table = document.createElement('table');
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Status</th>
-        <th>Acessos</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-  `;
-
-  const tbody = document.createElement('tbody');
-
-  sorted.forEach((u) => {
-    const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
-    const rowCls = u.status === 'pending' ? 'row-pending' : (u.status === 'denied' ? 'row-denied' : '');
-
-    const accessHTML = ['v1','v2','v3'].map((v) => {
-      const chk = u.versions.includes(v) ? 'checked' : '';
-      const dis = isAdmin ? 'disabled' : '';
-      return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${chk} ${dis}/> ${v.toUpperCase()}</label>`;
-    }).join('');
-
-    const tr = document.createElement('tr');
-    if (rowCls) tr.className = rowCls;
-    tr.innerHTML = `
-      <td>${u.name}</td>
-      <td style="font-size:.8rem;color:var(--muted)">${u.email}</td>
-      <td>${statusPillHTML(u.status)}</td>
-      <td><div class="access-labels">${accessHTML}</div></td>
-      <td><div class="row-actions" id="act-${u.id}"></div></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  wrap.appendChild(table);
-  container.innerHTML = '';
-  container.appendChild(wrap);
-
-  /* action buttons */
-  sorted.forEach((u) => {
-    const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
-    const act = document.getElementById(`act-${u.id}`);
-    if (!act) return;
-
-    if (!isAdmin) {
-      if (u.status !== 'approved') {
-        const approve = document.createElement('button');
-        approve.className = 'btn btn-success btn-sm';
-        approve.textContent = 'Aprovar';
-        approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
-        act.appendChild(approve);
-      }
-
-      if (u.status !== 'denied') {
-        const deny = document.createElement('button');
-        deny.className = 'btn btn-danger btn-sm';
-        deny.textContent = 'Negar';
-        deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
-        act.appendChild(deny);
-      }
-
-      const del = document.createElement('button');
-      del.className = 'btn btn-danger btn-sm';
-      del.textContent = 'Excluir';
-      del.onclick = () => {
-        if (confirm(`Excluir o usuário "${u.name}"?`)) { EDAuth.deleteUser(u.id); render(); }
-      };
-      act.appendChild(del);
+    if (!user) {
+      authSection.classList.remove('hidden');
+      hubSection.classList.add('hidden');
+      document.querySelectorAll('.id-logged').forEach(el => el.classList.add('hidden'));
+      return;
     }
 
-    const passBtn = document.createElement('button');
-    passBtn.className = 'btn btn-neutral btn-sm';
-    passBtn.textContent = 'Senha';
-    passBtn.onclick = () => handleChangePassword(u);
-    act.appendChild(passBtn);
+    authSection.classList.add('hidden');
+    hubSection.classList.remove('hidden');
+    document.querySelectorAll('.id-logged').forEach(el => el.classList.remove('hidden'));
+
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('sideUserName').textContent = user.name;
+
+    // Handle avatar displays
+    const hubAv = document.getElementById('hubAvatar');
+    const sideAv = document.getElementById('sideAvatar');
+    if (user.photo) {
+      hubAv.style.backgroundImage = `url(${user.photo})`;
+      hubAv.textContent = '';
+      sideAv.style.backgroundImage = `url(${user.photo})`;
+      sideAv.textContent = '';
+    } else {
+      hubAv.style.backgroundImage = '';
+      hubAv.textContent = user.role === 'admin' ? '👑' : '⚔';
+      sideAv.style.backgroundImage = '';
+      sideAv.textContent = user.role === 'admin' ? '👑' : '⚔';
+    }
+
+    const rolePill = document.getElementById('userRolePill');
+    const tabsContainer = document.getElementById('hubTabsContainer');
+    if (user.role === 'admin') {
+      rolePill.className = 'pill pill-admin';
+      rolePill.textContent = 'Administrador';
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      if (tabsContainer) tabsContainer.classList.remove('hidden');
+    } else {
+      rolePill.className = 'pill pill-player';
+      rolePill.textContent = 'Jogador';
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+      if (tabsContainer) tabsContainer.classList.add('hidden');
+    }
+
+    renderMyFichas();
+
+    if (user.role === 'admin') {
+      renderAdminUsers();
+      renderNotifications();
+    }
+  }
+
+  /* ── render my fichas ── */
+  function renderMyFichas() {
+    const user = EDAuth.currentUser();
+    if (!user) return;
+    
+    const container = document.getElementById('myFichasGrid');
+    container.innerHTML = '';
+
+    // If Admin, they have access to all character sheets in fichas_v3
+    const ids = user.role === 'admin' ? Object.keys(globalFichasV3) : (user.assignedSheets || []);
+
+    if (!ids || ids.length === 0) {
+      container.innerHTML = '<div style="grid-column: 1/-1; opacity:0.65; text-align:center; padding: 20px;">Nenhuma ficha disponível. Contate o ADM.</div>';
+      return;
+    }
+
+    ids.forEach(id => {
+      const data = globalFichasV3[id];
+      if (!data) return; // Wait for firebase sync
+
+      const card = document.createElement('div');
+      card.className = 'char-card';
+      card.innerHTML = `
+        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
+        <div class="char-card-name">${data.char_name || id}</div>
+        <div class="char-card-level">Nível ${data.nivel || 1}</div>
+      `;
+      card.onclick = () => {
+        window.location.href = `ed_sistemav3_ficha.html?p=${id}`;
+      };
+      container.appendChild(card);
+    });
+  }
+
+  /* ── render admin user manager ── */
+  window.triggerRefreshUsers = () => {
+    renderAdminUsers();
+  };
+
+  function renderAdminUsers() {
+    const container = document.getElementById('adminUsersList');
+    if (!container) return;
+    const store = EDAuth.getStore();
+
+    /* sort: pending → denied → approved */
+    const ORDER = { pending: 0, denied: 1, approved: 2 };
+    const sorted = [...store.users].sort((a, b) => (ORDER[a.status] ?? 3) - (ORDER[b.status] ?? 3));
+
+    const wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+
+    const table = document.createElement('table');
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th>Versões</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+    `;
+
+    const tbody = document.createElement('tbody');
+
+    sorted.forEach((u) => {
+      const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
+      const rowCls = u.status === 'pending' ? 'row-pending' : (u.status === 'denied' ? 'row-denied' : '');
+
+      const accessHTML = ['v1','v2','v3'].map((v) => {
+        const chk = u.versions && u.versions.includes(v) ? 'checked' : '';
+        const dis = isAdmin ? 'disabled' : '';
+        return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${chk} ${dis}/> ${v.toUpperCase()}</label>`;
+      }).join('');
+
+      const tr = document.createElement('tr');
+      if (rowCls) tr.className = rowCls;
+      tr.innerHTML = `
+        <td>${u.name}</td>
+        <td style="font-size:.8rem;color:var(--muted)">${u.email}</td>
+        <td>
+          <span class="pill ${{ approved: 'pill-approved', pending: 'pill-pending', denied: 'pill-denied' }[u.status] || ''}">
+            ${{ approved: 'Aprovado', pending: 'Pendente', denied: 'Negado' }[u.status] || u.status}
+          </span>
+        </td>
+        <td><div class="access-labels">${accessHTML}</div></td>
+        <td><div class="row-actions" id="act-${u.id}"></div></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    container.innerHTML = '';
+    container.appendChild(wrap);
+
+    /* inject actions */
+    sorted.forEach((u) => {
+      const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
+      const act = document.getElementById(`act-${u.id}`);
+      if (!act) return;
+
+      if (!isAdmin) {
+        if (u.status !== 'approved') {
+          const approve = document.createElement('button');
+          approve.className = 'btn btn-success btn-sm';
+          approve.textContent = 'Aprovar';
+          approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
+          act.appendChild(approve);
+        }
+
+        if (u.status !== 'denied') {
+          const deny = document.createElement('button');
+          deny.className = 'btn btn-danger btn-sm';
+          deny.textContent = 'Negar';
+          deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
+          act.appendChild(deny);
+        }
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-primary btn-sm';
+        editBtn.textContent = '✏️ Editar';
+        editBtn.onclick = () => openUserEditModal(u);
+        act.appendChild(editBtn);
+
+        const del = document.createElement('button');
+        del.className = 'btn btn-danger btn-sm';
+        del.textContent = '🗑️ Excluir';
+        del.onclick = () => {
+          if (confirm(`Excluir o usuário "${u.name}"?`)) { EDAuth.deleteUser(u.id); render(); }
+        };
+        act.appendChild(del);
+      }
+    });
+
+    // Checkbox listeners
+    container.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+      box.addEventListener('change', () => {
+        const fresh = EDAuth.getStore();
+        const target = fresh.users.find((u) => u.id === box.dataset.user);
+        if (!target || target.email === EDAuth.ADMIN_EMAIL) return;
+        let versions = Array.isArray(target.versions) ? [...target.versions] : [];
+        if (box.checked && !versions.includes(box.dataset.ver)) versions.push(box.dataset.ver);
+        if (!box.checked) versions = versions.filter((v) => v !== box.dataset.ver);
+        EDAuth.updateUser(target.id, { versions });
+      });
+    });
+  }
+
+  /* ── render admin notifications panel ── */
+  function renderNotifications() {
+    const list = document.getElementById('notificationsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const store = EDAuth.getStore();
+    let count = 0;
+
+    store.users.forEach(u => {
+      if (u.requestedEmail) {
+        count++;
+        const div = document.createElement('div');
+        div.className = 'notification-item';
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:bold;">${u.name}</div>
+            <div style="font-size:0.82rem; color:var(--muted)">Solicitou alteração de e-mail para: <span style="color:#ffc060;">${u.requestedEmail}</span></div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-success btn-sm" onclick="approveDirect('${u.id}', 'email')">Aprovar</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectDirect('${u.id}', 'email')">Recusar</button>
+          </div>
+        `;
+        list.appendChild(div);
+      }
+
+      if (u.requestedPassword) {
+        count++;
+        const div = document.createElement('div');
+        div.className = 'notification-item';
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:bold;">${u.name}</div>
+            <div style="font-size:0.82rem; color:var(--muted)">Solicitou alteração de senha</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-success btn-sm" onclick="approveDirect('${u.id}', 'password')">Aprovar</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectDirect('${u.id}', 'password')">Recusar</button>
+          </div>
+        `;
+        list.appendChild(div);
+      }
+    });
+
+    if (count === 0) {
+      list.innerHTML = '<div style="opacity:0.65; text-align:center; padding:20px;">Nenhuma notificação pendente.</div>';
+    }
+  }
+
+  // Action methods for direct notifications
+  window.approveDirect = (userId, type) => {
+    const store = EDAuth.getStore();
+    const user = store.users.find(u => u.id === userId);
+    if (!user) return;
+
+    if (type === 'email' && user.requestedEmail) {
+      EDAuth.updateUser(userId, { email: user.requestedEmail, requestedEmail: null });
+    } else if (type === 'password' && user.requestedPassword) {
+      EDAuth.updateUser(userId, { password: user.requestedPassword, requestedPassword: null });
+    }
+    render();
+  };
+
+  window.rejectDirect = (userId, type) => {
+    if (type === 'email') {
+      EDAuth.updateUser(userId, { requestedEmail: null });
+    } else if (type === 'password') {
+      EDAuth.updateUser(userId, { requestedPassword: null });
+    }
+    render();
+  };
+
+  /* ── user editing modal functions ── */
+  let activeEditingUser = null;
+
+  function openUserEditModal(user) {
+    activeEditingUser = user;
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUserTitle').textContent = `Editar: ${user.name}`;
+    document.getElementById('editUserName').value = user.name;
+    
+    const emailInput = document.getElementById('editUserEmail');
+    emailInput.value = user.email;
+    emailInput.type = 'password'; // hidden by default
+
+    const passInput = document.getElementById('editUserPass');
+    passInput.value = user.password;
+    passInput.type = 'password'; // hidden by default
+
+    // Requested email banner
+    const reqEmailBlock = document.getElementById('editUserReqEmailBlock');
+    if (user.requestedEmail) {
+      reqEmailBlock.classList.remove('hidden');
+      document.getElementById('editUserReqEmailVal').textContent = user.requestedEmail;
+    } else {
+      reqEmailBlock.classList.add('hidden');
+    }
+
+    // Requested password banner
+    const reqPassBlock = document.getElementById('editUserReqPassBlock');
+    if (user.requestedPassword) {
+      reqPassBlock.classList.remove('hidden');
+    } else {
+      reqPassBlock.classList.add('hidden');
+    }
+
+    renderEditUserFichas();
+    document.getElementById('editUserModal').classList.add('open');
+  }
+  window.openUserEditModal = openUserEditModal;
+
+  window.closeEditModal = () => {
+    document.getElementById('editUserModal').classList.remove('open');
+    activeEditingUser = null;
+  };
+
+  function renderEditUserFichas() {
+    const grid = document.getElementById('editUserFichasGrid');
+    grid.innerHTML = '';
+    const user = activeEditingUser;
+    if (!user) return;
+
+    const assigned = user.assignedSheets || [];
+    if (assigned.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; opacity:0.6; font-size:0.85rem; text-align:center;">Nenhuma ficha associada.</div>';
+      return;
+    }
+
+    assigned.forEach(id => {
+      const data = globalFichasV3[id];
+      if (!data) return;
+
+      const card = document.createElement('div');
+      card.className = 'char-card';
+      card.style.cursor = 'default';
+      card.innerHTML = `
+        <div class="char-card-remove" onclick="detachSheet('${id}')">✖</div>
+        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
+        <div class="char-card-name">${data.char_name || id}</div>
+        <div class="char-card-level">Nível ${data.nivel || 1}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  window.detachSheet = (sheetId) => {
+    if (!activeEditingUser) return;
+    EDAuth.detachSheetFromUser(activeEditingUser.id, sheetId);
+    // Refresh user cache in active modal
+    const store = EDAuth.getStore();
+    activeEditingUser = store.users.find(u => u.id === activeEditingUser.id);
+    renderEditUserFichas();
+    render();
+  };
+
+  window.approveFieldChange = (type) => {
+    if (!activeEditingUser) return;
+    const userId = activeEditingUser.id;
+    if (type === 'email' && activeEditingUser.requestedEmail) {
+      EDAuth.updateUser(userId, { email: activeEditingUser.requestedEmail, requestedEmail: null });
+      document.getElementById('editUserEmail').value = activeEditingUser.requestedEmail;
+      document.getElementById('editUserReqEmailBlock').classList.add('hidden');
+    } else if (type === 'password' && activeEditingUser.requestedPassword) {
+      EDAuth.updateUser(userId, { password: activeEditingUser.requestedPassword, requestedPassword: null });
+      document.getElementById('editUserPass').value = activeEditingUser.requestedPassword;
+      document.getElementById('editUserReqPassBlock').classList.add('hidden');
+    }
+    // Refresh active reference
+    const store = EDAuth.getStore();
+    activeEditingUser = store.users.find(u => u.id === userId);
+    render();
+  };
+
+  window.saveUserEdit = () => {
+    if (!activeEditingUser) return;
+    const name = document.getElementById('editUserName').value.trim();
+    const email = document.getElementById('editUserEmail').value.trim().toLowerCase();
+    const password = document.getElementById('editUserPass').value.trim();
+
+    if (!name || !email || !password) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    EDAuth.updateUser(activeEditingUser.id, { name, email, password });
+    closeEditModal();
+    render();
+  };
+
+  /* ── add sheet modal functions ── */
+  window.openAddSheetModal = () => {
+    const selector = document.getElementById('sheetSelector');
+    selector.innerHTML = '';
+    const user = activeEditingUser;
+    if (!user) return;
+
+    const assigned = user.assignedSheets || [];
+    let count = 0;
+
+    Object.entries(globalFichasV3).forEach(([id, data]) => {
+      if (!assigned.includes(id)) {
+        count++;
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${data.char_name || id} (Nível ${data.nivel || 1})`;
+        selector.appendChild(opt);
+      }
+    });
+
+    if (count === 0) {
+      alert('Todas as fichas V3 globais já foram associadas a este usuário.');
+      return;
+    }
+
+    document.getElementById('addSheetModal').classList.add('open');
+  };
+
+  window.closeAddSheetModal = () => {
+    document.getElementById('addSheetModal').classList.remove('open');
+  };
+
+  window.confirmAttachSheet = () => {
+    const sheetId = document.getElementById('sheetSelector').value;
+    if (!sheetId || !activeEditingUser) return;
+
+    EDAuth.attachSheetToUser(activeEditingUser.id, sheetId);
+    
+    // Refresh active editing cache
+    const store = EDAuth.getStore();
+    activeEditingUser = store.users.find(u => u.id === activeEditingUser.id);
+    renderEditUserFichas();
+    closeAddSheetModal();
+    render();
+  };
+
+  /* ── auth actions ── */
+  document.getElementById('btnLogin').addEventListener('click', () => {
+    const result = EDAuth.login(
+      document.getElementById('loginEmail').value,
+      document.getElementById('loginPassword').value,
+      document.getElementById('remember').checked
+    );
+    const msg = document.getElementById('loginMsg');
+    msg.className = 'msg' + (result.ok ? ' ok' : '');
+    msg.textContent = result.ok ? 'Login realizado com sucesso.' : result.error;
+    if (result.ok) render();
   });
 
-  /* checkbox version toggles — reads fresh store to avoid stale-closure bug */
-  container.querySelectorAll('input[type="checkbox"]').forEach((box) => {
-    box.addEventListener('change', () => {
-      const fresh = EDAuth.getStore();
-      const target = fresh.users.find((u) => u.id === box.dataset.user);
-      if (!target || target.email === EDAuth.ADMIN_EMAIL) return;
-      let versions = Array.isArray(target.versions) ? [...target.versions] : [];
-      if (box.checked && !versions.includes(box.dataset.ver)) versions.push(box.dataset.ver);
-      if (!box.checked) versions = versions.filter((v) => v !== box.dataset.ver);
-      EDAuth.updateUser(target.id, { versions });
+  ['loginEmail', 'loginPassword'].forEach((id) => {
+    document.getElementById(id).addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click();
     });
   });
-}
 
-/* ── change password ── */
-function handleChangePassword(user) {
-  const nova = prompt(`Nova senha para "${user.name}":`);
-  if (nova === null) return;
-  const conf = prompt('Confirme a nova senha:');
-  if (conf === null) return;
-  if (nova !== conf) { alert('As senhas não coincidem.'); return; }
-  const result = EDAuth.changeUserPassword(user.id, nova);
-  if (!result.ok) { alert(result.error); return; }
-  alert('Senha alterada com sucesso.');
-}
-
-/* ── login ── */
-document.getElementById('btnLogin').addEventListener('click', () => {
-  const result = EDAuth.login(
-    document.getElementById('loginEmail').value,
-    document.getElementById('loginPassword').value,
-    document.getElementById('remember').checked
-  );
-  const msg = document.getElementById('loginMsg');
-  msg.className = 'msg' + (result.ok ? ' ok' : '');
-  msg.textContent = result.ok ? 'Login realizado com sucesso.' : result.error;
-  if (result.ok) render();
-});
-
-/* Enter key submits login */
-['loginEmail', 'loginPassword'].forEach((id) => {
-  document.getElementById(id).addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('btnLogin').click();
+  document.getElementById('btnRegister').addEventListener('click', () => {
+    const result = EDAuth.register({
+      name:            document.getElementById('regName').value,
+      email:           document.getElementById('regEmail').value,
+      password:        document.getElementById('regPass').value,
+      confirmPassword: document.getElementById('regPass2').value,
+    });
+    const msg = document.getElementById('regMsg');
+    msg.className = 'msg' + (result.ok ? ' ok' : '');
+    msg.textContent = result.ok ? result.message : result.error;
   });
-});
 
-/* ── register ── */
-document.getElementById('btnRegister').addEventListener('click', () => {
-  const result = EDAuth.register({
-    name:            document.getElementById('regName').value,
-    email:           document.getElementById('regEmail').value,
-    password:        document.getElementById('regPass').value,
-    confirmPassword: document.getElementById('regPass2').value,
+  document.getElementById('regPass2').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btnRegister').click();
   });
-  const msg = document.getElementById('regMsg');
-  msg.className = 'msg' + (result.ok ? ' ok' : '');
-  msg.textContent = result.ok ? result.message : result.error;
-});
 
-/* Enter key submits register from last field */
-document.getElementById('regPass2').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('btnRegister').click();
-});
+  document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.logout(); render(); });
 
-/* ── logout ── */
-document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.logout(); render(); });
+  // Listen to remote changes in auth store
+  window.onAuthStoreChanged = render;
 
-/* ── init ── */
-// Firebase listener in auth.js calls this whenever remote data changes
-// (e.g. a new user registers from another browser)
-window.onAuthStoreChanged = render;
-render();
+  // Listen to remote changes in global sheets list
+  onValue(ref(db, 'fichas_v3'), (snap) => {
+    globalFichasV3 = snap.val() || {};
+    renderMyFichas();
+    if (activeEditingUser) renderEditUserFichas();
+  });
+
+  // Initial check
+  render();
+  handleQueryTab();
 </script>
-  <script src="pwa.js" defer></script>
+<script src="pwa.js" defer></script>
 </body>
 </html>
