@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grimório - Escória de Deus</title>
+    <style>
+        :root { --bg: #0a0a0a; --sidebar: #111; --accent: #800000; --text: #e0e0e0; --font-body: 'Georgia', serif; --font-title: 'Segoe UI', sans-serif; }
+        
+        body { background: var(--bg); color: var(--text); font-family: var(--font-body); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR (Menu) */
+        .sidebar { width: 300px; background: var(--sidebar); border-right: 2px solid #333; display: flex; flex-direction: column; padding: 20px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); z-index: 10; overflow-y: auto; transition: transform 0.3s ease; }
+        .sidebar h1 { font-family: var(--font-title); text-transform: uppercase; color: var(--accent); letter-spacing: 2px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 20px; font-size: 22px; }
+        .nav-list { list-style: none; padding: 0; margin-top: 20px; }
+        .nav-item { padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.3s; font-family: var(--font-title); font-size: 14px; text-transform: uppercase; color: #888; }
+        .nav-item:hover, .nav-item.active { color: white; border-left: 3px solid var(--accent); padding-left: 20px; background: rgba(128,0,0,0.1); }
+
+        /* CONTENT AREA */
+        .content-area { flex-grow: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; position: relative; background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0a0a0a 100%); }
+        .page-container { max-width: 900px; margin: 0 auto; padding-bottom: 100px; }
+
+        /* TIPOGRAFIA E ELEMENTOS */
+        h1.page-title { font-family: var(--font-title); font-size: 48px; color: var(--accent); text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 40px; opacity: 0; animation: fadeDown 0.8s forwards; }
+        
+        p.lore-text { font-size: 18px; line-height: 1.8; margin-bottom: 20px; color: #ccc; text-align: justify; }
+        
+        .lore-img { width: 100%; border-radius: 5px; border: 1px solid #333; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transform: translateY(20px); transition: 0.8s ease; }
+        .lore-img.visible { opacity: 1; transform: translateY(0); }
+
+        .lore-block { opacity: 0; transform: translateY(20px); transition: 0.8s ease; }
+        .lore-block.visible { opacity: 1; transform: translateY(0); }
+
+        .action-btn { display: inline-block; background: transparent; color: var(--accent); border: 2px solid var(--accent); padding: 10px 30px; font-family: var(--font-title); font-weight: bold; text-transform: uppercase; text-decoration: none; margin-top: 20px; transition: 0.3s; cursor: pointer; }
+        .action-btn:hover { background: var(--accent); color: white; box-shadow: 0 0 15px var(--accent); }
+
+        /* ANIMATIONS */
+        @keyframes fadeDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+        
+        /* MOBILE MENU TOGGLE */
+        .menu-toggle { display: none; position: fixed; top: 20px; left: 20px; z-index: 100; background: var(--accent); color: white; border: none; padding: 10px; border-radius: 5px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; height: 100%; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .menu-toggle { display: block; }
+            .content-area { padding: 20px; padding-top: 60px; }
+            h1.page-title { font-size: 32px; }
+        }
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ MENU</button>
+
+    <div class="sidebar">
+        <h1>Grimório</h1>
+        <ul class="nav-list" id="nav_list">
+            </ul>
+    </div>
+
+    <div class="content-area">
+        <div class="page-container" id="page_content">
+            <div style="text-align:center; color:#555; margin-top:100px;">
+                <h2>Bem vindo ao Grimório</h2>
+                <p>Selecione um capítulo no menu lateral.</p>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let globalPages = {};
+
+    // Configura o Intersection Observer (para animações de scroll)
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // 1. Carregar Menu e Páginas
+    onValue(ref(db, 'livro_paginas'), (snap) => {
+        globalPages = snap.val() || {};
+        const list = document.getElementById('nav_list');
+        list.innerHTML = "";
+        
+        Object.keys(globalPages).forEach((key, index) => {
+            const p = globalPages[key];
+            const li = document.createElement('li');
+            li.className = 'nav-item';
+            li.innerText = p.title || 'Página sem nome';
+            li.onclick = () => loadPage(key);
+            
+            // Se for a primeira página e nenhuma estiver aberta, abre ela
+            if (index === 0 && !document.querySelector('.page-title')) {
+                // Opcional: loadPage(key); 
+            }
+            list.appendChild(li);
+        });
+    });
+
+    window.loadPage = (id) => {
+        const p = globalPages[id];
+        if(!p) return;
+
+        const container = document.getElementById('page_content');
+        container.innerHTML = `<h1 class="page-title">${p.title}</h1>`;
+
+        // Fecha menu mobile se estiver aberto
+        document.querySelector('.sidebar').classList.remove('open');
+
+        // Renderiza blocos
+        if (p.blocks) {
+            p.blocks.forEach(block => {
+                let el;
+                if (block.type === 'text') {
+                    el = document.createElement('p');
+                    el.className = 'lore-text lore-block';
+                    // Converte quebras de linha em <br> para manter formatação
+                    el.innerHTML = block.content.replace(/\n/g, '<br>');
+                } else if (block.type === 'image') {
+                    el = document.createElement('img');
+                    el.className = 'lore-img';
+                    el.src = block.content;
+                } else if (block.type === 'button') {
+                    el = document.createElement('div');
+                    el.className = 'lore-block';
+                    el.style.textAlign = 'center';
+                    el.innerHTML = `<button class="action-btn" onclick="loadPage('${block.extra}')">${block.content}</button>`;
+                }
+
+                if(el) {
+                    container.appendChild(el);
+                    observer.observe(el); // Adiciona animação
+                }
+            });
+        }
+
+        // Highlight no menu
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        // Encontrar o item do menu correspondente é difícil sem ID no DOM, mas visualmente o usuário sabe onde clicou
+    };
+
+    // Exporta loadPage para que os botões dentro do HTML funcionem
+    window.loadPage = loadPage;
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

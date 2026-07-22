@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Jornada - RPG</title>
+    <style>
+        :root { --bg: #121212; --panel: #1e1e1e; --accent: #800000; --text: #fff; --line-inactive: #333; --line-active: #ff0000; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* HEADER & CONFIG */
+        .top-bar { background: var(--panel); padding: 15px; border-bottom: 2px solid var(--accent); display: flex; gap: 15px; align-items: center; box-shadow: 0 0 15px rgba(0,0,0,0.5); z-index: 10; }
+        h1 { margin: 0; font-size: 20px; text-transform: uppercase; color: var(--accent); margin-right: 20px; }
+        select, button, input { background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #555; }
+        .btn-start { background: var(--accent); border-color: #ff4444; }
+        .btn-start:hover { background: #a00000; }
+
+        /* MAP AREA */
+        .map-container { flex-grow: 1; position: relative; overflow: auto; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; cursor: grab; }
+        .map-container:active { cursor: grabbing; }
+        
+        .map-content { position: absolute; top: 0; left: 0; transform-origin: top left; transition: transform 0.2s; padding: 50px; min-width: 100%; min-height: 100%; box-sizing: border-box; }
+
+        /* NODES & LINES */
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        line { stroke-width: 3; transition: stroke 0.5s, stroke-width 0.5s; stroke-linecap: round; }
+        
+        .node { position: absolute; width: 40px; height: 40px; background: #222; border: 3px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .node:hover { transform: scale(1.1); border-color: #aaa; }
+        .node.visited { background: var(--accent); border-color: #ff4444; box-shadow: 0 0 15px var(--accent); color: white; }
+        .node.available { border-color: #00ffff; animation: pulse 1.5s infinite; }
+        .node.start { border-color: #4caf50; background: #1b5e20; }
+        .node.end { border-color: #ffd700; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0); } }
+
+        /* MODAL & LOGS */
+        .log-panel { width: 300px; background: var(--panel); border-left: 1px solid #333; display: flex; flex-direction: column; padding: 10px; overflow-y: auto; }
+        .log-entry { background: #2a2a2a; border-left: 3px solid #555; padding: 10px; margin-bottom: 10px; font-size: 13px; animation: slideIn 0.3s; }
+        .log-entry strong { display: block; margin-bottom: 5px; color: #ddd; }
+        .log-bad { border-color: #f44336; }
+        .log-med { border-color: #ff9800; }
+        .log-good { border-color: #4caf50; }
+        .log-perfect { border-color: #00ffff; background: #1a2a2a; }
+
+        /* POPUP INPUT */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .popup-box { background: #1e1e1e; padding: 20px; border: 2px solid var(--accent); border-radius: 10px; text-align: center; width: 300px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .popup-box h2 { color: var(--accent); margin-top: 0; }
+        .popup-input { font-size: 24px; text-align: center; width: 80px; margin: 15px 0; background: #111; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; }
+        .btn-confirm { background: #2e7d32; width: 100%; padding: 10px; margin-top: 10px; }
+
+        @keyframes slideIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} }
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+    <div class="top-bar">
+        <h1>Simulador de Jornada</h1>
+        
+        <select id="biome">
+            <option value="plain">Planícies/Florestas (Normal)</option>
+            <option value="cave">Cavernas/Masmorras (Linear)</option>
+            <option value="city">Cidades/Ruínas (Muitas Rotas)</option>
+            <option value="desert">Deserto/Neve (Ermo)</option>
+        </select>
+
+        <select id="length">
+            <option value="6">Curta (6 passos)</option>
+            <option value="10" selected>Média (10 passos)</option>
+            <option value="15">Longa (15 passos)</option>
+            <option value="20">Muito Longa (20 passos)</option>
+        </select>
+
+        <button class="btn-start" onclick="generateMap()">Gerar Mapa</button>
+        <div style="flex-grow:1"></div>
+        <button onclick="zoom(0.1)">+</button>
+        <button onclick="zoom(-0.1)">-</button>
+    </div>
+
+    <div style="display:flex; flex-grow:1; overflow:hidden;">
+        <div class="map-container" id="map_container">
+            <div class="map-content" id="map_content">
+                <svg id="connections"></svg>
+                <div id="nodes"></div>
+            </div>
+        </div>
+        <div class="log-panel" id="log_panel">
+            <div style="text-align:center; color:#666; margin-top:20px;">O registro da jornada aparecerá aqui.</div>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popup">
+        <div class="popup-box">
+            <h2>Teste de Jornada</h2>
+            <p>Os personagens avançam para o próximo quadrado.</p>
+            <p style="font-size:12px; color:#aaa;">Insira o resultado do dado:</p>
+            <input type="number" id="test_result" class="popup-input" placeholder="D20">
+            <button class="btn-confirm" onclick="resolveStep()">Avançar</button>
+            <button style="background:transparent; border:none; color:#666; margin-top:5px; font-size:11px;" onclick="closePopup()">Cancelar</button>
+        </div>
+    </div>
+
+<script>
+    // CONFIGURAÇÃO DO SISTEMA
+    const BIOMES = {
+        plain: { branch: 0.5, name: "Planície" },
+        cave: { branch: 0.2, name: "Caverna" }, // Poucas bifurcações
+        city: { branch: 0.8, name: "Cidade" },  // Muitas bifurcações
+        desert: { branch: 0.4, name: "Deserto" }
+    };
+
+    let nodes = [];
+    let connections = [];
+    let currentNodeId = null;
+    let targetNodeId = null;
+    let currentScale = 1;
+
+    // --- GERADOR DE MAPA ---
+    function generateMap() {
+        const biomeKey = document.getElementById('biome').value;
+        const length = parseInt(document.getElementById('length').value);
+        const biome = BIOMES[biomeKey];
+
+        const nodesContainer = document.getElementById('nodes');
+        const svgContainer = document.getElementById('connections');
+        const logPanel = document.getElementById('log_panel');
+
+        nodesContainer.innerHTML = '';
+        svgContainer.innerHTML = '';
+        logPanel.innerHTML = '<div style="padding:10px; border-bottom:1px solid #333; font-weight:bold; color:#aaa">INÍCIO DA JORNADA</div>';
+        
+        nodes = [];
+        connections = [];
+
+        // 1. Cria camadas (Layers)
+        let layers = [];
+        for(let i=0; i<length; i++) {
+            // Quantos nós nessa coluna vertical?
+            // Começa com 1, depois varia baseado no bioma, termina com 1
+            let count = 1;
+            if (i > 0 && i < length - 1) {
+                const rand = Math.random();
+                if (rand < biome.branch) count = Math.floor(Math.random() * 3) + 1; // 1 a 3 caminhos
+                else count = 1;
+            }
+            layers.push(count);
+        }
+
+        // 2. Cria Nós
+        let idCounter = 0;
+        let layerData = []; // Guarda IDs por camada
+        
+        const xStep = 100; // Distancia Horizontal
+        const yStep = 80;  // Distancia Vertical
+
+        layers.forEach((count, colIndex) => {
+            let columnIds = [];
+            // Centraliza verticalmente
+            let startY = 300 - ((count - 1) * (yStep / 2)); 
+
+            for(let i=0; i<count; i++) {
+                const node = {
+                    id: idCounter++,
+                    col: colIndex,
+                    x: 100 + (colIndex * xStep),
+                    y: startY + (i * yStep),
+                    visited: false,
+                    type: 'unknown' // Será definido ao chegar
+                };
+                
+                // Nó inicial
+                if(colIndex === 0) {
+                    node.visited = true;
+                    node.type = 'start';
+                    currentNodeId = node.id;
+                }
+
+                nodes.push(node);
+                columnIds.push(node.id);
+
+                // Render HTML
+                const div = document.createElement('div');
+                div.className = `node ${colIndex === 0 ? 'visited start' : ''} ${colIndex === length-1 ? 'end' : ''}`;
+                div.style.left = node.x + 'px';
+                div.style.top = node.y + 'px';
+                div.innerText = colIndex === 0 ? 'S' : (colIndex === length-1 ? 'F' : '');
+                div.id = `node_${node.id}`;
+                div.onclick = () => clickNode(node.id);
+                nodesContainer.appendChild(div);
+            }
+            layerData.push(columnIds);
+        });
+
+        // 3. Cria Conexões (Linhas)
+        for(let col=0; col < layers.length - 1; col++) {
+            const currentLayer = layerData[col];
+            const nextLayer = layerData[col+1];
+
+            currentLayer.forEach(parentId => {
+                // Lógica simples: conecta com o nó da frente que estiver mais perto em Y
+                // Para garantir que todos tenham caminho, conectamos aleatoriamente, mas forçando conexões
+                
+                // Se a proxima camada tem 1, conecta tudo nele
+                if (nextLayer.length === 1) {
+                    connect(parentId, nextLayer[0]);
+                } 
+                // Se a atual tem 1, conecta em todos da proxima (bifurcação)
+                else if (currentLayer.length === 1) {
+                    nextLayer.forEach(childId => connect(parentId, childId));
+                }
+                // Muitos para Muitos (conecta vizinhos mais próximos)
+                else {
+                    const parentNode = nodes.find(n => n.id === parentId);
+                    // Conecta com pelo menos 1
+                    let closest = nextLayer[0];
+                    let minDist = 9999;
+                    
+                    nextLayer.forEach(childId => {
+                        const childNode = nodes.find(n => n.id === childId);
+                        const dist = Math.abs(childNode.y - parentNode.y);
+                        if(dist < 100) { // Conecta se estiver "reto" ou perto
+                            connect(parentId, childId);
+                        }
+                    });
+                }
+            });
+        }
+        
+        updateVisuals();
+    }
+
+    function connect(fromId, toId) {
+        // Evita duplicatas
+        if(connections.some(c => c.from === fromId && c.to === toId)) return;
+        
+        const fromNode = nodes.find(n => n.id === fromId);
+        const toNode = nodes.find(n => n.id === toId);
+
+        connections.push({ from: fromId, to: toId, active: false });
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromNode.x + 20);
+        line.setAttribute('y1', fromNode.y + 20);
+        line.setAttribute('x2', toNode.x + 20);
+        line.setAttribute('y2', toNode.y + 20);
+        line.setAttribute('stroke', '#333');
+        line.id = `line_${fromId}_${toId}`;
+        document.getElementById('connections').appendChild(line);
+    }
+
+    // --- LÓGICA DE JOGO ---
+
+    function clickNode(id) {
+        const target = nodes.find(n => n.id === id);
+        
+        // Regras de clique
+        if (target.visited) return; // Já foi
+        
+        // Verifica se é vizinho do atual
+        const connection = connections.find(c => c.from === currentNodeId && c.to === id);
+        
+        if (connection) {
+            targetNodeId = id;
+            openPopup();
+        }
+    }
+
+    function openPopup() {
+        document.getElementById('popup').style.display = 'flex';
+        document.getElementById('test_result').value = '';
+        document.getElementById('test_result').focus();
+    }
+    
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+
+    function resolveStep() {
+        const val = parseInt(document.getElementById('test_result').value);
+        if (isNaN(val)) { alert("Digite um valor"); return; }
+        
+        closePopup();
+        
+        // Lógica do Sistema
+        let quality = "";
+        let colorClass = "";
+        let content = "";
+        
+        // 1. Definição da Qualidade
+        if (val <= 5) { quality = "Ruim"; colorClass = "log-bad"; }
+        else if (val <= 8) { quality = "Médio"; colorClass = "log-med"; }
+        else if (val <= 12) { quality = "Bom"; colorClass = "log-good"; }
+        else if (val <= 15) { quality = "Excelente"; colorClass = "log-good"; }
+        else { quality = "Perfeito"; colorClass = "log-perfect"; }
+
+        // 2. Definição do Conteúdo da Sala (RNG ponderado)
+        // Se o resultado for bom, chance maior de coisa boa. Se ruim, chance maior de coisa ruim.
+        const rollType = Math.random() * 100;
+        let type = "";
+        let details = "";
+        let icon = "";
+
+        // Tabela de Encontros Base
+        if (rollType < 10) type = "Recompensa";       // 10%
+        else if (rollType < 25) type = "Descanso";    // 15%
+        else if (rollType < 50) type = "Armadilha";   // 25%
+        else if (rollType < 75) type = "Terreno Difícil"; // 25%
+        else type = "Inimigos";                       // 25%
+
+        // Modificadores pelo Teste
+        if (type === "Inimigos") {
+            icon = "⚔️";
+            let qtd = Math.floor(Math.random() * 4) + 2; // 2 a 5 base
+            if (val <= 5) qtd += 2; // + Inimigos
+            if (val >= 13) qtd = Math.max(1, qtd - 2); // - Inimigos
+            if (val >= 16) { type = "Inimigos (Evitados)"; details = "Passaram despercebidos."; qtd = 0; icon = "👀"; }
+            else { details = `${qtd} Inimigos na área.`; }
+        }
+        else if (type === "Armadilha") {
+            icon = "⚠️";
+            let dt = 10; // Base
+            if (val <= 5) { dt = 15; details = "Armadilha mortal e bem escondida (DT 15)."; }
+            else if (val >= 13) { dt = 5; details = "Armadilha óbvia ou enferrujada (DT 5)."; }
+            else { details = `Armadilha comum (DT ${dt}).`; }
+            
+            if (val >= 16) { type = "Armadilha Desarmada"; details = "Detectaram e desarmaram automaticamente."; icon = "🔧"; }
+        }
+        else if (type === "Terreno Difícil") {
+            icon = "gf";
+            let dt = 10;
+            if (val <= 5) { dt = 15; details = "Terreno traiçoeiro ou deslizante (DT 15 para atravessar)."; }
+            else { details = `Terreno acidentado (DT ${dt}).`; }
+            
+            if (val >= 16) { type = "Caminho Seguro"; details = "Encontraram uma rota firme."; icon = "boots"; }
+        }
+        else if (type === "Recompensa") {
+            icon = "💎";
+            details = "Um baú, item perdido ou recurso raro.";
+        }
+        else if (type === "Descanso") {
+            icon = "⛺";
+            details = "Local seguro para recuperar fôlego.";
+        }
+
+        // Se for o último nó
+        const isLast = nodes.find(n => n.id === targetNodeId).col === (document.getElementById('length').value - 1);
+        if (isLast) {
+            type = "FIM DA JORNADA";
+            icon = "🏁";
+            details = `<button style="width:100%; margin-top:5px; background:#4caf50;" onclick="alert('Jornada Concluída!')">Concluir</button>`;
+        }
+
+        // 3. Atualizar Estado
+        const targetNode = nodes.find(n => n.id === targetNodeId);
+        targetNode.visited = true;
+        targetNode.type = type;
+        
+        // Atualizar conexão
+        const conn = connections.find(c => c.from === currentNodeId && c.to === targetNodeId);
+        if(conn) conn.active = true;
+
+        currentNodeId = targetNodeId;
+        targetNodeId = null;
+
+        // 4. Log
+        const logHtml = `
+            <div class="log-entry ${colorClass}">
+                <strong>Passo ${targetNode.col}: ${quality} (${val})</strong>
+                <div>${icon} ${type}</div>
+                <div style="color:#aaa; margin-top:3px;">${details}</div>
+            </div>
+        `;
+        document.getElementById('log_panel').innerHTML = logHtml + document.getElementById('log_panel').innerHTML;
+
+        updateVisuals();
+    }
+
+    function updateVisuals() {
+        // Atualiza nós
+        nodes.forEach(n => {
+            const el = document.getElementById(`node_${n.id}`);
+            if (n.visited) el.classList.add('visited');
+            
+            // Remove 'available' de todos
+            el.classList.remove('available');
+            
+            // Adiciona 'available' se for vizinho do atual
+            if (!n.visited) {
+                const isNeighbor = connections.some(c => c.from === currentNodeId && c.to === n.id);
+                if (isNeighbor) el.classList.add('available');
+            }
+        });
+
+        // Atualiza Linhas
+        connections.forEach(c => {
+            const line = document.getElementById(`line_${c.from}_${c.to}`);
+            if(c.active) {
+                line.setAttribute('stroke', '#ff0000');
+                line.setAttribute('stroke-width', '4');
+            }
+        });
+    }
+
+    // Zoom e Pan básico
+    function zoom(delta) {
+        currentScale += delta;
+        if (currentScale < 0.5) currentScale = 0.5;
+        document.getElementById('map_content').style.transform = `scale(${currentScale})`;
+    }
+
+    // Pan Dragging
+    const mapContainer = document.getElementById('map_container');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let startY;
+    let scrollTop;
+
+    mapContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - mapContainer.offsetLeft;
+        scrollLeft = mapContainer.scrollLeft;
+        startY = e.pageY - mapContainer.offsetTop;
+        scrollTop = mapContainer.scrollTop;
+    });
+    mapContainer.addEventListener('mouseleave', () => { isDown = false; });
+    mapContainer.addEventListener('mouseup', () => { isDown = false; });
+    mapContainer.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - mapContainer.offsetLeft;
+        const walkX = (x - startX) * 1.5; 
+        mapContainer.scrollLeft = scrollLeft - walkX;
+        const y = e.pageY - mapContainer.offsetTop;
+        const walkY = (y - startY) * 1.5;
+        mapContainer.scrollTop = scrollTop - walkY;
+    });
+
+    // Iniciar vazio ou gerar um padrão
+    generateMap();
+
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

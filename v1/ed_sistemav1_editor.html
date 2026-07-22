@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Grimório - RPG</title>
+    <style>
+        :root { --bg: #121212; --panel: #1e1e1e; --accent: #800000; --text: #fff; --border: #333; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 10px; }
+        .sidebar h2 { margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: #aaa; text-align: center; }
+        .page-list { flex-grow: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+        .page-item { padding: 10px; border-bottom: 1px solid #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .page-item:hover, .page-item.active { background: var(--accent); color: white; }
+        .btn-sidebar { background: #4caf50; border: none; color: white; width: 100%; padding: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .btn-del-page { background: transparent; border: none; color: #ff6666; cursor: pointer; font-weight: bold; }
+
+        /* MAIN EDITOR */
+        .editor-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .editor-container { width: 100%; max-width: 800px; }
+        
+        .page-title-input { width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: white; font-size: 32px; font-weight: bold; margin-bottom: 20px; outline: none; }
+        
+        /* BLOCKS */
+        .block-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+        .block { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; position: relative; animation: fadeIn 0.3s; }
+        .block-header { display: flex; justify-content: space-between; margin-bottom: 10px; color: #aaa; font-size: 12px; text-transform: uppercase; }
+        .block-controls { display: flex; gap: 5px; }
+        .btn-icon { background: #333; border: 1px solid #555; color: white; cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .btn-icon:hover { background: #555; }
+        .btn-del-block { background: #4a1414; border-color: #f44336; }
+
+        /* INPUTS */
+        textarea { width: 100%; background: #111; border: 1px solid #444; color: #ddd; padding: 10px; min-height: 100px; resize: vertical; border-radius: 4px; box-sizing: border-box; }
+        input[type="text"] { width: 100%; background: #111; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
+        .img-preview { max-width: 100%; max-height: 200px; display: block; margin-top: 10px; border: 1px solid #444; background: #000; }
+
+        /* TOOLBAR */
+        .toolbar { position: fixed; bottom: 20px; background: var(--panel); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent); box-shadow: 0 5px 20px rgba(0,0,0,0.5); display: flex; gap: 10px; }
+        .btn-tool { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        .btn-tool:hover { background: #555; }
+        .btn-save { background: #2e7d32; font-weight: bold; }
+        .btn-save:hover { background: #4caf50; }
+
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+    <div class="sidebar">
+        <h2>Páginas do Livro</h2>
+        <ul class="page-list" id="page_list"></ul>
+        <button class="btn-sidebar" onclick="createNewPage()">+ Nova Página</button>
+    </div>
+
+    <div class="editor-area">
+        <div class="editor-container" id="editor_interface" style="display:none;">
+            <input type="text" id="page_title" class="page-title-input" placeholder="Título da Página">
+            <input type="hidden" id="current_page_id">
+            
+            <div class="block-list" id="blocks_container"></div>
+
+            <div style="height: 80px;"></div> </div>
+        <div id="empty_state" style="margin-top:100px; color:#666;">Selecione ou crie uma página</div>
+    </div>
+
+    <div class="toolbar" id="toolbar" style="display:none;">
+        <button class="btn-tool" onclick="addBlock('text')">+ Texto</button>
+        <button class="btn-tool" onclick="addBlock('image')">+ Imagem</button>
+        <button class="btn-tool" onclick="addBlock('button')">+ Botão/Link</button>
+        <div style="width:1px; background:#555; margin:0 5px;"></div>
+        <button class="btn-tool btn-save" onclick="savePage()">💾 SALVAR PÁGINA</button>
+        <button class="btn-tool" style="background:#0d47a1" onclick="window.open('livro.html', '_blank')">👁️ Ver Livro</button>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update, push, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let globalPages = {};
+
+    // 1. Carregar Lista de Páginas
+    onValue(ref(db, 'livro_paginas'), (snap) => {
+        globalPages = snap.val() || {};
+        const list = document.getElementById('page_list');
+        list.innerHTML = "";
+        Object.keys(globalPages).forEach(key => {
+            const p = globalPages[key];
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            li.innerHTML = `<span>${p.title || 'Sem Título'}</span> <button class="btn-del-page" onclick="deletePage('${key}')">🗑️</button>`;
+            li.onclick = (e) => {
+                if(!e.target.classList.contains('btn-del-page')) loadEditor(key);
+            };
+            list.appendChild(li);
+        });
+    });
+
+    // 2. Editor Logic
+    window.createNewPage = () => {
+        const newRef = push(ref(db, 'livro_paginas'));
+        const id = newRef.key;
+        set(newRef, { title: "Nova Página", blocks: [] }).then(() => {
+            loadEditor(id);
+        });
+    };
+
+    window.loadEditor = (id) => {
+        const p = globalPages[id];
+        if(!p) return;
+        
+        document.getElementById('current_page_id').value = id;
+        document.getElementById('page_title').value = p.title;
+        document.getElementById('editor_interface').style.display = 'block';
+        document.getElementById('toolbar').style.display = 'flex';
+        document.getElementById('empty_state').style.display = 'none';
+
+        const container = document.getElementById('blocks_container');
+        container.innerHTML = "";
+        
+        if(p.blocks) {
+            p.blocks.forEach(block => renderBlockInput(block.type, block.content, block.extra));
+        }
+
+        // Highlight sidebar
+        document.querySelectorAll('.page-item').forEach(el => el.classList.remove('active'));
+    };
+
+    window.addBlock = (type) => { renderBlockInput(type, "", ""); };
+
+    function renderBlockInput(type, content, extra) {
+        const container = document.getElementById('blocks_container');
+        const div = document.createElement('div');
+        div.className = 'block';
+        div.dataset.type = type;
+        
+        let innerHTML = `<div class="block-header"><span>Bloco: ${type}</span><div class="block-controls"><button class="btn-icon btn-del-block" onclick="this.closest('.block').remove()">✖</button></div></div>`;
+        
+        if (type === 'text') {
+            innerHTML += `<textarea placeholder="Digite o texto aqui... (Aceita HTML simples como <b>, <i>)">${content || ''}</textarea>`;
+        } else if (type === 'image') {
+            innerHTML += `<input type="file" accept="image/*" onchange="previewImage(this)"><input type="hidden" class="img-data" value="${content || ''}"><img class="img-preview" src="${content || ''}">`;
+        } else if (type === 'button') {
+            innerHTML += `<label>Texto do Botão</label><input type="text" class="btn-text" value="${content || ''}" placeholder="Ir para..."><label style="margin-top:5px; display:block;">ID da Página de Destino (opcional)</label><input type="text" class="btn-link" value="${extra || ''}" placeholder="Cole o ID de outra página aqui">`;
+        }
+
+        div.innerHTML = innerHTML;
+        container.appendChild(div);
+    }
+
+    window.previewImage = (input) => {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const cvs = document.createElement('canvas');
+                const max = 800; // Limite maior para livro
+                let w = img.width, h = img.height;
+                if(w>h){ if(w>max){h*=max/w; w=max}} else {if(h>max){w*=max/h; h=max}}
+                cvs.width=w; cvs.height=h;
+                cvs.getContext('2d').drawImage(img,0,0,w,h);
+                const dataUrl = cvs.toDataURL('image/jpeg', 0.8);
+                input.parentElement.querySelector('.img-data').value = dataUrl;
+                input.parentElement.querySelector('.img-preview').src = dataUrl;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.savePage = () => {
+        const id = document.getElementById('current_page_id').value;
+        const title = document.getElementById('page_title').value;
+        const blocksDivs = document.querySelectorAll('#blocks_container .block');
+        const blocks = [];
+
+        blocksDivs.forEach(div => {
+            const type = div.dataset.type;
+            let content = "";
+            let extra = "";
+
+            if (type === 'text') content = div.querySelector('textarea').value;
+            else if (type === 'image') content = div.querySelector('.img-data').value;
+            else if (type === 'button') {
+                content = div.querySelector('.btn-text').value;
+                extra = div.querySelector('.btn-link').value;
+            }
+
+            blocks.push({ type, content, extra });
+        });
+
+        update(ref(db, 'livro_paginas/' + id), { title, blocks }).then(() => {
+            alert("Página Salva!");
+        });
+    };
+
+    window.deletePage = (id) => {
+        if(confirm("Tem certeza que deseja apagar esta página?")) {
+            remove(ref(db, 'livro_paginas/' + id));
+            document.getElementById('editor_interface').style.display = 'none';
+        }
+    };
+    
+    // Expor funções para global
+    window.previewImage = window.previewImage;
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

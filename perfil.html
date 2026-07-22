@@ -375,9 +375,9 @@
       display: block;
     }
   </style>
-  <script src="auth.js"></script>
+  <script src="configs/auth.js"></script>
 </head>
-<body data-require-auth="true" data-required-version="v3">
+<body data-require-auth="true">
 
   <!-- Sidebar Trigger -->
   <div class="sidebar-trigger" onclick="toggleSidebar()">☰</div>
@@ -395,9 +395,9 @@
       <li><a class="sidebar-link" href="index.html">🏠 Hub</a></li>
       <li><a class="sidebar-link active" href="perfil.html">👤 Perfil</a></li>
       <li><a class="sidebar-link" href="index.html?tab=fichas">🎭 Fichas</a></li>
-      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="v3/ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
       <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=users">👥 Gerenciar Usuários</a></li>
-      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav1_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="v1/ed_sistemav1_calendario.html">📅 Calendário</a></li>
       <li class="admin-only hidden"><a class="sidebar-link" href="index.html?tab=notifications">🔔 Notificações</a></li>
     </ul>
     <div class="sidebar-footer">
@@ -639,6 +639,6 @@
     window.onAuthStoreChanged = renderProfile;
     renderProfile();
   </script>
-  <script src="pwa.js" defer></script>
+  <script src="configs/pwa.js" defer></script>
 </body>
 </html>
