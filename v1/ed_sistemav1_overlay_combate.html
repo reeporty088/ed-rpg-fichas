@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay Combate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: 'Cinzel', serif; }
+        
+        /* --- POSICIONAMENTO UNIFICADO (TOPO CENTRAL) --- */
+        .overlay-element {
+            position: fixed;
+            top: 20px; /* Margem do topo para facilitar no OBS */
+            left: 0; 
+            width: 100%;
+            display: flex; 
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* --- ANIMAÇÃO DE INTRODUÇÃO --- */
+        #intro-container {
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 10; /* Fica na frente se colidir */
+        }
+        
+        .intro-text {
+            font-size: 80px; /* Reduzido de 120px */
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 10px; /* Reduzido de 15px */
+            text-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 4s ease-out;
+            margin: 0;
+        }
+
+        .mode-normal { color: #f5f5f5; text-shadow: 0 0 20px #800000; }
+        .mode-letal { color: #ff0000; text-shadow: 0 0 20px #8b0000, 0 0 40px black; border-bottom: 3px solid #ff0000; }
+
+        /* --- HUD DO TURNO ATUAL --- */
+        #turn-hud {
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 5;
+        }
+
+        .hud-name {
+            font-size: 50px; /* Reduzido de 60px */
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px #000;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+
+        .hud-divider {
+            width: 0%; /* Animação de largura */
+            height: 2px; /* Mais fino */
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            margin: 2px auto 5px auto; /* Margens ajustadas */
+            transition: width 1s ease-in-out;
+        }
+
+        .hud-info {
+            font-size: 18px; /* Reduzido de 24px */
+            color: #ddd;
+            font-weight: 400;
+            text-shadow: 1px 1px 3px #000;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .hud-info span { display: flex; align-items: center; gap: 5px; }
+
+        /* Classes de animação */
+        .show-intro { opacity: 1 !important; }
+        .zoom-text { transform: scale(1.05) !important; } /* Zoom mais suave */
+        .show-hud { opacity: 1 !important; }
+        .expand-line { width: 400px !important; max-width: 90%; } /* Largura fixa elegante */
+
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+    <div id="intro-container" class="overlay-element">
+        <div id="intro-text" class="intro-text">COMBATE</div>
+    </div>
+
+    <div id="turn-hud" class="overlay-element">
+        <div id="char-name" class="hud-name">PERSONAGEM</div>
+        <div class="hud-divider" id="divider"></div>
+        <div class="hud-info">
+            <span id="info-time">00:00</span>
+            <span>•</span>
+            <span id="info-weather">☀ Sol</span>
+            <span>•</span>
+            <span id="info-moon">Lua Cheia</span>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let lastTrigger = 0;
+    let worldData = {};
+
+    // Dados de Clima/Lua (Mesma lógica do mestre)
+    const SEASONS = ["Primavera", "Verão", "Outono", "Inverno"];
+    const WEATHER_TYPES = { "Primavera": ["Sol", "Nublado", "Nublado", "Chuva", "Tempestade"], "Verão": ["Sol Intenso", "Sol", "Nublado", "Tempestade", "Vendaval"], "Outono": ["Nublado", "Chuva", "Neblina", "Vento", "Seco"], "Inverno": ["Nublado", "Neve Fraca", "Neve Forte", "Vento Gelado", "Nevasca"] };
+    const WEATHER_ICONS = { "Sol": "☀", "Sol Intenso": "🔥", "Nublado": "☁", "Chuva": "🌧", "Tempestade": "⛈", "Neblina": "🌫", "Vento": "🌬", "Vento Gelado": "🌬", "Seco": "🍂", "Neve Fraca": "🌨", "Neve Forte": "❄", "Nevasca": "☃", "Vendaval": "🌪" };
+
+    // Sincroniza Tempo
+    onValue(ref(db, 'world_time'), (snap) => {
+        worldData = snap.val() || {};
+        updateHudInfo();
+    });
+
+    // Monitora Combate
+    onValue(ref(db, 'combate'), (snap) => {
+        const data = snap.val();
+        
+        // Se combate acabou ou foi apagado
+        if (!data) {
+            hideAll();
+            return;
+        }
+
+        // 1. Detectar Início (Animação)
+        if (data.started_at && data.started_at !== lastTrigger) {
+            lastTrigger = data.started_at;
+            playIntro(data.mode || 'normal');
+        }
+
+        // 2. Atualizar Turno Atual
+        if (data.participantes) {
+            const parts = Object.values(data.participantes);
+            const activeChar = parts.find(p => p.active === true);
+            
+            if (activeChar) {
+                // Pega só o primeiro nome
+                const firstName = activeChar.name.trim().split(' ')[0];
+                document.getElementById('char-name').innerText = firstName;
+                
+                // Se a intro já passou (opacity 0), garante que o HUD está visível
+                const intro = document.getElementById('intro-container');
+                if (getComputedStyle(intro).opacity == 0) {
+                    showHud();
+                }
+            }
+        }
+    });
+
+    function updateHudInfo() {
+        if(!worldData.day) return;
+        
+        // Hora
+        const h = worldData.hour.toString().padStart(2, '0');
+        const m = worldData.minute.toString().padStart(2, '0');
+        document.getElementById('info-time').innerText = `${h}:${m}`;
+
+        // Clima
+        const seasonName = SEASONS[worldData.season];
+        const options = WEATHER_TYPES[seasonName];
+        const seed = (worldData.season * 1000) + (worldData.day * 10) + worldData.period; 
+        const rand = Math.floor((Math.sin(seed) * 10000 - Math.floor(Math.sin(seed) * 10000)) * options.length);
+        const wName = options[rand];
+        const wIcon = WEATHER_ICONS[wName] || "";
+        document.getElementById('info-weather').innerHTML = `${wIcon} ${wName}`;
+
+        // Lua
+        const dayMod = worldData.day % 28;
+        let moonPhase = "Lua Nova";
+        if (dayMod >= 7 && dayMod < 13) moonPhase = "Lua Crescente";
+        else if (dayMod >= 13 && dayMod <= 16) moonPhase = "Lua Cheia";
+        else if (dayMod > 16 && dayMod <= 22) moonPhase = "Lua Minguante";
+        
+        let moonIcon = "🌑";
+        if(moonPhase === "Lua Crescente") moonIcon = "🌓";
+        if(moonPhase === "Lua Cheia") moonIcon = "🌕";
+        if(moonPhase === "Lua Minguante") moonIcon = "🌗";
+
+        document.getElementById('info-moon').innerText = `${moonIcon} ${moonPhase}`;
+    }
+
+    function playIntro(mode) {
+        // Esconde HUD
+        document.getElementById('turn-hud').classList.remove('show-hud');
+        document.getElementById('divider').classList.remove('expand-line');
+
+        // Prepara Texto
+        const introBox = document.getElementById('intro-container');
+        const introTxt = document.getElementById('intro-text');
+        
+        introTxt.innerText = mode === 'letal' ? "COMBATE LETAL" : "COMBATE";
+        introTxt.className = `intro-text mode-${mode}`;
+
+        // Animação
+        introBox.classList.add('show-intro');
+        
+        setTimeout(() => {
+            introTxt.classList.add('zoom-text');
+        }, 100);
+
+        // Termina Intro e Mostra HUD
+        setTimeout(() => {
+            introBox.classList.remove('show-intro');
+            introTxt.classList.remove('zoom-text');
+            setTimeout(showHud, 1000); // Espera o texto sumir para mostrar o HUD
+        }, 3500);
+    }
+
+    function showHud() {
+        document.getElementById('turn-hud').classList.add('show-hud');
+        setTimeout(() => {
+            document.getElementById('divider').classList.add('expand-line');
+        }, 300);
+    }
+
+    function hideAll() {
+        document.getElementById('intro-container').classList.remove('show-intro');
+        document.getElementById('turn-hud').classList.remove('show-hud');
+        document.getElementById('divider').classList.remove('expand-line');
+    }
+
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha V2 - Escória de Deus</title>
+    <style>
+        :root { 
+            --bg: #111111; 
+            --text: #ffffff;
+            --theme-main: #800000;
+            --theme-card: #2a0b10;
+            --theme-border: #5a1a1f;
+            --theme-input: #1a0508;
+            --theme-light: #ffaaaa;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; padding-bottom: 80px; transition: 0.5s; }
+        .hub-back-btn { position: fixed; top: 12px; left: 12px; z-index: 2500; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--theme-border); background: rgba(0,0,0,0.55); color: var(--theme-light); text-decoration: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; transition: 0.2s; }
+        .hub-back-btn:hover { border-color: var(--theme-light); color: #fff; }
+        .container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1400px; width: 100%; }
+        .col { display: flex; flex-direction: column; gap: 15px; }
+        
+        /* --- EFEITOS NEON DAS LINHAGENS --- */
+        body.forma-demon { --theme-main: #110000; --theme-light: #ff0000; --theme-card: #050000; --theme-border: #660000; }
+        body.forma-demon .attr-box input, body.forma-demon #char_name { color: #ff0000 !important; text-shadow: 0 0 10px #ff0000; }
+        body.forma-demon .attr-box { box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); border-color: #ff0000; }
+        body.forma-demon .avatar-circle { box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); border-color: #ff0000; }
+
+        body.forma-beast { --theme-main: #001100; --theme-light: #00ff00; --theme-card: #000500; --theme-border: #006600; }
+        body.forma-beast .attr-box input, body.forma-beast #char_name { color: #00ff00 !important; text-shadow: 0 0 10px #00ff00; }
+        body.forma-beast .attr-box { box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); border-color: #00ff00; }
+        body.forma-beast .avatar-circle { box-shadow: 0 0 30px rgba(0, 255, 0, 0.6); border-color: #00ff00; }
+
+        body.forma-sacra { --theme-main: #00111a; --theme-light: #00e5ff; --theme-card: #00050a; --theme-border: #005566; }
+        body.forma-sacra .attr-box input, body.forma-sacra #char_name { color: #00e5ff !important; text-shadow: 0 0 10px #00e5ff; }
+        body.forma-sacra .attr-box { box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); border-color: #00e5ff; }
+        body.forma-sacra .avatar-circle { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6); border-color: #00e5ff; }
+
+        /* Botões de Transformação */
+        .btn-forma { background: rgba(0,0,0,0.5); border: 1px solid var(--theme-light); color: var(--theme-light); padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 11px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .btn-forma:hover { background: rgba(255,255,255,0.1); }
+        .btn-forma.active { background: var(--theme-light); color: #000 !important; box-shadow: 0 0 15px var(--theme-light); text-shadow: none !important; border-color: white; }
+
+        .card { background: var(--theme-card); border-radius: 12px; padding: 15px; border: 1px solid var(--theme-border); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; }
+        .header-label { background: var(--theme-main); text-align: center; border-radius: 20px; padding: 5px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 10px; border: 1px solid var(--theme-light); transition: 0.3s; }
+        
+        input, textarea, select { background: var(--theme-input); border: 1px solid #555; color: white; padding: 8px; border-radius: 20px; width: 100%; box-sizing: border-box; margin-bottom: 5px; font-family: inherit;}
+        input[readonly] { background: rgba(0,0,0,0.3); color: #aaa; border: 1px dashed #444; cursor: not-allowed; }
+        
+        label { font-size: 10px; color: var(--theme-light); font-weight: bold; margin-left: 10px; text-transform: uppercase; display: block; }
+        
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; margin-top: 10px; }
+        .section-header label { margin: 0; }
+
+        .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; position: relative; }
+        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--theme-main); background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; background-position: center; position: relative; transition: 0.3s; }
+        .avatar-circle::after { content: "🖼️"; font-size: 22px; background: rgba(0,0,0,0.65); border: 1px solid var(--theme-light); border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; }
+        .avatar-circle:hover::after { opacity: 1; }
+        
+        .top-btn { position: absolute; background: #111; border: 2px solid #555; color: #555; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 20; transition: 0.3s; }
+        .top-btn:hover { border-color: white; color: white; }
+        #theme-btn { top: 0; right: 20px; font-size: 16px; border-color: var(--theme-light); color: var(--theme-light); }
+
+        .color-picker { display: none; position: absolute; top: 40px; right: 0; background: #222; border: 1px solid #555; padding: 10px; border-radius: 10px; grid-template-columns: repeat(4, 1fr); gap: 8px; z-index: 30; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .color-picker.open { display: grid; }
+        .color-swatch { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .color-swatch:hover { transform: scale(1.2); border-color: white; }
+
+        /* BARRAS DE STATUS */
+        .bar-container { margin-bottom: 12px; }
+        .bar-label { margin-left: 5px; margin-bottom: 3px; color: var(--theme-light); font-size: 11px; font-weight: bold; text-transform: uppercase; display: block; }
+        .bar-controls { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); border-radius: 25px; padding: 4px 8px; }
+        .btn-math { background: transparent; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; width: 30px; z-index: 10; }
+        .bar-bg { flex-grow: 1; height: 28px; background: #1a1a1a; border-radius: 15px; position: relative; overflow: hidden; border: 1px solid #444; display: flex; align-items: center; }
+        .bar-fill { position: absolute; left: 0; top: 0; height: 100%; transition: width 0.3s ease; z-index: 1; width: 100%; }
+        .hp-fill { background: #d32f2f; } 
+        .stress-fill { background: #7b1fa2; } 
+        .hope-fill { background: #fbc02d; }
+        .asc-fill { background: #111; border-right: 2px solid #00e5ff; box-shadow: inset 0 0 10px #00e5ff; }
+        
+        .bar-values { position: relative; z-index: 5; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .bar-values input { pointer-events: auto; width: 45px; background: transparent; border: none; text-align: center; font-size: 14px; font-weight: bold; color: white; text-shadow: 1px 1px 2px #000; margin: 0; padding: 0; }
+        
+        /* ATRIBUTOS */
+        .attr-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
+        .attr-box { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-border); border-radius: 12px; padding: 10px 2px; text-align: center; transition: 0.5s; }
+        .attr-box input { font-size: 32px; font-weight: bold; text-align: center; border: none; background: transparent; color: white; margin: 0; padding: 0; transition: 0.3s; }
+        .attr-box div { font-size: 12px; font-weight: bold; color: var(--theme-light); letter-spacing: 1px; }
+
+        /* DEFESA, ARMADURA E LIMIARES */
+        .defense-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid var(--theme-border); margin-bottom: 15px; }
+        .evasao-display { text-align: center; border-right: 1px solid #555; padding-right: 15px; }
+        .evasao-val { font-size: 28px; font-weight: bold; color: #4fc3f7; line-height: 1; }
+        .armor-section { flex-grow: 1; padding-left: 15px; display: flex; flex-direction: column; align-items: center; }
+        .armor-slots { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; justify-content: center; }
+        
+        .armor-slot { width: 22px; height: 22px; border: 2px solid #aaa; border-radius: 4px; background: #222; cursor: pointer; transition: 0.2s; }
+        .armor-slot.used { background: #ff4444; border-color: #ff0000; box-shadow: inset 0 0 5px #000; }
+        .armor-slot.temp { border-color: #ffd700; background: rgba(255, 215, 0, 0.1); }
+        .armor-slot.temp:hover { box-shadow: 0 0 8px #ffd700; }
+
+        .armor-controls { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+        .btn-armor-ctrl { background: #222; border: 1px solid #555; color: white; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.2s; }
+        .btn-armor-ctrl:hover { background: #444; border-color: white; }
+        .btn-armor-temp { border-color: #ffd700; color: #ffd700; }
+        .btn-armor-temp:hover { background: rgba(255, 215, 0, 0.2); }
+
+        .threshold-container { display: flex; gap: 5px; text-align: center; margin-bottom: 15px; }
+        .thresh-box { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px; }
+        .thresh-box div:first-child { font-size: 9px; font-weight: bold; letter-spacing: 1px; }
+        .thresh-val { font-size: 18px; font-weight: bold; }
+
+        /* HABILIDADES & CARTAS */
+        .hab-item { background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+        .hab-header { display: flex; align-items: center; padding: 8px; gap: 5px; }
+        .hab-title { flex-grow: 1; font-weight: bold; border-radius: 10px !important; margin: 0 !important; font-size: 13px; }
+        .hab-dice { width: 70px !important; text-align: center; border-radius: 10px !important; margin: 0 !important; font-size: 12px; }
+        .hab-toggle { cursor: pointer; color: var(--theme-light); font-size: 12px; padding: 0 5px; }
+        .hab-body { padding: 8px; display: none; border-top: 1px solid var(--theme-border); }
+        .hab-body.open { display: block; }
+        .hab-body textarea { min-height: 80px; resize: vertical; line-height: 1.4; font-size: 13px; }
+        
+        .btn-add { background: #22aa22; color: white; border: none; border-radius: 5px; padding: 2px 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .btn-add:hover { background: #2ebd2e; }
+        .btn-del { color: #ff4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-move-card { background: transparent; border: 1px solid var(--theme-border); color: var(--theme-light); cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-move-card:hover { border-color: var(--theme-light); background: rgba(255,255,255,0.08); }
+
+        /* CARTÕES DE EQUIPAMENTO NA FICHA (Bonitinhos) */
+        .equip-ficha-card { background: linear-gradient(145deg, #1a0508 0%, #0d0204 100%); border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 12px; padding: 12px; border-left: 4px solid #cc4444; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .equip-ficha-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .equip-ficha-title { font-size: 16px; font-weight: bold; background: transparent; border: none; border-bottom: 1px dashed #555; color: var(--theme-light); width: 85%; margin: 0; padding: 2px; }
+        .equip-ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .equip-ficha-grid label { font-size: 9px; margin-bottom: 2px; color: #aaa; margin-left: 2px; }
+        .equip-ficha-input { background: rgba(0,0,0,0.4); border: 1px solid #444; color: white; border-radius: 6px; padding: 6px; font-size: 12px; width: 100%; box-sizing: border-box; margin:0; }
+        .equip-ficha-desc { background: rgba(0,0,0,0.3); border: 1px dashed #555; color: #ccc; padding: 8px; border-radius: 6px; font-size: 12px; min-height: 50px; resize: vertical; width: 100%; box-sizing: border-box; margin:0; }
+
+        .xp-container { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 10px; border: 1px solid var(--theme-border); margin-bottom: 10px; }
+        .xp-display { text-align: center; }
+        .xp-number { font-size: 28px; font-weight: bold; color: #ffd700; display: block; line-height: 1; }
+        .btn-xp { background: var(--theme-main); border: 1px solid var(--theme-light); color: white; font-size: 10px; padding: 5px 10px; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        .ascensao-cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        .asc-card { background: linear-gradient(145deg, #130a15 0%, #08060f 100%); border: 1px solid #3a2b53; border-left: 4px solid #8b5cf6; border-radius: 12px; padding: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.35); }
+        .asc-card-title { color: #d8b4fe; font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .asc-card-meta { font-size: 10px; color: #c4b5fd; text-transform: uppercase; margin-bottom: 8px; }
+        .asc-card-desc { font-size: 12px; color: #ddd; line-height: 1.35; white-space: pre-wrap; }
+        .asc-muted { color: #999; font-size: 12px; margin-top: 8px; text-align: center; }
+        .dadiva-controls { display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 6px; }
+        .btn-dadiva { border: 1px solid #555; background: #1b1b1b; color: #ddd; border-radius: 16px; padding: 6px 10px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .btn-dadiva.active { color: #111; box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+        .dadiva-card { background: linear-gradient(145deg, #121212 0%, #090909 100%); border: 1px solid #3f3f3f; border-left: 4px solid #666; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+        .dadiva-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+        .dadiva-subtitle { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 6px; }
+        .dadiva-desc { font-size: 11px; color: #ccc; white-space: pre-wrap; line-height: 1.35; }
+        .asc-choice-card { background: rgba(0,0,0,0.4); border: 1px solid #4b5563; border-radius: 10px; padding: 12px; cursor: pointer; transition: 0.2s; }
+        .asc-choice-card:hover { border-color: #c4b5fd; transform: translateY(-1px); }
+        .asc-choice-card.selected { border-color: #8b5cf6; box-shadow: 0 0 0 1px #8b5cf6 inset, 0 0 10px rgba(139, 92, 246, 0.35); }
+        .asc-choice-title { color: #e9d5ff; font-weight: bold; margin-bottom: 5px; }
+        .asc-choice-tag { display: inline-block; font-size: 10px; background: #312e81; color: #e0e7ff; border-radius: 4px; padding: 2px 6px; margin-bottom: 8px; }
+        .asc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+        .btn-disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ROLAGEM DE DUALIDADE */
+        .duality-card { margin-bottom: 15px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.35); border: 1px solid var(--theme-border); }
+        .duality-title { text-align: center; color: var(--theme-light); text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--theme-border); }
+        .duality-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .duality-row label { margin: 0; font-size: 10px; }
+        .duality-row select, .duality-row input { margin-bottom: 0; border-radius: 8px; }
+        .duality-bonus { width: 58px; text-align: center; }
+        .duality-dice-area { border: 1px solid var(--theme-border); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.25); margin-bottom: 10px; text-align: center; }
+        .duality-dice-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 8px 0; }
+        .duality-mode-btn { min-width: 72px; height: 34px; border-radius: 8px; border: 1px solid var(--theme-border); background: rgba(0,0,0,0.5); color: var(--theme-light); font-size: 10px; font-weight: bold; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+        .duality-mode-btn:hover { border-color: var(--theme-light); }
+        .duality-mode-btn.active { background: var(--theme-main); border-color: var(--theme-light); box-shadow: 0 0 10px rgba(255,255,255,0.12); }
+        .duality-mode-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+        .duality-die { width: 74px; height: 74px; border-radius: 12px; border: 2px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+        .duality-die.hope { border-color: #6cbfff; }
+        .duality-die.fear { border-color: #ff6868; }
+        .duality-die.winner { transform: scale(1.06); box-shadow: 0 0 14px rgba(255,255,255,0.2); }
+        .duality-val { font-size: 40px; font-weight: bold; line-height: 1; }
+        .duality-die.hope .duality-val { color: #8fd1ff; }
+        .duality-die.fear .duality-val { color: #ff7f7f; }
+        .duality-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .duality-die.hope .duality-tag { color: #6cbfff; }
+        .duality-die.fear .duality-tag { color: #ff6868; }
+        .duality-extra { min-height: 12px; margin-top: 2px; font-size: 9px; color: #cfcfcf; }
+        .duality-roll-text { color: #ddd; font-size: 12px; margin-top: 6px; }
+        .duality-cut-text { color: #a8a8a8; font-size: 11px; min-height: 15px; margin-top: 3px; }
+        .duality-outcome { font-size: 13px; font-weight: bold; margin-top: 3px; min-height: 18px; }
+        .duality-outcome.hope { color: #8fd1ff; }
+        .duality-outcome.fear { color: #ff7f7f; }
+        .duality-outcome.crit { color: #ffd580; }
+        .duality-roll-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--theme-light); background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.05)); color: var(--theme-light); font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+        .duality-roll-btn:hover { background: rgba(255,255,255,0.12); }
+
+        /* MODAIS E NAVEGAÇÃO MOBILE */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-overlay.open { display: flex; }
+        .modal-choice { background: var(--theme-card); padding: 20px; border-radius: 15px; border: 2px solid var(--theme-main); width: 300px; text-align: center; }
+        .btn-choice { width: 100%; padding: 15px; margin: 8px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--theme-light); color: white; cursor: pointer; border-radius: 8px; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        .btn-choice:hover { background: rgba(255,255,255,0.1); }
+        .image-modal-content { width: 95%; max-width: 520px; background: var(--theme-card); border: 2px solid var(--theme-main); border-radius: 14px; padding: 18px; box-sizing: border-box; }
+        .image-upload-grid { display: grid; gap: 10px; }
+        .image-upload-item { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; border: 1px solid #444; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 8px; }
+        .image-preview { width: 64px; height: 64px; border-radius: 8px; background: #1a1a1a; border: 1px solid #555; background-size: cover; background-position: center; }
+        .image-upload-item h4 { margin: 0; font-size: 12px; color: var(--theme-light); text-transform: uppercase; }
+        .image-upload-item p { margin: 2px 0 0; font-size: 10px; color: #bbb; }
+        .btn-img-upload, .btn-img-clear { border: 1px solid #666; background: #222; color: #fff; border-radius: 8px; cursor: pointer; padding: 7px 10px; font-size: 11px; text-transform: uppercase; font-weight: bold; }
+        .btn-img-upload:hover { border-color: var(--theme-light); }
+        .btn-img-clear { border-color: #b33; color: #ff9d9d; }
+        .btn-img-clear:hover { background: rgba(255,0,0,0.12); }
+
+        /* --- ESTILOS DO NOVO MODAL DE COMPÊNDIO E DISCENTE --- */
+        .db-modal-container { width: 95%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; background: var(--theme-card); padding: 20px; border-radius: 15px; border: 2px solid var(--theme-main); }
+        .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; overflow-y: auto; padding-right: 5px; flex-grow: 1; text-align: left; }
+        
+        .skill-card { background: linear-gradient(145deg, #1a0508 0%, #0d0204 100%); border: 1px solid var(--theme-border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .skill-card:hover { border-color: var(--theme-light); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(255,170,170,0.2); }
+        .skill-card.selected-raca { border-color: #ffaaaa; box-shadow: 0 0 15px rgba(255, 170, 170, 0.4); border-width: 2px; }
+        
+        .card-badges { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+        .badge-domain { background: var(--theme-main); color: white; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--theme-light); }
+        .badge-level { background: #d4a017; color: black; padding: 2px 6px; border-radius: 4px; }
+        .card-title { font-size: 16px; font-weight: bold; color: var(--theme-light); margin-bottom: 6px; border-bottom: 1px solid #444; padding-bottom: 4px; }
+        .card-meta { font-size: 10px; color: #aaa; margin-bottom: 8px; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; }
+        .card-meta strong { color: #ddd; }
+        .card-desc { font-size: 12px; color: #ccc; line-height: 1.4; white-space: pre-wrap; margin-bottom: 5px; }
+
+        .passiva-card { background: rgba(0,0,0,0.6); border: 1px solid #444; border-radius: 8px; padding: 12px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
+        .passiva-card:hover { border-color: var(--theme-light); background: rgba(255,255,255,0.05); }
+        .passiva-title { font-size: 14px; font-weight: bold; color: white; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+        .passiva-desc { font-size: 11px; color: #bbb; white-space: pre-wrap; line-height: 1.4; }
+
+        /* Estilos do Painel Discente Habilidades */
+        .discente-section { background: rgba(0,0,0,0.4); border: 1px solid #444; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .discente-hab-box { background: rgba(0,0,0,0.6); border: 1px solid #555; padding: 10px; border-radius: 8px; margin-top: 8px; cursor: pointer; transition: 0.2s; }
+        .discente-hab-box:hover { border-color: #88ccff; }
+        .discente-hab-box.selected { border-color: #55ff55; background: rgba(0, 255, 0, 0.1); box-shadow: 0 0 10px rgba(0,255,0,0.2); }
+        .discente-hab-title { font-size: 13px; font-weight: bold; color: var(--theme-light); margin-bottom: 4px; }
+        .discente-hab-desc { font-size: 11px; color: #bbb; }
+
+        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; padding: 10px 20px; box-sizing: border-box; justify-content: space-between; align-items: center; border-top: 2px solid var(--theme-border); z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.8); }
+        .mobile-nav button { background: var(--theme-main); color: white; border: 1px solid var(--theme-light); border-radius: 8px; padding: 10px 20px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .mobile-nav span { color: var(--theme-light); font-weight: bold; font-size: 14px; }
+
+        @media (max-width: 768px) { 
+            .container { display: block; } 
+            .col { display: none; width: 100%; } 
+            .col.active { display: flex; } 
+            .mobile-nav { display: flex; }
+        }
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v2">
+<a class="hub-back-btn" href="../index.html">← Hub</a>
+
+<div class="container">
+    <div class="col active" id="col-0">
+        <div class="card">
+            <div class="header-label">Personagem</div>
+            <div class="avatar-container">
+                <div class="avatar-circle" id="avatar_display" onclick="openImagePanel()"></div>
+                <button class="top-btn" id="theme-btn" onclick="toggleColorPicker()">🎨</button>
+                <div id="colorPicker" class="color-picker"></div>
+                
+                <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-size:20px; font-weight:bold; margin-top:10px; color:white;" placeholder="NOME DO PERSONAGEM">
+                
+                <div id="linhagem_btn_container" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:5px;"></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <div><label>NÍVEL</label><input type="number" id="nivel" value="1" min="1" max="10"></div>
+                <div><label>FLORINS</label><input type="text" id="florins" value="0"></div>
+            </div>
+
+            <div class="section-header" style="margin-top: 15px;">
+                <label>CLASSE</label>
+                <button class="btn-armor-ctrl" onclick="openDirectDB('classe_hab')" style="background: var(--theme-main); border-color: var(--theme-light);">📚 Escolher Classe</button>
+            </div>
+            <input type="text" id="classe" placeholder="Selecione no botão acima..." readonly style="cursor: pointer;" onclick="openDirectDB('classe_hab')">
+
+            <div class="section-header" style="margin-top: 10px;">
+                <label>ANCESTRALIDADE / RAÇA</label>
+                <button class="btn-armor-ctrl" onclick="openDirectDB('raca_hab')" style="background: var(--theme-main); border-color: var(--theme-light);">📚 Escolher Raça</button>
+            </div>
+            <input type="text" id="ancestralidade" placeholder="Selecione no botão acima..." readonly style="cursor: pointer;" onclick="openDirectDB('raca_hab')">
+
+            <div class="header-label" style="margin-top:15px;">Atributos Básicos</div>
+            <div class="attr-container">
+                <div class="attr-box"><input type="number" id="poder" value="0" min="0" max="5"><div>PODER</div></div>
+                <div class="attr-box"><input type="number" id="habilidade" value="0" min="0" max="5"><div>HABILIDADE</div></div>
+                <div class="attr-box"><input type="number" id="resistencia" value="0" min="0" max="5"><div>RESISTÊNCIA</div></div>
+            </div>
+
+            <div class="header-label">Status Vital</div>
+            
+            <div class="bar-container">
+                <label class="bar-label">PONTOS DE VIDA (Base: 5 + Res)</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('hp', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_hp" class="bar-fill hp-fill"></div>
+                    <div class="bar-values"><input type="number" id="hp_at" value="5"> / <input type="number" id="hp_max" value="5"></div></div>
+                    <button class="btn-math" onclick="changeVal('hp', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="bar-container">
+                <label class="bar-label">ESTRESSE (Dano Mental / Magia)</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('stress', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_stress" class="bar-fill stress-fill"></div>
+                    <div class="bar-values"><input type="number" id="stress_at" value="0"> / <input type="number" id="stress_max" value="5"></div></div>
+                    <button class="btn-math" onclick="changeVal('stress', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="bar-container">
+                <label class="bar-label">ESPERANÇA (Moeda Narrativa)</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('hope', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_hope" class="bar-fill hope-fill"></div>
+                    <div class="bar-values"><input type="number" id="hope_at" value="0"> / <input type="number" id="hope_max" value="5"></div></div>
+                    <button class="btn-math" onclick="changeVal('hope', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="bar-container" id="asc_container" style="display:none;">
+                <label class="bar-label" style="color:#00e5ff;">PONTOS DE ASCENSÃO (PA)</label>
+                <div class="bar-controls">
+                    <button class="btn-math" onclick="changeVal('asc', -1)">-</button>
+                    <div class="bar-bg"><div id="bar_asc" class="bar-fill asc-fill"></div>
+                    <div class="bar-values"><input type="number" id="asc_at" value="0"> / <input type="number" id="asc_max" value="10" readonly></div></div>
+                    <button class="btn-math" onclick="changeVal('asc', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="defense-box">
+                <div class="evasao-display">
+                    <label style="margin:0 0 5px 0; text-align:center;">EVASÃO</label>
+                    <div class="evasao-val" id="evasao_val">8</div>
+                </div>
+                <div class="armor-section">
+                    <label style="margin:0;">SLOTS DE ARMADURA</label>
+                    <div class="armor-slots" id="armor_slots_container"></div>
+                    <div class="armor-controls">
+                        <button class="btn-armor-ctrl" onclick="addArmorSlot(-1)">Remover Slot</button>
+                        <button class="btn-armor-ctrl" onclick="addArmorSlot(1)">Add Slot</button>
+                        <button class="btn-armor-ctrl btn-armor-temp" onclick="addArmorTemp()">Add Temporário</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-label" style="margin-top:5px; background: rgba(0,0,0,0.5); border-color: #555; color: #ccc;">Limiares de Dano</div>
+            <div class="threshold-container">
+                <div class="thresh-box" style="border-color: #aaaaaa;">
+                    <div style="color: #aaaaaa;">LEVE (-1 PV)</div>
+                    <div class="thresh-val" id="limiar_leve" style="color: white;">1</div>
+                </div>
+                <div class="thresh-box" style="border-color: #ffaa00;">
+                    <div style="color: #ffaa00;">GRAVE (-2 PV)</div>
+                    <div class="thresh-val" id="limiar_grave" style="color: #ffaa00;">5</div>
+                </div>
+                <div class="thresh-box" style="border-color: #ff4444;">
+                    <div style="color: #ff4444;">MASSIVO (-3 PV)</div>
+                    <div class="thresh-val" id="limiar_massivo" style="color: #ff4444;">10</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col" id="col-1">
+        <div class="card">
+            <div class="header-label">O Arsenal</div>
+            
+            <div class="section-header">
+                <label>Vantagens Passivas</label>
+                <button class="btn-add" onclick="openAddMenu('passivas')">+ Add</button>
+            </div>
+            <div id="list_passivas" style="margin-bottom: 15px;"></div>
+            
+            <div class="header-label" style="background:#550000; border-color:#ff5555;">Loadout (Equipadas - Max 5)</div>
+            <div id="list_loadout" style="margin-top:5px; margin-bottom: 15px;"></div>
+            <button class="btn-add" onclick="openAddMenu('loadout')" style="width:100%; border-radius:8px; margin-bottom:15px; background:#880000; padding: 10px;">+ Equipar Carta de Domínio</button>
+
+            <div class="header-label" style="background:#222; border-color:#555; color:#aaa;">O Cofre (Cartas Guardadas)</div>
+            <div id="list_cofre" style="margin-top:5px;"></div>
+            <button class="btn-add" onclick="openAddMenu('cofre')" style="width:100%; border-radius:8px; margin-top:10px; margin-bottom: 20px; background:#444; padding: 10px;">+ Guardar Carta no Cofre</button>
+
+            <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+
+            <div class="section-header">
+                <label style="color: #aaa;">Habilidades de Classe</label>
+            </div>
+            <div id="list_classe_hab" style="margin-bottom: 15px;"></div>
+
+            <div class="section-header">
+                <label style="color: #aaa;">Habilidades de Raça / Ancestralidade</label>
+            </div>
+            <div id="list_raca_hab" style="margin-bottom: 15px;"></div>
+
+        </div>
+    </div>
+
+    <div class="col" id="col-2">
+        <div class="card">
+            <div class="header-label">Armas e Equipamentos</div>
+
+            <div class="duality-card">
+                <div class="duality-title">Rolar Dados de Dualidade</div>
+                <div class="duality-row">
+                    <label for="duality_attr">Traço</label>
+                    <select id="duality_attr">
+                        <option value="poder">Poder</option>
+                        <option value="habilidade">Habilidade</option>
+                        <option value="resistencia">Resistência</option>
+                    </select>
+                    <label for="duality_bonus">Bônus</label>
+                    <input type="number" id="duality_bonus" class="duality-bonus" value="0">
+                </div>
+
+                <div class="duality-dice-area">
+                    <div class="duality-dice-row">
+                        <button class="duality-mode-btn" id="duality_btn_perda" onclick="setDualityMode('perda')" title="Adiciona 1 dado vermelho">Perda</button>
+                        <div class="duality-die fear" id="duality_fear_die">
+                            <span class="duality-val" id="duality_fear_val">—</span>
+                            <span class="duality-tag">Medo</span>
+                            <span class="duality-extra" id="duality_fear_extra"></span>
+                        </div>
+                        <div class="duality-die hope" id="duality_hope_die">
+                            <span class="duality-val" id="duality_hope_val">—</span>
+                            <span class="duality-tag">Esperança</span>
+                            <span class="duality-extra" id="duality_hope_extra"></span>
+                        </div>
+                        <button class="duality-mode-btn" id="duality_btn_ganho" onclick="setDualityMode('ganho')" title="Adiciona 1 dado azul">Ganho</button>
+                    </div>
+                    <div class="duality-roll-text" id="duality_roll_text"></div>
+                    <div class="duality-cut-text" id="duality_cut_text"></div>
+                    <div class="duality-outcome" id="duality_outcome"></div>
+                </div>
+
+                <button class="duality-roll-btn" onclick="rollDualityV2()">⬡ Rolar D12 + D12</button>
+            </div>
+            
+            <div class="section-header">
+                <label>Arsenal de Equipamentos</label>
+                <button class="btn-add" onclick="openAddMenu('armas')">+ Add</button>
+            </div>
+            <div id="list_armas" style="margin-bottom:15px;"></div>
+
+            <div class="section-header">
+                <label>Inventário Geral</label>
+                <button class="btn-add" onclick="openAddMenu('inventario')">+ Add</button>
+            </div>
+            <div id="list_inventario" style="margin-bottom:15px;"></div>
+            
+            <div id="xp_section" style="display:none;">
+                <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+                <div class="header-label">EVOLUÇÃO DA ASCENSÃO</div>
+                <div class="xp-container">
+                    <div class="xp-display">
+                        <span class="xp-label" style="font-size:10px; color:#aaa; display:block;">PONTOS DE DESPERTAR / XP</span>
+                        <span id="display_xp_total" class="xp-number">0</span>
+                    </div>
+                    <div>
+                        <button class="btn-xp" onclick="openAscensaoModal()" style="font-size:12px; padding:8px 16px;">Evoluir</button>
+                    </div>
+                </div>
+                <div id="ascensao_cards" class="ascensao-cards-grid"></div>
+            </div>
+
+            <div id="dadivas_section" style="display:none;">
+                <hr style="border:0; border-top:1px solid #5a1a1f; margin: 20px 0;">
+                <div class="header-label" style="background:#3f2a00; border-color:#c0892f;">MALDIÇÕES & DÁDIVAS</div>
+                <div class="dadiva-controls" id="dadiva_buttons"></div>
+                <div id="dadivas_cards"></div>
+            </div>
+            
+            <div class="header-label" style="margin-top:20px;">Anotações Rápidas</div>
+            <textarea id="anotacoes" style="min-height: 250px; border-radius: 10px; resize: vertical;" placeholder="Use este espaço para ferimentos persistentes, missões ou lore..."></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="mobile-nav">
+    <button onclick="changeCol(-1)">◀ Voltar</button>
+    <span id="mobile-page-indicator">1 / 3</span>
+    <button onclick="changeCol(1)">Avançar ▶</button>
+</div>
+
+<div class="modal-overlay" id="modal-choice" onclick="closeModal('modal-choice')">
+    <div class="modal-choice" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; color:var(--theme-light);">ADICIONAR ITEM</h3>
+        <button class="btn-choice" id="btn-db-add" onclick="openDBModal()" style="background:#800000; border-color:#ffaaaa; color:white;">📚 Escolher do Compêndio</button>
+        <button class="btn-choice" onclick="createManual()">✏️ Criar Manualmente</button>
+        <button class="btn-choice" style="background:#444;" onclick="closeModal('modal-choice')">Cancelar</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-db-list" onclick="closeModal('modal-db-list')">
+    <div class="db-modal-container" onclick="event.stopPropagation()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="margin:0; color:var(--theme-light);">COMPÊNDIO</h3>
+            <button style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeModal('modal-db-list')">✖</button>
+        </div>
+        
+        <div id="discente-controls" style="display:none; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--theme-light); border-radius: 8px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; color: white;">
+                <input type="checkbox" id="chk-discente" onchange="toggleDiscenteMode(this.checked)" style="width: auto;">
+                MODO DISCENTE (Sangue Misto - Selecione 2 a 3 Raças)
+            </label>
+            <div id="discente-actions" style="display:none; margin-top: 10px; text-align: right;">
+                <span id="discente-counter" style="margin-right: 15px; color: #ffaaaa; font-weight: bold;">0 selecionadas</span>
+                <button class="btn-add" onclick="goToDiscenteStep2()" id="btn-discente-next" disabled style="display:inline-block;">Avançar para Habilidades ▶</button>
+            </div>
+        </div>
+
+        <input type="text" id="db-search" placeholder="🔍 Buscar por nome, descrição ou categoria..." onkeyup="renderDBList(this.value)" style="margin-bottom: 15px; font-size: 14px; padding: 12px; border-radius: 8px;">
+        
+        <div id="db-list-content" class="db-grid"></div>
+
+        <div id="discente-step2-container" style="display:none; flex-direction:column; gap:15px; overflow-y:auto; flex-grow:1; padding-right:5px;"></div>
+        
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-ascensao" onclick="closeModal('modal-ascensao')">
+    <div class="db-modal-container" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:10px; margin-bottom:15px;">
+            <h3 style="margin:0; color:#d8b4fe;">EVOLUÇÃO DA ASCENSÃO</h3>
+            <button style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeModal('modal-ascensao')">✖</button>
+        </div>
+        <div id="ascensao_requirements" style="font-size:12px; margin-bottom:10px; color:#ccc;"></div>
+        <div id="ascensao_modal_list" class="db-grid"></div>
+        <div class="asc-modal-actions">
+            <button class="btn-choice" style="width:auto; padding:10px 16px; margin:0; background:#444; border-color:#777;" onclick="closeModal('modal-ascensao')">Fechar</button>
+            <button class="btn-choice" id="btn_confirm_ascensao" style="width:auto; padding:10px 16px; margin:0;" onclick="confirmAscensaoChoice()">Confirmar Evolução</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-image-panel" onclick="closeModal('modal-image-panel')">
+    <div class="image-modal-content" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:10px; margin-bottom:12px;">
+            <h3 style="margin:0; color:var(--theme-light);">IMAGENS DA FICHA & OVERLAY</h3>
+            <button style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeModal('modal-image-panel')">✖</button>
+        </div>
+        <div class="image-upload-grid">
+            <div class="image-upload-item">
+                <div class="image-preview" id="preview_char_img"></div>
+                <div><h4>Imagem da Ficha</h4><p>Avatar circular da ficha do personagem.</p></div>
+                <div><button class="btn-img-upload" onclick="triggerImageUpload('char_img')">Enviar</button></div>
+            </div>
+            <div class="image-upload-item">
+                <div class="image-preview" id="preview_overlay_img"></div>
+                <div><h4>Imagem do Overlay</h4><p>Imagem padrão usada no overlay OBS.</p></div>
+                <div><button class="btn-img-upload" onclick="triggerImageUpload('overlay_img')">Enviar</button></div>
+            </div>
+            <div class="image-upload-item">
+                <div class="image-preview" id="preview_overlay_img_linhagem"></div>
+                <div><h4>Imagem Overlay 2</h4><p>Troca quando ativar forma de linhagem.</p></div>
+                <div style="display:flex; flex-direction:column; gap:6px;"><button class="btn-img-upload" onclick="triggerImageUpload('overlay_img_linhagem')">Enviar</button><button class="btn-img-clear" onclick="clearOverlayImage('overlay_img_linhagem')">Limpar</button></div>
+            </div>
+            <div class="image-upload-item">
+                <div class="image-preview" id="preview_overlay_img_dadiva"></div>
+                <div><h4>Imagem Overlay 3</h4><p>Troca quando houver dádiva/maldição ativa.</p></div>
+                <div style="display:flex; flex-direction:column; gap:6px;"><button class="btn-img-upload" onclick="triggerImageUpload('overlay_img_dadiva')">Enviar</button><button class="btn-img-clear" onclick="clearOverlayImage('overlay_img_dadiva')">Limpar</button></div>
+            </div>
+        </div>
+        <input type="file" id="img_upload_char_img" accept="image/*" style="display:none;">
+        <input type="file" id="img_upload_overlay_img" accept="image/*" style="display:none;">
+        <input type="file" id="img_upload_overlay_img_linhagem" accept="image/*" style="display:none;">
+        <input type="file" id="img_upload_overlay_img_dadiva" accept="image/*" style="display:none;">
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, update, onValue, remove, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlParams = new URLSearchParams(window.location.search);
+    const fichaID = urlParams.get('p') || "personagem_padrao_v2";
+    
+    const dbPath = `fichas_v2/${fichaID}`; 
+
+    let globalCharData = {};
+    let globalCompendium = { passivas: {}, cartas: {}, classes: {}, racas: {}, equipamentos: {}, maldicoes_dadivas: {} };
+    const DADIVA_COLORS = {
+        mascara_lunar: '#9aa6ff',
+        lodo_corrompido: '#6cbc6d',
+        combustao_arcana: '#ff7a2f',
+        escarcha_absoluta: '#7bd9ff',
+        tremor_abissal: '#d7a6ff'
+    };
+    const ASCENSAO_DB = {
+        exilis: {
+            nome: "EXILIS",
+            foco: "Caminho da Fisionomia",
+            base: { id: "base_exilis", nome: "Impulso Exilis", custo: 1, desc: "Você sobrecarrega o corpo por um instante: dobre sua velocidade no turno OU adicione +1d8 de dano físico em um ataque corpo a corpo que acertou." },
+            habilidades: [
+                { id: "passos_vacuo", nome: "Passos do Vácuo", custo: 1, desc: "Desloca para um ponto Longe instantaneamente, ignorando terreno difícil, armadilhas e ataques de oportunidade." },
+                { id: "metabolismo_acelerado", nome: "Metabolismo Acelerado", custo: 2, desc: "Cura imediatamente 1 Dano Maior (2 PV) e estanca Sangramento ou Veneno." },
+                { id: "forca_colossal", nome: "Força Colossal", custo: 1, desc: "Em testes de esforço físico mundano, recebe Sucesso Crítico Automático." },
+                { id: "onda_choque", nome: "Onda de Choque", custo: 2, desc: "Ataque corpo a corpo gera cone de destruição; inimigos Perto na linha sofrem metade do dano." }
+            ]
+        },
+        nevus: {
+            nome: "NÉVUS",
+            foco: "Caminho da Presença",
+            base: { id: "base_nevus", nome: "Expansão Névus", custo: 1, desc: "Até seu próximo turno, percepção absoluta do que está Perto; alternativamente, força inimigos Perto a teste de Resistência ou ficam Assombrados por 1 rodada." },
+            habilidades: [
+                { id: "intencao_assassina", nome: "Intenção Assassina", custo: 1, desc: "Até 3 inimigos Perto/Médio fazem teste difícil de Resistência; quem falhar fica Atordoado." },
+                { id: "olhos_verdade", nome: "Olhos da Verdade", custo: 1, desc: "Até o fim da cena, enxerga no escuro, através de fumaça e cancela invisibilidade/ilusões visuais no seu campo de visão." },
+                { id: "previsao_combate", nome: "Previsão de Combate", custo: 2, desc: "Reação ao sofrer ataque: Defesa Perfeita; em Sucesso Crítico do inimigo, recebe metade do dano." },
+                { id: "ocultacao_absoluta", nome: "Ocultação Absoluta", custo: 1, desc: "Apaga presença: não emite som/calor/rastro mágico; inimigos não podem mirar em você até agressão/interação hostil." }
+            ]
+        },
+        sublime: {
+            nome: "SUBLIME",
+            foco: "Caminho da Resistência",
+            base: { id: "base_sublime", nome: "Casca Sublime", custo: 1, desc: "Reação ao sofrer dano: cria Slot de Armadura Etérea temporário que absorve completamente um ataque e se estilhaça." },
+            habilidades: [
+                { id: "revestimento_batalha", nome: "Revestimento de Batalha", custo: 1, desc: "Até o fim do combate, arma se torna indestrutível, ignora resistências físicas e recebe +1d6 de dano nos acertos." },
+                { id: "ponto_fixo", nome: "Ponto Fixo", custo: 1, desc: "Enquanto não se mover, é impossível ser empurrado, derrubado, engolido ou arremessado." },
+                { id: "muralha_intransponivel", nome: "Muralha Intransponível", custo: 2, desc: "Reação: cria parede/cúpula para aliados Perto e absorve até dois Danos Severos." },
+                { id: "corpo_obsidiana", nome: "Corpo de Obsidiana", custo: 2, desc: "Durante toda a rodada, fica imune a danos físicos (corte, impacto e perfuração)." }
+            ]
+        }
+    };
+    let currentCategory = ""; 
+    let currentDBItems = [];
+    let ascChoiceState = null;
+    const MAX_CARTAS_EQUIPADAS = 5;
+    
+    // Variáveis Discente
+    window.isDiscenteMode = false;
+    window.discenteRaces = []; // IDs selecionados
+    window.discenteHabs = []; // Objs habilidades selecionadas
+    window.discenteLinhas = []; // Linhagens marcadas
+    
+    // --- PUXAR BANCO DE DADOS GLOBAL ---
+    onValue(ref(db, 'banco_dados_v2'), (snapshot) => {
+        if (snapshot.exists()) {
+            globalCompendium = snapshot.val();
+        }
+    });
+
+    function escapeForInlineJS(value = '') {
+        return String(value)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\r?\n/g, '\\n');
+    }
+
+    // --- CONTROLE MOBILE ---
+    let currentCol = 0;
+    const totalCols = 3;
+    window.changeCol = (dir) => {
+        document.getElementById(`col-${currentCol}`).classList.remove('active');
+        currentCol += dir;
+        if (currentCol < 0) currentCol = totalCols - 1;
+        if (currentCol >= totalCols) currentCol = 0;
+        document.getElementById(`col-${currentCol}`).classList.add('active');
+        document.getElementById('mobile-page-indicator').innerText = (currentCol + 1) + ' / ' + totalCols;
+        window.scrollTo(0, 0); 
+    };
+
+    // --- TEMAS ---
+    const themes = { 
+        sangue: { main: '#800000', card: '#2a0b10', border: '#5a1a1f', input: '#1a0508', light: '#ffaaaa' }, 
+        oceano: { main: '#0d47a1', card: '#0a192f', border: '#1565c0', input: '#0d2345', light: '#82b1ff' }, 
+        floresta: { main: '#1b5e20', card: '#0f2913', border: '#2e7d32', input: '#0a210f', light: '#a5d6a7' }, 
+        ametista: { main: '#4a148c', card: '#240a33', border: '#7b1fa2', input: '#210530', light: '#e1bee7' }, 
+        sombra: { main: '#424242', card: '#111111', border: '#616161', input: '#000000', light: '#bdbdbd' },
+        rubi: { main: '#b71c1c', card: '#2d0a0a', border: '#e53935', input: '#180404', light: '#ffcdd2' },
+        lava: { main: '#bf360c', card: '#2a1006', border: '#ff5722', input: '#1f0a03', light: '#ffccbc' },
+        ouro: { main: '#a67c00', card: '#2b2308', border: '#d4a017', input: '#1d1805', light: '#ffe082' },
+        deserto: { main: '#8d6e63', card: '#211815', border: '#a1887f', input: '#17100d', light: '#d7ccc8' },
+        esmeralda: { main: '#00695c', card: '#06231f', border: '#009688', input: '#031814', light: '#b2dfdb' },
+        menta: { main: '#2e7d6b', card: '#11231f', border: '#4db6ac', input: '#0c1816', light: '#b2f5ea' },
+        cobalto: { main: '#1565c0', card: '#0b1c33', border: '#1e88e5', input: '#081426', light: '#bbdefb' },
+        safira: { main: '#283593', card: '#101633', border: '#3f51b5', input: '#0b1023', light: '#c5cae9' },
+        nevoa: { main: '#546e7a', card: '#162027', border: '#78909c', input: '#10191f', light: '#cfd8dc' },
+        violeta: { main: '#6a1b9a', card: '#240f32', border: '#8e24aa', input: '#1a0b24', light: '#e1bee7' },
+        magenta: { main: '#ad1457', card: '#300d1d', border: '#d81b60', input: '#220813', light: '#f8bbd0' },
+        aurora: { main: '#006064', card: '#071f20', border: '#00acc1', input: '#051516', light: '#b2ebf2' },
+        gelo: { main: '#0277bd', card: '#0a2030', border: '#29b6f6', input: '#071722', light: '#b3e5fc' },
+        obsidiana: { main: '#212121', card: '#0d0d0d', border: '#455a64', input: '#050505', light: '#eceff1' }
+    };
+
+    window.toggleColorPicker = () => { document.getElementById('colorPicker').classList.toggle('open'); };
+    window.setTheme = (themeName) => { 
+        const t = themes[themeName]; if(!t) return; 
+        const r = document.documentElement.style; 
+        r.setProperty('--theme-main', t.main); r.setProperty('--theme-card', t.card); r.setProperty('--theme-border', t.border); r.setProperty('--theme-input', t.input); r.setProperty('--theme-light', t.light); 
+        update(ref(db, dbPath), { color_theme: themeName }); 
+        document.getElementById('colorPicker').classList.remove('open'); 
+    };
+
+    const picker = document.getElementById('colorPicker'); 
+    Object.keys(themes).forEach(key => { 
+        const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = themes[key].main; 
+        div.onclick = () => setTheme(key); picker.appendChild(div); 
+    });
+
+    const camposParaSalvar = [ 'char_name', 'nivel', 'florins', 'hp_at', 'hp_max', 'stress_at', 'stress_max', 'hope_at', 'hope_max', 'asc_at', 'poder', 'habilidade', 'resistencia', 'xp_total', 'anotacoes'];
+
+    function calculateDerivedStats() {
+        const res = parseInt(document.getElementById('resistencia').value) || 0;
+        const hab = parseInt(document.getElementById('habilidade').value) || 0;
+
+        document.getElementById('evasao_val').innerText = 8 + hab;
+        
+        document.getElementById('limiar_leve').innerText = "1";
+        document.getElementById('limiar_grave').innerText = 5 + (res * 2);
+        document.getElementById('limiar_massivo').innerText = 10 + (res * 3);
+
+        const suggestedHp = 5 + res;
+        const hpMaxInput = document.getElementById('hp_max');
+        if(parseInt(hpMaxInput.value) < suggestedHp) {
+            hpMaxInput.value = suggestedHp;
+            update(ref(db, dbPath), { hp_max: suggestedHp });
+        }
+    }
+
+    window.toggleForma = (formaType) => {
+        const current = globalCharData.toggles?.forma_ativa;
+        
+        if (current === formaType) {
+            let updates = { 'toggles/forma_ativa': null };
+            if (current === 'sacra') {
+                let hpAtual = parseInt(globalCharData.hp_at) || 0;
+                updates['hp_at'] = Math.max(0, hpAtual - 1); 
+                alert("Vislumbre da Evolução encerrado!\n\nO seu corpo rejeita a mutação drástica e você sofre 1 Dano Menor (-1 PV).");
+            }
+            update(ref(db, `${dbPath}`), updates);
+        } else {
+            let custoEstresse = 0;
+            let nomeHabilidade = "";
+            if (formaType === 'demon') { custoEstresse = 3; nomeHabilidade = "O Chamado do Inferno"; }
+            if (formaType === 'beast') { custoEstresse = 2; nomeHabilidade = "Despertar Primordial"; }
+            if (formaType === 'sacra') { custoEstresse = 2; nomeHabilidade = "Vislumbre da Evolução"; }
+
+            let stressAtual = parseInt(globalCharData.stress_at) || 0;
+            let stressMax = parseInt(globalCharData.stress_max) || 5;
+            let novoStress = stressAtual + custoEstresse;
+
+            if (novoStress > stressMax) {
+                if(!confirm(`Ativar "${nomeHabilidade}" custa ${custoEstresse} Pontos de Estresse. Deseja forçar a habilidade mesmo assim?`)) return; 
+                novoStress = stressMax; 
+            }
+
+            update(ref(db, `${dbPath}`), { 
+                'toggles/forma_ativa': formaType,
+                'stress_at': novoStress
+            });
+        }
+    };
+
+    function updateVisualModes() {
+        const tg = globalCharData.toggles || {};
+        const ascUnlocked = tg.asc_unlocked === true;
+        
+        const ascContainer = document.getElementById('asc_container');
+        if(ascContainer) ascContainer.style.display = ascUnlocked ? 'block' : 'none';
+        
+        const xpSection = document.getElementById('xp_section');
+        if(xpSection) xpSection.style.display = ascUnlocked ? 'block' : 'none';
+
+        document.body.classList.remove('forma-demon', 'forma-beast', 'forma-sacra');
+        if(tg.forma_ativa) {
+            document.body.classList.add(`forma-${tg.forma_ativa}`);
+        }
+
+        const btnContainer = document.getElementById('linhagem_btn_container');
+        if(btnContainer) {
+            btnContainer.innerHTML = ""; 
+            if(tg.linhagem_1) {
+                const isActive = tg.forma_ativa === 'demon';
+                btnContainer.innerHTML += `<button class="btn-forma ${isActive ? 'active' : ''}" style="--theme-light: #ff5555; color: ${isActive ? '#000' : '#ff5555'};" onclick="toggleForma('demon')">😈 Chamado do Inferno</button>`;
+            }
+            if(tg.linhagem_2) {
+                const isActive = tg.forma_ativa === 'beast';
+                btnContainer.innerHTML += `<button class="btn-forma ${isActive ? 'active' : ''}" style="--theme-light: #55ff55; color: ${isActive ? '#000' : '#55ff55'};" onclick="toggleForma('beast')">🐺 Despertar Primordial</button>`;
+            }
+            if(tg.linhagem_3) {
+                const isActive = tg.forma_ativa === 'sacra';
+                btnContainer.innerHTML += `<button class="btn-forma ${isActive ? 'active' : ''}" style="--theme-light: #00e5ff; color: ${isActive ? '#000' : '#00e5ff'};" onclick="toggleForma('sacra')">👼 Vislumbre da Evolução</button>`;
+            }
+        }
+    }
+
+    window.changeVal = (type, mod) => {
+        let current = parseInt(globalCharData[`${type}_at`]) || 0;
+        let max = parseInt(globalCharData[`${type}_max`]) || (type === 'asc' ? 10 : 5);
+        let newVal = current + mod;
+        if (newVal < 0) newVal = 0;
+        if (newVal > max) newVal = max;
+        update(ref(db, dbPath), { [`${type}_at`]: newVal });
+    };
+
+    window.changeValXP = (mod) => {
+        let xp = parseInt(globalCharData.xp_total) || 0;
+        let newXp = xp + mod; if(newXp < 0) newXp = 0;
+        update(ref(db, dbPath), { xp_total: newXp });
+    };
+
+    let dualityMode = 'none'; // none | ganho | perda
+
+    function updateDualityModeButtons() {
+        const btnGanho = document.getElementById('duality_btn_ganho');
+        const btnPerda = document.getElementById('duality_btn_perda');
+        if (!btnGanho || !btnPerda) return;
+
+        btnGanho.classList.toggle('active', dualityMode === 'ganho');
+        btnPerda.classList.toggle('active', dualityMode === 'perda');
+        btnGanho.classList.toggle('disabled', dualityMode === 'perda');
+        btnPerda.classList.toggle('disabled', dualityMode === 'ganho');
+    }
+
+    window.setDualityMode = (mode) => {
+        if (mode !== 'ganho' && mode !== 'perda') return;
+        if (dualityMode !== 'none' && dualityMode !== mode) return;
+        if (dualityMode === mode) dualityMode = 'none';
+        else dualityMode = mode;
+        updateDualityModeButtons();
+    };
+
+    function getKeptAndDiscarded(rolls) {
+        if (!rolls.length) return { kept: 0, discarded: [] };
+        const maxVal = Math.max(...rolls);
+        let keptUsed = false;
+        const discarded = [];
+        rolls.forEach((r) => {
+            if (!keptUsed && r === maxVal) keptUsed = true;
+            else discarded.push(r);
+        });
+        return { kept: maxVal, discarded };
+    }
+
+    window.rollDualityV2 = () => {
+        const attrId = document.getElementById('duality_attr').value;
+        const attrMod = parseInt(globalCharData[attrId]) || 0;
+        const bonus = parseInt(document.getElementById('duality_bonus').value) || 0;
+
+        const hopeRolls = [Math.ceil(Math.random() * 12)];
+        const fearRolls = [Math.ceil(Math.random() * 12)];
+        if (dualityMode === 'ganho') hopeRolls.push(Math.ceil(Math.random() * 12));
+        if (dualityMode === 'perda') fearRolls.push(Math.ceil(Math.random() * 12));
+        const hopeData = getKeptAndDiscarded(hopeRolls);
+        const fearData = getKeptAndDiscarded(fearRolls);
+
+        const hopeFinal = hopeData.kept;
+        const fearFinal = fearData.kept;
+        const total = hopeFinal + fearFinal + attrMod + bonus;
+
+        const hopeDie = document.getElementById('duality_hope_die');
+        const fearDie = document.getElementById('duality_fear_die');
+        hopeDie.classList.remove('winner');
+        fearDie.classList.remove('winner');
+
+        let outcomeClass = 'crit';
+        let outcomeText = '✦ Crítico!';
+        if (hopeFinal > fearFinal) {
+            outcomeClass = 'hope';
+            outcomeText = '✦ Rolagem com Esperança';
+            hopeDie.classList.add('winner');
+        } else if (fearFinal > hopeFinal) {
+            outcomeClass = 'fear';
+            outcomeText = '✦ Rolagem com Medo';
+            fearDie.classList.add('winner');
+        } else {
+            hopeDie.classList.add('winner');
+            fearDie.classList.add('winner');
+        }
+
+        document.getElementById('duality_hope_val').innerText = hopeFinal;
+        document.getElementById('duality_fear_val').innerText = fearFinal;
+        const hopeExtraEl = document.getElementById('duality_hope_extra');
+        const fearExtraEl = document.getElementById('duality_fear_extra');
+        hopeExtraEl.innerText = '';
+        fearExtraEl.innerText = '';
+        if (hopeRolls.length > 1) {
+            const extra = hopeRolls[1];
+            const status = extra === hopeFinal ? 'usado' : 'cortado';
+            hopeExtraEl.innerText = `Extra: ${extra} (${status})`;
+        }
+        if (fearRolls.length > 1) {
+            const extra = fearRolls[1];
+            const status = extra === fearFinal ? 'usado' : 'cortado';
+            fearExtraEl.innerText = `Extra: ${extra} (${status})`;
+        }
+        const attrLabel = document.getElementById('duality_attr').selectedOptions[0].text;
+        document.getElementById('duality_roll_text').innerText = `(${hopeFinal} + ${fearFinal}) + ${attrLabel}(${attrMod >= 0 ? '+' : ''}${attrMod}) ${bonus >= 0 ? '+' : '-'} ${Math.abs(bonus)} = ${total}`;
+
+        const cuts = [];
+        if (hopeData.discarded.length) cuts.push(`Esperança cortado(s): ${hopeData.discarded.join(', ')}`);
+        if (fearData.discarded.length) cuts.push(`Medo cortado(s): ${fearData.discarded.join(', ')}`);
+        document.getElementById('duality_cut_text').innerText = cuts.join(' • ');
+
+        const outcomeEl = document.getElementById('duality_outcome');
+        outcomeEl.className = `duality-outcome ${outcomeClass}`;
+        outcomeEl.innerText = outcomeText;
+    };
+
+    function getAscensaoData() {
+        const asc = globalCharData.ascensao || {};
+        return {
+            caminhos: asc.caminhos || {},
+            ordem_caminhos: Array.isArray(asc.ordem_caminhos) ? asc.ordem_caminhos : []
+        };
+    }
+
+    function getMaxedAttributesCount() {
+        const p = parseInt(globalCharData.poder) || 0;
+        const h = parseInt(globalCharData.habilidade) || 0;
+        const r = parseInt(globalCharData.resistencia) || 0;
+        return [p, h, r].filter(v => v >= 5).length;
+    }
+
+    window.openAscensaoModal = () => {
+        const ascData = getAscensaoData();
+        const nivel = parseInt(globalCharData.nivel) || 0;
+        const maxedAttrs = getMaxedAttributesCount();
+        const hasRequirements = nivel >= 5 && maxedAttrs >= 1;
+        const selectedPaths = Object.keys(ascData.caminhos);
+        const canUnlockNewPath = selectedPaths.length < maxedAttrs;
+
+        const listEl = document.getElementById('ascensao_modal_list');
+        const reqEl = document.getElementById('ascensao_requirements');
+        const btnConfirm = document.getElementById('btn_confirm_ascensao');
+        listEl.innerHTML = "";
+        ascChoiceState = null;
+
+        reqEl.innerHTML = `Requisitos: Nível <b>${nivel}</b>/5 e Atributos no valor 5: <b>${maxedAttrs}</b>.`;
+
+        if (!hasRequirements) {
+            listEl.innerHTML = `<div class="asc-muted">Você ainda não pode despertar a Ascensão. Alcance nível 5 e tenha ao menos 1 atributo em 5.</div>`;
+            btnConfirm.classList.add('btn-disabled');
+            btnConfirm.disabled = true;
+            document.getElementById('modal-ascensao').classList.add('open');
+            return;
+        }
+
+        if (selectedPaths.length === 0 || canUnlockNewPath) {
+            Object.entries(ASCENSAO_DB).forEach(([pathId, path]) => {
+                if (selectedPaths.includes(pathId)) return;
+                listEl.innerHTML += `
+                    <div class="asc-choice-card" id="asc_choice_path_${pathId}" onclick="selectAscChoice('path', '${pathId}')">
+                        <div class="asc-choice-tag">NOVO CAMINHO</div>
+                        <div class="asc-choice-title">${path.nome} — ${path.base.nome}</div>
+                        <div style="font-size:11px; color:#bbb; margin-bottom:6px;">${path.foco}</div>
+                        <div style="font-size:12px; color:#ddd;">${path.base.desc}</div>
+                    </div>`;
+            });
+        }
+
+        selectedPaths.forEach((pathId) => {
+            const path = ASCENSAO_DB[pathId];
+            if (!path) return;
+            const learned = ascData.caminhos[pathId]?.habilidades || {};
+            path.habilidades.forEach((hab) => {
+                if (learned[hab.id]) return;
+                const xpAtual = parseInt(globalCharData.xp_total) || 0;
+                const locked = xpAtual < 1;
+                listEl.innerHTML += `
+                    <div class="asc-choice-card ${locked ? 'btn-disabled' : ''}" id="asc_choice_skill_${pathId}_${hab.id}" onclick="${locked ? '' : `selectAscChoice('skill', '${pathId}', '${hab.id}')`}">
+                        <div class="asc-choice-tag">HABILIDADE • ${path.nome}</div>
+                        <div class="asc-choice-title">${hab.nome} (Custo: 1 Ponto)</div>
+                        <div style="font-size:12px; color:#ddd;">${hab.desc}</div>
+                    </div>`;
+            });
+        });
+
+        if (!listEl.innerHTML.trim()) {
+            listEl.innerHTML = `<div class="asc-muted">Nenhuma evolução disponível no momento.</div>`;
+        }
+
+        btnConfirm.classList.remove('btn-disabled');
+        btnConfirm.disabled = false;
+        document.getElementById('modal-ascensao').classList.add('open');
+    };
+
+    window.selectAscChoice = (type, pathId, skillId = null) => {
+        document.querySelectorAll('#ascensao_modal_list .asc-choice-card').forEach(card => card.classList.remove('selected'));
+        const cardId = type === 'path' ? `asc_choice_path_${pathId}` : `asc_choice_skill_${pathId}_${skillId}`;
+        const card = document.getElementById(cardId);
+        if (card) card.classList.add('selected');
+        ascChoiceState = { type, pathId, skillId };
+    };
+
+    window.confirmAscensaoChoice = () => {
+        if (!ascChoiceState) {
+            alert("Selecione uma evolução para confirmar.");
+            return;
+        }
+
+        const ascData = getAscensaoData();
+        const selectedPaths = Object.keys(ascData.caminhos);
+
+        if (ascChoiceState.type === 'path') {
+            if (!ascData.caminhos[ascChoiceState.pathId]) {
+                ascData.caminhos[ascChoiceState.pathId] = { base: true, habilidades: {} };
+                ascData.ordem_caminhos.push(ascChoiceState.pathId);
+            }
+            update(ref(db, dbPath), { ascensao: ascData }).then(() => closeModal('modal-ascensao'));
+            return;
+        }
+
+        if (!selectedPaths.includes(ascChoiceState.pathId)) {
+            alert("Você precisa desbloquear o caminho antes de escolher habilidades dele.");
+            return;
+        }
+
+        const xpAtual = parseInt(globalCharData.xp_total) || 0;
+        if (xpAtual < 1) {
+            alert("Sem Pontos de Despertar suficientes para evoluir.");
+            return;
+        }
+
+        if (!ascData.caminhos[ascChoiceState.pathId].habilidades) ascData.caminhos[ascChoiceState.pathId].habilidades = {};
+        ascData.caminhos[ascChoiceState.pathId].habilidades[ascChoiceState.skillId] = true;
+        update(ref(db, dbPath), { ascensao: ascData, xp_total: xpAtual - 1 }).then(() => closeModal('modal-ascensao'));
+    };
+
+    function renderAscensaoCards() {
+        const container = document.getElementById('ascensao_cards');
+        if (!container) return;
+        const ascData = getAscensaoData();
+        const paths = Object.keys(ascData.caminhos);
+        if (paths.length === 0) {
+            container.innerHTML = `<div class="asc-muted">Nenhuma Ascensão aprendida ainda. Clique em <b>Evoluir</b> para começar.</div>`;
+            return;
+        }
+
+        let html = "";
+        paths.forEach(pathId => {
+            const cfg = ASCENSAO_DB[pathId];
+            if (!cfg) return;
+            html += `<div class="asc-card"><div class="asc-card-title">${cfg.nome} — ${cfg.base.nome}</div><div class="asc-card-meta">TÉCNICA BASE • CUSTO ${cfg.base.custo} PA</div><div class="asc-card-desc">${cfg.base.desc}</div></div>`;
+            const learned = ascData.caminhos[pathId]?.habilidades || {};
+            Object.keys(learned).forEach(skillId => {
+                const skill = cfg.habilidades.find(h => h.id === skillId);
+                if (!skill) return;
+                html += `<div class="asc-card"><div class="asc-card-title">${cfg.nome} — ${skill.nome}</div><div class="asc-card-meta">EVOLUÇÃO • CUSTO ${skill.custo} PA</div><div class="asc-card-desc">${skill.desc}</div></div>`;
+            });
+        });
+
+        container.innerHTML = html || `<div class="asc-muted">Nenhuma Ascensão registrada.</div>`;
+    }
+
+    function getDadivasPermitidas() {
+        const tg = globalCharData.toggles || {};
+        const dadivas = tg.dadivas || {};
+        return Object.keys(dadivas).filter((id) => dadivas[id] === true);
+    }
+
+    function renderDadivasSection() {
+        const section = document.getElementById('dadivas_section');
+        const cards = document.getElementById('dadivas_cards');
+        const buttons = document.getElementById('dadiva_buttons');
+        if (!section || !cards || !buttons) return;
+
+        const permitidas = getDadivasPermitidas();
+        const comp = globalCompendium.maldicoes_dadivas || {};
+        const ativas = { ...(globalCharData.toggles?.dadivas_ativas || {}) };
+        let changedAtivas = false;
+        Object.keys(ativas).forEach((key) => {
+            if (!permitidas.includes(key)) {
+                delete ativas[key];
+                changedAtivas = true;
+            }
+        });
+        if (changedAtivas) update(ref(db, dbPath), { 'toggles/dadivas_ativas': ativas });
+        if (permitidas.length === 0) {
+            section.style.display = 'none';
+            cards.innerHTML = '';
+            buttons.innerHTML = '';
+            return;
+        }
+
+        section.style.display = 'block';
+        buttons.innerHTML = permitidas.map((id) => {
+            const item = comp[id] || {};
+            const color = DADIVA_COLORS[id] || '#aaa';
+            const active = ativas[id] === true;
+            return `<button class="btn-dadiva ${active ? 'active' : ''}" onclick="toggleDadivaAtiva('${id}')" style="border-color:${color}; color:${active ? '#111' : color}; background:${active ? color : '#1b1b1b'};">${active ? '●' : '○'} ${item.titulo || id}</button>`;
+        }).join('');
+
+        cards.innerHTML = permitidas.map((id) => {
+            const item = comp[id] || {};
+            const color = DADIVA_COLORS[id] || '#666';
+            return `<div class="dadiva-card" style="border-left-color:${color}; border-color:${color}55;">
+                <div class="dadiva-title" style="color:${color};">${item.titulo || id}</div>
+                <div class="dadiva-subtitle">${item.origem || 'Origem não definida'}</div>
+                <div class="dadiva-desc">${item.desc || 'Sem descrição cadastrada no Banco de Dados.'}</div>
+            </div>`;
+        }).join('');
+    }
+
+    window.toggleDadivaAtiva = (dadivaId) => {
+        const permitidas = getDadivasPermitidas();
+        if (!permitidas.includes(dadivaId)) return;
+        const ativas = { ...(globalCharData.toggles?.dadivas_ativas || {}) };
+        ativas[dadivaId] = !ativas[dadivaId];
+        update(ref(db, dbPath), { 'toggles/dadivas_ativas': ativas });
+    };
+
+    window.addArmorSlot = (mod) => {
+        let max = globalCharData.armor_max || 0;
+        let newMax = max + mod; if(newMax < 0) newMax = 0;
+        update(ref(db, dbPath), { armor_max: newMax });
+    };
+
+    window.addArmorTemp = () => {
+        let tempMax = globalCharData.armor_temp || 0;
+        update(ref(db, dbPath), { armor_temp: tempMax + 1 });
+    };
+
+    window.toggleArmorSlot = (index) => {
+        let used = globalCharData.armor_used || {};
+        let isUsed = used[`slot_${index}`] === true;
+        update(ref(db, `${dbPath}/armor_used`), { [`slot_${index}`]: !isUsed });
+    };
+
+    window.consumeArmorTemp = (tempId) => {
+        let tempMax = globalCharData.armor_temp || 0;
+        if (tempMax > 0) {
+            update(ref(db, dbPath), { armor_temp: tempMax - 1 });
+        }
+    };
+
+    function renderArmorSlots() {
+        const container = document.getElementById('armor_slots_container');
+        container.innerHTML = "";
+        
+        let max = globalCharData.armor_max || 0;
+        let used = globalCharData.armor_used || {};
+        let temps = globalCharData.armor_temp || 0;
+
+        for(let i=0; i < max; i++) {
+            let isUsed = used[`slot_${i}`] === true;
+            container.innerHTML += `<div class="armor-slot ${isUsed ? 'used' : ''}" onclick="toggleArmorSlot(${i})" title="Slot Permanente"></div>`;
+        }
+        
+        for(let j=0; j < temps; j++) {
+            container.innerHTML += `<div class="armor-slot temp" onclick="consumeArmorTemp(${j})" title="Slot Temporário (Some ao gastar)"></div>`;
+        }
+    }
+
+    document.addEventListener('input', (e) => {
+        const target = e.target;
+        if (camposParaSalvar.includes(target.id)) {
+            update(ref(db, dbPath), { [target.id]: target.value }).then(() => calculateDerivedStats());
+        }
+    });
+
+    onValue(ref(db, dbPath), (snapshot) => {
+        const dados = snapshot.val(); 
+        if (!dados) {
+            set(ref(db, dbPath), { hp_at: 5, hp_max: 5, stress_at: 0, stress_max: 5, hope_at: 0, hope_max: 5, asc_at: 0, asc_max: 10, armor_max: 0, armor_temp: 0 });
+            return;
+        }
+        globalCharData = dados;
+
+        if (dados.color_theme) { 
+            const t = themes[dados.color_theme]; 
+            if (t) { 
+                const r = document.documentElement.style; 
+                r.setProperty('--theme-main', t.main); r.setProperty('--theme-card', t.card); r.setProperty('--theme-border', t.border); r.setProperty('--theme-input', t.input); r.setProperty('--theme-light', t.light); 
+            } 
+        }
+
+        camposParaSalvar.concat(['classe', 'ancestralidade']).forEach(id => {
+            if (dados[id] !== undefined) {
+                if (id === 'xp_total') document.getElementById('display_xp_total').innerText = dados[id];
+                else {
+                    const el = document.getElementById(id);
+                    if (el && document.activeElement !== el) { el.value = dados[id]; }
+                }
+            }
+        });
+
+        if (dados.char_img) document.getElementById('avatar_display').style.backgroundImage = `url(${dados.char_img})`;
+        else document.getElementById('avatar_display').style.backgroundImage = "";
+        refreshImagePreviews();
+
+        updateBarVisual('hp', dados.hp_at, dados.hp_max);
+        updateBarVisual('stress', dados.stress_at, dados.stress_max);
+        updateBarVisual('hope', dados.hope_at, dados.hope_max);
+        updateBarVisual('asc', dados.asc_at, 10);
+
+        ['passivas', 'loadout', 'cofre', 'classe_hab', 'raca_hab', 'armas', 'inventario'].forEach(cat => renderHabs(cat, dados.habilidades?.[cat]));
+        
+        renderArmorSlots();
+        renderAscensaoCards();
+        renderDadivasSection();
+        calculateDerivedStats();
+        updateVisualModes();
+    });
+
+    function updateBarVisual(type, current, max) {
+        current = parseInt(current) || 0; max = parseInt(max) || 1;
+        const percent = Math.min(Math.max((current / max) * 100, 0), 100);
+        const el = document.getElementById('bar_' + type); if (el) el.style.width = percent + '%';
+    }
+
+    // --- MODAIS ---
+    window.openAddMenu = (category) => {
+        if (category === 'loadout' && !canAddToLoadout()) return;
+        currentCategory = category;
+        const dbBtn = document.getElementById('btn-db-add');
+        if (['passivas', 'loadout', 'cofre', 'armas'].includes(category)) {
+            dbBtn.style.display = 'block';
+        } else {
+            dbBtn.style.display = 'none';
+        }
+        document.getElementById('modal-choice').classList.add('open');
+    };
+
+    window.openDirectDB = (category) => {
+        currentCategory = category;
+        openDBModal();
+    };
+
+    window.closeModal = (id) => { document.getElementById(id).classList.remove('open'); };
+    window.openImagePanel = () => {
+        refreshImagePreviews();
+        document.getElementById('modal-image-panel').classList.add('open');
+    };
+
+    window.createManual = () => {
+        closeModal('modal-choice');
+        if (currentCategory === 'loadout' && !canAddToLoadout()) return;
+        let data = { titulo: "", desc: "" };
+        if (currentCategory === 'armas') {
+            data = { titulo: "Novo Equipamento", atributo: "", dano_slots: "", tipo_dano: "", alcance: "", desc: "" };
+        } else if (currentCategory === 'loadout' || currentCategory === 'cofre') { 
+            data.teste = ""; 
+        } 
+        push(ref(db, `${dbPath}/habilidades/${currentCategory}`), data);
+    };
+
+    // --- LÓGICA MODO DISCENTE ---
+    window.toggleDiscenteMode = (isOn) => {
+        window.isDiscenteMode = isOn;
+        window.discenteRaces = [];
+        window.discenteHabs = [];
+        document.getElementById('discente-actions').style.display = isOn ? 'block' : 'none';
+        document.getElementById('btn-discente-next').disabled = true;
+        document.getElementById('discente-counter').innerText = "0 selecionadas";
+        renderDBList(document.getElementById('db-search').value);
+    };
+
+    window.clickRacaCard = (itemId) => {
+        if (!window.isDiscenteMode) {
+            addFromDB(itemId); // Se desligado, equipa direto
+        } else {
+            // Modo de Seleção Discente
+            const idx = window.discenteRaces.indexOf(itemId);
+            if (idx > -1) {
+                window.discenteRaces.splice(idx, 1);
+            } else {
+                if (window.discenteRaces.length < 3) window.discenteRaces.push(itemId);
+                else alert("Você pode selecionar no máximo 3 raças para formar um Discente.");
+            }
+            document.getElementById('discente-counter').innerText = `${window.discenteRaces.length} selecionada(s)`;
+            document.getElementById('btn-discente-next').disabled = (window.discenteRaces.length < 2);
+            renderDBList(document.getElementById('db-search').value); // Re-render para mostrar as bordas ativas
+        }
+    };
+
+    window.goToDiscenteStep2 = () => {
+        document.getElementById('db-search').style.display = 'none';
+        document.getElementById('db-list-content').style.display = 'none';
+        document.getElementById('discente-controls').style.display = 'none';
+        
+        const container = document.getElementById('discente-step2-container');
+        container.style.display = 'flex';
+        container.innerHTML = `<h3 style="color:white; margin:0 0 10px 0;">SELEÇÃO DISCENTE</h3>`;
+        
+        let subText = window.discenteRaces.length === 2 
+            ? "Você é Sangue-Duplo! Escolha um total de <b>3 habilidades</b> divididas livremente entre as duas raças."
+            : "Você é uma Quimera! Escolha <b>exatamente 1 habilidade</b> de cada raça abaixo (Total: 3).";
+        
+        container.innerHTML += `<p style="color:#aaa; font-size:12px; margin-top:0;">${subText}</p>`;
+        
+        window.discenteHabs = [];
+        window.discenteLinhas = [];
+
+        // Agrupar linhagens disponíveis para a escolha final
+        let availableLinhagens = [];
+
+        window.discenteRaces.forEach(id => {
+            let raca = globalCompendium.racas[id];
+            if(!raca) return;
+
+            // Puxa a linhagem da raça para oferecer
+            let racaLinha = raca.linhagem || 'Animalesco';
+            if (!availableLinhagens.includes(racaLinha)) availableLinhagens.push(racaLinha);
+
+            let sec = document.createElement('div');
+            sec.className = 'discente-section';
+            sec.innerHTML = `<div style="color:var(--theme-light); font-weight:bold; font-size:14px; text-transform:uppercase;">Herança: ${raca.titulo}</div>`;
+            
+            // Hab 1
+            if(raca.hab1_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_1" onclick="toggleDiscenteHab('${id}', 1, '${escapeForInlineJS(raca.hab1_nome)}', '${escapeForInlineJS(raca.hab1_desc)}')"><div class="discente-hab-title">${raca.hab1_nome}</div><div class="discente-hab-desc">${raca.hab1_desc}</div></div>`;
+            // Hab 2
+            if(raca.hab2_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_2" onclick="toggleDiscenteHab('${id}', 2, '${escapeForInlineJS(raca.hab2_nome)}', '${escapeForInlineJS(raca.hab2_desc)}')"><div class="discente-hab-title">${raca.hab2_nome}</div><div class="discente-hab-desc">${raca.hab2_desc}</div></div>`;
+            // Hab 3
+            if(raca.hab3_nome) sec.innerHTML += `<div class="discente-hab-box" id="box_${id}_3" onclick="toggleDiscenteHab('${id}', 3, '${escapeForInlineJS(raca.hab3_nome)}', '${escapeForInlineJS(raca.hab3_desc)}')"><div class="discente-hab-title">${raca.hab3_nome}</div><div class="discente-hab-desc">${raca.hab3_desc}</div></div>`;
+            
+            container.appendChild(sec);
+        });
+
+        // Bloco de Linhagens Universais
+        let maxLinhagens = window.discenteRaces.length === 2 ? availableLinhagens.length : 1; // Se 3 raças, só 1.
+        let linhagensHTML = `<div class="discente-section" style="border-color:#00e5ff;">
+            <div style="color:#00e5ff; font-weight:bold; font-size:14px; text-transform:uppercase;">Linhagem Universal</div>
+            <p style="font-size:11px; color:#ccc;">Seu sangue misto altera sua herança mística. Escolha <b>até ${maxLinhagens}</b> linhagem(ns) para liberar na ficha:</p>`;
+        
+        availableLinhagens.forEach(linha => {
+            linhagensHTML += `
+                <label style="display:flex; align-items:center; gap:8px; margin-top:8px; color:white; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" value="${linha}" onchange="toggleDiscenteLinha(this, ${maxLinhagens})">
+                    Linhagem: ${linha}
+                </label>`;
+        });
+        linhagensHTML += `</div>`;
+        container.innerHTML += linhagensHTML;
+
+        container.innerHTML += `<button id="btn-finish-discente" class="btn-add" style="width:100%; padding:15px; border-radius:10px; font-size:14px; background:#444;" disabled onclick="finishDiscente()">FINALIZAR CRIAÇÃO</button>`;
+    };
+
+    window.toggleDiscenteHab = (racaId, num, nome, desc) => {
+        const boxId = `box_${racaId}_${num}`;
+        const box = document.getElementById(boxId);
+        const existingIdx = window.discenteHabs.findIndex(h => h.boxId === boxId);
+        
+        if (existingIdx > -1) {
+            window.discenteHabs.splice(existingIdx, 1);
+            box.classList.remove('selected');
+        } else {
+            if (window.discenteHabs.length >= 3) {
+                alert("Você já escolheu 3 habilidades!"); return;
+            }
+            window.discenteHabs.push({ boxId, racaId, titulo: nome, desc: desc });
+            box.classList.add('selected');
+        }
+        checkDiscenteValidation();
+    };
+
+    window.toggleDiscenteLinha = (checkbox, max) => {
+        if (checkbox.checked) {
+            if (window.discenteLinhas.length >= max) {
+                checkbox.checked = false;
+                alert(`Você só pode ter no máximo ${max} Linhagem(ns) Universal(is)!`);
+                return;
+            }
+            window.discenteLinhas.push(checkbox.value);
+        } else {
+            window.discenteLinhas = window.discenteLinhas.filter(l => l !== checkbox.value);
+        }
+    };
+
+    function checkDiscenteValidation() {
+        let isValid = false;
+        if (window.discenteHabs.length === 3) {
+            if (window.discenteRaces.length === 2) {
+                isValid = true; // 2 raças, 3 habs livres
+            } else if (window.discenteRaces.length === 3) {
+                // Checar se tem exatamente 1 de cada raça
+                let countObj = {};
+                window.discenteHabs.forEach(h => { countObj[h.racaId] = (countObj[h.racaId] || 0) + 1; });
+                if (Object.keys(countObj).length === 3) isValid = true;
+            }
+        }
+        const btn = document.getElementById('btn-finish-discente');
+        if(isValid) {
+            btn.disabled = false;
+            btn.style.background = '#22aa22';
+        } else {
+            btn.disabled = true;
+            btn.style.background = '#444';
+        }
+    }
+
+    window.finishDiscente = () => {
+        let racaTitles = window.discenteRaces.map(id => globalCompendium.racas[id]?.titulo || id);
+        let ancestralidadeName = `Discente (${racaTitles.join(" & ")})`;
+
+        update(ref(db, dbPath), { ancestralidade: ancestralidadeName });
+        
+        let pacoteRaca = {};
+        pacoteRaca['desc_geral'] = { 
+            titulo: `Sobre: Mestiço (Discente)`, 
+            desc: `Biologia fundida pelas seguintes raças: ${racaTitles.join(", ")}.\nLinhagens Universais ativas: ${window.discenteLinhas.join(" / ") || 'Nenhuma'}` 
+        };
+        
+        window.discenteHabs.forEach((hab, i) => {
+            pacoteRaca[`hab_${i+1}`] = { titulo: hab.titulo, desc: hab.desc };
+        });
+        
+        set(ref(db, `${dbPath}/habilidades/raca_hab`), pacoteRaca);
+
+        // Atualizar Toggles Universais baseado na escolha final do array discenteLinhas
+        let newToggles = {
+            'toggles/linhagem_1': window.discenteLinhas.some(l => l.toLowerCase().includes('demon')) || null,
+            'toggles/linhagem_2': window.discenteLinhas.some(l => l.toLowerCase().includes('animal')) || null,
+            'toggles/linhagem_3': window.discenteLinhas.some(l => l.toLowerCase().includes('sacr')) || null
+        };
+        update(ref(db, dbPath), newToggles);
+
+        closeModal('modal-db-list');
+    };
+
+    // --- COMPÊNDIO PADRÃO ---
+    window.openDBModal = () => {
+        closeModal('modal-choice');
+        document.getElementById('db-search').value = "";
+        
+        // Reset Visuals para garantir que não trave na tela discente anterior
+        document.getElementById('discente-step2-container').style.display = 'none';
+        document.getElementById('db-search').style.display = 'block';
+        document.getElementById('db-list-content').style.display = 'grid';
+        
+        // Toggle Discente (só na Raça)
+        const ctrls = document.getElementById('discente-controls');
+        if (currentCategory === 'raca_hab') {
+            ctrls.style.display = 'block';
+            document.getElementById('chk-discente').checked = false;
+            toggleDiscenteMode(false);
+        } else {
+            ctrls.style.display = 'none';
+            window.isDiscenteMode = false;
+        }
+
+        let dataObj = {};
+        if (currentCategory === 'passivas') dataObj = globalCompendium.passivas || {};
+        else if (currentCategory === 'loadout' || currentCategory === 'cofre') dataObj = globalCompendium.cartas || {};
+        else if (currentCategory === 'classe_hab') dataObj = globalCompendium.classes || {};
+        else if (currentCategory === 'raca_hab') dataObj = globalCompendium.racas || {};
+        else if (currentCategory === 'armas') dataObj = globalCompendium.equipamentos || {};
+
+        currentDBItems = Object.keys(dataObj).map(key => ({ id: key, ...dataObj[key] }));
+
+        if (currentCategory === 'loadout' || currentCategory === 'cofre') {
+            currentDBItems.sort((a,b) => {
+                if (a.dominio !== b.dominio) return (a.dominio || "").localeCompare(b.dominio || "");
+                return parseInt(a.nivel || 0) - parseInt(b.nivel || 0);
+            });
+        } else {
+            currentDBItems.sort((a,b) => (a.titulo || "").localeCompare(b.titulo || ""));
+        }
+
+        renderDBList("");
+        document.getElementById('modal-db-list').classList.add('open');
+    };
+
+    window.renderDBList = (searchTerm) => {
+        const container = document.getElementById('db-list-content');
+        container.innerHTML = "";
+        
+        const termo = searchTerm.toLowerCase().trim();
+        
+        const filtered = currentDBItems.filter(item => {
+            const titulo = (item.titulo || "").toLowerCase();
+            const desc = (item.desc || "").toLowerCase();
+            const dominio = (item.dominio || "").toLowerCase();
+            const dominios = (item.dominios || "").toLowerCase();
+            const linhagem = (item.linhagem || "").toLowerCase();
+            const atributo = (item.atributo || "").toLowerCase();
+            return titulo.includes(termo) || desc.includes(termo) || dominio.includes(termo) || dominios.includes(termo) || linhagem.includes(termo) || atributo.includes(termo);
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = "<p style='color:#aaa; text-align:center; grid-column: 1 / -1;'>Nenhuma habilidade/item encontrado.</p>";
+            return;
+        }
+
+        filtered.forEach(item => {
+            if (currentCategory === 'loadout' || currentCategory === 'cofre') {
+                container.innerHTML += `
+                    <div class="skill-card" onclick="addFromDB('${item.id}')">
+                        <div class="card-badges">
+                            <span class="badge-domain">${item.dominio || 'Geral'}</span>
+                            <span class="badge-level">Nível ${item.nivel || 1}</span>
+                        </div>
+                        <div class="card-title">${item.titulo}</div>
+                        <div class="card-meta">
+                            <strong>Tipo:</strong> ${item.tipo || 'Desconhecido'}<br>
+                            <strong>Custo:</strong> <span style="color:#ffaaaa;">${item.custo || 'Nenhum'}</span>
+                        </div>
+                        <div class="card-desc">${item.desc}</div>
+                        <div style="margin-top:auto; font-size:10px; color:var(--theme-light); text-align:right; font-weight:bold; padding-top: 10px; border-top: 1px solid #333;">CLIQUE PARA EQUIPAR</div>
+                    </div>
+                `;
+            } else if (currentCategory === 'classe_hab') {
+                container.innerHTML += `
+                    <div class="skill-card" onclick="addFromDB('${item.id}')">
+                        <div class="card-title">${item.titulo}</div>
+                        <div class="card-meta"><strong>Domínios:</strong> ${item.dominios || '-'}</div>
+                        <div class="card-desc">${item.desc || ''}</div>
+                        <div style="background:rgba(0,0,0,0.4); padding:6px; border-radius:6px; border-left:2px solid #336699;">
+                            <strong style="color:#88ccff; font-size:11px;">${item.hab_nome || 'Base'}</strong>
+                        </div>
+                        <div style="margin-top:auto; font-size:10px; color:var(--theme-light); text-align:right; font-weight:bold; padding-top: 10px;">CLIQUE PARA ESCOLHER CLASSE</div>
+                    </div>
+                `;
+            } else if (currentCategory === 'raca_hab') {
+                const isSelected = window.isDiscenteMode && window.discenteRaces.includes(item.id) ? 'selected-raca' : '';
+                const clickAction = window.isDiscenteMode ? `clickRacaCard('${item.id}')` : `addFromDB('${item.id}')`;
+                const promptText = window.isDiscenteMode ? "CLIQUE PARA MARCAR" : "CLIQUE PARA ESCOLHER RAÇA";
+                
+                container.innerHTML += `
+                    <div class="skill-card ${isSelected}" onclick="${clickAction}">
+                        <div class="card-badges"><span class="badge-domain">${item.linhagem || 'Animalesco'}</span></div>
+                        <div class="card-title">${item.titulo}</div>
+                        <div class="card-desc">${item.desc || ''}</div>
+                        <div style="margin-top:auto; font-size:10px; color:var(--theme-light); text-align:right; font-weight:bold; padding-top: 10px;">${promptText}</div>
+                    </div>
+                `;
+            } else if (currentCategory === 'armas') {
+                container.innerHTML += `
+                    <div class="skill-card" onclick="addFromDB('${item.id}')" style="border-top: 3px solid #cc4444;">
+                        <div class="card-badges">
+                            <span class="badge-domain">${item.categoria || 'Equipamento'}</span>
+                            <span class="badge-level">$ ${item.custo || '0'}</span>
+                        </div>
+                        <div class="card-title">${item.titulo}</div>
+                        <div class="card-meta">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                <div><strong>Atributo:</strong> ${item.atributo || '-'}</div>
+                                <div><strong>Dano/Slots:</strong> <span style="color:#fff;">${item.dano_slots || '-'}</span></div>
+                                <div><strong>Alcance:</strong> ${item.alcance || '-'}</div>
+                                <div><strong>Tipo:</strong> ${item.tipo_dano || '-'}</div>
+                            </div>
+                        </div>
+                        <div class="card-desc">${item.desc || ''}</div>
+                        <div style="margin-top:auto; font-size:10px; color:var(--theme-light); text-align:right; font-weight:bold; padding-top: 10px; border-top: 1px solid #333;">CLIQUE PARA ADICIONAR</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML += `
+                    <div class="passiva-card" onclick="addFromDB('${item.id}')">
+                        <div class="passiva-title">${item.titulo}</div>
+                        <div class="passiva-desc">${item.desc}</div>
+                        <div style="margin-top:auto; font-size:10px; color:var(--theme-light); text-align:right; font-weight:bold; padding-top: 10px;">CLIQUE PARA ADICIONAR</div>
+                    </div>
+                `;
+            }
+        });
+    };
+
+    window.addFromDB = (itemId) => {
+        let item;
+        if (currentCategory === 'loadout' || currentCategory === 'cofre') item = globalCompendium.cartas[itemId];
+        else if (currentCategory === 'passivas') item = globalCompendium.passivas[itemId];
+        else if (currentCategory === 'classe_hab') item = globalCompendium.classes[itemId];
+        else if (currentCategory === 'raca_hab') item = globalCompendium.racas[itemId];
+        else if (currentCategory === 'armas') item = globalCompendium.equipamentos[itemId];
+
+        if (!item) return;
+
+        if (currentCategory === 'classe_hab') {
+            update(ref(db, dbPath), { classe: item.titulo });
+            
+            let pacoteClasse = {};
+            pacoteClasse['desc_geral'] = { titulo: `Sobre: ${item.titulo}`, desc: item.desc || "Sem descrição." };
+            if (item.hab_nome) pacoteClasse['hab_1'] = { titulo: item.hab_nome, desc: item.hab_desc || "" };
+            if (item.hab2_nome) pacoteClasse['hab_2'] = { titulo: item.hab2_nome, desc: item.hab2_desc || "" };
+            if (item.hab3_nome) pacoteClasse['hab_3'] = { titulo: item.hab3_nome, desc: item.hab3_desc || "" };
+            
+            set(ref(db, `${dbPath}/habilidades/classe_hab`), pacoteClasse);
+            
+        } else if (currentCategory === 'raca_hab') {
+            update(ref(db, dbPath), { ancestralidade: item.titulo });
+            
+            let pacoteRaca = {};
+            pacoteRaca['desc_geral'] = { titulo: `Sobre: ${item.titulo}`, desc: item.desc || "Sem descrição." };
+            if (item.hab1_nome) pacoteRaca['hab_1'] = { titulo: item.hab1_nome, desc: item.hab1_desc || "" };
+            if (item.hab2_nome) pacoteRaca['hab_2'] = { titulo: item.hab2_nome, desc: item.hab2_desc || "" };
+            if (item.hab3_nome) pacoteRaca['hab_3'] = { titulo: item.hab3_nome, desc: item.hab3_desc || "" };
+            
+            set(ref(db, `${dbPath}/habilidades/raca_hab`), pacoteRaca);
+
+            // Unlock Toggles Padrões baseado na Linhagem Singular
+            let linha = (item.linhagem || "").toLowerCase();
+            let newToggles = {
+                'toggles/linhagem_1': linha.includes('demon') || null,
+                'toggles/linhagem_2': linha.includes('animal') || null,
+                'toggles/linhagem_3': linha.includes('sacr') || null
+            };
+            update(ref(db, dbPath), newToggles);
+            
+        } else if (currentCategory === 'armas') {
+            let data = {
+                titulo: item.titulo || "",
+                atributo: item.atributo || "",
+                dano_slots: item.dano_slots || "",
+                alcance: item.alcance || "",
+                tipo_dano: item.tipo_dano || "",
+                desc: item.desc || ""
+            };
+            push(ref(db, `${dbPath}/habilidades/${currentCategory}`), data);
+
+        } else {
+            if (currentCategory === 'loadout' && !canAddToLoadout()) return;
+            let desc = item.desc;
+            let data = { titulo: item.titulo, desc: desc };
+            
+            if (currentCategory === 'loadout' || currentCategory === 'cofre') {
+                data.desc = `[${item.dominio} | Nível ${item.nivel} | ${item.tipo}]\n\n${item.desc}`;
+                data.teste = item.custo || "";
+            }
+            push(ref(db, `${dbPath}/habilidades/${currentCategory}`), data);
+        }
+
+        closeModal('modal-db-list');
+    };
+
+    // --- MANIPULAÇÃO DE ITENS DA FICHA ---
+    function getLoadoutCount() {
+        return Object.keys(globalCharData?.habilidades?.loadout || {}).length;
+    }
+
+    function canAddToLoadout() {
+        if (getLoadoutCount() >= MAX_CARTAS_EQUIPADAS) {
+            alert(`Limite atingido: você só pode ter ${MAX_CARTAS_EQUIPADAS} cartas equipadas.`);
+            return false;
+        }
+        return true;
+    }
+
+    window.moveCardBetweenLoadoutAndVault = async (category, id) => {
+        const item = globalCharData?.habilidades?.[category]?.[id];
+        if (!item) return;
+
+        const targetCategory = category === 'loadout' ? 'cofre' : 'loadout';
+        if (targetCategory === 'loadout' && !canAddToLoadout()) return;
+
+        await push(ref(db, `${dbPath}/habilidades/${targetCategory}`), item);
+        await remove(ref(db, `${dbPath}/habilidades/${category}/${id}`));
+    };
+
+    window.removeItem = (category, id) => { if(confirm("Apagar item?")) remove(ref(db, `${dbPath}/habilidades/${category}/${id}`)); };
+    window.toggleHab = (elementId) => { document.getElementById('body_' + elementId).classList.toggle('open'); };
+    window.saveHab = (cat, id, field, val) => { update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { [field]: val }); };
+
+    function renderHabs(category, data) { 
+        let container = document.getElementById('list_' + category); 
+        if(!container) return; 
+        container.innerHTML = ""; 
+        
+        if(!data) {
+            if (category === 'classe_hab') container.innerHTML = "<p style='font-size:11px; color:#555; text-align:center;'>Nenhuma classe selecionada. Escolha na aba 'Personagem'.</p>";
+            if (category === 'raca_hab') container.innerHTML = "<p style='font-size:11px; color:#555; text-align:center;'>Nenhuma raça selecionada. Escolha na aba 'Personagem'.</p>";
+            return; 
+        }
+        
+        Object.keys(data).forEach(id => { 
+            const item = data[id]; 
+            const div = document.createElement('div'); 
+            
+            // EQUIPAMENTOS (O CARD BONITINHO QUE JÁ É O EDITOR)
+            if (category === 'armas') {
+                div.className = 'equip-ficha-card';
+                div.innerHTML = `
+                    <div class="equip-ficha-header">
+                        <input type="text" class="equip-ficha-title" value="${item.titulo || ''}" onchange="saveHab('${category}', '${id}', 'titulo', this.value)" placeholder="Nome do Equipamento">
+                        <button class="btn-del" onclick="removeItem('${category}', '${id}')">✖</button>
+                    </div>
+                    <div class="equip-ficha-grid">
+                        <div>
+                            <label>ATRIBUTO / CLASSE</label>
+                            <input type="text" class="equip-ficha-input" value="${item.atributo || ''}" onchange="saveHab('${category}', '${id}', 'atributo', this.value)" placeholder="Ex: Poder, Leve...">
+                        </div>
+                        <div>
+                            <label>DANO / SLOTS ABS.</label>
+                            <input type="text" class="equip-ficha-input" value="${item.dano_slots || ''}" onchange="saveHab('${category}', '${id}', 'dano_slots', this.value)" placeholder="Ex: 1d10, 2 Slots">
+                        </div>
+                        <div>
+                            <label>ALCANCE</label>
+                            <input type="text" class="equip-ficha-input" value="${item.alcance || ''}" onchange="saveHab('${category}', '${id}', 'alcance', this.value)" placeholder="Corpo a Corpo...">
+                        </div>
+                        <div>
+                            <label>TIPO DE DANO</label>
+                            <input type="text" class="equip-ficha-input" value="${item.tipo_dano || ''}" onchange="saveHab('${category}', '${id}', 'tipo_dano', this.value)" placeholder="Corte, Fogo...">
+                        </div>
+                    </div>
+                    <label style="margin-left:2px; font-size:9px; color:#aaa;">PROPRIEDADE ESPECIAL / EFEITO</label>
+                    <textarea class="equip-ficha-desc" onchange="saveHab('${category}', '${id}', 'desc', this.value)" placeholder="Efeitos adicionais ou propriedades...">${item.desc || ''}</textarea>
+                `;
+            } else {
+                // RENDER PADRÃO
+                div.className = 'hab-item'; 
+                
+                const isFixed = (category === 'classe_hab' || category === 'raca_hab');
+                const placeholderCusto = (category === 'loadout' || category === 'cofre') ? 'Custo/Dano' : 'Valor';
+                const showDiceInput = (!isFixed && category !== 'passivas' && category !== 'inventario');
+
+                let titleHTML = isFixed 
+                    ? `<div class="hab-title" style="color:var(--theme-light); padding: 5px; cursor:pointer;" onclick="toggleHab('${category}_${id}')">${item.titulo || ''}</div>`
+                    : `<input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${category}','${id}','titulo',this.value)" placeholder="Nome">`;
+                    
+                let diceHTML = showDiceInput 
+                    ? `<input type="text" class="hab-dice" value="${item.teste || ''}" onchange="saveHab('${category}','${id}','teste',this.value)" placeholder="${placeholderCusto}">` 
+                    : '';
+
+                let moveBtnHTML = '';
+                if (category === 'loadout' || category === 'cofre') {
+                    const arrowIcon = category === 'loadout' ? '▼' : '▲';
+                    const arrowTitle = category === 'loadout'
+                        ? 'Mover para o Cofre'
+                        : 'Equipar (mover para Loadout)';
+                    moveBtnHTML = `<button class="btn-move-card" onclick="moveCardBetweenLoadoutAndVault('${category}','${id}')" title="${arrowTitle}">${arrowIcon}</button>`;
+                }
+                    
+                let delBtnHTML = isFixed ? '' : `<button class="btn-del" onclick="removeItem('${category}','${id}')">✖</button>`;
+
+                let bodyContent = isFixed
+                    ? `<div style="font-size:12px; color:#ccc; line-height:1.4; white-space:pre-wrap; padding: 5px;">${item.desc || ''}</div>`
+                    : `<textarea onchange="saveHab('${category}','${id}','desc',this.value)" placeholder="Descrição e Regras...">${item.desc || ''}</textarea>`;
+
+                let isBodyOpen = (isFixed && id === 'desc_geral') ? 'open' : '';
+
+                div.innerHTML = `
+                    <div class="hab-header">
+                        <span class="hab-toggle" onclick="toggleHab('${category}_${id}')">▼</span>
+                        ${titleHTML}
+                        ${diceHTML}
+                        ${moveBtnHTML}
+                        ${delBtnHTML}
+                    </div>
+                    <div class="hab-body ${isBodyOpen}" id="body_${category}_${id}">
+                        ${bodyContent}
+                    </div>`; 
+            }
+            container.appendChild(div); 
+        }); 
+    }
+
+    function processImageFile(file, options = {}) {
+        const { output = 'jpeg', quality = 0.8 } = options;
+        return new Promise((resolve, reject) => {
+            if (!file) return reject(new Error('Arquivo inválido.'));
+            const reader = new FileReader();
+            reader.onload = (readerEvent) => {
+                const image = new Image();
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 600;
+                    let width = image.width;
+                    let height = image.height;
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height *= maxSize / width;
+                            width = maxSize;
+                        }
+                    } else if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(image, 0, 0, width, height);
+                    if (output === 'png') resolve(canvas.toDataURL('image/png'));
+                    else resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                image.onerror = () => reject(new Error('Não foi possível processar a imagem.'));
+                image.src = readerEvent.target.result;
+            };
+            reader.onerror = () => reject(new Error('Falha ao ler arquivo.'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function setPreview(previewId, value, fallback = "") {
+        const el = document.getElementById(previewId);
+        if (!el) return;
+        if (value) el.style.backgroundImage = `url(${value})`;
+        else if (fallback) el.style.backgroundImage = `url(${fallback})`;
+        else el.style.backgroundImage = "";
+    }
+
+    function refreshImagePreviews() {
+        const dados = globalCharData || {};
+        setPreview('preview_char_img', dados.char_img);
+        setPreview('preview_overlay_img', dados.overlay_img, dados.char_img || "");
+        const overlayBase = dados.overlay_img || dados.char_img || "";
+        setPreview('preview_overlay_img_linhagem', dados.overlay_img_linhagem, overlayBase);
+        setPreview('preview_overlay_img_dadiva', dados.overlay_img_dadiva, overlayBase);
+    }
+
+    window.triggerImageUpload = (field) => {
+        const input = document.getElementById(`img_upload_${field}`);
+        if (!input) return;
+        input.click();
+    };
+
+    window.clearOverlayImage = (field) => {
+        update(ref(db, dbPath), { [field]: null });
+    };
+
+    async function handleImageUpload(field, file) {
+        try {
+            const preferPng = field.startsWith('overlay_');
+            const dataUrl = await processImageFile(file, preferPng ? { output: 'png' } : { output: 'jpeg', quality: 0.8 });
+            await update(ref(db, dbPath), { [field]: dataUrl });
+        } catch (err) {
+            alert(err.message || 'Erro ao enviar imagem.');
+        }
+    }
+
+    ['char_img', 'overlay_img', 'overlay_img_linhagem', 'overlay_img_dadiva'].forEach((field) => {
+        const input = document.getElementById(`img_upload_${field}`);
+        if (!input) return;
+        input.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            if (file) await handleImageUpload(field, file);
+            e.target.value = "";
+        });
+    });
+
+    updateDualityModeButtons();
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

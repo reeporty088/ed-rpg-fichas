@@ -703,8 +703,8 @@
       border-radius: 8px;
     }
   </style>
-  <script src="auth.js"></script>
-  <link rel="manifest" href="manifest.webmanifest" />
+  <script src="configs/auth.js"></script>
+  <link rel="manifest" href="configs/manifest.webmanifest" />
   <meta name="theme-color" content="#130909" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -714,6 +714,13 @@
 
   <!-- Sidebar Trigger -->
   <div class="sidebar-trigger id-logged hidden" onclick="toggleSidebar()">☰</div>
+
+  <!-- Floating Version Switcher (Directly below 3 bars icon) -->
+  <div class="version-floating-btn id-logged hidden" style="position:fixed; top:60px; left:15px; z-index:1899; display:flex; gap:4px; padding:4px; background:rgba(7,3,3,.95); border:1px solid #5c1c22; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.8);">
+    <button id="floatVerBtn_v3" onclick="setHubVersion('v3')" style="padding:5px 10px; background:#5c1c22; color:#fff; border-radius:5px; border:1px solid #cc2a2a; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">🎭 v3</button>
+    <button id="floatVerBtn_v4" onclick="setHubVersion('v4')" style="padding:5px 10px; background:#1a4c5c; color:#fff; border-radius:5px; border:1px solid #2accda; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">⚔️ v4</button>
+  </div>
+
 
   <!-- Sidebar Backdrop -->
   <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
@@ -725,12 +732,21 @@
       <div class="sidebar-user-name" id="sideUserName">Jogador</div>
     </div>
     <ul class="sidebar-menu">
+
+      <div style="padding: 8px 12px; margin: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="font-size: 0.68rem; color: #9a8585; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; font-weight:700;">Versão Ativa no Hub</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="sideVerBtn_v3" onclick="setHubVersion('v3')" style="flex: 1; text-align: center; padding: 5px; background: #5c1c22; color: #fff; border-radius: 5px; border: 1px solid #cc2a2a; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition:all 0.2s;">🎭 v3</button>
+          <button id="sideVerBtn_v4" onclick="setHubVersion('v4')" style="flex: 1; text-align: center; padding: 5px; background: #1a4c5c; color: #fff; border-radius: 5px; border: 1px solid #2accda; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition:all 0.2s;">⚔️ v4</button>
+        </div>
+      </div>
+
       <li><div class="sidebar-link" onclick="switchHubTab('dashboard')">🏠 Hub</div></li>
       <li><a class="sidebar-link" href="perfil.html">👤 Perfil</a></li>
       <li><div class="sidebar-link" onclick="switchHubTab('fichas')">🎭 Fichas</div></li>
-      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" id="sideLinkMestre" href="v3/ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
       <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('users')">👥 Gerenciar Usuários</div></li>
-      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav1_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" id="sideLinkCalendario" href="v1/ed_sistemav1_calendario.html">📅 Calendário</a></li>
       <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('notifications')">🔔 Notificações</div></li>
     </ul>
     <div class="sidebar-footer">
@@ -823,28 +839,12 @@
     <!-- View: Dashboard -->
     <div id="view_dashboard" class="hub-view">
       <div class="card">
-        <h3 class="card-title">Acesso Rápido</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+          <h3 class="card-title" style="margin-bottom:0;">Acesso Rápido</h3>
+          <div id="hubVersionBadge" style="font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:12px; text-transform:uppercase; letter-spacing:0.05em;"></div>
+        </div>
         <div class="version-grid" id="quickActionsGrid">
-          <div class="version-card accessible" onclick="switchHubTab('fichas')">
-            <div class="v-icon">🎭</div>
-            <div class="v-name">Fichas de Personagem</div>
-            <div class="v-status ok">Ver minhas fichas</div>
-          </div>
-          <div class="version-card accessible" onclick="window.location.href='perfil.html'">
-            <div class="v-icon">👤</div>
-            <div class="v-name">Configurar Perfil</div>
-            <div class="v-status ok">Avatar & Detalhes</div>
-          </div>
-          <div class="version-card accessible admin-only hidden" onclick="window.location.href='ed_sistemav3_mestre.html'">
-            <div class="v-icon">👑</div>
-            <div class="v-name">Painel do Mestre</div>
-            <div class="v-status ok">Abrir Painel Mestre</div>
-          </div>
-          <div class="version-card accessible admin-only hidden" onclick="switchHubTab('users')">
-            <div class="v-icon">👥</div>
-            <div class="v-name">Gerenciar Usuários</div>
-            <div class="v-status ok">Editar Contas & Fichas</div>
-          </div>
+          <!-- Populated dynamically by renderQuickActions() -->
         </div>
       </div>
     </div>
@@ -960,7 +960,125 @@
   const hubSection  = document.getElementById('hubSection');
 
   let globalFichasV3 = {};
+  let globalFichasV4 = {};
   let currentActiveTab = 'dashboard';
+  let currentActiveVersion = localStorage.getItem('ed_selected_version') || 'v3';
+
+  window.setHubVersion = (ver) => {
+    if (ver !== 'v3' && ver !== 'v4') ver = 'v3';
+    currentActiveVersion = ver;
+    localStorage.setItem('ed_selected_version', ver);
+    updateVersionUI();
+    renderQuickActions();
+    renderMyFichas();
+  };
+
+  function updateVersionUI() {
+    const isV4 = currentActiveVersion === 'v4';
+
+    // Update floating buttons styling
+    const floatV3 = document.getElementById('floatVerBtn_v3');
+    const floatV4 = document.getElementById('floatVerBtn_v4');
+    if (floatV3) {
+      floatV3.style.background = isV4 ? 'rgba(25,10,12,0.6)' : '#5c1c22';
+      floatV3.style.borderColor = isV4 ? 'rgba(92,28,34,0.4)' : '#cc2a2a';
+      floatV3.style.color = isV4 ? '#a87878' : '#fff';
+      floatV3.style.boxShadow = isV4 ? 'none' : '0 0 10px rgba(204,42,42,0.6)';
+      floatV3.style.opacity = isV4 ? '0.6' : '1';
+    }
+    if (floatV4) {
+      floatV4.style.background = isV4 ? '#1a4c5c' : 'rgba(10,25,30,0.6)';
+      floatV4.style.borderColor = isV4 ? '#2accda' : 'rgba(26,76,92,0.4)';
+      floatV4.style.color = isV4 ? '#fff' : '#78a8b8';
+      floatV4.style.boxShadow = isV4 ? '0 0 10px rgba(42,204,218,0.6)' : 'none';
+      floatV4.style.opacity = isV4 ? '1' : '0.6';
+    }
+
+    // Update sidebar version buttons styling
+    const sideV3 = document.getElementById('sideVerBtn_v3');
+    const sideV4 = document.getElementById('sideVerBtn_v4');
+    if (sideV3) {
+      sideV3.style.background = isV4 ? 'rgba(25,10,12,0.6)' : '#5c1c22';
+      sideV3.style.borderColor = isV4 ? 'rgba(92,28,34,0.4)' : '#cc2a2a';
+      sideV3.style.color = isV4 ? '#a87878' : '#fff';
+      sideV3.style.opacity = isV4 ? '0.6' : '1';
+    }
+    if (sideV4) {
+      sideV4.style.background = isV4 ? '#1a4c5c' : 'rgba(10,25,30,0.6)';
+      sideV4.style.borderColor = isV4 ? '#2accda' : 'rgba(26,76,92,0.4)';
+      sideV4.style.color = isV4 ? '#fff' : '#78a8b8';
+      sideV4.style.opacity = isV4 ? '1' : '0.6';
+    }
+
+    // Update badge on Hub dashboard
+    const badge = document.getElementById('hubVersionBadge');
+    if (badge) {
+      badge.textContent = isV4 ? '⚔️ Versão v4 Ativa' : '🎭 Versão v3 Ativa';
+      badge.style.background = isV4 ? 'rgba(42,204,218,0.15)' : 'rgba(204,42,42,0.15)';
+      badge.style.border = isV4 ? '1px solid #2accda' : '1px solid #cc2a2a';
+      badge.style.color = isV4 ? '#7fe3ff' : '#ff8888';
+    }
+
+    // Update sidebar direct links
+    const sideMestre = document.getElementById('sideLinkMestre');
+    if (sideMestre) {
+      sideMestre.href = isV4 ? 'v4/ed_sistemav4_mestre.html' : 'v3/ed_sistemav3_mestre.html';
+    }
+    const sideCal = document.getElementById('sideLinkCalendario');
+    if (sideCal) {
+      sideCal.href = isV4 ? 'v4/ed_sistemav4_calendario.html' : 'v1/ed_sistemav1_calendario.html';
+    }
+  }
+
+  function renderQuickActions() {
+    const grid = document.getElementById('quickActionsGrid');
+    if (!grid) return;
+    const isV4 = currentActiveVersion === 'v4';
+
+    grid.innerHTML = `
+      <div class="version-card accessible" onclick="switchHubTab('fichas')">
+        <div class="v-icon">🎭</div>
+        <div class="v-name">Fichas de Personagem</div>
+        <div class="v-status ok">Fichas ${isV4 ? 'v4' : 'v3'}</div>
+      </div>
+      <div class="version-card accessible" onclick="window.location.href='perfil.html'">
+        <div class="v-icon">👤</div>
+        <div class="v-name">Configurar Perfil</div>
+        <div class="v-status ok">Avatar & Detalhes</div>
+      </div>
+      <div class="version-card accessible admin-only hidden" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_mestre.html' : 'v3/ed_sistemav3_mestre.html'}'">
+        <div class="v-icon">👑</div>
+        <div class="v-name">Painel do Mestre</div>
+        <div class="v-status ok">Painel Mestre (${isV4 ? 'v4' : 'v3'})</div>
+      </div>
+      <div class="version-card accessible" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_bancodedados.html' : 'v3/ed_sistemav3_bancodedados.html'}'">
+        <div class="v-icon">📚</div>
+        <div class="v-name">Compêndio / Banco de Dados</div>
+        <div class="v-status ok">Banco de Dados (${isV4 ? 'v4' : 'v3'})</div>
+      </div>
+      <div class="version-card accessible" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_criadordetecnicas.html' : 'v3/ed_sistemav3_criadordetecnicas.html'}'">
+        <div class="v-icon">⚡</div>
+        <div class="v-name">Criador de Técnicas</div>
+        <div class="v-status ok">Criador (${isV4 ? 'v4' : 'v3'})</div>
+      </div>
+      <div class="version-card accessible admin-only hidden" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_calendario.html' : 'v1/ed_sistemav1_calendario.html'}'">
+        <div class="v-icon">📅</div>
+        <div class="v-name">Calendário</div>
+        <div class="v-status ok">Calendário (${isV4 ? 'v4' : 'v1'})</div>
+      </div>
+      <div class="version-card accessible admin-only hidden" onclick="switchHubTab('users')">
+        <div class="v-icon">👥</div>
+        <div class="v-name">Gerenciar Usuários</div>
+        <div class="v-status ok">Editar Contas & Fichas</div>
+      </div>
+    `;
+
+    // Re-check admin elements visibility
+    const user = EDAuth.currentUser();
+    if (user && user.role === 'admin') {
+      grid.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    }
+  }
 
   // Toggle Sidebar
   window.toggleSidebar = () => {
@@ -1005,6 +1123,11 @@
   // Initial routing if query param exists
   function handleQueryTab() {
     const params = new URLSearchParams(window.location.search);
+    const ver = params.get('ver');
+    if (ver && (ver === 'v3' || ver === 'v4')) {
+      currentActiveVersion = ver;
+      localStorage.setItem('ed_selected_version', ver);
+    }
     const tab = params.get('tab');
     if (tab) {
       // Clear query parameter from URL history quietly
@@ -1060,6 +1183,8 @@
       if (tabsContainer) tabsContainer.classList.add('hidden');
     }
 
+    updateVersionUI();
+    renderQuickActions();
     renderMyFichas();
 
     if (user.role === 'admin') {
@@ -1074,29 +1199,40 @@
     if (!user) return;
     
     const container = document.getElementById('myFichasGrid');
+    if (!container) return;
     container.innerHTML = '';
 
-    // If Admin, they have access to all character sheets in fichas_v3
-    const ids = user.role === 'admin' ? Object.keys(globalFichasV3) : (user.assignedSheets || []);
+    const isV4 = currentActiveVersion === 'v4';
+    const targetFolder = isV4 ? 'v4' : 'v3';
+    const targetFile = isV4 ? 'ed_sistemav4_ficha.html' : 'ed_sistemav3_ficha.html';
+    const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
+
+    // If Admin, they have access to all character sheets in target version
+    const ids = user.role === 'admin' 
+      ? Object.keys(sourceSheets) 
+      : (user.assignedSheets || []).filter(id => !!sourceSheets[id]);
 
     if (!ids || ids.length === 0) {
-      container.innerHTML = '<div style="grid-column: 1/-1; opacity:0.65; text-align:center; padding: 20px;">Nenhuma ficha disponível. Contate o ADM.</div>';
+      container.innerHTML = `<div style="grid-column: 1/-1; opacity:0.65; text-align:center; padding: 20px;">Nenhuma ficha ${isV4 ? 'v4' : 'v3'} disponível. Contate o ADM.</div>`;
       return;
     }
 
     ids.forEach(id => {
-      const data = globalFichasV3[id];
+      const data = sourceSheets[id];
       if (!data) return; // Wait for firebase sync
 
       const card = document.createElement('div');
       card.className = 'char-card';
+      const verLabel = isV4 ? 'v4' : 'v3';
+      const verBadgeStyle = isV4 ? 'background:rgba(42,204,218,0.2); color:#2accda; border:1px solid rgba(42,204,218,0.4);' : 'background:rgba(204,42,42,0.2); color:#ff9e9e; border:1px solid rgba(204,42,42,0.4);';
+
       card.innerHTML = `
         <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
         <div class="char-card-name">${data.char_name || id}</div>
-        <div class="char-card-level">Nível ${data.nivel || 1}</div>
+        <div class="char-card-level">Nível ${data.nivel || 1} <span style="font-size:0.68rem; padding:1px 5px; border-radius:4px; margin-left:4px; font-weight:bold; ${verBadgeStyle}">${verLabel}</span></div>
       `;
       card.onclick = () => {
-        window.location.href = `ed_sistemav3_ficha.html?p=${id}`;
+        window.location.href = `${targetFolder}/${targetFile}?p=${id}`;
       };
       container.appendChild(card);
     });
@@ -1494,9 +1630,15 @@
   // Listen to remote changes in auth store
   window.onAuthStoreChanged = render;
 
-  // Listen to remote changes in global sheets list
+  // Listen to remote changes in global sheets list (v3 and v4)
   onValue(ref(db, 'fichas_v3'), (snap) => {
     globalFichasV3 = snap.val() || {};
+    renderMyFichas();
+    if (activeEditingUser) renderEditUserFichas();
+  });
+
+  onValue(ref(db, 'fichas_v4'), (snap) => {
+    globalFichasV4 = snap.val() || {};
     renderMyFichas();
     if (activeEditingUser) renderEditUserFichas();
   });
@@ -1505,6 +1647,6 @@
   render();
   handleQueryTab();
 </script>
-<script src="pwa.js" defer></script>
+<script src="configs/pwa.js" defer></script>
 </body>
 </html>

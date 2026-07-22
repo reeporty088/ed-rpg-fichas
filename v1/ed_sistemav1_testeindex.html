@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daggerheart — Ficha de Personagem</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #0e0c0a;
+  --surface:      #171410;
+  --card:         #221e18;
+  --card2:        #2a2520;
+  --border:       #4a4030;
+  --border2:      #6a5a3a;
+  --gold:         #d4b05a;
+  --gold2:        #f0d890;
+  --gold-dim:     #9a7840;
+  --hope:         #6ab8f0;
+  --hope2:        #9ed4ff;
+  --fear:         #e05040;
+  --fear2:        #ff7060;
+  --text:         #f0e8d0;
+  --text2:        #c8b080;
+  --text3:        #9a8860;
+  --hp-col:       #e05040;
+  --stress-col:   #9a5acc;
+  --armor-col:    #4aaa80;
+  --hope-col:     #5a9ad0;
+  --radius:       10px;
+  --radius-sm:    6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 15px;
+  min-height: 100vh;
+  padding: 16px 12px 100px;
+}
+
+/* ── LAYOUT ─────────────────────────── */
+.page-header {
+  text-align: center;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 16px;
+  position: relative;
+}
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(201,168,76,0.35);
+}
+.page-header p {
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.col { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── CARDS ──────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px;
+  position: relative;
+}
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: center;
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 12px;
+}
+.section-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin: 10px 0 5px 2px;
+  display: block;
+}
+
+/* ── INPUTS ─────────────────────────── */
+input[type="text"], input[type="number"], textarea, select {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 5px;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212,176,90,0.12); }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button { -webkit-appearance: none; }
+textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+input::placeholder, textarea::placeholder { color: var(--text3); opacity: 1; }
+label.field-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--text2);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+  margin-left: 2px;
+}
+
+/* ── AVATAR ─────────────────────────── */
+.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.avatar-ring {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-dim);
+  background: #111;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background-size: cover; background-position: center;
+  transition: border-color 0.2s;
+}
+.avatar-ring:hover { border-color: var(--gold); }
+.avatar-ring input[type="file"] {
+  opacity: 0; position: absolute;
+  width: 100%; height: 100%; cursor: pointer; margin: 0; padding: 0;
+}
+.avatar-placeholder { color: var(--text3); font-size: 28px; pointer-events: none; }
+
+.char-name-input {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border2) !important;
+  border-radius: 0 !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  text-align: center;
+  color: var(--gold2) !important;
+  letter-spacing: 1px;
+  padding: 4px 0 !important;
+  margin-bottom: 0 !important;
+}
+.char-name-input:focus { border-bottom-color: var(--gold) !important; }
+
+/* ── IDENTITY GRID ──────────────────── */
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.identity-grid .full { grid-column: 1 / -1; }
+
+/* ── TRAITS (6 ATRIBUTOS) ───────────── */
+.traits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+.trait-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 4px 8px;
+  text-align: center;
+  cursor: default;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.trait-box:hover { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212,176,90,0.12); }
+.trait-val {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold2);
+  line-height: 1;
+  cursor: pointer;
+  min-height: 32px;
+}
+.trait-val-input {
+  width: 60px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  color: var(--gold2) !important;
+  text-align: center;
+  display: none;
+  margin-bottom: 0 !important;
+}
+.trait-name {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ── PROFICIENCY + EVASION ──────────── */
+.prof-evasion {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+.stat-pill {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--border2);
+  border-radius: 30px;
+  padding: 6px 10px;
+  text-align: center;
+}
+.stat-pill .val {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 600;
+  display: block;
+  color: var(--gold2);
+}
+.stat-pill .lbl {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+
+/* ── RESOURCE SLOTS ─────────────────── */
+.resource-block { margin-bottom: 12px; }
+.resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.resource-header .r-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.resource-header .r-counter {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  color: var(--text2);
+}
+.slots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.slot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  position: relative;
+}
+.slot:hover { transform: scale(1.1); }
+.slot.marked { background: currentColor; }
+.slot.marked::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+}
+
+/* slot colors */
+.slot.hp    { color: var(--hp-col); }
+.slot.stress{ color: var(--stress-col); }
+.slot.armor { color: var(--armor-col); border-radius: var(--radius-sm); }
+.slot.hope-s{ color: var(--hope-col); }
+
+/* ── DAMAGE THRESHOLDS ──────────────── */
+.threshold-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+.threshold-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  text-align: center;
+}
+.threshold-box .t-val {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 600;
+  display: block;
+}
+.threshold-box .t-lbl {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.threshold-box.major .t-val { color: #d4a040; }
+.threshold-box.severe .t-val { color: var(--fear2); }
+
+/* ── DICE ROLLER ────────────────────── */
+.dice-area {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.dice-result-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 0 8px;
+}
+.die-display {
+  width: 72px; height: 72px;
+  border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 2px solid;
+  transition: all 0.3s;
+  position: relative;
+}
+.die-display.hope-die {
+  border-color: var(--hope);
+  background: rgba(91,163,217,0.08);
+}
+.die-display.fear-die {
+  border-color: var(--fear);
+  background: rgba(192,68,42,0.08);
+}
+.die-display.winner {
+  box-shadow: 0 0 20px currentColor;
+  transform: scale(1.08);
+}
+.die-val {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+.die-display.hope-die .die-val { color: var(--hope2); }
+.die-display.fear-die  .die-val { color: var(--fear2); }
+.die-tag {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.die-display.hope-die .die-tag { color: var(--hope); }
+.die-display.fear-die  .die-tag { color: var(--fear); }
+
+.roll-total {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.roll-outcome {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.roll-outcome.hope   { color: var(--hope2); }
+.roll-outcome.fear   { color: var(--fear2); }
+.roll-outcome.crit   { color: var(--gold2); }
+
+.trait-select-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.trait-select-row label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+  white-space: nowrap;
+}
+.trait-select-row select {
+  flex: 1;
+  min-width: 100px;
+  margin-bottom: 0;
+}
+.bonus-input {
+  width: 60px !important;
+  text-align: center;
+  margin-bottom: 0 !important;
+}
+.roll-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+  border: 1px solid var(--gold-dim);
+  color: var(--gold2);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.roll-btn:hover { background: rgba(201,168,76,0.2); border-color: var(--gold); }
+.roll-btn:active { transform: scale(0.98); }
+
+@keyframes diceRoll {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(8deg) scale(1.08); }
+  50%  { transform: rotate(-6deg) scale(1.05); }
+  75%  { transform: rotate(4deg) scale(1.06); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.rolling { animation: diceRoll 0.35s ease; }
+
+/* ── HOPE COUNTER (GLOBAL) ──────────── */
+.hope-counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(74,138,192,0.08);
+  border: 1px solid rgba(74,138,192,0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  margin-bottom: 10px;
+}
+.hope-counter-row .hc-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--hope);
+}
+.hope-btns { display: flex; gap: 6px; align-items: center; }
+.btn-sm {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  border-radius: 4px;
+  width: 24px; height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.btn-sm:hover { border-color: var(--gold); color: var(--gold); }
+.hope-val {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  color: var(--hope2);
+  min-width: 28px;
+  text-align: center;
+}
+
+/* ── EXPERIENCES ────────────────────── */
+.exp-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.exp-item input[type="text"] {
+  flex: 1;
+  margin-bottom: 0;
+}
+.exp-bonus {
+  width: 46px !important;
+  text-align: center;
+  margin-bottom: 0 !important;
+  font-family: 'Cinzel', serif !important;
+  color: var(--gold2) !important;
+}
+.btn-icon {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  border-radius: 4px;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-icon:hover { border-color: var(--fear2); color: var(--fear2); }
+.btn-icon.add:hover { border-color: var(--armor-col); color: var(--armor-col); }
+
+/* ── ABILITIES / HABILIDADES ─────────── */
+.ability-item {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.ability-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+}
+.ability-toggle {
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  user-select: none;
+}
+.ability-toggle.open { transform: rotate(90deg); }
+.ability-title {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid transparent !important;
+  font-family: 'Crimson Pro', serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  padding: 2px 4px !important;
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+  transition: border-color 0.2s !important;
+}
+.ability-title:focus { border-bottom-color: var(--gold-dim) !important; }
+.ability-tag {
+  width: 72px !important;
+  text-align: center;
+  font-size: 12px !important;
+  color: var(--text2) !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0;
+}
+.ability-body {
+  padding: 8px;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+.ability-body.open { display: block; }
+.ability-body textarea {
+  width: 100%;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+/* ── WEAPONS ────────────────────────── */
+.weapon-item {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.weapon-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.weapon-row input { margin-bottom: 0; }
+.weapon-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 5px;
+}
+.weapon-stats input { margin-bottom: 0; font-size: 12px !important; }
+
+/* ── INVENTORY ──────────────────────── */
+.inv-item {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+}
+.inv-item input[type="text"] { flex: 1; margin-bottom: 0; }
+.inv-qty {
+  width: 46px !important;
+  text-align: center;
+  margin-bottom: 0 !important;
+}
+
+/* ── BOTTOM NAV (MOBILE) ─────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0;
+  width: 100%;
+  background: rgba(14,12,10,0.95);
+  border-top: 1px solid var(--border2);
+  padding: 10px 0;
+  justify-content: center;
+  gap: 30px;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+.nav-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); transition: color 0.2s; padding: 4px 12px;
+  font-family: 'Crimson Pro', serif;
+}
+.nav-tab.active { color: var(--gold); }
+.nav-tab .nav-icon { font-size: 18px; }
+.nav-tab .nav-lbl { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── DIVIDER ────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 10px 0;
+}
+
+/* ── LEVEL + XP ─────────────────────── */
+.level-xp-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.level-box {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  min-width: 70px;
+}
+.level-box .lv-val {
+  font-family: 'Cinzel', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--gold2);
+}
+.level-box .lv-lbl {
+  font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text2);
+}
+.xp-area { flex: 1; }
+.xp-bar-bg {
+  height: 8px; background: rgba(0,0,0,0.4);
+  border-radius: 4px; border: 1px solid var(--border2);
+  overflow: hidden; margin-bottom: 4px;
+}
+.xp-bar-fill {
+  height: 100%; background: var(--gold);
+  border-radius: 4px; transition: width 0.4s ease;
+  width: 0%;
+}
+.xp-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.xp-row input[type="number"] {
+  width: 60px; text-align: center; margin-bottom: 0;
+  font-family: 'Cinzel', serif !important;
+}
+.xp-row span { font-size: 11px; color: var(--text2); }
+.btn-level {
+  padding: 4px 10px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.btn-level:hover { background: rgba(201,168,76,0.2); }
+
+/* ── SCARS / HOPE SLOTS ─────────────── */
+.hope-scar-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.scar-slot {
+  width: 26px; height: 26px;
+  border: 1.5px solid var(--hope-col);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.scar-slot.scarred {
+  background: var(--hope-col);
+  opacity: 0.35;
+}
+.scar-slot.scarred::after {
+  content: '✕';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--text);
+}
+
+/* ── ADD BUTTON ─────────────────────── */
+.btn-add-row {
+  width: 100%;
+  padding: 6px;
+  background: transparent;
+  border: 1px dashed var(--border2);
+  color: var(--text2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.btn-add-row:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ── RESPONSIVE ─────────────────────── */
+@media (max-width: 900px) {
+  .container { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .container { display: block; }
+  .col { display: none; }
+  .col.active { display: flex; }
+  .mobile-nav { display: flex; }
+  body { padding-bottom: 80px; }
+  @keyframes fadeCol { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .col.active { animation: fadeCol 0.25s ease; }
+}
+</style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+<div class="page-header">
+  <h1>DAGGERHEART</h1>
+  <p>Character Sheet</p>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════
+       COLUNA 0 — IDENTIDADE & STATUS
+  ══════════════════════════════════ -->
+  <div class="col active" id="col-0">
+
+    <!-- Avatar + Nome -->
+    <div class="card">
+      <div class="card-title">Personagem</div>
+      <div class="avatar-wrap">
+        <div class="avatar-ring" id="avatar-display">
+          <span class="avatar-placeholder">⚔</span>
+          <input type="file" id="img-upload" accept="image/*">
+        </div>
+        <input type="text" id="char-name" class="char-name-input" placeholder="Nome do Personagem">
+      </div>
+
+      <div class="identity-grid">
+        <div>
+          <label class="field-label">Pronomes</label>
+          <input type="text" id="pronouns" placeholder="ele/dela">
+        </div>
+        <div>
+          <label class="field-label">Nível</label>
+          <input type="number" id="level-display" value="1" min="1" max="10">
+        </div>
+        <div class="full">
+          <label class="field-label">Classe</label>
+          <input type="text" id="char-class" placeholder="ex: Guerreiro, Mago...">
+        </div>
+        <div>
+          <label class="field-label">Subclasse</label>
+          <input type="text" id="char-subclass" placeholder="Foundation...">
+        </div>
+        <div>
+          <label class="field-label">Ancestralidade</label>
+          <input type="text" id="ancestry" placeholder="ex: Humano, Faerie...">
+        </div>
+        <div class="full">
+          <label class="field-label">Comunidade</label>
+          <input type="text" id="community" placeholder="ex: Wanderborne, Highborne...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Traços (6 atributos) -->
+    <div class="card">
+      <div class="card-title">Traços</div>
+      <div class="traits-grid">
+        <div class="trait-box" id="trait-box-agility">
+          <span class="trait-val" id="tv-agility" onclick="startEditTrait('agility')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-agility" min="-4" max="5"
+                 onblur="stopEditTrait('agility')" onkeydown="traitKey(event,'agility')">
+          <span class="trait-name">Agilidade</span>
+        </div>
+        <div class="trait-box" id="trait-box-strength">
+          <span class="trait-val" id="tv-strength" onclick="startEditTrait('strength')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-strength" min="-4" max="5"
+                 onblur="stopEditTrait('strength')" onkeydown="traitKey(event,'strength')">
+          <span class="trait-name">Força</span>
+        </div>
+        <div class="trait-box" id="trait-box-finesse">
+          <span class="trait-val" id="tv-finesse" onclick="startEditTrait('finesse')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-finesse" min="-4" max="5"
+                 onblur="stopEditTrait('finesse')" onkeydown="traitKey(event,'finesse')">
+          <span class="trait-name">Finesse</span>
+        </div>
+        <div class="trait-box" id="trait-box-instinct">
+          <span class="trait-val" id="tv-instinct" onclick="startEditTrait('instinct')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-instinct" min="-4" max="5"
+                 onblur="stopEditTrait('instinct')" onkeydown="traitKey(event,'instinct')">
+          <span class="trait-name">Instinto</span>
+        </div>
+        <div class="trait-box" id="trait-box-presence">
+          <span class="trait-val" id="tv-presence" onclick="startEditTrait('presence')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-presence" min="-4" max="5"
+                 onblur="stopEditTrait('presence')" onkeydown="traitKey(event,'presence')">
+          <span class="trait-name">Presença</span>
+        </div>
+        <div class="trait-box" id="trait-box-knowledge">
+          <span class="trait-val" id="tv-knowledge" onclick="startEditTrait('knowledge')">+0</span>
+          <input type="number" class="trait-val-input" id="ti-knowledge" min="-4" max="5"
+                 onblur="stopEditTrait('knowledge')" onkeydown="traitKey(event,'knowledge')">
+          <span class="trait-name">Conhecimento</span>
+        </div>
+      </div>
+
+      <div class="prof-evasion">
+        <div class="stat-pill">
+          <span class="val" id="disp-proficiency">+1</span>
+          <span class="lbl">Proficiência</span>
+        </div>
+        <div class="stat-pill">
+          <input type="number" id="evasion" value="10" style="font-family:'Cinzel',serif;font-size:20px;font-weight:600;text-align:center;background:transparent;border:none;color:var(--gold2);width:60px;margin:0 auto 0;padding:0;display:block;">
+          <span class="lbl">Evasão</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HP e Stress -->
+    <div class="card">
+      <div class="card-title">Dano & Saúde</div>
+
+      <!-- HP -->
+      <div class="resource-block">
+        <div class="resource-header">
+          <span class="r-label" style="color:var(--hp-col);">Pontos de Vida</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button class="btn-sm" onclick="addSlot('hp')">+</button>
+            <button class="btn-sm" onclick="removeSlot('hp')">−</button>
+          </div>
+        </div>
+        <div class="slots-row" id="hp-slots"></div>
+      </div>
+
+      <!-- Stress -->
+      <div class="resource-block">
+        <div class="resource-header">
+          <span class="r-label" style="color:var(--stress-col);">Stress</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button class="btn-sm" onclick="addSlot('stress')">+</button>
+            <button class="btn-sm" onclick="removeSlot('stress')">−</button>
+          </div>
+        </div>
+        <div class="slots-row" id="stress-slots"></div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Armor -->
+      <div class="resource-block">
+        <div class="resource-header">
+          <span class="r-label" style="color:var(--armor-col);">Armadura</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button class="btn-sm" onclick="addSlot('armor')">+</button>
+            <button class="btn-sm" onclick="removeSlot('armor')">−</button>
+          </div>
+        </div>
+        <div class="slots-row" id="armor-slots"></div>
+        <div style="margin-top:8px;">
+          <label class="field-label">Armadura equipada</label>
+          <input type="text" id="armor-name" placeholder="Nome e feature da armadura">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Damage Thresholds -->
+      <span class="section-label">Limiares de Dano</span>
+      <div class="threshold-row">
+        <div class="threshold-box major">
+          <input type="number" id="threshold-major" value="10"
+            style="background:transparent;border:none;font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:#d4a040;width:60px;text-align:center;margin:0 auto;display:block;padding:0;">
+          <span class="t-lbl">Major (2 HP)</span>
+        </div>
+        <div class="threshold-box severe">
+          <input type="number" id="threshold-severe" value="20"
+            style="background:transparent;border:none;font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:var(--fear2);width:60px;text-align:center;margin:0 auto;display:block;padding:0;">
+          <span class="t-lbl">Severe (3 HP)</span>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text2);text-align:center;margin-top:4px;">
+        Dano abaixo do Major = 1 HP · marque Armor para reduzir 1 nível
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════
+       COLUNA 1 — ROLAGEM & HABILIDADES
+  ══════════════════════════════════ -->
+  <div class="col" id="col-1">
+
+    <!-- Hope -->
+    <div class="card">
+      <div class="card-title">Esperança & Cicatrizes</div>
+      <div class="hope-counter-row">
+        <span class="hc-label">✦ Esperança Atual</span>
+        <div class="hope-btns">
+          <button class="btn-sm" onclick="changeHope(-1)">−</button>
+          <span class="hope-val" id="hope-val">2</span>
+          <button class="btn-sm" onclick="changeHope(1)">+</button>
+        </div>
+      </div>
+      <span class="section-label">Slots de Esperança (cicatrizes riscam permanentemente)</span>
+      <div class="hope-scar-row" id="hope-scar-row">
+        <!-- renderizado pelo JS -->
+      </div>
+    </div>
+
+    <!-- Rolagem de Dados -->
+    <div class="card">
+      <div class="card-title">Rolar Dados de Dualidade</div>
+
+      <div class="trait-select-row">
+        <label>Traço</label>
+        <select id="roll-trait">
+          <option value="agility">Agilidade</option>
+          <option value="strength">Força</option>
+          <option value="finesse">Finesse</option>
+          <option value="instinct">Instinto</option>
+          <option value="presence">Presença</option>
+          <option value="knowledge">Conhecimento</option>
+        </select>
+        <label>Bônus</label>
+        <input type="number" class="bonus-input" id="roll-bonus" value="0">
+      </div>
+
+      <div class="dice-area">
+        <div class="dice-result-row">
+          <div class="die-display hope-die" id="hope-die">
+            <span class="die-val" id="hope-die-val">—</span>
+            <span class="die-tag">Esperança</span>
+          </div>
+          <div class="die-display fear-die" id="fear-die">
+            <span class="die-val" id="fear-die-val">—</span>
+            <span class="die-tag">Medo</span>
+          </div>
+        </div>
+        <div class="roll-total" id="roll-total-text"></div>
+        <div class="roll-outcome" id="roll-outcome"></div>
+      </div>
+
+      <button class="roll-btn" onclick="rollDuality()">⬡ Rolar d12 + d12</button>
+    </div>
+
+    <!-- Experiences -->
+    <div class="card">
+      <div class="card-title">Experiências</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">
+        Gaste 1 Esperança para adicionar o bônus de uma Experiência relevante à rolagem.
+      </p>
+      <div id="exp-list"></div>
+      <button class="btn-add-row" onclick="addExperience()">+ Adicionar Experiência</button>
+    </div>
+
+    <!-- Habilidades de Classe -->
+    <div class="card">
+      <div class="card-title">Habilidades de Classe & Subclasse</div>
+      <div id="class-abilities-list"></div>
+      <button class="btn-add-row" onclick="addAbility('class')">+ Adicionar Habilidade</button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════
+       COLUNA 2 — DOMÍNIOS, ARMAS, XP
+  ══════════════════════════════════ -->
+  <div class="col" id="col-2">
+
+    <!-- Ancestralidade & Comunidade (habilidades) -->
+    <div class="card">
+      <div class="card-title">Ancestralidade & Comunidade</div>
+      <span class="section-label">Habilidade de Ancestralidade</span>
+      <div id="ancestry-abilities-list"></div>
+      <button class="btn-add-row" onclick="addAbility('ancestry')">+ Adicionar</button>
+      <hr class="divider">
+      <span class="section-label">Habilidade de Comunidade</span>
+      <div id="community-abilities-list"></div>
+      <button class="btn-add-row" onclick="addAbility('community')">+ Adicionar</button>
+    </div>
+
+    <!-- Domain Cards -->
+    <div class="card">
+      <div class="card-title">Cards de Domínio</div>
+      <div id="domain-cards-list"></div>
+      <button class="btn-add-row" onclick="addAbility('domain')">+ Adicionar Card</button>
+    </div>
+
+    <!-- Armas -->
+    <div class="card">
+      <div class="card-title">Armas Ativas</div>
+      <div id="weapons-list"></div>
+      <button class="btn-add-row" onclick="addWeapon()">+ Adicionar Arma</button>
+    </div>
+
+    <!-- Nível e XP -->
+    <div class="card">
+      <div class="card-title">Nível & Progressão</div>
+      <div class="level-xp-row">
+        <div class="level-box">
+          <span class="lv-val" id="level-big">1</span>
+          <span class="lv-lbl">Nível</span>
+        </div>
+        <div class="xp-area">
+          <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar"></div></div>
+          <div class="xp-row">
+            <input type="number" id="xp-current" value="0" min="0" placeholder="XP" oninput="updateXP()">
+            <span>/</span>
+            <input type="number" id="xp-needed" value="10" min="1" placeholder="Meta">
+            <button class="btn-level" onclick="levelUp()">Level Up</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notas -->
+    <div class="card">
+      <div class="card-title">Notas & Histórico</div>
+      <textarea id="notes" style="min-height:160px;" placeholder="Background, vínculos, notas de sessão..."></textarea>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <button class="nav-tab active" id="nav-0" onclick="switchCol(0)">
+    <span class="nav-icon">⚔</span>
+    <span class="nav-lbl">Status</span>
+  </button>
+  <button class="nav-tab" id="nav-1" onclick="switchCol(1)">
+    <span class="nav-icon">⬡</span>
+    <span class="nav-lbl">Rolar</span>
+  </button>
+  <button class="nav-tab" id="nav-2" onclick="switchCol(2)">
+    <span class="nav-icon">✦</span>
+    <span class="nav-lbl">Poderes</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FIREBASE + LÓGICA
+═══════════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, update, onValue, remove, push, set }
+                                    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+/* ── FIREBASE CONFIG ── substitua pelos seus dados ── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhWQ",
+  authDomain:        "ed-rpg---sistema-de-fichas.firebaseapp.com",
+  databaseURL:       "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+  projectId:         "ed-rpg---sistema-de-fichas",
+  storageBucket:     "ed-rpg---sistema-de-fichas.firebasestorage.app",
+  messagingSenderId: "350999444010",
+  appId:             "1:350999444010:web:d89f31d13e449b8fbfa153"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+const params  = new URLSearchParams(window.location.search);
+const fichaID = params.get('p') || 'personagem_padrao';
+const dbRef   = () => ref(db, 'daggerheart/' + fichaID);
+
+let G = {}; // estado global da ficha
+
+// ── HELPERS ──────────────────────────────────────────────
+function save(payload) { update(dbRef(), payload); }
+function el(id) { return document.getElementById(id); }
+
+// ── MOBILE NAV ────────────────────────────────────────────
+window.switchCol = (idx) => {
+  document.querySelectorAll('.col').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+};
+
+// ── TRAITS ───────────────────────────────────────────────
+const TRAITS = ['agility','strength','finesse','instinct','presence','knowledge'];
+window.startEditTrait = (t) => {
+  const raw = parseInt(G['trait_' + t]) || 0;
+  el('tv-' + t).style.display = 'none';
+  const inp = el('ti-' + t);
+  inp.style.display = 'block';
+  inp.value = raw;
+  inp.focus(); inp.select();
+};
+window.stopEditTrait = (t) => {
+  const inp = el('ti-' + t);
+  const val = parseInt(inp.value) || 0;
+  inp.style.display = 'none';
+  el('tv-' + t).style.display = 'block';
+  el('tv-' + t).textContent = (val >= 0 ? '+' : '') + val;
+  G['trait_' + t] = val;
+  save({ ['trait_' + t]: val });
+};
+window.traitKey = (e, t) => {
+  if (e.key === 'Enter' || e.key === 'Escape') stopEditTrait(t);
+};
+
+// ── SLOTS GENÉRICOS ───────────────────────────────────────
+function renderSlots(type) {
+  const total  = G[type + '_total']  ?? defaultSlots(type);
+  const marked = G[type + '_marked'] ?? 0;
+  const row    = el(type + '-slots');
+  if (!row) return;
+  row.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const s = document.createElement('div');
+    s.className = 'slot ' + type + (i < marked ? ' marked' : '');
+    s.onclick = () => toggleSlot(type, i, total, marked);
+    row.appendChild(s);
+  }
+}
+function defaultSlots(t) {
+  if (t === 'hp') return 6;
+  if (t === 'stress') return 6;
+  if (t === 'armor') return 0;
+  return 5;
+}
+window.addSlot = (t) => {
+  const n = (G[t + '_total'] ?? defaultSlots(t)) + 1;
+  G[t + '_total'] = n; save({ [t + '_total']: n }); renderSlots(t);
+};
+window.removeSlot = (t) => {
+  const cur = G[t + '_total'] ?? defaultSlots(t);
+  if (cur <= 0) return;
+  const n = cur - 1;
+  const m = Math.min(G[t + '_marked'] ?? 0, n);
+  G[t + '_total'] = n; G[t + '_marked'] = m;
+  save({ [t + '_total']: n, [t + '_marked']: m }); renderSlots(t);
+};
+function toggleSlot(type, idx, total, marked) {
+  let newMarked;
+  if (idx < marked) {
+    newMarked = idx; // desmarcar até aqui
+  } else {
+    newMarked = idx + 1; // marcar até aqui
+  }
+  G[type + '_marked'] = newMarked;
+  save({ [type + '_marked']: newMarked });
+  renderSlots(type);
+}
+
+// ── HOPE ─────────────────────────────────────────────────
+function renderHopeScars() {
+  const total   = G.hope_slots_total ?? 6;
+  const scarred = G.hope_slots_scarred ?? 0;
+  const row     = el('hope-scar-row');
+  if (!row) return;
+  row.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const s = document.createElement('div');
+    s.className = 'scar-slot' + (i >= total - scarred ? ' scarred' : '');
+    s.title = i >= total - scarred ? 'Cicatriz permanente' : 'Slot ativo';
+    s.onclick = () => {
+      if (i >= total - scarred) return;
+      if (!confirm('Cicatrizar permanentemente este slot de Esperança?')) return;
+      const ns = (G.hope_slots_scarred ?? 0) + 1;
+      G.hope_slots_scarred = ns;
+      const maxHope = total - ns;
+      const curHope = Math.min(G.hope_current ?? 2, maxHope);
+      G.hope_current = curHope;
+      save({ hope_slots_scarred: ns, hope_current: curHope });
+      renderHopeScars();
+      el('hope-val').textContent = curHope;
+    };
+    row.appendChild(s);
+  }
+}
+window.changeHope = (d) => {
+  const max  = (G.hope_slots_total ?? 6) - (G.hope_slots_scarred ?? 0);
+  const cur  = G.hope_current ?? 2;
+  const nv   = Math.max(0, Math.min(max, cur + d));
+  G.hope_current = nv;
+  el('hope-val').textContent = nv;
+  save({ hope_current: nv });
+};
+
+// ── DICE ROLLER ───────────────────────────────────────────
+window.rollDuality = () => {
+  const trait  = el('roll-trait').value;
+  const mod    = parseInt(G['trait_' + trait]) || 0;
+  const bonus  = parseInt(el('roll-bonus').value) || 0;
+  const h      = Math.ceil(Math.random() * 12);
+  const f      = Math.ceil(Math.random() * 12);
+  const total  = h + f + mod + bonus;
+
+  // animate
+  [el('hope-die'), el('fear-die')].forEach(d => {
+    d.classList.remove('rolling'); void d.offsetWidth;
+    d.classList.add('rolling');
+    setTimeout(() => d.classList.remove('rolling'), 380);
+  });
+
+  setTimeout(() => {
+    el('hope-die-val').textContent = h;
+    el('fear-die-val').textContent = f;
+
+    el('hope-die').classList.remove('winner');
+    el('fear-die').classList.remove('winner');
+
+    let outcomeText = '';
+    let outcomeClass = '';
+    if (h === f) {
+      outcomeText = '✦ Crítico!';
+      outcomeClass = 'crit';
+      el('hope-die').classList.add('winner');
+      el('fear-die').classList.add('winner');
+    } else if (h > f) {
+      outcomeText = '✦ Rolagem com Esperança';
+      outcomeClass = 'hope';
+      el('hope-die').classList.add('winner');
+    } else {
+      outcomeText = '✧ Rolagem com Medo';
+      outcomeClass = 'fear';
+      el('fear-die').classList.add('winner');
+    }
+
+    const traitLabel = el('roll-trait').options[el('roll-trait').selectedIndex].text;
+    const bonusLabel = bonus !== 0 ? (bonus > 0 ? ' +' + bonus : ' ' + bonus) : '';
+    el('roll-total-text').textContent =
+      `(${h} + ${f}) + ${traitLabel}(${mod >= 0 ? '+' + mod : mod})${bonusLabel} = ${total}`;
+    el('roll-outcome').textContent = outcomeText;
+    el('roll-outcome').className = 'roll-outcome ' + outcomeClass;
+  }, 360);
+};
+
+// ── EXPERIENCES ───────────────────────────────────────────
+window.addExperience = () => {
+  const data = { name: '', bonus: 2 };
+  const r    = push(ref(db, 'daggerheart/' + fichaID + '/experiences'));
+  set(r, data);
+};
+function renderExperiences(data) {
+  const list = el('exp-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!data) return;
+  Object.keys(data).forEach(id => {
+    const item = data[id];
+    const row  = document.createElement('div');
+    row.className = 'exp-item';
+    row.innerHTML = `
+      <input type="text" value="${item.name || ''}" placeholder="Experiência…"
+             onchange="saveExp('${id}','name',this.value)">
+      <input type="number" class="exp-bonus" value="${item.bonus ?? 2}"
+             onchange="saveExp('${id}','bonus',this.value)">
+      <button class="btn-icon" onclick="removeExp('${id}')">✕</button>`;
+    list.appendChild(row);
+  });
+}
+window.saveExp = (id, field, val) => {
+  update(ref(db, 'daggerheart/' + fichaID + '/experiences/' + id), { [field]: val });
+};
+window.removeExp = (id) => {
+  if (confirm('Remover experiência?'))
+    remove(ref(db, 'daggerheart/' + fichaID + '/experiences/' + id));
+};
+
+// ── ABILITIES (habilidades genéricas) ─────────────────────
+window.addAbility = (cat) => {
+  const r = push(ref(db, 'daggerheart/' + fichaID + '/abilities/' + cat));
+  set(r, { title: '', tag: '', desc: '' });
+};
+function renderAbilities(cat, data) {
+  const listId = {
+    class: 'class-abilities-list',
+    ancestry: 'ancestry-abilities-list',
+    community: 'community-abilities-list',
+    domain: 'domain-cards-list'
+  }[cat];
+  const list = el(listId);
+  if (!list) return;
+  list.innerHTML = '';
+  if (!data) return;
+  Object.keys(data).forEach(id => {
+    const item   = data[id];
+    const bodyId = 'abody-' + cat + '-' + id;
+    const togId  = 'atog-' + cat + '-' + id;
+    const div    = document.createElement('div');
+    div.className = 'ability-item';
+    div.innerHTML = `
+      <div class="ability-header">
+        <span class="ability-toggle" id="${togId}" onclick="toggleAbilityBody('${bodyId}','${togId}')">▶</span>
+        <input type="text" class="ability-title" value="${item.title || ''}"
+               placeholder="Nome da habilidade…"
+               onchange="saveAbility('${cat}','${id}','title',this.value)">
+        <input type="text" class="ability-tag" value="${item.tag || ''}"
+               placeholder="Ação / Passivo…"
+               onchange="saveAbility('${cat}','${id}','tag',this.value)">
+        <button class="btn-icon" onclick="removeAbility('${cat}','${id}')">✕</button>
+      </div>
+      <div class="ability-body" id="${bodyId}">
+        <textarea placeholder="Descrição da habilidade…"
+                  onchange="saveAbility('${cat}','${id}','desc',this.value)">${item.desc || ''}</textarea>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+window.toggleAbilityBody = (bodyId, togId) => {
+  const b = el(bodyId); const t = el(togId);
+  const open = b.classList.toggle('open');
+  t.classList.toggle('open', open);
+};
+window.saveAbility = (cat, id, field, val) => {
+  update(ref(db, 'daggerheart/' + fichaID + '/abilities/' + cat + '/' + id), { [field]: val });
+};
+window.removeAbility = (cat, id) => {
+  if (confirm('Remover habilidade?'))
+    remove(ref(db, 'daggerheart/' + fichaID + '/abilities/' + cat + '/' + id));
+};
+
+// ── WEAPONS ───────────────────────────────────────────────
+window.addWeapon = () => {
+  const r = push(ref(db, 'daggerheart/' + fichaID + '/weapons'));
+  set(r, { name: '', trait: '', range: '', damage: '', feature: '' });
+};
+function renderWeapons(data) {
+  const list = el('weapons-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!data) return;
+  Object.keys(data).forEach(id => {
+    const w   = data[id];
+    const div = document.createElement('div');
+    div.className = 'weapon-item';
+    div.innerHTML = `
+      <div class="weapon-row">
+        <input type="text" value="${w.name || ''}" placeholder="Nome da arma…"
+               style="margin:0;" onchange="saveWeapon('${id}','name',this.value)">
+        <button class="btn-icon" onclick="removeWeapon('${id}')">✕</button>
+      </div>
+      <div class="weapon-stats">
+        <div>
+          <label class="field-label" style="font-size:11px;">Traço</label>
+          <input type="text" value="${w.trait || ''}" placeholder="Finesse…"
+                 onchange="saveWeapon('${id}','trait',this.value)">
+        </div>
+        <div>
+          <label class="field-label" style="font-size:11px;">Alcance</label>
+          <input type="text" value="${w.range || ''}" placeholder="Melee…"
+                 onchange="saveWeapon('${id}','range',this.value)">
+        </div>
+        <div>
+          <label class="field-label" style="font-size:11px;">Dano</label>
+          <input type="text" value="${w.damage || ''}" placeholder="d8+3…"
+                 onchange="saveWeapon('${id}','damage',this.value)">
+        </div>
+      </div>
+      <div>
+        <label class="field-label" style="font-size:11px;margin-top:4px;">Feature</label>
+        <input type="text" value="${w.feature || ''}" placeholder="Efeito especial…"
+               onchange="saveWeapon('${id}','feature',this.value)" style="margin:0;">
+      </div>`;
+    list.appendChild(div);
+  });
+}
+window.saveWeapon = (id, field, val) => {
+  update(ref(db, 'daggerheart/' + fichaID + '/weapons/' + id), { [field]: val });
+};
+window.removeWeapon = (id) => {
+  if (confirm('Remover arma?'))
+    remove(ref(db, 'daggerheart/' + fichaID + '/weapons/' + id));
+};
+
+// ── XP ────────────────────────────────────────────────────
+window.updateXP = () => {
+  const cur    = parseInt(el('xp-current').value) || 0;
+  const needed = parseInt(el('xp-needed').value) || 10;
+  const pct    = Math.min(100, (cur / needed) * 100);
+  el('xp-bar').style.width = pct + '%';
+  save({ xp_current: cur, xp_needed: needed });
+};
+window.levelUp = () => {
+  const lv = (parseInt(G.level) || 1) + 1;
+  if (lv > 10) { alert('Nível máximo atingido!'); return; }
+  G.level = lv;
+  el('level-big').textContent = lv;
+  el('level-display').value = lv;
+  save({ level: lv, xp_current: 0 });
+  el('xp-current').value = 0;
+  updateXP();
+};
+
+// ── SIMPLE TEXT FIELDS ────────────────────────────────────
+const TEXT_FIELDS = [
+  'char-name','pronouns','level-display','char-class','char-subclass',
+  'ancestry','community','armor-name','evasion',
+  'threshold-major','threshold-severe','notes'
+];
+TEXT_FIELDS.forEach(id => {
+  const inp = el(id);
+  if (!inp) return;
+  inp.addEventListener('input', () => {
+    save({ [id.replace(/-/g, '_')]: inp.value });
+  });
+});
+
+// ── LOAD FROM FIREBASE ────────────────────────────────────
+onValue(dbRef(), (snap) => {
+  const d = snap.val();
+  if (!d) { initDefaults(); return; }
+  G = d;
+
+  // text fields
+  TEXT_FIELDS.forEach(id => {
+    const inp = el(id);
+    if (!inp || document.activeElement === inp) return;
+    if (d[id.replace(/-/g, '_')] !== undefined)
+      inp.value = d[id.replace(/-/g, '_')];
+  });
+
+  // level
+  const lv = d.level || 1;
+  el('level-big').textContent = lv;
+
+  // traits
+  TRAITS.forEach(t => {
+    const val = d['trait_' + t] ?? 0;
+    el('tv-' + t).textContent = (val >= 0 ? '+' : '') + val;
+  });
+
+  // slots
+  ['hp','stress','armor'].forEach(renderSlots);
+
+  // hope
+  el('hope-val').textContent = d.hope_current ?? 2;
+  renderHopeScars();
+
+  // proficiency
+  const prof = d.proficiency ?? 1;
+  el('disp-proficiency').textContent = '+' + prof;
+
+  // xp
+  if (d.xp_current !== undefined) el('xp-current').value = d.xp_current;
+  if (d.xp_needed  !== undefined) el('xp-needed').value  = d.xp_needed;
+  updateXP();
+
+  // lists
+  renderExperiences(d.experiences);
+  renderAbilities('class',     d.abilities?.class);
+  renderAbilities('ancestry',  d.abilities?.ancestry);
+  renderAbilities('community', d.abilities?.community);
+  renderAbilities('domain',    d.abilities?.domain);
+  renderWeapons(d.weapons);
+
+  // avatar
+  if (d.char_img)
+    el('avatar-display').style.backgroundImage = `url(${d.char_img})`;
+});
+
+function initDefaults() {
+  save({
+    char_name: '', level: 1,
+    hp_total: 6, hp_marked: 0,
+    stress_total: 6, stress_marked: 0,
+    armor_total: 0, armor_marked: 0,
+    hope_current: 2, hope_slots_total: 6, hope_slots_scarred: 0,
+    xp_current: 0, xp_needed: 10,
+    proficiency: 1, evasion: 10,
+    threshold_major: 10, threshold_severe: 20
+  });
+}
+
+// ── AVATAR UPLOAD ─────────────────────────────────────────
+el('img-upload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (re) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 320;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+      else        { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const url = canvas.toDataURL('image/jpeg', 0.72);
+      el('avatar-display').style.backgroundImage = `url(${url})`;
+      el('avatar-display').querySelector('.avatar-placeholder').style.display = 'none';
+      save({ char_img: url });
+    };
+    img.src = re.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

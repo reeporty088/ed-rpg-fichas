@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco de Dados V3 - Escória de Deus</title>
+  <style>
+    :root { --bg:#0a0a0a; --text:#eee4d5; --main:#7a1a1a; --light:#e8a090; --card:#1a0a08; --border:#4a1a18; --input:#120605; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:16px; font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
+    h1 { text-align:center; color:var(--light); margin:0 0 16px; text-transform:uppercase; letter-spacing:2px; }
+    .container { max-width:1280px; margin:0 auto; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .tab-btn { background:#1b1110; border:1px solid var(--border); color:#bda7a4; border-radius:8px; padding:10px 14px; cursor:pointer; font-weight:700; }
+    .tab-btn.active { background:var(--main); color:#fff; border-color:var(--light); }
+    .card { background:linear-gradient(160deg,var(--card),#0d0604); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .btn { border:1px solid var(--border); background:#1f1413; color:#f2d9d3; border-radius:7px; padding:8px 12px; cursor:pointer; font-weight:700; }
+    .btn:hover { border-color:var(--light); }
+    .btn-add { background:#1b4d2f; border-color:#2f7a4e; color:#b6efc7; }
+    .btn-warn { background:#66460d; border-color:#9b7433; color:#ffe5af; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+    .item { background:rgba(0,0,0,.3); border:1px solid #37201e; border-radius:10px; padding:10px; }
+    .item h4 { margin:0 0 6px; color:var(--light); }
+    .meta { font-size:12px; color:#bca8a5; margin-bottom:6px; }
+    .desc { white-space:pre-wrap; font-size:13px; color:#d6c8c4; line-height:1.4; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    .btn-edit { background:#66460d; border-color:#9b7433; color:#ffe5af; }
+    .btn-del { background:#5a1515; border-color:#8a2525; color:#ffc3c3; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); align-items:center; justify-content:center; padding:16px; }
+    .modal.open { display:flex; }
+    .box { width:min(820px,100%); max-height:90vh; overflow-y:auto; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    label { font-size:11px; font-weight:700; color:var(--light); text-transform:uppercase; margin:8px 0 4px; display:block; }
+    input, textarea, select { width:100%; border-radius:7px; border:1px solid #3a2422; background:var(--input); color:var(--text); padding:8px; }
+    textarea { min-height:80px; resize:vertical; }
+    .hidden { display:none; }
+    .hint { font-size:12px; color:#c9b2ae; }
+    .logic-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:12px; }
+    .logic-canvas { position:relative; height:75vh; min-height:640px; overflow:auto; border:1px solid var(--border); border-radius:12px; background:radial-gradient(circle at top,#160b0a,#050303 58%); cursor: grab; touch-action: none; }
+    .logic-canvas:active { cursor: grabbing; }
+    .logic-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+    .logic-node { position:absolute; width:172px; min-height:86px; border:1px solid #70403c; border-radius:12px; background:linear-gradient(160deg,#21100e,#0c0504); padding:10px; cursor:move; box-shadow:0 10px 24px #0009; user-select:none; touch-action: none; }
+    .logic-node.selected { border-color:var(--light); box-shadow:0 0 0 2px #e8a09033,0 10px 24px #0009; }
+    .logic-node.final { border-color:#61b36f; }
+    .logic-node.start { border-color:#78b9ff; }
+    .logic-node-title { color:var(--light); font-weight:800; font-size:13px; margin-bottom:5px; }
+    .logic-node-meta { color:#9ebbd4; font-size:11px; }
+    .logic-node-desc { color:#bca8a5; font-size:11px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .logic-side { border:1px solid var(--border); border-radius:12px; padding:12px; background:#090404; align-self:start; }
+    .logic-help { color:#c9b2ae; font-size:12px; line-height:1.45; margin-bottom:10px; }
+    .logic-edges { display:flex; flex-direction:column; gap:7px; margin-top:8px; }
+    .logic-edge-row { display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; }
+    .logic-node-actions { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+    @media (max-width:900px){ .logic-layout{grid-template-columns:1fr;} .logic-side{order:-1;} }
+
+    /* Sidebar CSS */
+    .sidebar-trigger {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1900;
+      background: #140807;
+      border: 1px solid #5c1c22;
+      color: #eee4d5;
+      border-radius: 6px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    }
+    .sidebar-trigger:hover {
+      border-color: #cc2a2a;
+      color: #cc2a2a;
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1999;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-backdrop.open { display: block; }
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      height: 100%;
+      background: rgba(19, 9, 9, 0.98);
+      border-right: 1px solid #5c1c22;
+      box-shadow: 5px 0 25px rgba(0,0,0,0.85);
+      z-index: 2000;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+    .sidebar-nav.open { left: 0; }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(92,28,34,0.4);
+      margin-bottom: 20px;
+    }
+    .sidebar-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5a1212, #1a0505);
+      border: 2px solid #5c1c22;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .sidebar-user-name {
+      font-family: 'Cinzel', serif, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #eee4d5;
+    }
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #9a8585;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(155,26,26,0.15);
+      color: #eee4d5;
+      border-left: 3px solid #cc2a2a;
+    }
+    .sidebar-footer {
+      padding-top: 15px;
+      border-top: 1px solid rgba(92,28,34,0.4);
+    }
+  </style>
+  <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v3">
+
+  <!-- Sidebar Trigger -->
+  <div class="sidebar-trigger" onclick="toggleSidebar()">☰</div>
+
+  <!-- Sidebar Backdrop -->
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-header">
+      <div class="sidebar-avatar" id="sideAvatar">⚔</div>
+      <div class="sidebar-user-name" id="sideUserName">Jogador</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a class="sidebar-link" href="../index.html">🏠 Hub</a></li>
+      <li><a class="sidebar-link" href="../perfil.html">👤 Perfil</a></li>
+      <li><a class="sidebar-link" href="../index.html?tab=fichas">🎭 Fichas</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="../index.html?tab=users">👥 Gerenciar Usuários</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="../v4/ed_sistemav4_calendario.html">📅 Calendário</a></li>
+      <li class="admin-only hidden"><a class="sidebar-link" href="../index.html?tab=notifications">🔔 Notificações</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-link" onclick="handleLogout()">🚪 Sair</div>
+    </div>
+  </nav>
+
+<div class="container">
+  <h1>Compêndio do Mestre — v3</h1>
+
+  <div class="toolbar card" style="margin-bottom:12px;">
+    <div>
+      <strong>Importação em lote (JSON/TXT)</strong>
+      <div class="hint">Baixe o modelo da aba ativa, preencha e importe para criar cards automaticamente.</div>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+      <button class="btn" onclick="downloadTemplate('json')">⬇ Modelo JSON</button>
+      <button class="btn" onclick="downloadTemplate('txt')">⬇ Modelo TXT</button>
+      <input type="file" id="importFile" accept=".json,.txt" onchange="importItems(event)" style="max-width:260px;">
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <section id="sec_main" class="card">
+    <div class="header">
+      <h3 id="sec_title" style="margin:0"></h3>
+      <div id="btn_area_novo"><button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button></div>
+    </div>
+    <div class="grid" id="list_current"></div>
+  </section>
+</div>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h3 id="modalTitle" style="margin-top:0"></h3>
+    <input id="editId" type="hidden" />
+    <div id="dynamicFields"></div>
+    <div class="actions">
+      <button class="btn" onclick="closeForm()">Cancelar</button>
+      <button class="btn btn-add" onclick="saveItem()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+  authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+  databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+  projectId: "ed-rpg---sistema-de-fichas",
+  storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+  messagingSenderId: "350999444010",
+  appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+};
+
+const db = getDatabase(initializeApp(firebaseConfig));
+const dbPath = 'banco_dados_v3';
+
+const PERICIAS_LIST = ['Animais','Arte','Atirar','Conhecimento','Energia','Esquiva','Esporte','Fortitude','Influência','Intuição','Ladinagem','Luta','Máquinas','Medicina','Mente','Mística','Percepção','Sobrevivência','Vitalidade','Vontade'];
+const CAMINHOS_LIST = ['Aprimorar','Emitir','Moldar','Manipular'];
+const ALCANCES_LIST = ['Corpo a corpo','1 bloco','2 blocos','3 blocos','4 blocos','5 blocos','6 blocos','8 blocos','10 blocos','12 blocos'];
+const AREAS_LIST    = ['Nenhuma','1 bloco raio','2 blocos raio','3 blocos raio','4 blocos raio','5 blocos raio','6 blocos raio','Linha 3 blocos','Linha 5 blocos','Cone 3 blocos'];
+const DADOS_LIST    = ['Nenhum','1d4','1d6','1d8','1d10','1d12','2d4','2d6','2d8','2d10','3d6','3d8','4d6'];
+const DURACOES_LIST = ['Instantâneo','1 turno','2 turnos','3 turnos','4 turnos','5 turnos','Até fim da cena','Sustentado'];
+
+const CATEGORIES = {
+  racas: {
+    label: '🧬 Raças',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'linhagem', label:'Linhagem', type:'text' },
+      { key:'desc', label:'Descrição', type:'textarea' },
+      { key:'hab1_nome', label:'Habilidade 1 (nome)', type:'text' },
+      { key:'hab1_desc', label:'Habilidade 1 (descrição)', type:'textarea' },
+      { key:'hab2_nome', label:'Habilidade 2 (nome)', type:'text' },
+      { key:'hab2_desc', label:'Habilidade 2 (descrição)', type:'textarea' },
+      { key:'hab3_nome', label:'Habilidade 3 (nome)', type:'text' },
+      { key:'hab3_desc', label:'Habilidade 3 (descrição)', type:'textarea' }
+    ],
+    meta: (it) => `Linhagem: ${it.linhagem || '-'}`,
+    descField: 'desc'
+  },
+  classes: {
+    label: '⚔️ Classes',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'desc', label:'Descrição', type:'textarea' },
+      { key:'dominios', label:'Domínios', type:'text' },
+      { key:'hab_nome', label:'Habilidade base (nome)', type:'text' },
+      { key:'hab_desc', label:'Habilidade base (descrição)', type:'textarea' },
+      { key:'hab2_nome', label:'Habilidade 2 (nome)', type:'text' },
+      { key:'hab2_desc', label:'Habilidade 2 (descrição)', type:'textarea' }
+    ],
+    meta: (it) => `Domínios: ${it.dominios || '-'}`,
+    descField: 'desc'
+  },
+  tecnicas: {
+    label: '🗡️ Técnicas (old)',
+    fields: [
+      { key:'titulo',    label:'Título',        type:'text',     required:true },
+      { key:'caminho',   label:'Caminho Arcano', type:'select',   options: CAMINHOS_LIST },
+      { key:'pericia',   label:'Perícia',        type:'select',   options: PERICIAS_LIST },
+      { key:'custo_pm',  label:'Custo PM',       type:'text' },
+      { key:'alcance',   label:'Alcance',        type:'select',   options: ALCANCES_LIST },
+      { key:'area',      label:'Área',           type:'select',   options: AREAS_LIST },
+      { key:'dados',     label:'Dados',          type:'select',   options: DADOS_LIST },
+      { key:'duracao',   label:'Duração',        type:'select',   options: DURACOES_LIST },
+      { key:'desc',      label:'Descrição',      type:'textarea' }
+    ],
+    meta: (it) => `Caminho: ${it.caminho || '-'} • Perícia: ${it.pericia || '-'}`,
+    descField: 'desc'
+  },
+
+  tecnicas_v2: {
+    label: '🪄 Técnicas V2',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'tipo', label:'Tipo', type:'text' },
+      { key:'subtipo', label:'Subtipo', type:'text' },
+      { key:'categoria', label:'Categoria', type:'text' },
+      { key:'custo_pm', label:'Custo PM', type:'text' },
+      { key:'custo_pm_base', label:'Custo base PM', type:'text' },
+      { key:'imagem', label:'Imagem (base64/URL)', type:'textarea' },
+      { key:'detalhes_texto', label:'Detalhes', type:'textarea' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `${it.tipo || '-'}${it.subtipo ? ' • ' + it.subtipo : ''} • PM: ${it.custo_pm ?? it.custo_pm_base ?? '-'}`,
+    descField: 'detalhes_texto'
+  },
+
+  logica_tecnicas: {
+    label: '🧩 Lógica de Técnicas',
+    fields: [
+      { key:'titulo', label:'Título', type:'text' }
+    ],
+    meta: () => 'Editor visual do fluxo do criador de técnicas',
+    descField: 'titulo'
+  },
+  caminhos_arcanos: {
+    label: '🌌 Caminhos Arcanos',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'foco', label:'Foco/Estilo', type:'text' },
+      { key:'dominio', label:'Domínio', type:'text' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Domínio: ${it.dominio || '-'}`,
+    descField: 'desc'
+  },
+  equipamentos: {
+    label: '🎒 Equipamentos',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'categoria', label:'Categoria', type:'text' },
+      { key:'atributo', label:'Atributo', type:'text' },
+      { key:'alcance', label:'Alcance', type:'text' },
+      { key:'dano', label:'Dano', type:'text' },
+      { key:'tipo', label:'Tipo', type:'text' },
+      { key:'custo', label:'Custo', type:'text' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Categoria: ${it.categoria || '-'} • Atributo: ${it.atributo || '-'}`,
+    descField: 'desc'
+  },
+  ascensao_arcana: {
+    label: '✨ Ascensão Arcana',
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'ramo', label:'Ramo', type:'text' },
+      { key:'custo', label:'Custo (XP/Pulso)', type:'text' },
+      { key:'efeito', label:'Efeito', type:'textarea' },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Ramo: ${it.ramo || '-'} • Custo: ${it.custo || '-'}`,
+    descField: 'desc'
+  },
+  efeitos_secundarios: {
+    label: '✨ Efeitos Secundários',
+    fields: [
+      { key:'titulo', label:'Nome', type:'text', required:true },
+      { key:'emoji', label:'Emoji (ex: 🔥)', type:'text', required:true },
+      { key:'desc', label:'Descrição', type:'textarea' }
+    ],
+    meta: (it) => `Emoji: ${it.emoji || '-'}`,
+    descField: 'desc'
+  }
+};
+
+const CUSTO_ALCANCE_DB = {'Corpo a corpo':0,'1 bloco':1,'2 blocos':2,'3 blocos':4,'4 blocos':6,'5 blocos':8,'6 blocos':10,'8 blocos':14,'10 blocos':17,'12 blocos':20};
+const CUSTO_AREA_DB    = {'Nenhuma':0,'1 bloco raio':2,'2 blocos raio':5,'3 blocos raio':9,'4 blocos raio':13,'5 blocos raio':16,'6 blocos raio':18,'Linha 3 blocos':3,'Linha 5 blocos':6,'Cone 3 blocos':4};
+const CUSTO_DADOS_DB   = {'Nenhum':0,'1d4':1,'1d6':3,'1d8':5,'1d10':8,'1d12':11,'2d4':4,'2d6':8,'2d8':12,'2d10':16,'3d6':13,'3d8':18,'4d6':18};
+const CUSTO_DURACAO_DB = {'Instantâneo':0,'1 turno':1,'2 turnos':3,'3 turnos':5,'4 turnos':8,'5 turnos':11,'Até fim da cena':15,'Sustentado':20};
+
+function calcTecnicaCustoDB() {
+  const alcance = document.getElementById('f_alcance')?.value || '';
+  const area    = document.getElementById('f_area')?.value    || '';
+  const dados   = document.getElementById('f_dados')?.value   || '';
+  const duracao = document.getElementById('f_duracao')?.value || '';
+  const total   = (CUSTO_ALCANCE_DB[alcance] ?? 0) + (CUSTO_AREA_DB[area] ?? 0) +
+                  (CUSTO_DADOS_DB[dados] ?? 0) + (CUSTO_DURACAO_DB[duracao] ?? 0);
+  const pmEl = document.getElementById('f_custo_pm');
+  if (pmEl) pmEl.value = total;
+}
+
+let currentTab = 'racas';
+let globalData = Object.fromEntries(Object.keys(CATEGORIES).map(k => [k, {}]));
+let globalPlayers = {};
+let tecnicaFormMode = 'guiado';
+
+function esc(s){ return (s ?? '').toString().replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderTabs(){
+  const box = document.getElementById('tabs');
+  box.innerHTML = Object.entries(CATEGORIES).map(([key, cfg]) =>
+    `<button class="tab-btn ${key===currentTab?'active':''}" onclick="switchTab('${key}')">${cfg.label}</button>`
+  ).join('');
+}
+
+function renderCompendiumItems(cat) {
+  const cfg = CATEGORIES[cat];
+  const arr = Object.entries(globalData[cat] || {})
+    .map(([id, v]) => ({ id, ...(v || {}) }))
+    .sort((a,b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+  if (!arr.length) return '<div style="opacity:.65; margin-bottom:12px;">Nenhum registro nessa categoria.</div>';
+  return '<div class="grid" style="margin-bottom:4px;">' + arr.map(it => `
+    <div class="item">
+      <h4>${esc(it.titulo || it.id)}</h4>
+      <div class="meta">${esc(cfg.meta(it))}</div>
+      <div class="desc">${esc(it[cfg.descField] || '')}</div>
+      <div class="actions">
+        <button class="btn btn-edit" onclick="openForm('${cat}','${it.id}')">Editar</button>
+        <button class="btn btn-del" onclick="deleteItem('${cat}','${it.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+function renderPlayerTecnicas() {
+  let html = '';
+  let any = false;
+
+  Object.entries(globalPlayers || {}).forEach(([fichaId, fichaData]) => {
+    const tecnicas = fichaData?.habilidades?.tecnicas || {};
+    const charName = fichaData?.char_name || fichaId;
+    const entries = Object.entries(tecnicas).filter(([, tech]) => !tech?.creator_source && !tech?.custo_pm_base && !tech?.detalhes_texto);
+    if (!entries.length) return;
+
+    html += `<div style="grid-column:1/-1; font-size:11px; font-weight:700; color:#bda7a4; text-transform:uppercase; letter-spacing:1px; margin:4px 0 2px; font-family:'Segoe UI',sans-serif;">${esc(charName)}</div>`;
+    entries.forEach(([techId, tech]) => {
+      any = true;
+      html += `
+        <div class="item">
+          <h4>${esc(tech.titulo || techId)}</h4>
+          <div class="meta">Caminho: ${esc(tech.caminho||'-')} • Perícia: ${esc(tech.pericia||'-')}</div>
+          <div class="meta">PM: ${esc(tech.custo_pm||'-')} • Alcance: ${esc(tech.alcance||'-')} • Área: ${esc(tech.area||'-')}</div>
+          <div class="meta">Dados: ${esc(tech.dados||'-')} • Duração: ${esc(tech.duracao||'-')}</div>
+          <div class="desc">${esc(tech.desc||'')}</div>
+          <div class="actions">
+            <button class="btn btn-warn" onclick="savePlayerTechToCompendium('${esc(fichaId)}','${esc(techId)}')">Salvar no Compêndio</button>
+            <button class="btn btn-del" onclick="deletePlayerTech('${esc(fichaId)}','${esc(techId)}')">Excluir</button>
+          </div>
+        </div>`;
+    });
+  });
+
+  if (!any) return '<div style="opacity:.65;">Nenhuma técnica criada por jogadores ainda.</div>';
+  return '<div class="grid">' + html + '</div>';
+}
+
+
+let selectedLogicNode = 'start';
+let connectFromNode = '';
+let draggingLogicNode = null;
+
+let isPanning = false;
+let panStart = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 };
+let zoomLevel = 1.0;
+
+window.handleCanvasWheel = (e) => {
+  e.preventDefault();
+  const canvas = document.getElementById('logic_canvas');
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left + canvas.scrollLeft;
+  const mouseY = e.clientY - rect.top + canvas.scrollTop;
+
+  const oldZoom = zoomLevel;
+  zoomLevel = Math.max(0.15, Math.min(2.5, zoomLevel + e.deltaY * -0.001));
+
+  const workspace = document.getElementById('logic_workspace');
+  if (workspace) {
+    workspace.style.transform = `scale(${zoomLevel})`;
+
+    const scaleRatio = zoomLevel / oldZoom;
+    canvas.scrollLeft = mouseX * scaleRatio - (e.clientX - rect.left);
+    canvas.scrollTop = mouseY * scaleRatio - (e.clientY - rect.top);
+  }
+};
+
+window.startCanvasPan = (e) => {
+  if (e.button !== 0) return;
+  if (e.target.closest('.logic-node')) return;
+  isPanning = true;
+  const canvas = document.getElementById('logic_canvas');
+  if (canvas) {
+    panStart = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: canvas.scrollLeft,
+      scrollTop: canvas.scrollTop
+    };
+    canvas.setPointerCapture(e.pointerId);
+  }
+};
+
+window.handleCanvasPointerMove = (e) => {
+  if (draggingLogicNode) {
+    window.dragLogicMove(e);
+  } else if (isPanning) {
+    const canvas = document.getElementById('logic_canvas');
+    if (canvas) {
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      canvas.scrollLeft = panStart.scrollLeft - dx;
+      canvas.scrollTop = panStart.scrollTop - dy;
+    }
+  }
+};
+
+window.endCanvasPan = (e) => {
+  if (isPanning) {
+    isPanning = false;
+    const canvas = document.getElementById('logic_canvas');
+    if (canvas) {
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch(err) {}
+    }
+  }
+  if (draggingLogicNode) {
+    window.finishLogicDrag(e);
+  }
+};
+
+function logicData() {
+  const data = globalData.logica_tecnicas || {};
+  const nodes = data.nodes || {};
+  const edges = data.edges || {};
+  return { nodes, edges };
+}
+function ensureLogicStart() {
+  const { nodes } = logicData();
+  if (nodes.start) return;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/start`]: {
+      nome: 'Começar', desc: 'Bloco inicial do criador de técnicas.', custo_pm: 0, final: false, x: 60, y: 260, locked: true
+    }
+  });
+}
+function edgeListFrom(nodeId) {
+  const { edges } = logicData();
+  return Object.entries(edges).filter(([, e]) => e?.from === nodeId).map(([id, e]) => ({ id, ...e }));
+}
+function renderTechniqueLogicEditor() {
+  ensureLogicStart();
+  const { nodes, edges } = logicData();
+  const node = nodes[selectedLogicNode] || nodes.start || {};
+
+  const oldCanvas = document.getElementById('logic_canvas');
+  const savedScrollLeft = oldCanvas ? oldCanvas.scrollLeft : 0;
+  const savedScrollTop = oldCanvas ? oldCanvas.scrollTop : 0;
+
+  document.getElementById('btn_area_novo').innerHTML = `
+    <button class="btn btn-add" onclick="addLogicNode()">+ Bloco conectado</button>
+    <button class="btn btn-warn" onclick="addLogicFinalNode()">◆ Finalizar ramo</button>
+    <button class="btn" onclick="startLogicConnect()">↗ Conectar seta</button>`;
+  const list = document.getElementById('list_current');
+  list.className = '';
+  list.style.cssText = '';
+  const nodeOptions = Object.entries(nodes).map(([id, n]) => `<option value="${esc(id)}">${esc(n.nome || id)}</option>`).join('');
+  list.innerHTML = `
+    <div class="logic-layout">
+      <div class="logic-canvas" id="logic_canvas" onpointerdown="startCanvasPan(event)" onpointermove="handleCanvasPointerMove(event)" onpointerup="endCanvasPan(event)" onpointerleave="endCanvasPan(event)">
+        <div id="logic_workspace" style="position: relative; width: 10000px; height: 6000px; transform-origin: 0 0; transform: scale(${zoomLevel});">
+          <svg class="logic-svg" viewBox="0 0 10000 6000" preserveAspectRatio="none">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d89a8e"></path></marker></defs>
+            ${Object.entries(edges).map(([id, e]) => {
+              const a = nodes[e.from] || {}; const b = nodes[e.to] || {};
+              const x1 = (Number(a.x) || 0) + 172; const y1 = (Number(a.y) || 0) + 43;
+              const x2 = Number(b.x) || 0; const y2 = (Number(b.y) || 0) + 43;
+              return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#d89a8e" stroke-width="2" marker-end="url(#arrow)" opacity=".85" />`;
+            }).join('')}
+          </svg>
+          ${Object.entries(nodes).map(([id, n]) => `
+            <div data-node-id="${esc(id)}" class="logic-node ${id===selectedLogicNode?'selected':''} ${id==='start'?'start':''} ${n.final?'final':''}"
+                 style="left:${Number(n.x)||40}px; top:${Number(n.y)||40}px;"
+                 onclick="selectLogicNode('${esc(id)}')" onpointerdown="startLogicDrag(event,'${esc(id)}')">
+              <div class="logic-node-title">${esc(n.nome || id)}</div>
+              <div class="logic-node-meta">${n.final ? '◆ Finalizador' : 'PM: ' + (Number(n.custo_pm)||0)}</div>
+              <div class="logic-node-desc">${esc(n.desc || 'Sem descrição')}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <aside class="logic-side">
+        <div class="logic-help">Crie blocos, conecte setas e marque blocos finais. O criador de técnicas lê este mapa em tempo real: cada bloco clicado soma/subtrai seu custo de PM e os blocos finais abrem a carta de conclusão.</div>
+        <h3 style="margin:0 0 8px;color:var(--light);">Editar info</h3>
+        <label>Nome do bloco</label><input id="logic_nome" value="${esc(node.nome || '')}">
+        <label>Descrição</label><textarea id="logic_desc">${esc(node.desc || '')}</textarea>
+        <div class="row-2"><div><label>Custo PM</label><input id="logic_cost" type="number" value="${Number(node.custo_pm)||0}"></div><div><label>Finalizador</label><select id="logic_final"><option value="false" ${node.final?'':'selected'}>Não</option><option value="true" ${node.final?'selected':''}>Sim</option></select></div></div>
+        <div class="logic-node-actions">
+          <button class="btn btn-add" onclick="saveLogicNodeInfo()">Salvar</button>
+          <button class="btn btn-del" onclick="deleteLogicNode()" ${selectedLogicNode==='start'?'disabled':''}>Deletar</button>
+        </div>
+        <h3 style="margin:12px 0 6px;color:var(--light);">Setas saindo deste bloco</h3>
+        <div class="logic-edges">
+          ${edgeListFrom(selectedLogicNode).map(e => `
+            <div class="logic-edge-row">
+              <select onchange="moveLogicEdge('${esc(e.id)}', this.value)">${nodeOptions.replace(`value="${esc(e.to)}"`, `value="${esc(e.to)}" selected`)}</select>
+              <button class="btn btn-del" onclick="deleteLogicEdge('${esc(e.id)}')">✖</button>
+            </div>`).join('') || '<div class="hint">Sem setas saindo daqui.</div>'}
+        </div>
+      </aside>
+    </div>`;
+
+  const newCanvas = document.getElementById('logic_canvas');
+  if (newCanvas) {
+    newCanvas.scrollLeft = savedScrollLeft;
+    newCanvas.scrollTop = savedScrollTop;
+    newCanvas.addEventListener('wheel', window.handleCanvasWheel, { passive: false });
+  }
+}
+window.selectLogicNode = (id) => {
+  if (draggingLogicNode) return;
+  if (connectFromNode && connectFromNode !== id) {
+    const k = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+    update(ref(db, `${dbPath}/logica_tecnicas/edges/${k}`), { from: connectFromNode, to: id });
+    connectFromNode = '';
+  }
+  selectedLogicNode = id;
+  renderCurrent();
+};
+window.startLogicDrag = (event, id) => {
+  if (event.button !== 0) return;
+  selectedLogicNode = id;
+  const { nodes } = logicData();
+  const n = nodes[id] || {};
+  draggingLogicNode = { id, startX: event.clientX, startY: event.clientY, x: Number(n.x) || 0, y: Number(n.y) || 0, moved: false };
+  event.currentTarget.setPointerCapture?.(event.pointerId);
+};
+window.dragLogicMove = (event) => {
+  if (!draggingLogicNode) return;
+  const dx = (event.clientX - draggingLogicNode.startX) / zoomLevel;
+  const dy = (event.clientY - draggingLogicNode.startY) / zoomLevel;
+  if (Math.abs(event.clientX - draggingLogicNode.startX) + Math.abs(event.clientY - draggingLogicNode.startY) > 3) {
+    draggingLogicNode.moved = true;
+  }
+  const x = Math.max(0, draggingLogicNode.x + dx);
+  const y = Math.max(0, draggingLogicNode.y + dy);
+  const nodeEl = document.querySelector(`.logic-node[data-node-id="${CSS.escape(draggingLogicNode.id)}"]`);
+  if (nodeEl) { nodeEl.style.left = `${x}px`; nodeEl.style.top = `${y}px`; }
+};
+window.finishLogicDrag = (event) => {
+  if (!draggingLogicNode) return;
+  const d = draggingLogicNode;
+  draggingLogicNode = null;
+  if (!d.moved) return;
+  const clientX = event?.clientX ?? d.startX;
+  const clientY = event?.clientY ?? d.startY;
+  const dx = (clientX - d.startX) / zoomLevel;
+  const dy = (clientY - d.startY) / zoomLevel;
+  const x = Math.max(0, d.x + dx);
+  const y = Math.max(0, d.y + dy);
+  update(ref(db, `${dbPath}/logica_tecnicas/nodes/${d.id}`), { x, y });
+};
+window.addLogicNode = () => {
+  const { nodes } = logicData();
+  const parent = nodes[selectedLogicNode] || nodes.start || { x: 40, y: 40 };
+  const k = push(ref(db, `${dbPath}/logica_tecnicas/nodes`)).key;
+  const e = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/${k}`]: { nome: 'Novo bloco', desc: '', custo_pm: 0, final: false, x: (Number(parent.x)||40)+230, y: (Number(parent.y)||40)+40 },
+    [`${dbPath}/logica_tecnicas/edges/${e}`]: { from: selectedLogicNode || 'start', to: k }
+  });
+  selectedLogicNode = k;
+};
+window.addLogicFinalNode = () => {
+  const { nodes } = logicData();
+  const parent = nodes[selectedLogicNode] || nodes.start || { x: 40, y: 40 };
+  const k = push(ref(db, `${dbPath}/logica_tecnicas/nodes`)).key;
+  const e = push(ref(db, `${dbPath}/logica_tecnicas/edges`)).key;
+  update(ref(db), {
+    [`${dbPath}/logica_tecnicas/nodes/${k}`]: { nome: 'Finalizar', desc: 'Finaliza este ramo e abre a carta da técnica.', custo_pm: 0, final: true, x: (Number(parent.x)||40)+230, y: (Number(parent.y)||40)+80 },
+    [`${dbPath}/logica_tecnicas/edges/${e}`]: { from: selectedLogicNode || 'start', to: k }
+  });
+  selectedLogicNode = k;
+};
+window.startLogicConnect = () => {
+  connectFromNode = selectedLogicNode || 'start';
+  alert('Clique no bloco de destino para criar a seta.');
+};
+window.saveLogicNodeInfo = () => {
+  const payload = {
+    nome: document.getElementById('logic_nome').value.trim() || 'Sem nome',
+    desc: document.getElementById('logic_desc').value.trim(),
+    custo_pm: Number(document.getElementById('logic_cost').value || 0),
+    final: document.getElementById('logic_final').value === 'true'
+  };
+  update(ref(db, `${dbPath}/logica_tecnicas/nodes/${selectedLogicNode}`), payload);
+};
+window.deleteLogicNode = async () => {
+  if (selectedLogicNode === 'start') return;
+  if (!confirm('Deletar este bloco e todas as setas ligadas a ele?')) return;
+  const { edges } = logicData();
+  const updates = { [`${dbPath}/logica_tecnicas/nodes/${selectedLogicNode}`]: null };
+  Object.entries(edges).forEach(([id, e]) => {
+    if (e.from === selectedLogicNode || e.to === selectedLogicNode) updates[`${dbPath}/logica_tecnicas/edges/${id}`] = null;
+  });
+  selectedLogicNode = 'start';
+  await update(ref(db), updates);
+};
+window.moveLogicEdge = (edgeId, to) => update(ref(db, `${dbPath}/logica_tecnicas/edges/${edgeId}`), { to });
+window.deleteLogicEdge = (edgeId) => remove(ref(db, `${dbPath}/logica_tecnicas/edges/${edgeId}`));
+
+function renderCurrent(){
+  const cfg = CATEGORIES[currentTab];
+  document.getElementById('sec_title').innerText = cfg.label;
+  const list = document.getElementById('list_current');
+
+  if (currentTab === 'logica_tecnicas') {
+    renderTechniqueLogicEditor();
+    return;
+  }
+
+  if (currentTab === 'tecnicas') {
+    document.getElementById('btn_area_novo').innerHTML = `
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-add" onclick="openTecnicaForm('guiado')" title="Criar técnica antiga com dropdowns e cálculo automático de PM">⊞ Guiado old</button>
+        <button class="btn" style="border-color:#777;color:#ccc;" onclick="openTecnicaForm('manual')" title="Criar técnica antiga com campos de texto livre">✎ Manual old</button>
+      </div>`;
+    list.className = '';
+    list.style.cssText = '';
+    list.innerHTML =
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas antigas do Compêndio</div>' +
+      renderCompendiumItems('tecnicas') +
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin:16px 0 12px;">Técnicas antigas dos Jogadores</div>' +
+      renderPlayerTecnicas();
+    return;
+  }
+
+  if (currentTab === 'tecnicas_v2') {
+    document.getElementById('btn_area_novo').innerHTML = '<button class="btn btn-add" onclick="openTecnicaV2Creator()">+ Nova Técnica V2</button>';
+    list.className = '';
+    list.style.cssText = '';
+    list.innerHTML =
+      '<div style="font-weight:700; color:var(--light); font-size:12px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Técnicas V2 do Compêndio</div>' +
+      renderCompendiumItems('tecnicas_v2');
+    return;
+  }
+
+  document.getElementById('btn_area_novo').innerHTML = '<button class="btn btn-add" onclick="openCurrentTabForm()">+ Novo Item</button>';
+  list.className = 'grid';
+  const arr = Object.entries(globalData[currentTab] || {})
+    .map(([id, v]) => ({ id, ...(v || {}) }))
+    .sort((a,b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+  if (!arr.length) {
+    list.innerHTML = '<div style="opacity:.65">Nenhum registro nessa categoria.</div>';
+    return;
+  }
+
+  list.innerHTML = arr.map(it => `
+    <div class="item">
+      <h4>${esc(it.titulo || it.id)}</h4>
+      <div class="meta">${esc(cfg.meta(it))}</div>
+      <div class="desc">${esc(it[cfg.descField] || '')}</div>
+      <div class="actions">
+        <button class="btn btn-edit" onclick="openForm('${currentTab}','${it.id}')">Editar</button>
+        <button class="btn btn-del" onclick="deleteItem('${currentTab}','${it.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function buildFields(cat, data = {}, forceText = false){
+  const cfg = CATEGORIES[cat];
+  return cfg.fields.map(f => {
+    const value = data[f.key] ?? '';
+    if (f.type === 'textarea') {
+      return `<label>${f.label}${f.required?' *':''}</label><textarea id="f_${f.key}" data-key="${f.key}">${esc(value)}</textarea>`;
+    }
+    if (f.type === 'select' && !forceText) {
+      const opts = f.options.map(o => `<option value="${esc(o)}" ${value === o ? 'selected' : ''}>${esc(o)}</option>`).join('');
+      return `<label>${f.label}${f.required?' *':''}</label><select id="f_${f.key}" data-key="${f.key}"><option value="">-- Selecionar --</option>${opts}</select>`;
+    }
+    return `<label>${f.label}${f.required?' *':''}</label><input id="f_${f.key}" data-key="${f.key}" type="text" value="${esc(value)}" placeholder="${esc(f.label)}" />`;
+  }).join('');
+}
+
+window.switchTab = (tab) => { currentTab = tab; renderTabs(); renderCurrent(); };
+window.openCurrentTabForm = () => window.openForm(currentTab);
+window.openTecnicaForm = (mode) => { tecnicaFormMode = mode; window.openForm('tecnicas'); };
+window.openTecnicaV2Creator = () => { window.location.href = 'ed_sistemav3_criadordetecnicas.html?source=compendium'; };
+
+window.openForm = (cat, id='') => {
+  const item = id ? (globalData[cat] || {})[id] || {} : {};
+  // Editing always uses guiado; creating respects the user-chosen mode
+  const formMode = (cat === 'tecnicas' && !id) ? tecnicaFormMode : 'guiado';
+  document.getElementById('editId').value = id;
+  const modeLabel = (cat === 'tecnicas' && !id) ? ` — ${formMode === 'guiado' ? '⊞ Guiado' : '✎ Manual'}` : '';
+  document.getElementById('modalTitle').innerText = `${id ? 'Editar' : 'Criar'} ${CATEGORIES[cat].label}${modeLabel}`;
+  document.getElementById('dynamicFields').innerHTML = buildFields(cat, item, cat === 'tecnicas' && formMode === 'manual');
+  document.getElementById('modal').dataset.category = cat;
+
+  if (cat === 'tecnicas' && formMode === 'guiado') {
+    const pmEl = document.getElementById('f_custo_pm');
+    if (pmEl) { pmEl.readOnly = true; pmEl.style.cssText = 'cursor:not-allowed; opacity:0.7; width:100%; border-radius:7px; border:1px solid #3a2422; background:var(--input); color:var(--text); padding:8px;'; }
+    ['f_alcance','f_area','f_dados','f_duracao'].forEach(fid => {
+      document.getElementById(fid)?.addEventListener('change', calcTecnicaCustoDB);
+    });
+    calcTecnicaCustoDB();
+  }
+
+  document.getElementById('modal').classList.add('open');
+};
+window.closeForm = () => document.getElementById('modal').classList.remove('open');
+
+function collectFormData(cat){
+  const cfg = CATEGORIES[cat];
+  const out = {};
+  for (const f of cfg.fields) {
+    const val = (document.getElementById(`f_${f.key}`)?.value || '').trim();
+    if (f.required && !val) throw new Error(`Campo obrigatório: ${f.label}`);
+    out[f.key] = val;
+  }
+  return out;
+}
+
+window.saveItem = async () => {
+  const cat = document.getElementById('modal').dataset.category;
+  const id = document.getElementById('editId').value;
+  let payload;
+  try { payload = collectFormData(cat); } catch (err) { alert(err.message); return; }
+  if (id) await update(ref(db, `${dbPath}/${cat}/${id}`), payload);
+  else {
+    const k = push(ref(db, `${dbPath}/${cat}`)).key;
+    await update(ref(db, `${dbPath}/${cat}/${k}`), payload);
+  }
+  closeForm();
+};
+
+window.deleteItem = async (cat, id) => {
+  if (!confirm('Excluir este item do banco?')) return;
+  await remove(ref(db, `${dbPath}/${cat}/${id}`));
+};
+
+window.savePlayerTechToCompendium = async (fichaId, techId) => {
+  const tech = globalPlayers[fichaId]?.habilidades?.tecnicas?.[techId];
+  if (!tech) return;
+  const payload = {
+    titulo:   tech.titulo   || '',
+    caminho:  tech.caminho  || '',
+    pericia:  tech.pericia  || '',
+    custo_pm: tech.custo_pm || '',
+    alcance:  tech.alcance  || '',
+    area:     tech.area     || '',
+    dados:    tech.dados    || '',
+    duracao:  tech.duracao  || '',
+    desc:     tech.desc     || ''
+  };
+  const k = push(ref(db, `${dbPath}/tecnicas`)).key;
+  await update(ref(db, `${dbPath}/tecnicas/${k}`), payload);
+  alert('Técnica salva no Compêndio!');
+};
+
+window.deletePlayerTech = async (fichaId, techId) => {
+  if (!confirm('Excluir esta técnica da ficha do jogador?')) return;
+  await remove(ref(db, `fichas_v3/${fichaId}/habilidades/tecnicas/${techId}`));
+};
+
+function makeTemplate(cat){
+  const fields = CATEGORIES[cat].fields.map(f => f.key);
+  const model = {};
+  fields.forEach((k) => model[k] = '');
+  return { categoria: cat, instrucoes: 'Preencha os objetos em itens. Apenas itens com titulo serão importados.', itens: [model] };
+}
+
+window.downloadTemplate = (format='json') => {
+  const model = makeTemplate(currentTab);
+  let content = '';
+  let filename = `modelo_${currentTab}.${format}`;
+  if (format === 'json') {
+    content = JSON.stringify(model, null, 2);
+  } else {
+    const keys = Object.keys(model.itens[0]);
+    content = [
+      `# MODELO ${currentTab.toUpperCase()}`,
+      '# Use blocos separados por ---',
+      ...keys.map(k => `${k}: `),
+      '---',
+      ...keys.map(k => `${k}: `)
+    ].join('\n');
+  }
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+function parseTxtImport(raw){
+  const blocks = raw.split(/\n\s*---\s*\n/g).map(b => b.trim()).filter(Boolean);
+  const items = blocks.map(block => {
+    const obj = {};
+    block.split('\n').forEach(line => {
+      if (!line.includes(':')) return;
+      const [k, ...rest] = line.split(':');
+      obj[k.trim()] = rest.join(':').trim();
+    });
+    return obj;
+  });
+  return { categoria: currentTab, itens: items };
+}
+
+window.importItems = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const text = await file.text();
+  let parsed;
+  try {
+    parsed = file.name.toLowerCase().endsWith('.json') ? JSON.parse(text) : parseTxtImport(text);
+  } catch {
+    alert('Arquivo inválido. Use o modelo de importação.');
+    event.target.value = '';
+    return;
+  }
+
+  const cat = parsed.categoria || currentTab;
+  if (!CATEGORIES[cat]) {
+    alert('Categoria inválida no arquivo.');
+    event.target.value = '';
+    return;
+  }
+
+  const itens = Array.isArray(parsed.itens) ? parsed.itens : [];
+  const fields = CATEGORIES[cat].fields.map(f => f.key);
+  const toCreate = itens
+    .map(it => {
+      const payload = {};
+      fields.forEach(k => payload[k] = (it[k] ?? '').toString().trim());
+      return payload;
+    })
+    .filter(it => it.titulo);
+
+  if (!toCreate.length) {
+    alert('Nenhum item válido com título foi encontrado.');
+    event.target.value = '';
+    return;
+  }
+
+  const updates = {};
+  toCreate.forEach((it) => {
+    const key = push(ref(db, `${dbPath}/${cat}`)).key;
+    updates[`${dbPath}/${cat}/${key}`] = it;
+  });
+  await update(ref(db), updates);
+  if (cat !== currentTab) switchTab(cat);
+  alert(`${toCreate.length} item(ns) importado(s) em ${CATEGORIES[cat].label}.`);
+  event.target.value = '';
+};
+
+onValue(ref(db, dbPath), (snap) => {
+  const data = snap.val() || {};
+  globalData = Object.fromEntries(Object.keys(CATEGORIES).map(k => [k, data[k] || {}]));
+  renderTabs();
+  renderCurrent();
+});
+
+onValue(ref(db, 'fichas_v3'), (snap) => {
+  globalPlayers = snap.val() || {};
+  if (currentTab === 'tecnicas') renderCurrent();
+});
+
+window.toggleSidebar = () => {
+  const nav = document.getElementById('sidebarNav');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+  if (nav && backdrop) {
+    nav.classList.toggle('open');
+    backdrop.classList.toggle('open');
+  }
+};
+
+window.handleLogout = () => {
+  if (window.EDAuth) window.EDAuth.logout();
+  window.location.href = '../index.html';
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.EDAuth) {
+    const u = window.EDAuth.currentUser();
+    if (u) {
+      const sideUserName = document.getElementById('sideUserName');
+      if (sideUserName) sideUserName.textContent = u.name;
+      const sideAv = document.getElementById('sideAvatar');
+      if (sideAv) {
+        if (u.photo) {
+          sideAv.style.backgroundImage = `url(${u.photo})`;
+          sideAv.textContent = '';
+        } else {
+          sideAv.textContent = u.role === 'admin' ? '👑' : '⚔';
+        }
+      }
+      if (u.role === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      }
+    }
+  }
+});
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>

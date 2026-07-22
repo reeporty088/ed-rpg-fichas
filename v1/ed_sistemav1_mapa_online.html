@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexamap Studio - RPG</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; }
+        
+        /* UI LATERAL */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 340px; height: 100%;
+            background: rgba(30, 30, 30, 0.98); border-right: 2px solid #444;
+            padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px;
+            z-index: 10; box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+            overflow-y: auto;
+        }
+
+        body.viewer-mode #ui-layer { transform: translateX(-360px); }
+
+        canvas { display: block; background: #111; cursor: default; }
+        
+        h2 { margin: 10px 0 5px 0; color: #ffaa00; text-transform: uppercase; font-size: 13px; border-bottom: 1px solid #444; padding-bottom: 2px; letter-spacing: 1px; }
+        label { font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; margin-top: 5px; }
+        
+        input[type="range"], input[type="text"] { width: 100%; box-sizing: border-box; margin-bottom: 5px; background: #222; border: 1px solid #555; color: white; padding: 4px; border-radius: 4px; }
+        input[type="color"] { width: 100%; height: 30px; border: none; padding: 0; background: none; cursor: pointer; }
+
+        .btn { background: #444; color: white; border: 1px solid #666; padding: 8px; cursor: pointer; width: 100%; margin-bottom: 5px; font-weight: bold; border-radius: 4px; transition: 0.2s; font-size: 12px; }
+        .btn:hover { background: #666; }
+        .btn-save { background: #2e7d32; border-color: #4caf50; }
+        
+        /* BARRA DE FERRAMENTAS */
+        .tools-row { display: flex; gap: 5px; margin-bottom: 10px; background: #222; padding: 5px; border-radius: 8px; border: 1px solid #444; }
+        .tool-btn { flex: 1; padding: 8px 0; font-size: 18px; background: transparent; border: none; cursor: pointer; border-radius: 5px; transition: 0.2s; color: #888; }
+        .tool-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .tool-btn.active { background: #ffaa00; color: black; box-shadow: 0 0 10px rgba(255, 170, 0, 0.4); }
+
+        /* PALETAS */
+        .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 10px; }
+        
+        /* Cores */
+        .color-swatch { width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid #444; transition: transform 0.2s; }
+        .color-swatch:hover { transform: scale(1.2); z-index: 2; border-color: white; }
+        .color-swatch.selected { border-color: white; box-shadow: 0 0 8px white; transform: scale(1.1); }
+        .color-swatch.transparent { background: repeating-linear-gradient(45deg, #333, #333 5px, #444 5px, #444 10px); }
+
+        /* Ícones */
+        .icon-swatch { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: 1px solid #333; background: #222; border-radius: 4px; }
+        .icon-swatch:hover { background: #444; border-color: #888; }
+        .icon-swatch.selected { background: #ffaa00; color: black; border-color: #ffaa00; }
+
+        .status-led { width: 10px; height: 10px; border-radius: 50%; background: #444; display: inline-block; margin-right: 5px; }
+        .status-led.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
+        .status-led.busy { background: #ffaa00; animation: blink 0.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; pointer-events: none; opacity: 0; transition: 0.5s; }
+        .loading-overlay.active { opacity: 1; pointer-events: all; }
+
+        #viewer-msg { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; border: 1px solid #ffaa00; color: #ffaa00; font-weight: bold; display: none; z-index: 5; }
+        body.viewer-mode #viewer-msg { display: block; }
+        
+        .input-group { display: flex; gap: 5px; margin-bottom: 5px; }
+        .input-group input { margin-bottom: 0; }
+        .input-group button { width: 40px; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
+
+        /* Paineis de Contexto */
+        .context-panel { display: none; background: #252525; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 10px; }
+        .context-panel.visible { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .color-mixer { display: flex; align-items: center; gap: 10px; background: #111; padding: 5px; border-radius: 5px; margin-bottom: 5px; }
+    </style>
+    <script src="../configs/auth.js"></script>
+  <link rel="manifest" href="../configs/manifest.webmanifest" />
+  <meta name="theme-color" content="#130909" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+</head>
+<body data-require-auth="true" data-required-version="v1">
+
+    <div id="viewer-msg">MODO VISUALIZADOR</div>
+    <div class="loading-overlay" id="loader">Carregando Mundo...</div>
+
+    <div id="ui-layer">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="font-size:16px; margin:0; color:#eee;">HEXAMAP STUDIO</h1>
+            <div title="Status da Conexão"><span id="db-led" class="status-led"></span></div>
+        </div>
+
+        <h2>Ferramentas</h2>
+        <div class="tools-row">
+            <button class="tool-btn active" id="btnColor" onclick="setTool('color')" title="Pintar Cor (1)">🎨</button>
+            <button class="tool-btn" id="btnIcon" onclick="setTool('icon')" title="Carimbar Ícone (2)">🌲</button>
+            <button class="tool-btn" id="btnImg" onclick="setTool('customImg')" title="Imagem Personalizada (3)">🖼️</button>
+            <button class="tool-btn" id="btnBorder" onclick="setTool('border')" title="Fronteira (4)">✏️</button>
+            <button class="tool-btn" id="btnHand" onclick="setTool('hand')" title="Mover (H)">✋</button>
+        </div>
+
+        <div id="panel-color" class="context-panel visible">
+            <label style="margin-top:0">Paleta de Cores</label>
+            <div class="color-mixer">
+                <input type="color" id="customColorPicker" value="#ffffff" onchange="pickCustomColor(this.value)">
+                <span style="font-size:11px; color:#aaa;">Misturador Livre</span>
+            </div>
+            <div class="palette-grid" id="colorPalette">
+                </div>
+            <small style="color:#aaa; font-size:10px;">Clique para pintar o fundo do hexágono.</small>
+        </div>
+
+        <div id="panel-icon" class="context-panel">
+            <label style="margin-top:0">Biblioteca de Símbolos</label>
+            <div class="palette-grid" id="iconPalette">
+                </div>
+            <button class="btn" onclick="selectIcon(null)" style="margin-top:5px; background:#444;">❌ Borracha de Símbolo</button>
+        </div>
+
+        <div id="panel-customImg" class="context-panel">
+            <label style="margin-top:0">Ícone de Imagem (URL)</label>
+            <div class="input-group">
+                <input type="text" id="customImgUrl" placeholder="https://imgur.com/...">
+            </div>
+            <button class="btn" style="background:#c62828" onclick="setEraseCustomImg()">Borracha de Imagem</button>
+            <small style="color:#aaa; font-size:10px;">Cola o link de uma imagem transparente para usar como token/ícone.</small>
+        </div>
+
+        <div id="panel-border" class="context-panel">
+            <label style="margin-top:0">Configurar Fronteira</label>
+            <input type="color" id="borderColor" value="#ff0000">
+            <label>Espessura</label>
+            <input type="range" id="borderWidth" min="2" max="10" value="4">
+            <button class="btn" onclick="setEraseBorderMode()" style="background:#c62828; margin-top:5px;">Borracha de Fronteira</button>
+        </div>
+
+        <h2>Mundo & Visualização</h2>
+        <label>URL Imagem de Fundo</label>
+        <div class="input-group">
+            <input type="text" id="bgUrlInput" placeholder="Link direto...">
+            <button class="btn" onclick="updateBgFromUrl(document.getElementById('bgUrlInput').value)">OK</button>
+        </div>
+
+        <label>Tamanho Hex</label>
+        <input type="range" id="hexSize" min="10" max="150" value="30">
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <div><label>Opac. Grade</label><input type="range" id="gridOpacity" min="0" max="1" step="0.1" value="0.3"></div>
+            <div><label>Opac. Cores</label><input type="range" id="hexOpacity" min="0" max="1" step="0.1" value="0.8"></div>
+        </div>
+        <label>Opacidade Fundo</label>
+        <input type="range" id="bgOpacity" min="0" max="1" step="0.1" value="1">
+
+        <hr style="border:0; border-top:1px solid #444; width:100%;">
+        
+        <button class="btn btn-save" onclick="saveToCloud()">☁️ SALVAR ALTERAÇÕES</button>
+        <button class="btn" style="background:#c62828;" onclick="clearHexes()">🗑️ Limpar Mapa Inteiro</button>
+        
+        <div style="margin-top:auto; font-size:11px; color:#666; text-align:center;">
+            <a href="#" id="viewLink" style="color:#4fc3f7; text-decoration:none;" target="_blank">🔗 Link do Jogador</a>
+        </div>
+    </div>
+
+    <canvas id="mapCanvas"></canvas>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ",
+        authDomain: "ed-rpg---sistema-de-fichas.firebaseapp.com",
+        databaseURL: "https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com",
+        projectId: "ed-rpg---sistema-de-fichas",
+        storageBucket: "ed-rpg---sistema-de-fichas.firebasestorage.app",
+        messagingSenderId: "350999444010",
+        appId: "1:350999444010:web:d89f31d13e449b8fbfa153"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const MODE = urlParams.get('mode') === 'view' ? 'VIEW' : 'EDIT';
+    const MAP_ID = 'mapa_mundi_principal';
+
+    if (MODE === 'VIEW') document.body.classList.add('viewer-mode');
+    else {
+        const baseUrl = window.location.href.split('?')[0];
+        document.getElementById('viewLink').href = `${baseUrl}?mode=view`;
+    }
+
+    const canvas = document.getElementById('mapCanvas');
+    const ctx = canvas.getContext('2d');
+    const led = document.getElementById('db-led');
+
+    let camera = { x: 0, y: 0, zoom: 1 };
+    
+    // ESTADO DO EDITOR
+    let activeTool = 'color'; // color, icon, customImg, border, hand
+    let isDragging = false;
+    let isSpacePressed = false;
+    let lastMouse = { x: 0, y: 0 };
+    let dragStart = { x: 0, y: 0 };
+    
+    // SELEÇÕES ATUAIS
+    let selectedColor = '#2e7d32'; // Verde padrão
+    let selectedIcon = '🌲';
+    let isBorderEraser = false;
+    let isCustomImgEraser = false;
+
+    // DADOS DO MAPA
+    let bgImage = null;
+    let bgImageUrl = "";
+    let hexMap = {}; // { "q,r": { color: "#...", icon: "...", customImg: "..." } }
+    let borderMap = {}; 
+    let hexRadius = 30;
+    let gridOpacity = 0.3;
+    let hexOpacity = 0.8;
+    let bgOpacity = 1.0;
+
+    // CACHE DE IMAGENS
+    const imgCache = {};
+
+    // --- PALETAS DEFINIDAS ---
+    const PALETTE_COLORS = [
+        'transparent', '#ffffff', '#000000', '#9e9e9e', '#5d4037', '#795548', // Especiais
+        '#1a237e', '#1565c0', '#4fc3f7', '#80deea', // Azuis (Água/Gelo)
+        '#1b5e20', '#2e7d32', '#4caf50', '#81c784', // Verdes (Natureza)
+        '#f57f17', '#fbc02d', '#fff176', '#fff9c4', // Amarelos (Deserto)
+        '#b71c1c', '#e53935', '#ff8a80', '#880e4f', // Vermelhos (Perigo/Lava)
+        '#4a148c', '#7b1fa2', '#ce93d8', '#3e2723'  // Roxos/Outros
+    ];
+
+    // --- ÍCONES EXPANDIDOS (NOVO) ---
+    const PALETTE_ICONS = [
+        '❌', 
+        // NATUREZA
+        '🌲', '🌳', '🌴', '🌵', '🌾', '🍄', '🌻', '🍂', '🎋', '⛰️', '🗻', '🌋', '🌊', '💧', '❄️', '🌫️', '🌑',
+        // CONSTRUÇÕES
+        '🏰', '🏯', '🏠', '🛖', '⛺', '🏚️', '🏛️', '⛪', '🌉', '🧱', '🚜', '⚓',
+        // ENCONTROS/MONSTROS
+        '⚔️', '💀', '🐉', '🐺', '🕷️', '🧟', '👻', '👁️', '🐙', '🦖', '🔥', '✨',
+        // MARCADORES
+        '🚩', '📍', '⭐', '❓', '💎', '📜', '🗝️', '🛡️', '🎯', '👣', '🛑'
+    ];
+
+    // --- SETUP INICIAL ---
+    function initUI() {
+        if (MODE !== 'EDIT') return;
+
+        // Gerar Paleta de Cores
+        const colorGrid = document.getElementById('colorPalette');
+        PALETTE_COLORS.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'color-swatch';
+            if(c === 'transparent') {
+                div.classList.add('transparent');
+                div.title = "Apagar Cor (Transparente)";
+            } else {
+                div.style.backgroundColor = c;
+            }
+            div.onclick = () => { selectColor(c); highlightSwatch(div, 'color-swatch'); };
+            colorGrid.appendChild(div);
+        });
+
+        // Gerar Paleta de Ícones
+        const iconGrid = document.getElementById('iconPalette');
+        PALETTE_ICONS.forEach(i => {
+            const div = document.createElement('div');
+            div.className = 'icon-swatch';
+            div.innerText = i === '❌' ? '🚫' : i; // Visualmente diferente para apagar
+            div.title = i === '❌' ? 'Apagar Ícone' : 'Carimbar';
+            div.onclick = () => { selectIcon(i === '❌' ? null : i); highlightSwatch(div, 'icon-swatch'); };
+            iconGrid.appendChild(div);
+        });
+
+        // Selecionar padrões
+        selectColor('#2e7d32');
+    }
+
+    function highlightSwatch(el, className) {
+        document.querySelectorAll('.' + className).forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // --- API DE FERRAMENTAS ---
+    window.setTool = (tool) => {
+        activeTool = tool;
+        // Atualiza botões
+        ['btnColor', 'btnIcon', 'btnImg', 'btnBorder', 'btnHand'].forEach(id => {
+            document.getElementById(id).classList.remove('active');
+        });
+        
+        const btnMap = { 'color': 'btnColor', 'icon': 'btnIcon', 'customImg': 'btnImg', 'border': 'btnBorder', 'hand': 'btnHand' };
+        if(btnMap[tool]) document.getElementById(btnMap[tool]).classList.add('active');
+
+        // Atualiza Paineis
+        document.querySelectorAll('.context-panel').forEach(p => p.classList.remove('visible'));
+        if(tool === 'color') document.getElementById('panel-color').classList.add('visible');
+        if(tool === 'icon') document.getElementById('panel-icon').classList.add('visible');
+        if(tool === 'customImg') document.getElementById('panel-customImg').classList.add('visible');
+        if(tool === 'border') document.getElementById('panel-border').classList.add('visible');
+
+        canvas.style.cursor = tool === 'hand' ? 'grab' : 'default';
+        if(tool === 'color') canvas.style.cursor = 'cell';
+        if(tool === 'icon') canvas.style.cursor = 'crosshair';
+        if(tool === 'customImg') canvas.style.cursor = 'copy';
+    };
+
+    window.selectColor = (c) => { selectedColor = c; };
+    window.pickCustomColor = (c) => { selectedColor = c; };
+    window.selectIcon = (i) => { selectedIcon = i; };
+    window.setEraseCustomImg = () => { isCustomImgEraser = true; };
+    window.setEraseBorderMode = () => { isBorderEraser = true; };
+
+    // --- ENGINE GRÁFICA ---
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; draw(); }
+    window.addEventListener('resize', resize);
+    initUI();
+    resize();
+
+    // --- CARREGAMENTO FIREBASE ---
+    const mapRef = ref(db, 'maps/' + MAP_ID);
+    document.getElementById('loader').classList.add('active');
+    
+    onValue(mapRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // Carregar Config
+            if (data.config) {
+                hexRadius = data.config.hexSize || 30;
+                gridOpacity = data.config.gridOpacity ?? 0.3;
+                hexOpacity = data.config.hexOpacity ?? 0.8;
+                bgOpacity = data.config.bgOpacity ?? 1.0;
+                
+                if (data.config.bgUrl && data.config.bgUrl !== bgImageUrl) {
+                    bgImageUrl = data.config.bgUrl;
+                    if(MODE==='EDIT') document.getElementById('bgUrlInput').value = bgImageUrl;
+                    loadImage(bgImageUrl);
+                }
+                if (MODE === 'EDIT') {
+                    document.getElementById('hexSize').value = hexRadius;
+                    document.getElementById('gridOpacity').value = gridOpacity;
+                    document.getElementById('hexOpacity').value = hexOpacity;
+                    document.getElementById('bgOpacity').value = bgOpacity;
+                }
+            }
+            hexMap = data.hexes || {};
+            borderMap = data.borders || {};
+        }
+        document.getElementById('loader').classList.remove('active');
+        led.classList.add('on');
+        draw();
+    }, (err) => console.error(err));
+
+    window.saveToCloud = () => {
+        if(MODE==='VIEW') return;
+        led.className = 'status-led busy';
+        update(ref(db, 'maps/' + MAP_ID), {
+            config: { bgUrl: bgImageUrl, hexSize: hexRadius, gridOpacity, hexOpacity, bgOpacity },
+            hexes: hexMap,
+            borders: borderMap
+        }).then(() => {
+            led.className = 'status-led on';
+        });
+    };
+
+    window.updateBgFromUrl = (url) => { if(url) { bgImageUrl = url; loadImage(url); } };
+    function loadImage(url) {
+        const img = new Image(); img.crossOrigin = "Anonymous";
+        img.onload = () => {
+            bgImage = img;
+            if(camera.x === 0 && camera.y === 0) { camera.x = canvas.width/2 - img.width/2; camera.y = canvas.height/2 - img.height/2; }
+            draw();
+        }; img.src = url;
+    }
+    window.clearHexes = () => { if(confirm("Apagar tudo?")) { hexMap = {}; borderMap = {}; draw(); } };
+
+    // --- MATH & HELPERS ---
+    function hexToPixel(q, r) { return { x: hexRadius * (3/2 * q), y: hexRadius * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r) }; }
+    function pixelToHex(x, y) { return cubeRound((2/3 * x) / hexRadius, (-1/3 * x + Math.sqrt(3)/3 * y) / hexRadius); }
+    function cubeRound(q, r) {
+        let s = -q-r; let rq = Math.round(q); let rr = Math.round(r); let rs = Math.round(s);
+        const qd = Math.abs(rq - q); const rd = Math.abs(rr - r); const sd = Math.abs(rs - s);
+        if (qd > rd && qd > sd) rq = -rr - rs; else if (rd > sd) rr = -rq - rs; else rs = -rq - rr;
+        return { q: rq, r: rr };
+    }
+    function screenToWorld(sx, sy) { return { x: (sx - canvas.width / 2) / camera.zoom + camera.x, y: (sy - canvas.height / 2) / camera.zoom + camera.y }; }
+    function getClosestSide(center, world) {
+        let angle = Math.atan2(world.y - center.y, world.x - center.x) * 180 / Math.PI; if (angle < 0) angle += 360;
+        return Math.floor(angle / 60);
+    }
+    function getImg(url) {
+        if(imgCache[url]) return imgCache[url];
+        const i = new Image(); i.crossOrigin = "Anonymous"; i.src = url; i.onload = draw;
+        imgCache[url] = i; return i;
+    }
+
+    // --- DRAWING ---
+    function drawHex(ctx, x, y, size, data) {
+        let color = data.color;
+        let icon = data.icon;
+
+        if (!color && data.type) {
+             const legacy = { 'grass': '#2e7d32', 'ocean': '#1a237e', 'desert': '#fbc02d', 'mountain': '#5d4037' };
+             color = legacy[data.type] || '#555';
+        }
+
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle_rad = Math.PI / 180 * (60 * i);
+            const px = x + size * Math.cos(angle_rad);
+            const py = y + size * Math.sin(angle_rad);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+
+        // 1. COR DO FUNDO
+        if (color && color !== 'transparent') {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // 2. GRADE
+        if (gridOpacity > 0) {
+            ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // 3. ÍCONE DE IMAGEM
+        if (data.customImg) {
+            const img = getImg(data.customImg);
+            if (img.complete && img.naturalWidth > 0) {
+                const s = size * 1.5;
+                ctx.save();
+                ctx.globalAlpha = 1; 
+                ctx.drawImage(img, x - s/2, y - s/2, s, s);
+                ctx.restore();
+            }
+        }
+        // 4. ÍCONE EMOJI
+        else if (icon) {
+            ctx.fillStyle = `rgba(255,255,255,${hexOpacity + 0.2})`; 
+            ctx.font = `${Math.floor(size/1.3)}px Arial`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.shadowColor = "black"; ctx.shadowBlur = 4; ctx.fillText(icon, x, y); ctx.shadowBlur = 0;
+        }
+    }
+
+    function draw() {
+        ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2); ctx.scale(camera.zoom, camera.zoom); ctx.translate(-camera.x, -camera.y);
+
+        // Fundo
+        ctx.save(); ctx.globalAlpha = bgOpacity;
+        if(bgImage) ctx.drawImage(bgImage, -bgImage.width/2, -bgImage.height/2);
+        else if(bgImageUrl) { ctx.fillStyle="#555"; ctx.textAlign="center"; ctx.fillText("Carregando...", 0, 0); }
+        ctx.restore();
+
+        // Hexágonos
+        ctx.save(); ctx.globalAlpha = hexOpacity;
+        for (let k in hexMap) {
+            const [q, r] = k.split(',').map(Number);
+            const pos = hexToPixel(q, r);
+            drawHex(ctx, pos.x, pos.y, hexRadius, hexMap[k]);
+        }
+        ctx.restore();
+
+        // Bordas
+        for (let k in borderMap) {
+            const [q,r,s] = k.split(',').map(Number);
+            const pos = hexToPixel(q,r);
+            const b = borderMap[k];
+            const a1 = Math.PI/180*(60*s); const a2 = Math.PI/180*(60*((s+1)%6));
+            ctx.beginPath();
+            ctx.moveTo(pos.x+hexRadius*Math.cos(a1), pos.y+hexRadius*Math.sin(a1));
+            ctx.lineTo(pos.x+hexRadius*Math.cos(a2), pos.y+hexRadius*Math.sin(a2));
+            ctx.strokeStyle = b.color; ctx.lineWidth = b.width; ctx.lineCap='round'; ctx.stroke();
+        }
+
+        // Mouse Hover
+        if(!isDragging && MODE === 'EDIT') {
+            const mw = screenToWorld(lastMouse.x, lastMouse.y);
+            const hex = pixelToHex(mw.x, mw.y);
+            const cp = hexToPixel(hex.q, hex.r);
+
+            if(activeTool === 'border') {
+                const s = getClosestSide(cp, mw);
+                const a1 = Math.PI/180*(60*s); const a2 = Math.PI/180*(60*((s+1)%6));
+                ctx.beginPath();
+                ctx.moveTo(cp.x+hexRadius*Math.cos(a1), cp.y+hexRadius*Math.sin(a1));
+                ctx.lineTo(cp.x+hexRadius*Math.cos(a2), cp.y+hexRadius*Math.sin(a2));
+                ctx.strokeStyle = document.getElementById('borderColor').value;
+                ctx.lineWidth = 4; ctx.stroke();
+            } else {
+                // Highlight Hex
+                drawHex(ctx, cp.x, cp.y, hexRadius, { color: 'rgba(255,255,255,0.2)' });
+            }
+        }
+
+        ctx.restore();
+    }
+
+    // --- INTERAÇÃO ---
+    function handleInput(sx, sy, isClick) {
+        if(MODE==='VIEW') return;
+        const mw = screenToWorld(sx, sy);
+        const h = pixelToHex(mw.x, mw.y);
+        const k = `${h.q},${h.r}`;
+
+        if(!hexMap[k]) hexMap[k] = {};
+
+        if(activeTool === 'color') {
+            hexMap[k].color = selectedColor;
+            if(selectedColor === 'transparent' && !hexMap[k].icon && !hexMap[k].customImg) delete hexMap[k];
+        }
+        else if(activeTool === 'icon') {
+            hexMap[k].icon = selectedIcon; 
+        }
+        else if(activeTool === 'customImg' && isClick) {
+            if(isCustomImgEraser) delete hexMap[k].customImg;
+            else {
+                const url = document.getElementById('customImgUrl').value;
+                if(url) hexMap[k].customImg = url;
+            }
+        }
+        else if(activeTool === 'border') {
+            const cp = hexToPixel(h.q, h.r);
+            const s = getClosestSide(cp, mw);
+            const bk = `${h.q},${h.r},${s}`;
+            if(isBorderEraser) delete borderMap[bk];
+            else borderMap[bk] = { color: document.getElementById('borderColor').value, width: document.getElementById('borderWidth').value };
+        }
+
+        draw();
+    }
+
+    canvas.addEventListener('mousedown', e => {
+        if(e.button===1 || (activeTool==='hand' || isSpacePressed)) {
+            isDragging=true; dragStart={x:e.clientX, y:e.clientY}; canvas.style.cursor='grabbing';
+        } else if(e.button===0 && MODE==='EDIT') {
+            handleInput(e.clientX, e.clientY, true);
+            if(activeTool==='color' || activeTool==='icon' || activeTool==='border') isDragging=true; 
+        }
+    });
+    canvas.addEventListener('mousemove', e => {
+        lastMouse={x:e.clientX, y:e.clientY};
+        if(!isDragging) { if(MODE==='EDIT') draw(); return; } 
+
+        if(activeTool==='hand' || isSpacePressed || e.buttons===4) {
+            const dx=(e.clientX-dragStart.x)/camera.zoom; const dy=(e.clientY-dragStart.y)/camera.zoom;
+            camera.x-=dx; camera.y-=dy; dragStart={x:e.clientX, y:e.clientY}; draw();
+        } else if(MODE==='EDIT' && (activeTool==='color' || activeTool==='icon' || activeTool==='border')) {
+            handleInput(e.clientX, e.clientY, false);
+        }
+    });
+    canvas.addEventListener('mouseup', () => { isDragging=false; canvas.style.cursor = (activeTool==='hand'||isSpacePressed)?'grab': (activeTool==='color'?'cell':'default'); });
+    canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const mw = screenToWorld(e.clientX, e.clientY);
+        const z = camera.zoom * (1 - Math.sign(e.deltaY)*0.1);
+        if(z>0.05 && z<10) { camera.zoom=z; const mw2 = screenToWorld(e.clientX, e.clientY); camera.x+=(mw.x-mw2.x); camera.y+=(mw.y-mw2.y); draw(); }
+    }, {passive:false});
+
+    window.addEventListener('keydown', e => {
+        if(e.code==='Space') { isSpacePressed=true; canvas.style.cursor='grab'; }
+        if(MODE==='EDIT') {
+            if(e.key==='1') setTool('color');
+            if(e.key==='2') setTool('icon');
+            if(e.key==='3') setTool('customImg');
+            if(e.key==='4') setTool('border');
+            if(e.key.toLowerCase()==='h') setTool('hand');
+        }
+    });
+    window.addEventListener('keyup', e => { if(e.code==='Space') { isSpacePressed=false; isDragging=false; canvas.style.cursor='default'; } });
+
+    if(MODE==='EDIT') {
+        document.getElementById('hexSize').addEventListener('input', e => { hexRadius=parseInt(e.target.value); draw(); });
+        document.getElementById('gridOpacity').addEventListener('input', e => { gridOpacity=parseFloat(e.target.value); draw(); });
+        document.getElementById('hexOpacity').addEventListener('input', e => { hexOpacity=parseFloat(e.target.value); draw(); });
+        document.getElementById('bgOpacity').addEventListener('input', e => { bgOpacity=parseFloat(e.target.value); draw(); });
+    }
+
+</script>
+  <script src="../configs/pwa.js" defer></script>
+</body>
+</html>
