@@ -2702,16 +2702,17 @@ window.openTechniqueDetail = (id) => {
     if (!tech) return;
     const img = tech.imagem || tech.image || '';
     const type = tech.tipo || 'Física';
+    const subtype = tech.subtipo || '';
     const cost = getTechniqueDisplayCost(tech);
     const base = getTechniqueBaseCost(tech);
     const discountNote = cost !== base ? ` <span style="color:#8ff0a4;">(base ${base} PM com redução de 25%)</span>` : '';
 
     let metaFieldsHtml = '';
     if (tech.alcance) metaFieldsHtml += `<div class="tech-resource-chip"><b>Alcance:</b> <span>${escHtml(tech.alcance)}</span></div>`;
-    if (tech.teste) metaFieldsHtml += `<div class="tech-resource-chip"><b>Teste:</b> <span>${escHtml(tech.teste)}</span></div>`;
-    if (tech.exigencias) metaFieldsHtml += `<div class="tech-resource-chip"><b>Exigências:</b> <span>${escHtml(tech.exigencias)}</span></div>`;
-    if (tech.foco_arcano) metaFieldsHtml += `<div class="tech-resource-chip"><b>Foco Arcano:</b> <span>${escHtml(tech.foco_arcano)}</span></div>`;
-    if (tech.conexao_divina) metaFieldsHtml += `<div class="tech-resource-chip" style="color:#f2c76f; border-color:#d6a85f; background:rgba(214,168,95,0.15);"><b style="color:#f2c76f;">Conexão Divina:</b> <span>⚡ ${escHtml(tech.conexao_divina)}</span></div>`;
+    metaFieldsHtml += `<div class="tech-resource-chip"><b>Teste:</b> <span>${escHtml(tech.teste || 'Não possui')}</span></div>`;
+    metaFieldsHtml += `<div class="tech-resource-chip"><b>Exigências:</b> <span>${escHtml(tech.exigencias || 'Não possui')}</span></div>`;
+    if (tech.foco_arcano && tech.foco_arcano.trim()) metaFieldsHtml += `<div class="tech-resource-chip"><b>Foco Arcano:</b> <span>${escHtml(tech.foco_arcano)}</span></div>`;
+    if (tech.conexao_divina && tech.conexao_divina.trim()) metaFieldsHtml += `<div class="tech-resource-chip" style="color:#f2c76f; border-color:#d6a85f; background:rgba(214,168,95,0.15);"><b style="color:#f2c76f;">Conexão Divina:</b> <span>⚡ ${escHtml(tech.conexao_divina)}</span></div>`;
     if (tech.detalhes_texto) metaFieldsHtml += renderTechniqueResources(tech.detalhes_texto);
 
     document.getElementById('tecnica_v2_detail').innerHTML = `
@@ -2721,7 +2722,10 @@ window.openTechniqueDetail = (id) => {
             </div>
             <div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                  <span class="tech-v4-type-badge ${type}">${type}</span>
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span class="tech-v4-type-badge ${type}">${type}</span>
+                    ${subtype ? `<span class="tech-v4-subtype-badge" style="background:rgba(42,204,218,0.2); color:#7fe3ff; border:1px solid rgba(42,204,218,0.5); padding:2px 8px; border-radius:4px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">${escHtml(subtype)}</span>` : ''}
+                  </div>
                   <div class="tech-detail-meta">${cost} PM${discountNote}</div>
                 </div>
                 <h2 class="tech-detail-title" style="margin-top:6px;">${escHtml(tech.titulo || 'Técnica sem nome')}</h2>
@@ -2845,7 +2849,10 @@ function renderDBList(items) {
         <div class="db-card" onclick="addFromDB('${item.id}')">
             ${item.linhagem ? `<div style="font-size:9px; color:#666; font-family:Cinzel,serif; text-transform:uppercase; margin-bottom:4px;">${item.linhagem}</div>` : ''}
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              ${type ? `<span class="tech-v4-type-badge ${type}">${type}</span>` : ''}
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                ${type ? `<span class="tech-v4-type-badge ${type}">${type}</span>` : ''}
+                ${item.subtipo ? `<span style="background:rgba(42,204,218,0.2); color:#7fe3ff; border:1px solid rgba(42,204,218,0.5); padding:2px 6px; border-radius:4px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">${escHtml(item.subtipo)}</span>` : ''}
+              </div>
               ${currentCategory === 'tecnicas' ? `<div style="font-size:12px; font-weight:800; color:#7fe3ff;">${cost} PM</div>` : ''}
             </div>
             <div class="db-card-title" style="margin-top:4px;">${item.titulo || item.id}</div>
@@ -3023,7 +3030,10 @@ function renderHabs(cat, data) {
                 ${img ? `<div class="tech-v2-mini-bg" style="background-image: url('${img.replace(/'/g, "%27")}');"></div>` : ''}
                 <div class="tech-v2-mini-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
-                      <span class="tech-v4-type-badge ${type}">${type}</span>
+                      <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                        <span class="tech-v4-type-badge ${type}">${type}</span>
+                        ${item.subtipo ? `<span style="background:rgba(42,204,218,0.2); color:#7fe3ff; border:1px solid rgba(42,204,218,0.5); padding:1px 5px; border-radius:3px; font-size:8px; font-weight:800; text-transform:uppercase;">${escHtml(item.subtipo)}</span>` : ''}
+                      </div>
                       <div class="tech-v2-mini-cost">${displayCost} PM</div>
                     </div>
                     <div class="tech-v2-mini-title">${escHtml(item.titulo || 'Técnica sem nome')}</div>
