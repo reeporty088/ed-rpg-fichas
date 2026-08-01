@@ -385,8 +385,19 @@ const CATEGORIES = {
   },
   tecnicas_v4: {
     label: '🔥 Técnicas v4',
-    fields: [],
-    meta: (it) => `${it.tipo || 'Física'} • PM: ${it.custo_pm || it.custo || '0'}`,
+    fields: [
+      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'tipo', label:'Tipo (Física, Feitiço, Clamor)', type:'text' },
+      { key:'subtipo', label:'Subtipo', type:'text' },
+      { key:'alcance', label:'Alcance', type:'text' },
+      { key:'teste', label:'Teste', type:'text' },
+      { key:'exigencias', label:'Exigências', type:'text' },
+      { key:'custo_pm', label:'Custo PM', type:'text' },
+      { key:'desc', label:'Descrição', type:'textarea' },
+      { key:'foco_arcano', label:'Foco Arcano', type:'text' },
+      { key:'conexao_divina', label:'Conexão Divina', type:'text' }
+    ],
+    meta: (it) => `${it.tipo || 'Física'}${it.subtipo ? ' • ' + it.subtipo : ''} • PM: ${it.custo_pm || it.custo || '0'}`,
     descField: 'desc'
   },
   deuses: {
@@ -876,8 +887,26 @@ function renderTechV4Form(id='') {
         ${!id ? `<button type="button" class="btn" style="font-size:11px;" onclick="selectTechV4Type('')">← Trocar Tipo</button>` : ''}
       </div>
 
-      <label>Nome da Técnica *</label>
-      <input id="f_titulo" type="text" placeholder="Ex: Golpe Devastador" value="${esc(item.titulo || '')}">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+        <div>
+          <label>Nome da Técnica *</label>
+          <input id="f_titulo" type="text" placeholder="Ex: Golpe Devastador" value="${esc(item.titulo || '')}">
+        </div>
+        <div>
+          <label>Subtipo (ex: Eficiência, Ataque...)</label>
+          <input id="f_subtipo" type="text" placeholder="Ex: Eficiência, Ataque, Revestir" value="${esc(item.subtipo || '')}" list="list_subtipos">
+          <datalist id="list_subtipos">
+            <option value="Eficiência">
+            <option value="Ataque">
+            <option value="Revestir">
+            <option value="Suporte">
+            <option value="Recuperação">
+            <option value="Utilitário">
+            <option value="Defesa">
+            <option value="Conjuração">
+          </datalist>
+        </div>
+      </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
         <div>
@@ -1079,6 +1108,7 @@ window.saveItem = async () => {
     payload = {
       titulo,
       tipo: type,
+      subtipo: document.getElementById('f_subtipo')?.value.trim() || '',
       alcance: document.getElementById('f_alcance')?.value.trim() || '',
       teste: document.getElementById('f_teste')?.value.trim() || '',
       exigencias: document.getElementById('f_exigencias')?.value.trim() || '',
@@ -1086,8 +1116,13 @@ window.saveItem = async () => {
       desc: document.getElementById('f_desc')?.value.trim() || '',
       imagem: document.getElementById('f_imagem')?.value || ''
     };
-    if (type === 'Feitiço') {
+    if (document.getElementById('f_foco_arcano')) {
       payload.foco_arcano = document.getElementById('f_foco_arcano')?.value.trim() || '';
+    } else if (type === 'Feitiço') {
+      payload.foco_arcano = document.getElementById('f_foco_arcano')?.value.trim() || '';
+    }
+    if (document.getElementById('f_conexao_divina')) {
+      payload.conexao_divina = document.getElementById('f_conexao_divina')?.value || '';
     } else if (type === 'Clamor') {
       payload.conexao_divina = document.getElementById('f_conexao_divina')?.value || '';
     }
