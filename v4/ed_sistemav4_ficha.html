@@ -338,6 +338,39 @@
         }
         #theme-btn:hover { border-color: var(--gold); }
 
+        #linhagem_btn_container {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        .btn-forma {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #111;
+            border: 1.5px solid #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            padding: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+        .btn-forma:hover {
+            transform: scale(1.1);
+        }
+        .btn-forma.active {
+            box-shadow: 0 0 10px currentColor;
+            background: #222;
+        }
+
         .color-picker {
             display: none;
             position: absolute;
@@ -1635,7 +1668,7 @@
 
                 <input type="text" id="char_name" style="background:transparent; border:none; text-align:center; font-family:'Cinzel',serif; font-size:18px; font-weight:900; margin-top:10px; color:white; letter-spacing:1px;" placeholder="NOME DO PERSONAGEM">
 
-                <div id="linhagem_btn_container" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:6px;"></div>
+                <div id="linhagem_btn_container"></div>
             </div>
 
             <div style="display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:end; margin-bottom:6px;">
@@ -1781,13 +1814,13 @@
             <div class="section-header">
                 <label>Habilidades de Classe</label>
             </div>
-            <div id="list_classe_hab" style="margin-bottom:12px;"></div>
+            <div id="list_classe_hab" class="tech-v2-grid" style="margin-bottom:12px;"></div>
 
             <!-- HABILIDADES DE RAÇA -->
             <div class="section-header">
                 <label>Habilidades Raciais</label>
             </div>
-            <div id="list_raca_hab" style="margin-bottom:12px;"></div>
+            <div id="list_raca_hab" class="tech-v2-grid" style="margin-bottom:12px;"></div>
 
             <hr class="hr">
 
@@ -1818,7 +1851,6 @@
                     <input type="number" id="mana_adicional" value="0" placeholder="Ex: 10">
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -1826,32 +1858,6 @@
     <div class="col" id="col-2">
         <div class="card">
             <div class="header-label">Combate & Inventário</div>
-
-            <!-- ROLAGEM 2D6 -->
-            <div class="roll-card">
-                <div class="roll-title">Rolar Dados — Sistema V3</div>
-
-                <div class="pericias-select">
-                    <label for="roll_pericia">Perícia (d4)</label>
-                    <select id="roll_pericia">
-                        <option value="">Nenhuma (0d4)</option>
-                    </select>
-                </div>
-
-                <div class="roll-mode-row">
-                    <button class="roll-mode-btn" id="btn_perda" onclick="setRollMode('perda')">− Perda</button>
-                    <button class="roll-mode-btn" id="btn_ganho" onclick="setRollMode('ganho')">+ Ganho</button>
-                </div>
-
-                <div class="dice-area">
-                    <div class="dice-row" id="d6_container"></div>
-                    <div class="dice-row" id="d4_container" style="margin-top:8px;"></div>
-                    <div class="roll-result" id="roll_result_text"></div>
-                    <div class="roll-outcome" id="roll_outcome"></div>
-                </div>
-
-                <button class="roll-btn" onclick="rollDice()">⬡ ROLAR DADOS</button>
-            </div>
 
             <!-- PROFICIÊNCIAS DE ARMA -->
             <div class="section-header" style="margin-top:4px;">
@@ -1864,6 +1870,23 @@
             <div id="proficiencias_container" style="margin-bottom:12px;"></div>
 
             <hr class="hr">
+
+            <!-- DÁDIVAS & MALDIÇÕES -->
+            <div id="dadivas_section" style="display:none; margin-bottom:12px;">
+                <div id="section_dadivas_wrapper">
+                    <div class="header-label" style="background:linear-gradient(90deg,rgba(60,40,0,0.8),transparent); border-color:#7a5a00; color:var(--gold);">
+                        ✨ Dádivas
+                    </div>
+                    <div id="dadivas_grid" style="margin-bottom:12px; display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+                <div id="section_maldicoes_wrapper" style="margin-top:12px;">
+                    <div class="header-label" style="background:linear-gradient(90deg,rgba(70,10,10,0.8),transparent); border-color:#7a1a1a; color:#ff7777;">
+                        💀 Maldições
+                    </div>
+                    <div id="maldicoes_grid" style="margin-bottom:12px; display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+                <hr class="hr">
+            </div>
 
             <!-- EQUIPAMENTOS -->
             <div class="section-header">
@@ -1899,16 +1922,6 @@
                 </div>
             </div>
 
-            <!-- DÁDIVAS & MALDIÇÕES -->
-            <div id="dadivas_section" style="display:none;">
-                <hr class="hr">
-                <div class="header-label" style="background:linear-gradient(90deg,rgba(60,40,0,0.8),transparent); border-color:#7a5a00; color:var(--gold);">
-                    Maldições & Dádivas
-                </div>
-                <div id="dadiva_btns" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
-                <div id="dadiva_cards"></div>
-            </div>
-
             <hr class="hr">
 
             <!-- ANOTAÇÕES -->
@@ -1923,6 +1936,17 @@
     <button onclick="changeCol(-1)">◀ Voltar</button>
     <span id="mobile_indicator">1 / 3</span>
     <button onclick="changeCol(1)">Avançar ▶</button>
+</div>
+
+<!-- MODAL VERTENTE -->
+<div class="modal-overlay" id="modal_vertente" onclick="closeModal('modal_vertente')">
+    <div class="modal-box modal-large" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="vertente_modal_title">Escolha uma Vertente</h2>
+            <button class="btn-close" onclick="closeModal('modal_vertente')">✖</button>
+        </div>
+        <div id="vertente_modal_body" style="padding:15px; color:#eee;"></div>
+    </div>
 </div>
 
 <!-- MODAL CHOICE -->
@@ -2427,7 +2451,7 @@ window.toggleForma = (tipo) => {
     if (cur === tipo) {
         update(ref(db, dbPath), { 'toggles/forma_ativa': null });
     } else {
-        let custos = { demon: 8, beast: 5, sacra: 6 };
+        let custos = { demon: 3, beast: 3, sacra: 3 };
         let custo = custos[tipo] || 0;
         let manaAtual = parseInt(charData.mana_at) || 0;
         let novoMana = Math.max(0, manaAtual - custo);
@@ -2447,15 +2471,15 @@ function updateLinhagemBtns() {
 
     if (tg.linhagem_demon) {
         const a = tg.forma_ativa === 'demon';
-        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#ff5555;" onclick="toggleForma('demon')">😈 Chamado do Inferno</button>`;
+        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#ff5555; border-color:#ff4444;" title="Chamado do Inferno (Demoníaco)" onclick="toggleForma('demon')">😈</button>`;
     }
     if (tg.linhagem_beast) {
         const a = tg.forma_ativa === 'beast';
-        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#44ff77;" onclick="toggleForma('beast')">🐺 Despertar Primordial</button>`;
+        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#44ff77; border-color:#44ff44;" title="Despertar Primordial (Animalesco)" onclick="toggleForma('beast')">🐺</button>`;
     }
     if (tg.linhagem_sacra) {
         const a = tg.forma_ativa === 'sacra';
-        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#55ddff;" onclick="toggleForma('sacra')">👼 Vislumbre da Evolução</button>`;
+        container.innerHTML += `<button class="btn-forma ${a ? 'active' : ''}" style="color:#55ddff; border-color:#00e5ff;" title="Vislumbre da Evolução (Sacra)" onclick="toggleForma('sacra')">👼</button>`;
     }
 
     // Pulso Ascensão
@@ -2608,7 +2632,7 @@ function renderAscHabs() {
 }
 
 // ============================================================
-// DÁDIVAS V3
+// DÁDIVAS & MALDIÇÕES (V4 HARDCODED LOGIC & ACTIONS)
 // ============================================================
 const DADIVA_COLORS = {
     mascara_lunar: '#9999ff',
@@ -2619,34 +2643,301 @@ const DADIVA_COLORS = {
     tremor_abissal: '#cc88ff'
 };
 
+window.toggleDadivaAura = (powerId, costPM = 0, costPV = 0) => {
+    const ativasMap = charData.toggles?.dadivas_ativas || {};
+    const isCurrentlyActive = ativasMap[powerId] === true;
+    const newState = !isCurrentlyActive;
+
+    const updates = {};
+    updates[`${dbPath}/toggles/dadivas_ativas/${powerId}`] = newState ? true : null;
+
+    if (newState) {
+        if (costPM > 0) {
+            const currentMana = parseInt(charData.mana_at) || 0;
+            updates[`${dbPath}/mana_at`] = Math.max(0, currentMana - costPM);
+        }
+        if (costPV > 0) {
+            const currentHp = parseInt(charData.hp_at) || 0;
+            updates[`${dbPath}/hp_at`] = Math.max(0, currentHp - costPV);
+        }
+    }
+
+    update(ref(db), updates);
+};
+
+window.triggerPowerAction = (powerId, costPM = 0, costPV = 0, message = '') => {
+    const currentMana = parseInt(charData.mana_at) || 0;
+    const currentHp = parseInt(charData.hp_at) || 0;
+
+    if (costPM > currentMana) {
+        if (!confirm(`PM insuficiente (necessário: ${costPM} PM, você tem: ${currentMana} PM). Continuar mesmo assim?`)) return;
+    }
+
+    const updates = {};
+    if (costPM > 0) updates[`${dbPath}/mana_at`] = Math.max(0, currentMana - costPM);
+    if (costPV > 0) updates[`${dbPath}/hp_at`] = Math.max(0, currentHp - costPV);
+
+    update(ref(db), updates).then(() => {
+        if (message) alert(message);
+    });
+};
+
+function getDadivaActionButtonsHtml(item) {
+    const id = item.id;
+    const ativasMap = charData.toggles?.dadivas_ativas || {};
+    const isActive = ativasMap[id] === true;
+
+    if (id === 'mascara_lunar') {
+        const btnStyle = isActive 
+            ? 'background:#2e7d32; border:1px solid #4caf50; color:#fff; box-shadow:0 0 10px rgba(76,175,80,0.5);' 
+            : 'background:rgba(153,153,255,0.15); border:1px solid #9999ff; color:#ccccff;';
+        return `
+            <div style="margin-top:8px;">
+                <button onclick="toggleDadivaAura('mascara_lunar')" style="width:100%; padding:6px; font-size:11px; font-weight:bold; border-radius:5px; cursor:pointer; transition:all 0.2s; ${btnStyle}">
+                    ${isActive ? '🌙 Máscara Lunar: ATIVADA' : '🌙 Ativar/Desativar Máscara'}
+                </button>
+            </div>`;
+    }
+
+    if (id === 'lodo_corrompido') {
+        return `
+            <div style="margin-top:8px;">
+                <button onclick="triggerPowerAction('lodo_corrompido', 2)" style="width:100%; padding:6px; font-size:11px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(102,204,102,0.2); border:1px solid #66cc66; color:#88ff88;">
+                    🧪 Arremesso Cáustico (-2 PM)
+                </button>
+            </div>`;
+    }
+
+    if (id === 'marca_do_abismo') {
+        return `
+            <div style="margin-top:8px;">
+                <button onclick="triggerPowerAction('marca_do_abismo', 3)" style="width:100%; padding:6px; font-size:11px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(170,170,170,0.2); border:1px solid #aaaaaa; color:#ffffff;">
+                    👻 Ativar Imaterialidade (-3 PM)
+                </button>
+            </div>`;
+    }
+
+    if (id === 'combustao_arcana') {
+        const btnStyle = isActive 
+            ? 'background:#2e7d32; border:1px solid #4caf50; color:#fff; box-shadow:0 0 10px rgba(76,175,80,0.5);' 
+            : 'background:rgba(255,136,51,0.2); border:1px solid #ff8833; color:#ffaa66;';
+        return `
+            <div style="margin-top:8px;">
+                <button onclick="toggleDadivaAura('combustao_arcana', 0, 2)" style="width:100%; padding:6px; font-size:11px; font-weight:bold; border-radius:5px; cursor:pointer; transition:all 0.2s; ${btnStyle}">
+                    🔥 ${isActive ? 'Combustão: ATIVADA' : 'Ativar/Desativar Combustão (-2 PV ao ativar)'}
+                </button>
+            </div>`;
+    }
+
+    if (id === 'escarcha_absoluta') {
+        const auraStyle = isActive 
+            ? 'background:#2e7d32; border:1px solid #4caf50; color:#fff; box-shadow:0 0 10px rgba(76,175,80,0.5);' 
+            : 'background:rgba(102,221,255,0.2); border:1px solid #66ddff; color:#99eeff;';
+        return `
+            <div style="display:flex; gap:6px; margin-top:8px;">
+                <button onclick="toggleDadivaAura('escarcha_absoluta', 2, 0)" style="flex:1; padding:6px; font-size:10px; font-weight:bold; border-radius:5px; cursor:pointer; transition:all 0.2s; ${auraStyle}">
+                    ❄️ ${isActive ? 'Aura: ATIVADA' : 'Ativar Aura (-2 PM)'}
+                </button>
+                <button onclick="triggerPowerAction('escarcha_absoluta', 1)" style="flex:1; padding:6px; font-size:10px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(102,221,255,0.15); border:1px solid #66ddff; color:#99eeff;">
+                    🛡️ Reação: Preservação (-1 PM)
+                </button>
+            </div>`;
+    }
+
+    if (id === 'tremor_abissal') {
+        return `
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:8px;">
+                <button onclick="triggerPowerAction('tremor_abissal', 2)" style="padding:6px 2px; font-size:9px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(204,136,255,0.2); border:1px solid #cc88ff; color:#eeaaff;">
+                    💥 Tremor 1 (-2 PM)
+                </button>
+                <button onclick="triggerPowerAction('tremor_abissal', 4, 0, 'Tremor Nível 2: Role 1d4 de dano em si mesmo fisicamente!')" style="padding:6px 2px; font-size:9px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(204,136,255,0.25); border:1px solid #cc88ff; color:#eeaaff;">
+                    💥 Tremor 2 (-4 PM)
+                </button>
+                <button onclick="triggerPowerAction('tremor_abissal', 6, 0, 'Tremor Nível 3: Sofre 1d6 de dano e seus membros ficam inutilizados!')" style="padding:6px 2px; font-size:9px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(204,136,255,0.3); border:1px solid #cc88ff; color:#ffffff;">
+                    💥 Tremor 3 (-6 PM)
+                </button>
+            </div>`;
+    }
+
+    const costInfo = parsePowerCost(item);
+    if (costInfo.hasCost) {
+        return `
+            <div style="margin-top:8px;">
+                <button onclick="triggerPowerAction('${id}', ${costInfo.costPM}, ${costInfo.costPV})" style="width:100%; padding:6px; font-size:11px; font-weight:bold; border-radius:5px; cursor:pointer; background:rgba(214,168,95,0.2); border:1px solid #d6a85f; color:#ffdd88;">
+                    ⚡ Ativar Poder (${costInfo.formatted})
+                </button>
+            </div>`;
+    }
+
+    return '';
+}
+
 function renderDadivas() {
     const section = document.getElementById('dadivas_section');
     const tg = charData.toggles || {};
-    const dadivas = tg.dadivas || {};
-    const permitidas = Object.keys(dadivas).filter(k => dadivas[k] === true);
+    const dadivasObj = tg.dadivas || {};
+    const permitidas = Object.keys(dadivasObj).filter(k => dadivasObj[k] === true);
     const comp = compendium.maldicoes_dadivas || {};
 
     if (!permitidas.length) { section.style.display = 'none'; return; }
     section.style.display = 'block';
 
-    const ativas = tg.dadivas_ativas || {};
-    document.getElementById('dadiva_btns').innerHTML = permitidas.map(id => {
-        const item = comp[id] || {};
-        const color = DADIVA_COLORS[id] || '#aaa';
-        const on = ativas[id] === true;
-        return `<button class="btn-dadiva" onclick="toggleDadiva('${id}')" style="border-color:${color}; color:${on ? '#000' : color}; background:${on ? color : '#111'};">${on ? '●' : '○'} ${item.titulo || id}</button>`;
-    }).join('');
+    const DADOS_FIXOS = {
+      mascara_lunar: {
+        titulo: 'Máscara Lunar',
+        tipo: 'Maldição (Ytaguinah)',
+        desc: 'Atributos aumentam em +2 temporariamente (pode passar de 5). Ganho automático em ataques. Sob Lua Cheia: deslocamento dobra e ganha +1 Ação Principal. Custo: 2 PM/turno (não recupera naturalmente). Se PM zerar, drena 1 PV/turno.',
+        fraqueza: 'Aversão à Luz: Perda automática em qualquer rolagem se iluminado diretamente por luz intensa/sol.'
+      },
+      lodo_corrompido: {
+        titulo: 'Lodo Corrompido',
+        tipo: 'Maldição (Yasharam)',
+        desc: 'Passiva: Comprime o corpo, estende membros até 2 blocos em ataques e é imune a dano de queda. Inimigos em contato físico por 3 rodadas ficam Atordoados. Ativo: Arremesso Cáustico (2 PM, 1 Ação).',
+        fraqueza: 'Combustão Biológica: Dano de Fogo sofrido sobe 1 grau de dado. Ficar Em Chamas causa Perda geral. Água abundante anula habilidades e causa Perda.'
+      },
+      marca_do_abismo: {
+        titulo: 'Marca do Abismo',
+        tipo: 'Maldição (Elísio)',
+        desc: 'Fica parcialmente imaterial (dano físico mundano cai pela metade). Criaturas do pós-vida não podem te atacar normalmente. Pode gastar +3 PM para atravessar 1 bloco de parede.',
+        fraqueza: 'Voz do Abismo: Em situações de estresse extremo (a critério do mestre), sofre Perda no próximo teste (máximo 1x/cena).'
+      },
+      combustao_arcana: {
+        titulo: 'Combustão Arcana',
+        tipo: 'Dádiva (Magmar)',
+        desc: 'Deslocamento dobra (8 blocos). Mover 3 blocos em linha reta antes de ataque corpo a corpo dá Ganho e +1d6 dano. Ataques físicos causam dano de Fogo (Fort 10 ou Em Chamas). Eficácia de curas recebidas cai pela metade.',
+        fraqueza: 'Fornalha Interna: Vulnerável a Água (dano aumenta em 1 grau). Nunca pode estar furtivo devido ao calor e vapor contínuos.'
+      },
+      escarcha_absoluta: {
+        titulo: 'Escarcha Absoluta',
+        tipo: 'Dádiva (Ghélida)',
+        desc: 'Aura de Petrificação: Inimigo a 2 blocos ganha Lentidão (2 turnos seguidos = Paralisado). Preservação: Reação para absorver 1 impacto por completo. Custo extra: Deslocamento cai pela metade e PM não regenera naturalmente.',
+        fraqueza: 'A Fissura Exposta: Ataques de Fogo ignoram espaços de proteção (dano vai no PV) e impõem Perda no seu turno seguinte.'
+      },
+      tremor_abissal: {
+        titulo: 'Tremor Abissal',
+        tipo: 'Dádiva (O Quebrador)',
+        desc: 'Estalo (Nível 1): Empurra 2 blocos e derruba. Fissura (Nível 2): Dano em 2 blocos frontais, ignora armadura e Atordoa. Colapso (Nível 3): Onda de choque 4 blocos com Ganho, ignora evasão/armadura e destrói o chão.',
+        fraqueza: 'Nervos Estilhaçados: Tremores nas mãos causam Perda automática em qualquer teste que exija precisão fina ou delicadeza.'
+      }
+    };
 
-    document.getElementById('dadiva_cards').innerHTML = permitidas.map(id => {
-        const item = comp[id] || {};
-        const color = DADIVA_COLORS[id] || '#666';
-        return `<div class="dadiva-card" style="border-color:${color}44; border-left-color:${color}; background:rgba(0,0,0,0.5);">
-            <div class="dadiva-title" style="color:${color};">${item.titulo || id}</div>
-            <div class="dadiva-subtitle">${item.origem || ''}</div>
-            <div class="dadiva-desc">${item.desc || 'Sem descrição no banco de dados.'}</div>
-        </div>`;
-    }).join('');
+    const dadivasList = [];
+    const maldicoesList = [];
+
+    permitidas.forEach(id => {
+        const itemFix = DADOS_FIXOS[id];
+        const itemComp = comp[id] || {};
+        const item = {
+            id,
+            titulo: itemFix?.titulo || itemComp.titulo || id,
+            tipo: itemFix?.tipo || itemComp.tipo || itemComp.categoria || 'Poder',
+            desc: itemFix?.desc || itemComp.desc || 'Sem descrição.',
+            fraqueza: itemFix?.fraqueza || itemComp.fraqueza || ''
+        };
+        const tipoLower = item.tipo.toLowerCase();
+        const isMaldicao = tipoLower.includes('maldic') || id.includes('maldic') || id.startsWith('m_');
+        if (isMaldicao) maldicoesList.push(item);
+        else dadivasList.push(item);
+    });
+
+    const renderCardList = (items, isMald) => {
+        if (!items.length) return `<div style="color:#777; font-size:11px; text-align:center;">Nenhuma.</div>`;
+        return items.map(item => {
+            const id = item.id;
+            const color = DADIVA_COLORS[id] || (isMald ? '#ff6666' : '#d6a85f');
+            const actionButtons = getDadivaActionButtonsHtml(item);
+
+            return `
+                <div class="dadiva-card" style="border-color:${color}66; border-left:4px solid ${color}; background:rgba(10,10,15,0.85); padding:10px; border-radius:8px; display:flex; flex-direction:column; justify-content:space-between; margin-bottom:8px;">
+                    <div>
+                        <div class="dadiva-title" style="color:${color}; font-family:'Cinzel',serif; font-weight:bold; font-size:13px; margin-bottom:2px;">${escHtml(item.titulo || id)}</div>
+                        <div class="dadiva-subtitle" style="font-size:10px; color:#aaa; margin-bottom:6px; font-style:italic;">${escHtml(item.tipo)}</div>
+                        <div class="dadiva-desc" style="font-size:11px; color:#ccc; line-height:1.4; white-space:pre-wrap; margin-bottom:6px;">${escHtml(item.desc || 'Sem descrição.')}</div>
+                        ${item.fraqueza ? `
+                            <div class="dadiva-weakness" style="color:#ff5555; font-size:11px; margin-top:6px; border-top:1px dashed #552222; padding-top:4px;">
+                                <b>Fraqueza Permanente:</b> ${escHtml(item.fraqueza)}
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${actionButtons}
+                </div>
+            `;
+        }).join('');
+    };
+
+    const dadivasGrid = document.getElementById('dadivas_grid');
+    const maldicoesGrid = document.getElementById('maldicoes_grid');
+    if (dadivasGrid) dadivasGrid.innerHTML = renderCardList(dadivasList, false);
+    if (maldicoesGrid) maldicoesGrid.innerHTML = renderCardList(maldicoesList, true);
 }
+
+function parsePowerCost(item = {}) {
+    let costPM = parseInt(item.custo_pm) || 0;
+    let costPV = parseInt(item.custo_pv) || 0;
+    let costPulso = parseInt(item.custo_pulso) || 0;
+
+    const rawCost = String(item.custo || item.cost || '');
+    if (!costPM && !costPV && !costPulso && rawCost) {
+        const pmMatch = rawCost.match(/(\d+)\s*PM/i);
+        const pvMatch = rawCost.match(/(\d+)\s*PV/i);
+        const pulsoMatch = rawCost.match(/(\d+)\s*Pulso/i);
+        if (pmMatch) costPM = parseInt(pmMatch[1]);
+        if (pvMatch) costPV = parseInt(pvMatch[1]);
+        if (pulsoMatch) costPulso = parseInt(pulsoMatch[1]);
+    }
+
+    const parts = [];
+    if (costPM > 0) parts.push(`${costPM} PM`);
+    if (costPV > 0) parts.push(`${costPV} PV`);
+    if (costPulso > 0) parts.push(`${costPulso} Pulso`);
+
+    return {
+        costPM,
+        costPV,
+        costPulso,
+        hasCost: parts.length > 0,
+        formatted: parts.join(' + ')
+    };
+}
+
+window.activatePower = (powerId) => {
+    const comp = compendium.maldicoes_dadivas || {};
+    const item = comp[powerId] || { id: powerId, titulo: powerId };
+    const costInfo = parsePowerCost(item);
+
+    const ativas = charData.efeitos_ativos || {};
+    const isCurrentlyActive = ativas[powerId] === true;
+
+    if (isCurrentlyActive) {
+        update(ref(db, `${dbPath}/efeitos_ativos`), { [powerId]: null });
+        return;
+    }
+
+    const currentPM = parseInt(charData.mana_at) || 0;
+    const currentPV = parseInt(charData.hp_at) || 0;
+    const currentPulso = parseInt(charData.pulso_at) || 0;
+
+    if (costInfo.costPM > currentPM) {
+        alert(`PM insuficiente! Custo: ${costInfo.costPM} PM, Atual: ${currentPM} PM.`);
+        return;
+    }
+    if (costInfo.costPV > currentPV) {
+        alert(`PV insuficiente! Custo: ${costInfo.costPV} PV, Atual: ${currentPV} PV.`);
+        return;
+    }
+    if (costInfo.costPulso > currentPulso) {
+        alert(`Pulso insuficiente! Custo: ${costInfo.costPulso} Pulso, Atual: ${currentPulso} Pulso.`);
+        return;
+    }
+
+    const updates = {};
+    if (costInfo.costPM > 0) updates['mana_at'] = currentPM - costInfo.costPM;
+    if (costInfo.costPV > 0) updates['hp_at'] = currentPV - costInfo.costPV;
+    if (costInfo.costPulso > 0) updates['pulso_at'] = currentPulso - costInfo.costPulso;
+
+    updates[`efeitos_ativos/${powerId}`] = true;
+    update(ref(db, dbPath), updates);
+};
 
 window.toggleDadiva = (id) => {
     const ativas = { ...(charData.toggles?.dadivas_ativas || {}) };
@@ -2872,12 +3163,9 @@ window.addFromDB = (itemId) => {
     if (!item) { alert("Item não encontrado no banco."); return; }
 
     if (currentCategory === 'classe_hab') {
-        update(ref(db, dbPath), { classe: item.titulo });
-        let pack = {};
-        pack['desc_geral'] = { titulo: `Sobre: ${item.titulo}`, desc: item.desc || "" };
-        if (item.hab_nome) pack['hab_1'] = { titulo: item.hab_nome, desc: item.hab_desc || "" };
-        if (item.hab2_nome) pack['hab_2'] = { titulo: item.hab2_nome, desc: item.hab2_desc || "" };
-        set(ref(db, `${dbPath}/habilidades/classe_hab`), pack);
+        closeModal('modal_db');
+        openVertenteModal(item);
+        return;
     } else if (currentCategory === 'raca_hab') {
         update(ref(db, dbPath), { ancestralidade: item.titulo });
         let pack = {};
@@ -2999,28 +3287,178 @@ window.saveHab = (cat, id, field, val) => {
     update(ref(db, `${dbPath}/habilidades/${cat}/${id}`), { [field]: val });
 };
 
+window.openVertenteModal = (item) => {
+    document.getElementById('vertente_modal_title').innerText = `Escolha a Vertente: ${item.titulo || 'Classe'}`;
+    const container = document.getElementById('vertente_modal_body');
+
+    const vertentes = [];
+    if (item.v1_nome || item.v1_hab_nome) vertentes.push({ nome: item.v1_nome || 'Vertente 1', hab_nome: item.v1_hab_nome || '', hab_desc: item.v1_hab_desc || '' });
+    if (item.v2_nome || item.v2_hab_nome) vertentes.push({ nome: item.v2_nome || 'Vertente 2', hab_nome: item.v2_hab_nome || '', hab_desc: item.v2_hab_desc || '' });
+    if (item.v3_nome || item.v3_hab_nome) vertentes.push({ nome: item.v3_nome || 'Vertente 3', hab_nome: item.v3_hab_nome || '', hab_desc: item.v3_hab_desc || '' });
+
+    let html = `
+        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:8px; margin-bottom:16px; border:1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin:0 0 6px 0; color:var(--theme-light,#d6a85f); font-family:Cinzel,serif;">${escHtml(item.titulo || '')}</h3>
+            <p style="font-size:12px; color:#ccc; margin:0 0 8px 0; line-height:1.4;">${escHtml(item.desc || '')}</p>
+            ${item.hab_nome ? `<div style="font-size:12px; color:#7fe3ff;"><b>Habilidade Base (${escHtml(item.hab_nome)}):</b> <span style="color:#aaa;">${escHtml(item.hab_desc || '')}</span></div>` : ''}
+        </div>
+        <h4 style="font-family:Cinzel,serif; color:#fff; margin-bottom:10px;">Selecione uma Vertente:</h4>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+    `;
+
+    if (!vertentes.length) {
+        html += `<div style="color:#aaa; text-align:center; grid-column:1/-1;">Nenhuma vertente cadastrada para esta classe.</div>`;
+    } else {
+        vertentes.forEach((v, idx) => {
+            const vJson = JSON.stringify({
+                className: item.titulo || '',
+                habBaseNome: item.hab_nome || '',
+                habBaseDesc: item.hab_desc || '',
+                vNome: v.nome || `Vertente ${idx+1}`,
+                vHabNome: v.hab_nome || '',
+                vHabDesc: v.hab_desc || ''
+            }).replace(/"/g, '&quot;');
+
+            html += `
+                <div class="db-card" style="cursor:pointer; border:1px solid var(--gold-dim,#886622); padding:12px;" onclick="selectVertenteData('${vJson}')">
+                    <div style="font-size:14px; font-weight:bold; color:var(--gold,#ffd700); font-family:Cinzel,serif; margin-bottom:6px;">${escHtml(v.nome)}</div>
+                    ${v.hab_nome ? `<div style="font-size:12px; font-weight:bold; color:#7fe3ff; margin-bottom:4px;">${escHtml(v.hab_nome)}</div>` : ''}
+                    <div style="font-size:11px; color:#bbb; line-height:1.4;">${escHtml(v.hab_desc || 'Sem descrição.')}</div>
+                    <button class="btn-choice" style="margin-top:10px; width:100%;">Escolher ${escHtml(v.nome)}</button>
+                </div>
+            `;
+        });
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+    document.getElementById('modal_vertente').classList.add('open');
+};
+
+window.selectVertenteData = (jsonStr) => {
+    try {
+        const data = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+        const fullClassName = `${data.className}: ${data.vNome}`;
+        update(ref(db, dbPath), { classe: fullClassName });
+
+        let pack = {};
+        pack['desc_geral'] = { titulo: `Sobre: ${data.className}`, desc: `Classe ${data.className} - Vertente ${data.vNome}` };
+        if (data.habBaseNome) pack['hab_1'] = { titulo: data.habBaseNome, desc: data.habBaseDesc || "" };
+        if (data.vHabNome) pack['hab_2'] = { titulo: data.vHabNome, desc: data.vHabDesc || "" };
+
+        set(ref(db, `${dbPath}/habilidades/classe_hab`), pack);
+        closeModal('modal_vertente');
+    } catch(e) { console.error(e); }
+};
+
+window.openAbilityDetail = (cat, id) => {
+    const item = charData.habilidades?.[cat]?.[id];
+    if (!item) return;
+    const isClasse = cat === 'classe_hab';
+    const type = isClasse ? 'CLASSE' : 'RAÇA';
+    const badgeClass = isClasse ? 'Feitiço' : 'Clamor';
+
+    document.getElementById('tecnica_v2_detail').innerHTML = `
+        <div class="tech-detail-card">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span class="tech-v4-type-badge ${badgeClass}">${type}</span>
+                  </div>
+                </div>
+                <h2 class="tech-detail-title" style="margin-top:6px;">${escHtml(item.titulo || 'Habilidade')}</h2>
+                <div class="tech-detail-section" style="margin-top:10px;"><b>Descrição</b>\n${escHtml(item.desc || 'Sem descrição.')}</div>
+            </div>
+        </div>`;
+    document.getElementById('modal_tecnica_v2').classList.add('open');
+};
+
+window.openFormaDetail = (titulo, desc) => {
+    document.getElementById('tecnica_v2_detail').innerHTML = `
+        <div class="tech-detail-card">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span class="tech-v4-type-badge Clamor">TRANSFORMAÇÃO</span>
+                  </div>
+                </div>
+                <h2 class="tech-detail-title" style="margin-top:6px;">${escHtml(titulo)}</h2>
+                <div class="tech-detail-section" style="margin-top:10px;"><b>Descrição</b>\n${escHtml(desc)}</div>
+            </div>
+        </div>`;
+    document.getElementById('modal_tecnica_v2').classList.add('open');
+};
+
 function renderHabs(cat, data) {
     const container = document.getElementById(`list_${cat}`);
     if (!container) return;
     container.innerHTML = "";
+
+    if (cat === 'raca_hab' && charData.toggles && charData.toggles.forma_ativa) {
+        const forma = charData.toggles.forma_ativa;
+        let formaInfo = null;
+        if (forma === 'demon') {
+            formaInfo = {
+                titulo: 'Forma Ativa: Chamado do Inferno',
+                desc: 'Custo: 3 PM, 1 Ação. Ignora todas as condições negativas ativas. O custo em PM de técnicas e hab. de raça cai pela metade (mín 1). Rola ataques com Ganho. Fica Exausto no fim da cena.'
+            };
+        } else if (forma === 'beast') {
+            formaInfo = {
+                titulo: 'Forma Ativa: Despertar Primordial',
+                desc: 'Custo: 3 PM, 1 Ação. Assume a forma do animal místico (ver regras específicas da sua raça). Fica incapaz de se transformar por 2 cenas após o uso.'
+            };
+        } else if (forma === 'sacra') {
+            formaInfo = {
+                titulo: 'Forma Ativa: Vislumbre da Evolução',
+                desc: 'Custo: 3 PM. Duração: 1 Rodada. Todos os testes recebem Ganho, ataques ganham +1d6 de dano e deslocamento sobe para 6 blocos. Ao fim da habilidade, sofre 1d8 de dano direto.'
+            };
+        }
+
+        if (formaInfo) {
+            const divForma = document.createElement('div');
+            divForma.className = 'tech-v2-mini';
+            divForma.style.border = '1px solid var(--theme-accent)';
+            divForma.onclick = () => openFormaDetail(formaInfo.titulo, formaInfo.desc);
+            divForma.innerHTML = `
+                <div class="tech-v2-mini-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span class="tech-v4-type-badge Clamor">TRANSFORMAÇÃO</span>
+                    </div>
+                    <div class="tech-v2-mini-title">${escHtml(formaInfo.titulo)}</div>
+                </div>`;
+            container.appendChild(divForma);
+        }
+    }
     
-    // CORREÇÃO 1: Identifica corretamente objetos vazios vindos do Firebase
-    if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+    const hasData = data && typeof data === 'object' && Object.keys(data).length > 0;
+    if (!hasData) {
         if (cat === 'classe_hab') container.innerHTML = "<p style='font-size:11px; color:#777; text-align:center; font-family:Cinzel,serif;'>Nenhuma habilidade de classe detectada no banco.</p>";
-        if (cat === 'raca_hab') container.innerHTML = "<p style='font-size:11px; color:#777; text-align:center; font-family:Cinzel,serif;'>Nenhuma habilidade de raça detectada no banco.</p>";
+        if (cat === 'raca_hab' && (!charData.toggles || !charData.toggles.forma_ativa)) {
+            container.innerHTML = "<p style='font-size:11px; color:#777; text-align:center; font-family:Cinzel,serif;'>Nenhuma habilidade de raça detectada no banco.</p>";
+        }
         return;
     }
 
-    const fixed = (cat === 'classe_hab' || cat === 'raca_hab');
-
     Object.keys(data).forEach(id => {
         const item = data[id];
-        // CORREÇÃO 2: Segurança extra contra dados corrompidos
         if (!item || typeof item !== 'object') return; 
 
         const div = document.createElement('div');
 
-        if (cat === 'tecnicas') {
+        if (cat === 'classe_hab' || cat === 'raca_hab') {
+            div.className = 'tech-v2-mini';
+            const isClasse = cat === 'classe_hab';
+            const badgeText = isClasse ? 'CLASSE' : 'RAÇA';
+            const badgeClass = isClasse ? 'Feitiço' : 'Clamor';
+            div.onclick = () => openAbilityDetail(cat, id);
+            div.innerHTML = `
+                <div class="tech-v2-mini-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span class="tech-v4-type-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="tech-v2-mini-title">${escHtml(item.titulo || 'Habilidade')}</div>
+                </div>`;
+        } else if (cat === 'tecnicas') {
             div.className = 'tech-v2-mini';
             const img = item.imagem || item.image || '';
             const type = item.tipo || 'Física';
@@ -3083,25 +3521,15 @@ function renderHabs(cat, data) {
                     <textarea onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Efeito...">${item.desc || ''}</textarea>
                 </div>`;
         } else {
-            // Fixed (classe_hab, raca_hab) and inventario
             div.className = 'hab-item';
-            const titleEl = fixed
-                ? `<div class="hab-title" style="color:var(--theme-light); padding:4px; cursor:pointer; font-family:'Cinzel',serif; font-size:12px;" onclick="toggleHab('${cat}_${id}')">${item.titulo || ''}</div>`
-                : `<input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Item">`;
-            const bodyEl = fixed
-                ? `<div style="font-size:12px; color:#bbb; line-height:1.5; white-space:pre-wrap; padding:4px;">${item.desc || ''}</div>`
-                : `<textarea onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Descrição...">${item.desc || ''}</textarea>`;
-            const delEl = fixed ? '' : `<button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>`;
-            const isOpen = (fixed && id === 'desc_geral') ? 'open' : '';
-
             div.innerHTML = `
                 <div class="hab-header">
                     <span class="hab-toggle" onclick="toggleHab('${cat}_${id}')">▼</span>
-                    ${titleEl}
-                    ${delEl}
+                    <input type="text" class="hab-title" value="${item.titulo || ''}" onchange="saveHab('${cat}','${id}','titulo',this.value)" placeholder="Item">
+                    <button class="btn-del" onclick="removeItem('${cat}','${id}')">✖</button>
                 </div>
-                <div class="hab-body ${isOpen}" id="body_${cat}_${id}">
-                    ${bodyEl}
+                <div class="hab-body" id="body_${cat}_${id}">
+                    <textarea onchange="saveHab('${cat}','${id}','desc',this.value)" placeholder="Descrição...">${item.desc || ''}</textarea>
                 </div>`;
         }
 

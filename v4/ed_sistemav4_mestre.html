@@ -90,11 +90,11 @@
         .npc-skill-dot.active { color:#ffaaaa; }
         .npc-skill-dot:hover { color:#ff8888; }
 
-        #roster-sidebar,#combat-sidebar { position:fixed; top:0; width:300px; height:100%; background:#111; z-index:2000; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; transition:.3s; }
-        #roster-sidebar { left:-320px; border-right:3px solid var(--header-bg); }
-        #combat-sidebar { right:-320px; border-left:3px solid var(--header-bg); }
-        #roster-sidebar.open { left:0; } #combat-sidebar.open { right:0; }
-        .roster-toggle-btn,.combat-toggle-btn { position:fixed; top:50%; transform:translateY(-50%); background:var(--header-bg); color:#fff; border:2px solid #fff; width:40px; height:60px; font-size:24px; cursor:pointer; z-index:2001; }
+        #roster-sidebar,#combat-sidebar { position:fixed; top:0; width:300px; height:100%; background:#111; z-index:2000; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; transition:left .3s, right .3s, visibility .3s; visibility:hidden; pointer-events:none; }
+        #roster-sidebar { left:-350px; border-right:3px solid var(--header-bg); }
+        #combat-sidebar { right:-350px; border-left:3px solid var(--header-bg); }
+        #roster-sidebar.open { left:0; visibility:visible; pointer-events:auto; } #combat-sidebar.open { right:0; visibility:visible; pointer-events:auto; }
+        .roster-toggle-btn,.combat-toggle-btn { position:fixed; top:50%; transform:translateY(-50%); background:var(--header-bg); color:#fff; border:2px solid #fff; width:40px; height:60px; font-size:24px; cursor:pointer; z-index:2001; transition: left 0.3s ease, right 0.3s ease; }
         .roster-toggle-btn { left:0; border-left:none; border-radius:0 10px 10px 0; }
         .combat-toggle-btn { right:0; border-right:none; border-radius:10px 0 0 10px; }
         .combat-header { text-align:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:10px; font-weight:bold; color:var(--accent); }
@@ -173,20 +173,24 @@
         .sidebar-nav {
           position: fixed;
           top: 0;
-          left: -280px;
+          left: -350px;
           width: 260px;
           height: 100%;
           background: rgba(19, 9, 9, 0.98);
           border-right: 1px solid var(--border);
           box-shadow: 5px 0 25px rgba(0,0,0,0.8);
           z-index: 3000;
-          transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s;
           display: flex;
           flex-direction: column;
           padding: 24px;
+          visibility: hidden;
+          pointer-events: none;
         }
         .sidebar-nav.open {
           left: 0;
+          visibility: visible;
+          pointer-events: auto;
         }
         .sidebar-trigger {
           position: fixed;
@@ -349,8 +353,11 @@
 
     <div id="roster-sidebar" style="overflow-y: auto;">
         <div class="combat-header">👥 ESTOQUE</div>
+        <div style="padding:0 5px; margin-bottom:8px;">
+          <input type="text" id="roster_search_input" placeholder="🔍 Buscar ficha ou NPC no Estoque..." onkeyup="filterRosterItems()" style="padding:6px 10px; font-size:12px; background:#1a0c0e; border:1px solid #5a1a1f; color:white; border-radius:4px; width:100%; box-sizing:border-box;" />
+        </div>
         <div style="display:flex; gap:5px; margin-bottom:15px; padding:0 5px;">
-          <input type="text" id="new_folder_name" placeholder="Nova Pasta" style="padding:6px; font-size:12px; background:#222; border:1px solid #5a1a1f; color:white; border-radius:4px;" />
+          <input type="text" id="new_folder_name" placeholder="Nova Pasta" style="padding:6px; font-size:12px; background:#222; border:1px solid #5a1a1f; color:white; border-radius:4px; flex:1;" />
           <button onclick="createRosterFolder()" style="background:#2e7d32; border:none; color:white; border-radius:4px; font-weight:bold; cursor:pointer; padding:6px 10px; font-size:12px;">+ Pasta</button>
         </div>
         <div id="roster_folders_container"></div>
@@ -369,45 +376,34 @@
     <button class="combat-toggle-btn" onclick="toggleCombatSidebar()">⚔️</button>
 
     <div id="form-npc-container"><div class="npc-form">
-        <h3 style="text-align:center;color:var(--accent);">CRIAR / EDITAR NPC V3</h3>
+        <h3 style="text-align:center;color:var(--accent);">CRIAR / EDITAR NPC V4.1</h3>
         <input type="hidden" id="npc_id">
-        <div style="text-align:right;margin-bottom:8px;">
-          <button type="button" style="background:#4a1a2a;border:1px solid var(--accent);color:var(--accent);padding:7px 14px;border-radius:5px;cursor:pointer;font-weight:bold;" onclick="toggleRandomPanel()">🎲 Gerar Aleatório</button>
-        </div>
-        <div id="npc-random-panel" class="npc-type-panel">
-          <div style="font-size:12px;color:#aaa;margin-bottom:8px;">Selecione o tipo de inimigo:</div>
-          <div class="npc-type-grid">
-            <button class="btn-npc-type lacaio" onclick="generateRandomNpc('lacaio')"><b>Lacaio</b><br><span style="font-size:11px;font-weight:normal;">Fraco, usado em grupos</span></button>
-            <button class="btn-npc-type combatente" onclick="generateRandomNpc('combatente')"><b>Combatente</b><br><span style="font-size:11px;font-weight:normal;">Desafia um personagem</span></button>
-            <button class="btn-npc-type elite" onclick="generateRandomNpc('elite')"><b>Elite</b><br><span style="font-size:11px;font-weight:normal;">Ameaça séria ao grupo</span></button>
-            <button class="btn-npc-type chefe" onclick="generateRandomNpc('chefe')"><b>Chefe</b><br><span style="font-size:11px;font-weight:normal;">Inimigo memorável de cena</span></button>
-          </div>
-        </div>
-        <div class="form-row"><div><label>Nome</label><input id="npc_name"></div><div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div></div>
-        <div class="form-row"><div><label>Classe/Função</label><input id="npc_classe"></div><div><label>Ancestralidade</label><input id="npc_ancestralidade"></div></div>
-        <div class="form-row-3"><div><label>Poder</label><input type="number" id="npc_pod" value="0" oninput="calcNpcDerived()"></div><div><label>Habilidade</label><input type="number" id="npc_hab" value="0" oninput="calcNpcDerived()"></div><div><label>Resistência</label><input type="number" id="npc_res" value="0" oninput="calcNpcDerived()"></div></div>
-        <div class="form-row-3">
-          <div><label>PV Máx (5×RES)</label><input type="number" id="npc_hp" readonly></div>
-          <div><label>PM Máx (10×HAB)</label><input type="number" id="npc_mana" readonly></div>
-          <div><label>Pulso Máx (fixo)</label><input type="number" id="npc_pulso" readonly></div>
+        <div class="form-row">
+          <div><label>Nome</label><input id="npc_name" placeholder="Nome do NPC"></div>
+          <div><label>Imagem</label><input type="file" id="npc_img_file" accept="image/*"><input type="hidden" id="npc_img_data"></div>
         </div>
         <div class="form-row">
-          <div><label>Nível</label><input type="number" id="npc_nivel" value="1" min="1" max="10"></div>
-          <div><label>Espaços de Proteção</label><input type="number" id="npc_ep_max" value="4" min="0"></div>
+          <div>
+            <label>Categoria</label>
+            <select id="npc_categoria" style="width:100%; padding:8px; background:#111; color:#fff; border:1px solid #444; border-radius:5px;">
+              <option value="Lacaio">Lacaio</option>
+              <option value="Padrão" selected>Padrão</option>
+              <option value="Elite">Elite</option>
+              <option value="Chefe">Chefe</option>
+            </select>
+          </div>
+          <div><label>PV Máx (5×RES)</label><input type="number" id="npc_hp"></div>
         </div>
         <div class="form-row-3">
-          <div><label>Armadura Natural</label><input type="number" id="npc_an" readonly></div>
-          <div><label>Defesa Total</label><input type="number" id="npc_defesa" readonly></div>
-          <div></div>
+          <div><label>Poder</label><input type="number" id="npc_pod" value="0" oninput="calcNpcDerived()"></div>
+          <div><label>Habilidade</label><input type="number" id="npc_hab" value="0" oninput="calcNpcDerived()"></div>
+          <div><label>Resistência</label><input type="number" id="npc_res" value="0" oninput="calcNpcDerived()"></div>
         </div>
-        <div class="form-row-3">
-          <div><label>Limiar Menor (RES)</label><input type="number" id="npc_lim_menor" readonly></div>
-          <div><label>Limiar Maior (RES+5)</label><input type="number" id="npc_lim_maior" readonly></div>
-          <div><label>Limiar Severo (RES+10)</label><input type="number" id="npc_lim_severo" readonly></div>
+        <div class="form-row">
+          <div><label>Dano Principal</label><input id="npc_dano_principal" placeholder="Ex: 2d6+3 ou 8"></div>
+          <div><label>DT Fixa</label><input type="number" id="npc_dt_fixa" value="12" placeholder="Ex: 12"></div>
         </div>
-        <button type="button" class="npc-skill-toggle" onclick="toggleNpcSkills()">Perícias ▼</button>
-        <div id="npc-pericias-grid" class="npc-skill-grid" style="display:none;"></div>
-        <label>Observações</label><textarea id="npc_obs" rows="3"></textarea>
+        <label style="margin-top:8px;">Observações</label><textarea id="npc_obs" rows="3"></textarea>
         <label style="margin-top:10px;">Habilidades <button type="button" onclick="addHabRow()">+</button></label><div id="hab_editor_list"></div>
         <button class="btn-action btn-save" onclick="saveNpc()">SALVAR NPC</button><button class="btn-action btn-cancel" onclick="closeNpcForm()">CANCELAR</button>
     </div></div>
@@ -560,14 +556,44 @@ window.toggleFolderExpand = (folderId) => {
   renderRosterSidebar();
 };
 
+let rosterSearchTerm = '';
+
+window.filterRosterItems = () => {
+    rosterSearchTerm = (document.getElementById('roster_search_input')?.value || '').toLowerCase().trim();
+    renderRosterSidebar();
+};
+
 function renderRosterSidebar() {
   const container = document.getElementById('roster_folders_container');
   if (!container) return;
   container.innerHTML = '';
   const folders = Object.entries(globalRosterFolders);
+  const isSearching = rosterSearchTerm.length > 0;
+
   folders.forEach(([folderId, folder]) => {
     const isGeral = folderId === 'geral';
-    const isExpanded = !!expandedFolders[folderId];
+    let isExpanded = isSearching ? true : !!expandedFolders[folderId];
+
+    const matchingPlayers = Object.entries(globalPlayers).filter(([id, f]) => {
+      if (f.category !== 'hidden_roster' || (f.stock_folder || 'geral') !== folderId) return false;
+      if (!isSearching) return true;
+      const name = (f.char_name || id).toLowerCase();
+      const classe = (f.classe || '').toLowerCase();
+      return name.includes(rosterSearchTerm) || classe.includes(rosterSearchTerm);
+    });
+
+    const matchingNpcs = Object.entries(globalNpcs).filter(([id, n]) => {
+      if (n.category !== 'hidden_roster' || (n.stock_folder || 'geral') !== folderId) return false;
+      if (!isSearching) return true;
+      const name = (n.name || id).toLowerCase();
+      const cat = (n.categoria || '').toLowerCase();
+      return name.includes(rosterSearchTerm) || cat.includes(rosterSearchTerm);
+    });
+
+    if (isSearching && !matchingPlayers.length && !matchingNpcs.length) {
+      return;
+    }
+
     const div = document.createElement('div');
     div.className = 'roster-folder-box';
     div.style.cssText = 'border:1px solid #3a1a1f; border-radius:8px; padding:10px; margin-bottom:12px; background:rgba(10,5,5,0.7);';
@@ -583,9 +609,9 @@ function renderRosterSidebar() {
         ${nameHTML}
       </div>
       <div id="folder-content-${folderId}" class="${isExpanded ? '' : 'hidden'}">
-        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">Jogadores</div>
+        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">Jogadores (${matchingPlayers.length})</div>
         <div id="roster_players_${folderId}" class="roster-drop-zone" style="min-height:45px; margin-bottom:10px; border:1px dashed rgba(92,28,34,0.3); background:rgba(0,0,0,0.15);" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'players','${folderId}')"></div>
-        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">NPCs</div>
+        <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">NPCs (${matchingNpcs.length})</div>
         <div id="roster_npcs_${folderId}" class="roster-drop-zone" style="min-height:45px; border:1px dashed rgba(92,28,34,0.3); background:rgba(0,0,0,0.15);" ondragover="allowDrop(event)" ondrop="dropInRoster(event,'npcs','${folderId}')"></div>
       </div>
     `;
@@ -593,19 +619,19 @@ function renderRosterSidebar() {
     
     if (isExpanded) {
       const playZone = document.getElementById(`roster_players_${folderId}`);
-      Object.entries(globalPlayers).forEach(([id, f]) => {
-        if (f.category === 'hidden_roster' && (f.stock_folder || 'geral') === folderId) {
-          playZone.appendChild(createRosterItem(id, f, 'players'));
-        }
+      matchingPlayers.forEach(([id, f]) => {
+        playZone.appendChild(createRosterItem(id, f, 'players'));
       });
       const npcZone = document.getElementById(`roster_npcs_${folderId}`);
-      Object.entries(globalNpcs).forEach(([id, n]) => {
-        if (n.category === 'hidden_roster' && (n.stock_folder || 'geral') === folderId) {
-          npcZone.appendChild(createRosterItem(id, n, 'npcs'));
-        }
+      matchingNpcs.forEach(([id, n]) => {
+        npcZone.appendChild(createRosterItem(id, n, 'npcs'));
       });
     }
   });
+
+  if (isSearching && !container.children.length) {
+    container.innerHTML = '<div style="color:#777; font-size:11px; text-align:center; padding:15px; font-family:Cinzel,serif;">Nenhuma ficha encontrada no estoque.</div>';
+  }
 }
 
 function createRosterItem(id, data, type) {
@@ -645,7 +671,7 @@ window.moveRosterItemPrompt = (id, type) => {
     const num = parseInt(choice);
     if (num > 0 && num <= folders.length) {
       const targetFolderId = folders[num - 1][0];
-      const path = type === 'players' ? `fichas_v3/${id}` : `npcs_v3/${id}`;
+      const path = type === 'players' ? `${pathPlayers}/${id}` : `${pathNpcs}/${id}`;
       update(ref(db, path), { stock_folder: targetFolderId });
     }
   }
@@ -654,11 +680,11 @@ window.moveRosterItemPrompt = (id, type) => {
 window.deleteRosterItemConfirm = (id, type) => {
   if (type === 'players') {
     if (confirm('Deletar esta ficha de jogador permanentemente do banco de dados?')) {
-      remove(ref(db, `fichas_v3/${id}`));
+      remove(ref(db, `${pathPlayers}/${id}`));
     }
   } else {
     if (confirm('Deletar este NPC permanentemente?')) {
-      remove(ref(db, `npcs_v3/${id}`));
+      remove(ref(db, `${pathNpcs}/${id}`));
     }
   }
 };
@@ -692,14 +718,14 @@ function createPlayerCard(id,f){
   const hpAt=+f.hp_at||0,hpMax=+f.hp_max||1,manaAt=+f.mana_at||0,manaMax=+f.mana_max||1,pulsoAt=+f.pulso_at||0;
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
   const pulsoRef=Math.max(10,pulsoAt,1);
-  const linkFicha=`${baseURL}ed_sistemav4_ficha.html?p=${id}`;
-  const linkOverlay=`${baseURL}ed_sistemav4_overlay.html?p=${id}`;
+  const linkFicha=`ed_sistemav4_ficha.html?p=${id}`;
+  const linkOverlay=`ed_sistemav4_overlay.html?p=${id}`;
   const linhagens=[]; if(f.toggles?.linhagem_demon) linhagens.push('😈'); if(f.toggles?.linhagem_beast) linhagens.push('🐺'); if(f.toggles?.linhagem_sacra) linhagens.push('👼');
   let effectsHTML = '';
   if (f.efeitos_ativos) {
-    Object.entries(globalCompendiumEffects).forEach(([effId, eff]) => {
+    Object.entries(globalCompendiumEffects || {}).forEach(([effId, eff]) => {
       if (f.efeitos_ativos[effId] === true) {
-        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji}</span>`;
+        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji || '✨'}</span>`;
       }
     });
   }
@@ -733,20 +759,18 @@ function createPlayerCard(id,f){
 
 function createNpcCard(id,n){
   const hpAt=+n.hp_at ?? +n.hp_max ?? 0, hpMax=+n.hp_max||1;
-  const manaAt=+n.mana_at||0, manaMax=+n.mana_max||1;
-  const pulsoAt=+n.pulso_at||0, pulsoMax=+n.pulso_max||10;
   const p=(a,b)=>Math.min((a/Math.max(b,1))*100,100);
   const habs=n.habs||[];
-  const res=+n.res||0, hab=+n.hab||0, pod=+n.pod||0, fort=+(n.pericias?.Fortitude)||0;
-  const an=6, defesa=an+res+fort;
-  const nivel=n.nivel||1, epMax=+n.ep_max||0, epUsed=n.ep_used||{};
-  let epSlots='';
-  for(let i=0;i<epMax;i++) epSlots+=`<div class="ep-slot${epUsed[`s${i}`]?' used':''}" onclick="toggleEpSlot('${id}',${i})"></div>`;
+  const res=+n.res||0, hab=+n.hab||0, pod=+n.pod||0;
+  const categoria=n.categoria||'Padrão';
+  const dano=n.dano_principal||'—';
+  const dtFixa=n.dt_fixa??'—';
+
   let effectsHTML = '';
   if (n.efeitos_ativos) {
-    Object.entries(globalCompendiumEffects).forEach(([effId, eff]) => {
+    Object.entries(globalCompendiumEffects || {}).forEach(([effId, eff]) => {
       if (n.efeitos_ativos[effId] === true) {
-        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji}</span>`;
+        effectsHTML += `<span class="effect-badge" title="${eff.titulo}: ${eff.desc || ''}">${eff.emoji || '✨'}</span>`;
       }
     });
   }
@@ -756,8 +780,8 @@ function createNpcCard(id,n){
     <div class="player-header" style="position:relative;">
       <div class="player-img" style="background-image:url('${n.img||''}')"></div>
       <div class="player-info">
-        <h2>${n.name||'Inimigo'}<span class="npc-lvl-badge">Nv${nivel}</span></h2>
-        <p>${n.classe||'—'} • ${n.ancestralidade||'—'}</p>
+        <h2>${n.name||'Inimigo'} <span class="npc-lvl-badge" style="background:rgba(214,168,95,0.2); color:#d6a85f; font-size:10px; padding:2px 6px; border-radius:4px;">${categoria}</span></h2>
+        <p style="font-size:11px; color:#aaa;">DT Fixa: ${dtFixa} • Dano: ${dano}</p>
         <div class="controls-row">
           <button class="btn-small" onclick="toggleConfigPopover(event, '${id}', 'npcs')">⚙️ Config</button>
           <div class="config-popover" id="popover-npcs-${id}">
@@ -773,30 +797,10 @@ function createNpcCard(id,n){
       <div class="npc-attr-box"><div class="attr-val">${hab}</div><div class="attr-lbl">Habilidade</div></div>
       <div class="npc-attr-box"><div class="attr-val">${res}</div><div class="attr-lbl">Resistência</div></div>
     </div>
-    <div class="npc-defense-row">
-      <div class="npc-def-box"><div class="def-val">${an}</div><div class="def-lbl">Arm. Natural</div></div>
-      <div class="npc-def-box"><div class="def-val">${defesa}</div><div class="def-lbl">Defesa Total</div></div>
-    </div>
-    <div class="npc-threshold-row">
-      <div class="npc-thr-box"><div class="thr-val">${res}</div><div class="thr-lbl">Menor — 1 PV</div></div>
-      <div class="npc-thr-box"><div class="thr-val">${res+5}</div><div class="thr-lbl">Maior — 2 PV</div></div>
-      <div class="npc-thr-box"><div class="thr-val">${res+10}</div><div class="thr-lbl">Severo — 3 PV</div></div>
-    </div>
-    ${epMax>0?`<div style="font-size:10px;color:#aaa;margin-top:4px;display:flex;align-items:center;gap:6px;">EP <button onclick="resetNpcEp('${id}')" style="font-size:9px;background:#333;border:1px solid #555;color:#ccc;border-radius:3px;cursor:pointer;padding:1px 6px;">Descanso</button></div><div class="npc-ep-row">${epSlots}</div>`:''}
-    <div class="npc-bar-row">
+    <div class="npc-bar-row" style="margin-top:8px;">
       <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','hp',-1)">−</button>
       <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PV ${hpAt}/${hpMax}</div><div class="bar-fill hp" style="width:${p(hpAt,hpMax)}%"></div></div></div>
       <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','hp',1)">+</button>
-    </div>
-    <div class="npc-bar-row">
-      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','mana',-1)">−</button>
-      <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PM ${manaAt}/${manaMax}</div><div class="bar-fill mana" style="width:${p(manaAt,manaMax)}%"></div></div></div>
-      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','mana',1)">+</button>
-    </div>
-    <div class="npc-bar-row">
-      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',-1)">−</button>
-      <div class="npc-bar-wrap"><div class="status-bar"><div class="bar-text">PULSO ${pulsoAt}/${pulsoMax}</div><div class="bar-fill pulso" style="width:${p(pulsoAt,pulsoMax)}%"></div></div></div>
-      <button class="btn-bar-adj" onclick="adjustNpcBar('${id}','pulso',1)">+</button>
     </div>
     ${effectsHTML ? `<div style="margin-top:6px; display:flex; align-items:center; gap:4px;">${effectsHTML}</div>` : ''}
     <button class="npc-expand-btn" onclick="toggleNpcDetails('${id}')">▼ DETALHES ▼</button>
@@ -864,7 +868,63 @@ window.saveActiveEffects = () => {
   set(ref(db, path), list).then(closeEffectsModal);
 };
 
-function renderCombat(){ const list=document.getElementById('combat_list'); list.innerHTML=''; const parts=Object.entries(combatData.participantes||{}).map(([key,v])=>({...v,key})).sort((a,b)=>(a.order??999)-(b.order??999)); parts.forEach((p,idx)=>{ const div=document.createElement('div'); div.className=`combat-item ${p.active?'active':''}`; div.draggable=true; div.ondragstart=e=>dragCombat(e,p.key); div.ondragover=e=>e.preventDefault(); div.ondrop=e=>dropCombatReorder(e,p.key); div.innerHTML=`<div style='width:18px;text-align:center;color:#999;'>${idx+1}</div><div class='combat-avatar' style="background-image:url('${p.img||''}')"></div><div style='flex:1;'>${p.name||'—'}</div><button onclick="removeCombatant('${p.key}')" style='border:none;background:none;color:#f66;cursor:pointer;'>✖</button>`; list.appendChild(div); }); }
+function renderCombat(){ 
+  const list = document.getElementById('combat_list'); 
+  list.innerHTML = ''; 
+  const parts = Object.entries(combatData.participantes || {}).map(([key,v]) => ({...v, key})).sort((a,b) => (a.order ?? 999) - (b.order ?? 999));
+  
+  parts.forEach((p, idx) => { 
+    const div = document.createElement('div'); 
+    div.className = `combat-item ${p.active ? 'active' : ''}`; 
+    div.draggable = true; 
+    div.ondragstart = e => dragCombat(e, p.key); 
+    div.ondragover = e => e.preventDefault(); 
+    div.ondrop = e => dropCombatReorder(e, p.key); 
+    
+    const targetChar = p.type === 'players' ? globalPlayers[p.ref_id] : globalNpcs[p.ref_id];
+    const targetEffects = targetChar?.efeitos_ativos || {};
+    
+    let quickEffectBtns = '';
+    Object.keys(targetEffects).forEach(effId => {
+      if (targetEffects[effId] === true) {
+        const effComp = (globalCompendiumEffects && globalCompendiumEffects[effId]) ? globalCompendiumEffects[effId] : null;
+        const effTitle = effComp ? (effComp.titulo || effId) : effId.replace(/_/g, ' ');
+        const label = effId.includes('chamas') || effId.includes('fogo') ? 'Aplicar Dano de Fogo' :
+                      effId.includes('sangr') ? 'Aplicar Dano de Sangramento' :
+                      `Aplicar Dano (${effTitle})`;
+        quickEffectBtns += `<button onclick="applyConditionDamage('${p.ref_id}', '${p.type}', '${escHtml(label)}')" style="background:#4a1515; border:1px solid #ff4444; color:#ffaaaa; border-radius:4px; font-size:9px; padding:2px 6px; margin-top:3px; cursor:pointer;" title="Clique para aplicar dano">${escHtml(label)}</button>`;
+      }
+    });
+
+    div.innerHTML = `
+      <div style="display:flex; flex-direction:column; width:100%; gap:4px;">
+        <div style="display:flex; align-items:center; gap:6px; width:100%;">
+          <div style='width:18px;text-align:center;color:#999;font-size:11px;'>${idx+1}</div>
+          <div class='combat-avatar' style="background-image:url('${p.img||''}')"></div>
+          <div style='flex:1; font-size:12px; font-weight:bold; color:#eee;'>${p.name||'—'}</div>
+          <button onclick="openEffectsModal('${p.ref_id}', '${p.type}')" style="background:#2a2a3a; border:1px solid #55a; color:#aae; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;" title="Gerenciar Condições">+ Condição</button>
+          <button onclick="removeCombatant('${p.key}')" style='border:none;background:none;color:#f66;cursor:pointer; font-size:14px;'>✖</button>
+        </div>
+        ${quickEffectBtns ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-left:24px;">${quickEffectBtns}</div>` : ''}
+      </div>`; 
+    list.appendChild(div); 
+  }); 
+}
+
+window.applyConditionDamage = (refId, type, label) => {
+  const targetChar = type === 'players' ? globalPlayers[refId] : globalNpcs[refId];
+  if (!targetChar) return;
+  const currentHp = +(targetChar.hp_at ?? targetChar.hp_max ?? 0);
+  const targetName = targetChar.char_name || targetChar.name || 'alvo';
+  const rawDmg = prompt(`[${label}] em ${targetName}.\nDigite a quantidade de dano a aplicar ao PV:`, "5");
+  if (rawDmg === null) return;
+  const dmg = parseInt(rawDmg);
+  if (isNaN(dmg) || dmg <= 0) return;
+
+  const newHp = Math.max(0, currentHp - dmg);
+  const path = type === 'players' ? `${pathPlayers}/${refId}` : `${pathNpcs}/${refId}`;
+  update(ref(db, path), { hp_at: newHp });
+};
 
 window.allowDrop=(ev)=>ev.preventDefault();
 window.drag=(ev,id,type)=>ev.dataTransfer.setData('text/plain',JSON.stringify({id,type}));
@@ -890,19 +950,23 @@ window.toggleOverlayModeAll = async () => {
   if (!ids.length) { alert('Nenhum jogador encontrado para alternar overlay.'); return; }
   overlayModeGlobal = overlayModeGlobal === 'nome' ? 'combate' : 'nome';
   const updates = {};
-  ids.forEach(id => { updates[`overlay_v3_data/${id}/mode`] = overlayModeGlobal; });
+  ids.forEach(id => { updates[`overlay_v4_data/${id}/mode`] = overlayModeGlobal; });
   await update(ref(db), updates);
   updateOverlayToggleBtn();
 };
 window.openNpcForm=()=>{
-  ['npc_id','npc_name','npc_img_data','npc_classe','npc_ancestralidade','npc_obs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('npc_img_file').value='';
-  document.getElementById('npc_pod').value=0; document.getElementById('npc_hab').value=0; document.getElementById('npc_res').value=0;
-  document.getElementById('npc_nivel').value=1; document.getElementById('npc_ep_max').value=4;
-  npcPericias={}; renderAllNpcSkillDots();
-  document.getElementById('npc_pulso').value=10;
+  document.getElementById('npc_id').value='';
+  document.getElementById('npc_name').value='';
+  document.getElementById('npc_img_data').value='';
+  document.getElementById('npc_categoria').value='Padrão';
+  document.getElementById('npc_pod').value=0;
+  document.getElementById('npc_hab').value=0;
+  document.getElementById('npc_res').value=0;
+  document.getElementById('npc_hp').value=0;
+  document.getElementById('npc_dano_principal').value='';
+  document.getElementById('npc_dt_fixa').value=12;
+  document.getElementById('npc_obs').value='';
   document.getElementById('hab_editor_list').innerHTML='';
-  document.getElementById('npc-random-panel').classList.remove('open');
   calcNpcDerived();
   document.getElementById('form-npc-container').classList.add('open');
 };
@@ -912,25 +976,23 @@ window.saveNpc=()=>{
   const id=document.getElementById('npc_id').value;
   const habs=[...document.querySelectorAll('#hab_editor_list > div')].map(r=>({titulo:r.querySelector('.hab-row-title').value,desc:r.querySelector('.hab-row-desc').value})).filter(h=>h.titulo||h.desc);
   const res=+document.getElementById('npc_res').value||0;
-  const hab=+document.getElementById('npc_hab').value||0;
+  const hpMax=+document.getElementById('npc_hp').value || (res*5) || 5;
+
   const data={
     name:document.getElementById('npc_name').value,
     img:document.getElementById('npc_img_data').value,
-    classe:document.getElementById('npc_classe').value,
-    ancestralidade:document.getElementById('npc_ancestralidade').value,
+    categoria:document.getElementById('npc_categoria').value||'Padrão',
     pod:+document.getElementById('npc_pod').value||0,
-    hab,res,
-    hp_max:res*5,
-    mana_max:hab*10,
-    pulso_max:+document.getElementById('npc_pulso').value||10,
-    nivel:+document.getElementById('npc_nivel').value||1,
-    pericias:{...npcPericias},
-    ep_max:+document.getElementById('npc_ep_max').value||0,
-    obs:document.getElementById('npc_obs').value,
+    hab:+document.getElementById('npc_hab').value||0,
+    res,
+    hp_max:hpMax,
+    dano_principal:document.getElementById('npc_dano_principal').value||'',
+    dt_fixa:+document.getElementById('npc_dt_fixa').value||12,
+    obs:document.getElementById('npc_obs').value||'',
     habs
   };
   if(!id){
-    data.hp_at=data.hp_max; data.mana_at=data.mana_max; data.pulso_at=0; data.ep_used={}; data.category='default'; data.stock_folder='geral';
+    data.hp_at=data.hp_max; data.category='default'; data.stock_folder='geral';
     push(ref(db,pathNpcs),data).then(closeNpcForm);
   } else update(ref(db,`${pathNpcs}/${id}`),data).then(closeNpcForm);
 };
@@ -939,59 +1001,26 @@ window.editNpc=async(id)=>{
   document.getElementById('npc_id').value=id;
   document.getElementById('npc_name').value=d.name||'';
   document.getElementById('npc_img_data').value=d.img||'';
-  document.getElementById('npc_classe').value=d.classe||'';
-  document.getElementById('npc_ancestralidade').value=d.ancestralidade||'';
+  document.getElementById('npc_categoria').value=d.categoria||'Padrão';
   document.getElementById('npc_pod').value=d.pod||0;
   document.getElementById('npc_hab').value=d.hab||0;
   document.getElementById('npc_res').value=d.res||0;
-  document.getElementById('npc_nivel').value=d.nivel||1;
-  document.getElementById('npc_ep_max').value=d.ep_max||0;
-  npcPericias={}; NPC_SKILLS.forEach(s=>{npcPericias[s]=(d.pericias&&d.pericias[s])||0;}); renderAllNpcSkillDots();
-  document.getElementById('npc_pulso').value=d.pulso_max||10;
+  document.getElementById('npc_hp').value=d.hp_max||((+d.res||0)*5);
+  document.getElementById('npc_dano_principal').value=d.dano_principal||'';
+  document.getElementById('npc_dt_fixa').value=d.dt_fixa??12;
   document.getElementById('npc_obs').value=d.obs||'';
   document.getElementById('hab_editor_list').innerHTML='';
   (d.habs||[]).forEach(h=>addHabRow(h.titulo,h.desc));
-  document.getElementById('npc-random-panel').classList.remove('open');
-  calcNpcDerived();
   document.getElementById('form-npc-container').classList.add('open');
 };
 window.deleteNpc=(id)=>{ if(confirm('Deletar NPC?')) remove(ref(db,`${pathNpcs}/${id}`)); };
 window.toggleNpcDetails=(id)=>document.getElementById(`details_${id}`).classList.toggle('open');
 window.calcNpcDerived=()=>{
   const res=+document.getElementById('npc_res').value||0;
-  const hab=+document.getElementById('npc_hab').value||0;
-  const fort=npcPericias['Fortitude']||0;
-  document.getElementById('npc_hp').value=res*5;
-  document.getElementById('npc_mana').value=hab*10;
-  document.getElementById('npc_an').value=6;
-  document.getElementById('npc_defesa').value=6+res+fort;
-  document.getElementById('npc_lim_menor').value=res;
-  document.getElementById('npc_lim_maior').value=res+5;
-  document.getElementById('npc_lim_severo').value=res+10;
+  const hpEl=document.getElementById('npc_hp');
+  if(hpEl) hpEl.value=res*5;
 };
-window.toggleRandomPanel=()=>document.getElementById('npc-random-panel').classList.toggle('open');
-window.generateRandomNpc=(type)=>{
-  const rnd=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-  const cfg={
-    lacaio:    {attr:[0,2],ep:2,nivel:[1,3],pulso:10},
-    combatente:{attr:[1,3],ep:4,nivel:[3,5],pulso:10},
-    elite:     {attr:[2,4],ep:6,nivel:[5,7],pulso:10},
-    chefe:     {attr:[3,5],ep:8,nivel:[7,10],pulso:15},
-  }[type];
-  document.getElementById('npc_pod').value=rnd(...cfg.attr);
-  document.getElementById('npc_hab').value=rnd(...cfg.attr);
-  document.getElementById('npc_res').value=rnd(...cfg.attr);
-  document.getElementById('npc_ep_max').value=cfg.ep;
-  document.getElementById('npc_nivel').value=rnd(...cfg.nivel);
-  document.getElementById('npc_pulso').value=cfg.pulso;
-  const skillCfg={lacaio:{count:2,range:[1,1]},combatente:{count:3,range:[1,2]},elite:{count:4,range:[1,3]},chefe:{count:5,range:[2,4]}}[type];
-  npcPericias={};
-  const shuffled=[...NPC_SKILLS].sort(()=>Math.random()-0.5);
-  shuffled.slice(0,skillCfg.count).forEach(s=>{npcPericias[s]=rnd(...skillCfg.range);});
-  renderAllNpcSkillDots();
-  calcNpcDerived();
-  document.getElementById('npc-random-panel').classList.remove('open');
-};
+
 window.adjustNpcBar=(id,stat,delta)=>{
   const n=globalNpcs[id]; if(!n)return;
   const maxKey=stat==='hp'?'hp_max':stat==='mana'?'mana_max':'pulso_max';
@@ -1048,13 +1077,13 @@ onValue(ref(db,'moeda_v3/valor'),(snapshot)=>{
   moedaValor = Number(snapshot.val()) || 0;
   renderMoeda();
 });
-onValue(ref(db,'overlay_v3_data'),(snapshot)=>{
+onValue(ref(db,'overlay_v4_data'),(snapshot)=>{
   const all = snapshot.val() || {};
   const firstMode = Object.values(all).find(v => v?.mode === 'combate' || v?.mode === 'nome')?.mode;
   overlayModeGlobal = firstMode || 'nome';
   updateOverlayToggleBtn();
 });
-onValue(ref(db, 'pastas_roster_v3'), snap => {
+onValue(ref(db, 'pastas_roster_v4'), snap => {
   const val = snap.val() || {};
   globalRosterFolders = { geral: { name: 'Geral' }, ...val };
   renderRosterSidebar();
