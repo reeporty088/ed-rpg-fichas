@@ -683,11 +683,202 @@
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.85);
     }
+    .modal-box.edit-modal-box {
+      width: min(680px, 100%);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
     .modal-actions {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
       margin-top: 20px;
+    }
+
+    /* === Sheet Access Manager Styles === */
+    .sm-container {
+      margin-top: 20px;
+      border-top: 1px solid rgba(92, 28, 34, 0.6);
+      padding-top: 16px;
+    }
+    .sm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sm-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+    }
+    .sm-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0,0,0,0.5);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(92,28,34,0.5);
+    }
+    .sm-tab-btn {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: 'Cinzel', serif;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sm-tab-btn:hover {
+      color: #fff;
+    }
+    .sm-tab-btn.active.v4 {
+      background: #1a4c5c;
+      color: #fff;
+      border-color: #2accda;
+      box-shadow: 0 0 10px rgba(42,204,218,0.4);
+    }
+    .sm-tab-btn.active.v3 {
+      background: #5c1c22;
+      color: #fff;
+      border-color: #cc2a2a;
+      box-shadow: 0 0 10px rgba(204,42,42,0.4);
+    }
+    .sm-search-wrap {
+      margin-bottom: 12px;
+    }
+    .sm-search-input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(110,44,50,.65);
+      background: rgba(7,3,3,.95);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .sm-search-input:focus {
+      border-color: var(--bright);
+    }
+    .sm-sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .sm-sheet-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(15, 7, 7, 0.85);
+      border: 1px solid rgba(92, 28, 34, 0.5);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .sm-sheet-card.granted {
+      border-color: rgba(31, 139, 76, 0.6);
+      background: rgba(10, 32, 20, 0.5);
+    }
+    .sm-sheet-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+    .sm-sheet-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background-color: #1a0505;
+    }
+    .sm-sheet-details {
+      min-width: 0;
+      flex: 1;
+    }
+    .sm-sheet-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sm-sheet-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+    .sm-sheet-badge.v4 {
+      background: rgba(42,204,218,0.2);
+      color: #2accda;
+      border: 1px solid rgba(42,204,218,0.4);
+    }
+    .sm-sheet-badge.v3 {
+      background: rgba(204,42,42,0.2);
+      color: #ff9e9e;
+      border: 1px solid rgba(204,42,42,0.4);
+    }
+    .sm-sheet-badge.v1, .sm-sheet-badge.v2 {
+      background: rgba(150,150,150,0.2);
+      color: #ccc;
+      border: 1px solid rgba(150,150,150,0.4);
+    }
+    .sm-action-btn {
+      font-size: 0.75rem;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .sm-action-btn.grant {
+      background: rgba(31, 139, 76, 0.2);
+      color: #4ade80;
+      border: 1px solid #1f8b4c;
+    }
+    .sm-action-btn.grant:hover {
+      background: #1f8b4c;
+      color: #fff;
+    }
+    .sm-action-btn.revoke {
+      background: rgba(137, 40, 40, 0.25);
+      color: #ff9a9a;
+      border: 1px solid #892828;
+    }
+    .sm-action-btn.revoke:hover {
+      background: #9b1a1a;
+      color: #fff;
     }
 
     /* Notification items */
@@ -887,7 +1078,7 @@
 
 <!-- User Editing Modal -->
 <div class="modal" id="editUserModal">
-  <div class="modal-box">
+  <div class="modal-box edit-modal-box">
     <h3 class="card-title" id="editUserTitle">Editar Usuário</h3>
     <input type="hidden" id="editUserId" />
     
@@ -916,28 +1107,26 @@
       </div>
     </div>
 
-    <h4 style="margin: 18px 0 8px; font-family:'Cinzel',serif; font-size:0.9rem;">Fichas V3 Associadas</h4>
-    <div class="char-grid" id="editUserFichasGrid" style="margin-bottom: 12px;"></div>
-    <button class="btn btn-neutral btn-full btn-sm" onclick="openAddSheetModal()">+ Associar Nova Ficha</button>
+    <!-- Gerenciador de Acesso a Fichas -->
+    <div class="sm-container">
+      <div class="sm-header">
+        <h4 class="sm-title">🛡️ Gerenciador de Acesso a Fichas</h4>
+        <div class="sm-tabs">
+          <button type="button" id="smTab_v4" class="sm-tab-btn v4 active" onclick="switchSMTab('v4')">⚔️ Versão V4</button>
+          <button type="button" id="smTab_v3" class="sm-tab-btn v3" onclick="switchSMTab('v3')">🎭 Versão V3</button>
+        </div>
+      </div>
+      <div class="sm-search-wrap">
+        <input type="text" id="smSearchInput" class="sm-search-input" placeholder="🔍 Filtrar ficha por nome..." oninput="renderSheetManager()" />
+      </div>
+      <div id="smListContainer" class="sm-sheet-grid">
+        <!-- Preenchido dinamicamente pelo renderSheetManager() -->
+      </div>
+    </div>
 
     <div class="modal-actions">
       <button class="btn" onclick="closeEditModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveUserEdit()">Salvar Alterações</button>
-    </div>
-  </div>
-</div>
-
-<!-- Select Character Sheet Modal -->
-<div class="modal" id="addSheetModal" style="z-index: 2600;">
-  <div class="modal-box" style="max-width: 400px;">
-    <h3 class="card-title">Anexar Nova Ficha</h3>
-    <div class="field">
-      <label for="sheetSelector">Selecione o Personagem V3</label>
-      <select id="sheetSelector"></select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeAddSheetModal()">Cancelar</button>
-      <button class="btn btn-success" onclick="confirmAttachSheet()">Anexar</button>
     </div>
   </div>
 </div>
@@ -1220,6 +1409,49 @@
     }
   }
 
+  /* ── helper: resolve sheet metadata & destination URL ── */
+  function getSheetInfo(id) {
+    if (globalFichasV4 && globalFichasV4[id]) {
+      return {
+        id,
+        version: 'v4',
+        data: globalFichasV4[id],
+        url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
+      };
+    }
+    if (id === 'v4_ficha_base') {
+      return {
+        id,
+        version: 'v4',
+        data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
+        url: 'v4/ed_sistemav4_ficha.html'
+      };
+    }
+    if (globalFichasV3 && globalFichasV3[id]) {
+      return {
+        id,
+        version: 'v3',
+        data: globalFichasV3[id],
+        url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
+      };
+    }
+    if (id === 'v3_ficha_base') {
+      return {
+        id,
+        version: 'v3',
+        data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
+        url: 'v3/ed_sistemav3_ficha.html'
+      };
+    }
+    if (id === 'v1_ficha') {
+      return { id, version: 'v1', data: { char_name: 'Ficha ED v1', nivel: 1 }, url: 'v1/ed_sistemav1_ficha.html' };
+    }
+    if (id === 'v2_ficha') {
+      return { id, version: 'v2', data: { char_name: 'Ficha ED v2', nivel: 1 }, url: 'v2/ed_sistemav2_ficha.html' };
+    }
+    return null;
+  }
+
   /* ── render my fichas ── */
   function renderMyFichas() {
     const user = EDAuth.currentUser();
@@ -1230,14 +1462,23 @@
     container.innerHTML = '';
 
     const isV4 = currentActiveVersion === 'v4';
-    const targetFolder = isV4 ? 'v4' : 'v3';
-    const targetFile = isV4 ? 'ed_sistemav4_ficha.html' : 'ed_sistemav3_ficha.html';
     const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
 
-    // If Admin, they have access to all character sheets in target version
-    const ids = user.role === 'admin' 
-      ? Object.keys(sourceSheets) 
-      : (user.assignedSheets || []).filter(id => !!sourceSheets[id]);
+    let ids = [];
+    if (user.role === 'admin') {
+      ids = Object.keys(sourceSheets);
+      const baseId = isV4 ? 'v4_ficha_base' : 'v3_ficha_base';
+      if (!ids.includes(baseId)) ids.unshift(baseId);
+    } else {
+      const assigned = user.assignedSheets || [];
+      ids = assigned.filter(id => {
+        if (isV4) {
+          return !!(globalFichasV4 && globalFichasV4[id]) || id === 'v4_ficha_base';
+        } else {
+          return !!(globalFichasV3 && globalFichasV3[id]) || id === 'v3_ficha_base' || id === 'v1_ficha' || id === 'v2_ficha';
+        }
+      });
+    }
 
     if (!ids || ids.length === 0) {
       container.innerHTML = `<div style="grid-column: 1/-1; opacity:0.65; text-align:center; padding: 20px;">Nenhuma ficha ${isV4 ? 'v4' : 'v3'} disponível. Contate o ADM.</div>`;
@@ -1245,21 +1486,24 @@
     }
 
     ids.forEach(id => {
-      const data = sourceSheets[id];
-      if (!data) return; // Wait for firebase sync
+      const info = getSheetInfo(id);
+      if (!info) return;
 
       const card = document.createElement('div');
       card.className = 'char-card';
-      const verLabel = isV4 ? 'v4' : 'v3';
-      const verBadgeStyle = isV4 ? 'background:rgba(42,204,218,0.2); color:#2accda; border:1px solid rgba(42,204,218,0.4);' : 'background:rgba(204,42,42,0.2); color:#ff9e9e; border:1px solid rgba(204,42,42,0.4);';
+      const verLabel = info.version.toUpperCase();
+      const verBadgeStyle = info.version === 'v4' 
+        ? 'background:rgba(42,204,218,0.2); color:#2accda; border:1px solid rgba(42,204,218,0.4);' 
+        : 'background:rgba(204,42,42,0.2); color:#ff9e9e; border:1px solid rgba(204,42,42,0.4);';
 
+      const data = info.data;
       card.innerHTML = `
-        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
+        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : (info.version === 'v4' ? '⚔️' : '🎭')}</div>
         <div class="char-card-name">${data.char_name || id}</div>
         <div class="char-card-level">Nível ${data.nivel || 1} <span style="font-size:0.68rem; padding:1px 5px; border-radius:4px; margin-left:4px; font-weight:bold; ${verBadgeStyle}">${verLabel}</span></div>
       `;
       card.onclick = () => {
-        window.location.href = `${targetFolder}/${targetFile}?p=${id}`;
+        window.location.href = info.url;
       };
       container.appendChild(card);
     });
@@ -1454,8 +1698,18 @@
     render();
   };
 
-  /* ── user editing modal functions ── */
+  /* ── user editing modal & Sheet Access Manager functions ── */
   let activeEditingUser = null;
+  let activeSMTab = 'v4';
+
+  window.switchSMTab = (tab) => {
+    activeSMTab = tab;
+    const btnV4 = document.getElementById('smTab_v4');
+    const btnV3 = document.getElementById('smTab_v3');
+    if (btnV4) btnV4.classList.toggle('active', tab === 'v4');
+    if (btnV3) btnV3.classList.toggle('active', tab === 'v3');
+    renderSheetManager();
+  };
 
   function openUserEditModal(user) {
     activeEditingUser = user;
@@ -1465,13 +1719,12 @@
     
     const emailInput = document.getElementById('editUserEmail');
     emailInput.value = user.email;
-    emailInput.type = 'password'; // hidden by default
+    emailInput.type = 'password';
 
     const passInput = document.getElementById('editUserPass');
     passInput.value = user.password;
-    passInput.type = 'password'; // hidden by default
+    passInput.type = 'password';
 
-    // Requested email banner
     const reqEmailBlock = document.getElementById('editUserReqEmailBlock');
     if (user.requestedEmail) {
       reqEmailBlock.classList.remove('hidden');
@@ -1480,7 +1733,6 @@
       reqEmailBlock.classList.add('hidden');
     }
 
-    // Requested password banner
     const reqPassBlock = document.getElementById('editUserReqPassBlock');
     if (user.requestedPassword) {
       reqPassBlock.classList.remove('hidden');
@@ -1488,7 +1740,7 @@
       reqPassBlock.classList.add('hidden');
     }
 
-    renderEditUserFichas();
+    renderSheetManager();
     document.getElementById('editUserModal').classList.add('open');
   }
   window.openUserEditModal = openUserEditModal;
@@ -1496,6 +1748,94 @@
   window.closeEditModal = () => {
     document.getElementById('editUserModal').classList.remove('open');
     activeEditingUser = null;
+  };
+
+  function renderSheetManager() {
+    const container = document.getElementById('smListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const user = activeEditingUser;
+    if (!user) return;
+
+    const assigned = user.assignedSheets || [];
+    const filterText = (document.getElementById('smSearchInput')?.value || '').toLowerCase().trim();
+
+    const isV4 = activeSMTab === 'v4';
+    const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
+    const baseId = isV4 ? 'v4_ficha_base' : 'v3_ficha_base';
+
+    let sheetKeys = Object.keys(sourceSheets);
+    if (!sheetKeys.includes(baseId)) sheetKeys.unshift(baseId);
+
+    if (!isV4) {
+      if (!sheetKeys.includes('v1_ficha')) sheetKeys.push('v1_ficha');
+      if (!sheetKeys.includes('v2_ficha')) sheetKeys.push('v2_ficha');
+    }
+
+    let items = sheetKeys.map(id => getSheetInfo(id)).filter(Boolean);
+    if (filterText) {
+      items = items.filter(info => (info.data.char_name || info.id).toLowerCase().includes(filterText));
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; opacity:0.6; text-align:center; padding:15px; font-size:0.85rem;">Nenhuma ficha ${isV4 ? 'V4' : 'V3'} encontrada.</div>`;
+      return;
+    }
+
+    items.forEach(info => {
+      const hasAccess = assigned.includes(info.id);
+      const card = document.createElement('div');
+      card.className = `sm-sheet-card ${hasAccess ? 'granted' : ''}`;
+      
+      const verLabel = info.version.toUpperCase();
+      const badgeCls = info.version;
+
+      card.innerHTML = `
+        <div class="sm-sheet-info">
+          <div class="sm-sheet-avatar" style="${info.data.char_img ? `background-image:url('${info.data.char_img}');` : ''}">${info.data.char_img ? '' : (info.version === 'v4' ? '⚔️' : '🎭')}</div>
+          <div class="sm-sheet-details">
+            <div class="sm-sheet-name">${info.data.char_name || info.id}</div>
+            <div class="sm-sheet-badge ${badgeCls}">${verLabel}</div>
+          </div>
+        </div>
+        <div>
+          ${hasAccess ? `
+            <button type="button" class="sm-action-btn revoke" onclick="toggleSheetAccess('${info.id}', false)">✖ Remover</button>
+          ` : `
+            <button type="button" class="sm-action-btn grant" onclick="toggleSheetAccess('${info.id}', true)">+ Conceder</button>
+          `}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+  window.renderSheetManager = renderSheetManager;
+
+  window.toggleSheetAccess = (sheetId, grant) => {
+    if (!activeEditingUser) return;
+    const userId = activeEditingUser.id;
+
+    if (grant) {
+      EDAuth.attachSheetToUser(userId, sheetId);
+      const info = getSheetInfo(sheetId);
+      if (info && (info.version === 'v4' || info.version === 'v3')) {
+        const freshUser = EDAuth.getStore().users.find(u => u.id === userId);
+        if (freshUser) {
+          let versions = Array.isArray(freshUser.versions) ? [...freshUser.versions] : [];
+          if (!versions.includes(info.version)) {
+            versions.push(info.version);
+            EDAuth.updateUser(userId, { versions });
+          }
+        }
+      }
+    } else {
+      EDAuth.detachSheetFromUser(userId, sheetId);
+    }
+
+    const store = EDAuth.getStore();
+    activeEditingUser = store.users.find(u => u.id === userId);
+    renderSheetManager();
+    render();
   };
 
   window.createNewSheetHub = () => {
@@ -1514,49 +1854,10 @@
     }).then(() => {
       alert(`Ficha "${name.trim()}" (${isV4 ? 'v4' : 'v3'}) criada com sucesso!`);
       renderMyFichas();
+      if (activeEditingUser) renderSheetManager();
     }).catch(err => {
       alert("Erro ao criar ficha: " + err.message);
     });
-  };
-
-  function renderEditUserFichas() {
-    const grid = document.getElementById('editUserFichasGrid');
-    grid.innerHTML = '';
-    const user = activeEditingUser;
-    if (!user) return;
-
-    const assigned = user.assignedSheets || [];
-    if (assigned.length === 0) {
-      grid.innerHTML = '<div style="grid-column:1/-1; opacity:0.6; font-size:0.85rem; text-align:center;">Nenhuma ficha associada.</div>';
-      return;
-    }
-
-    assigned.forEach(id => {
-      const data = globalFichasV3[id] || globalFichasV4[id];
-      if (!data) return;
-
-      const card = document.createElement('div');
-      card.className = 'char-card';
-      card.style.cursor = 'default';
-      const verLabel = globalFichasV4[id] ? 'v4' : 'v3';
-      card.innerHTML = `
-        <div class="char-card-remove" onclick="detachSheet('${id}')">✖</div>
-        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
-        <div class="char-card-name">${data.char_name || id}</div>
-        <div class="char-card-level">Nível ${data.nivel || 1} <span style="font-size:0.65rem; opacity:0.8;">[${verLabel}]</span></div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  window.detachSheet = (sheetId) => {
-    if (!activeEditingUser) return;
-    EDAuth.detachSheetFromUser(activeEditingUser.id, sheetId);
-    // Refresh user cache in active modal
-    const store = EDAuth.getStore();
-    activeEditingUser = store.users.find(u => u.id === activeEditingUser.id);
-    renderEditUserFichas();
-    render();
   };
 
   window.approveFieldChange = (type) => {
@@ -1571,7 +1872,6 @@
       document.getElementById('editUserPass').value = activeEditingUser.requestedPassword;
       document.getElementById('editUserReqPassBlock').classList.add('hidden');
     }
-    // Refresh active reference
     const store = EDAuth.getStore();
     activeEditingUser = store.users.find(u => u.id === userId);
     render();
@@ -1590,54 +1890,6 @@
 
     EDAuth.updateUser(activeEditingUser.id, { name, email, password });
     closeEditModal();
-    render();
-  };
-
-  /* ── add sheet modal functions ── */
-  window.openAddSheetModal = () => {
-    const selector = document.getElementById('sheetSelector');
-    selector.innerHTML = '';
-    const user = activeEditingUser;
-    if (!user) return;
-
-    const assigned = user.assignedSheets || [];
-    let count = 0;
-    const allSheets = { ...globalFichasV3, ...globalFichasV4 };
-
-    Object.entries(allSheets).forEach(([id, data]) => {
-      if (!assigned.includes(id)) {
-        count++;
-        const opt = document.createElement('option');
-        opt.value = id;
-        const ver = globalFichasV4[id] ? 'v4' : 'v3';
-        opt.textContent = `[${ver.toUpperCase()}] ${data.char_name || id} (Nível ${data.nivel || 1})`;
-        selector.appendChild(opt);
-      }
-    });
-
-    if (count === 0) {
-      alert('Todas as fichas globais já foram associadas a este usuário.');
-      return;
-    }
-
-    document.getElementById('addSheetModal').classList.add('open');
-  };
-
-  window.closeAddSheetModal = () => {
-    document.getElementById('addSheetModal').classList.remove('open');
-  };
-
-  window.confirmAttachSheet = () => {
-    const sheetId = document.getElementById('sheetSelector').value;
-    if (!sheetId || !activeEditingUser) return;
-
-    EDAuth.attachSheetToUser(activeEditingUser.id, sheetId);
-    
-    // Refresh active editing cache
-    const store = EDAuth.getStore();
-    activeEditingUser = store.users.find(u => u.id === activeEditingUser.id);
-    renderEditUserFichas();
-    closeAddSheetModal();
     render();
   };
 
@@ -1685,13 +1937,13 @@
   onValue(ref(db, 'fichas_v3'), (snap) => {
     globalFichasV3 = snap.val() || {};
     renderMyFichas();
-    if (activeEditingUser) renderEditUserFichas();
+    if (activeEditingUser) renderSheetManager();
   });
 
   onValue(ref(db, 'fichas_v4'), (snap) => {
     globalFichasV4 = snap.val() || {};
     renderMyFichas();
-    if (activeEditingUser) renderEditUserFichas();
+    if (activeEditingUser) renderSheetManager();
   });
 
   // Initial check
