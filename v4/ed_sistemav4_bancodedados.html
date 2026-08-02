@@ -372,15 +372,21 @@ const CATEGORIES = {
   classes: {
     label: '⚔️ Classes',
     fields: [
-      { key:'titulo', label:'Título', type:'text', required:true },
+      { key:'titulo', label:'Nome da Classe', type:'text', required:true },
       { key:'desc', label:'Descrição', type:'textarea' },
-      { key:'dominios', label:'Domínios', type:'text' },
-      { key:'hab_nome', label:'Habilidade base (nome)', type:'text' },
-      { key:'hab_desc', label:'Habilidade base (descrição)', type:'textarea' },
-      { key:'hab2_nome', label:'Habilidade 2 (nome)', type:'text' },
-      { key:'hab2_desc', label:'Habilidade 2 (descrição)', type:'textarea' }
+      { key:'hab_nome', label:'Hab. da Classe (nome)', type:'text' },
+      { key:'hab_desc', label:'Hab. da Classe (descrição)', type:'textarea' },
+      { key:'v1_nome', label:'Nome Vertente 1', type:'text' },
+      { key:'v1_hab_nome', label:'Vertente 1 - Hab. (nome)', type:'text' },
+      { key:'v1_hab_desc', label:'Vertente 1 - Hab. (descrição)', type:'textarea' },
+      { key:'v2_nome', label:'Nome Vertente 2', type:'text' },
+      { key:'v2_hab_nome', label:'Vertente 2 - Hab. (nome)', type:'text' },
+      { key:'v2_hab_desc', label:'Vertente 2 - Hab. (descrição)', type:'textarea' },
+      { key:'v3_nome', label:'Nome Vertente 3', type:'text' },
+      { key:'v3_hab_nome', label:'Vertente 3 - Hab. (nome)', type:'text' },
+      { key:'v3_hab_desc', label:'Vertente 3 - Hab. (descrição)', type:'textarea' }
     ],
-    meta: (it) => `Domínios: ${it.dominios || '-'}`,
+    meta: (it) => `Classe Base`,
     descField: 'desc'
   },
   tecnicas_v4: {
@@ -412,15 +418,16 @@ const CATEGORIES = {
     meta: (it) => `${it.alcunha ? it.alcunha + ' • ' : ''}Domínio: ${it.dominio || '-'}`,
     descField: 'desc'
   },
-  caminhos_arcanos: {
-    label: '🌌 Caminhos Arcanos',
+  maldicoes_dadivas: {
+    label: '✨ Maldições & Dádivas',
     fields: [
       { key:'titulo', label:'Título', type:'text', required:true },
-      { key:'foco', label:'Foco/Estilo', type:'text' },
-      { key:'dominio', label:'Domínio', type:'text' },
-      { key:'desc', label:'Descrição', type:'textarea' }
+      { key:'tipo', label:'Tipo (Dádiva ou Maldição)', type:'text' },
+      { key:'origem', label:'Origem / Linhagem', type:'text' },
+      { key:'desc', label:'Descrição / Passivas', type:'textarea' },
+      { key:'fraqueza', label:'Fraqueza Permanente', type:'textarea' }
     ],
-    meta: (it) => `Domínio: ${it.dominio || '-'}`,
+    meta: (it) => `${it.tipo || 'Poder'} • Origem: ${it.origem || '-'}`,
     descField: 'desc'
   },
   equipamentos: {

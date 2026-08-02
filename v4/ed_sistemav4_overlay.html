@@ -141,8 +141,8 @@
     const db = getDatabase(app);
 
     const params = new URLSearchParams(window.location.search);
-    const fichaID = params.get('p') || 'personagem_padrao_v3';
-    const overlayPath = `overlay_v3_data/${fichaID}`;
+    const fichaID = params.get('p') || 'personagem_padrao_v4';
+    const overlayPath = `overlay_v4_data/${fichaID}`;
 
     const nameModeEl   = document.getElementById('name-mode');
     const combatModeEl = document.getElementById('combat-mode');
@@ -348,7 +348,7 @@
         }
     });
 
-    onValue(ref(db, `fichas_v3/${fichaID}`), (snapshot) => {
+    onValue(ref(db, `fichas_v4/${fichaID}`), (snapshot) => {
         const data = snapshot.val();
         if (!data) {
             document.body.innerHTML = `<div class="empty">Ficha não encontrada: ${fichaID}</div>`;
