@@ -1410,39 +1410,77 @@
   }
 
   /* ── helper: resolve sheet metadata & destination URL ── */
-  function getSheetInfo(id) {
-    if (globalFichasV4 && globalFichasV4[id]) {
-      return {
-        id,
-        version: 'v4',
-        data: globalFichasV4[id],
-        url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
-      };
+  function getSheetInfo(id, preferredVersion) {
+    const targetVer = preferredVersion || currentActiveVersion || 'v3';
+
+    if (targetVer === 'v3') {
+      if (globalFichasV3 && globalFichasV3[id]) {
+        return {
+          id,
+          version: 'v3',
+          data: globalFichasV3[id],
+          url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
+        };
+      }
+      if (id === 'v3_ficha_base') {
+        return {
+          id,
+          version: 'v3',
+          data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
+          url: 'v3/ed_sistemav3_ficha.html'
+        };
+      }
+      if (globalFichasV4 && globalFichasV4[id]) {
+        return {
+          id,
+          version: 'v4',
+          data: globalFichasV4[id],
+          url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
+        };
+      }
+      if (id === 'v4_ficha_base') {
+        return {
+          id,
+          version: 'v4',
+          data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
+          url: 'v4/ed_sistemav4_ficha.html'
+        };
+      }
+    } else {
+      if (globalFichasV4 && globalFichasV4[id]) {
+        return {
+          id,
+          version: 'v4',
+          data: globalFichasV4[id],
+          url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
+        };
+      }
+      if (id === 'v4_ficha_base') {
+        return {
+          id,
+          version: 'v4',
+          data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
+          url: 'v4/ed_sistemav4_ficha.html'
+        };
+      }
+      if (globalFichasV3 && globalFichasV3[id]) {
+        return {
+          id,
+          version: 'v3',
+          data: globalFichasV3[id],
+          url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
+        };
+      }
+      if (id === 'v3_ficha_base') {
+        return {
+          id,
+          version: 'v3',
+          data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
+          url: 'v3/ed_sistemav3_ficha.html'
+        };
+      }
     }
-    if (id === 'v4_ficha_base') {
-      return {
-        id,
-        version: 'v4',
-        data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
-        url: 'v4/ed_sistemav4_ficha.html'
-      };
-    }
-    if (globalFichasV3 && globalFichasV3[id]) {
-      return {
-        id,
-        version: 'v3',
-        data: globalFichasV3[id],
-        url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
-      };
-    }
-    if (id === 'v3_ficha_base') {
-      return {
-        id,
-        version: 'v3',
-        data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
-        url: 'v3/ed_sistemav3_ficha.html'
-      };
-    }
+
     if (id === 'v1_ficha') {
       return { id, version: 'v1', data: { char_name: 'Ficha ED v1', nivel: 1 }, url: 'v1/ed_sistemav1_ficha.html' };
     }
@@ -1462,6 +1500,7 @@
     container.innerHTML = '';
 
     const isV4 = currentActiveVersion === 'v4';
+    const currentVer = isV4 ? 'v4' : 'v3';
     const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
 
     let ids = [];
@@ -1486,7 +1525,7 @@
     }
 
     ids.forEach(id => {
-      const info = getSheetInfo(id);
+      const info = getSheetInfo(id, currentVer);
       if (!info) return;
 
       const card = document.createElement('div');
@@ -1772,7 +1811,7 @@
       if (!sheetKeys.includes('v2_ficha')) sheetKeys.push('v2_ficha');
     }
 
-    let items = sheetKeys.map(id => getSheetInfo(id)).filter(Boolean);
+    let items = sheetKeys.map(id => getSheetInfo(id, activeSMTab)).filter(Boolean);
     if (filterText) {
       items = items.filter(info => (info.data.char_name || info.id).toLowerCase().includes(filterText));
     }
@@ -1817,7 +1856,7 @@
 
     if (grant) {
       EDAuth.attachSheetToUser(userId, sheetId);
-      const info = getSheetInfo(sheetId);
+      const info = getSheetInfo(sheetId, activeSMTab);
       if (info && (info.version === 'v4' || info.version === 'v3')) {
         const freshUser = EDAuth.getStore().users.find(u => u.id === userId);
         if (freshUser) {
