@@ -716,7 +716,7 @@
   <div class="sidebar-trigger id-logged hidden" onclick="toggleSidebar()">☰</div>
 
   <!-- Floating Version Switcher (Directly below 3 bars icon) -->
-  <div class="version-floating-btn id-logged hidden" style="position:fixed; top:60px; left:15px; z-index:1899; display:flex; gap:4px; padding:4px; background:rgba(7,3,3,.95); border:1px solid #5c1c22; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.8);">
+  <div class="version-floating-btn id-logged hidden" id="floatingVersionSwitcher" style="position:fixed; top:60px; left:15px; z-index:1899; display:flex; gap:4px; padding:4px; background:rgba(7,3,3,.95); border:1px solid #5c1c22; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.8);">
     <button id="floatVerBtn_v3" onclick="setHubVersion('v3')" style="padding:5px 10px; background:#5c1c22; color:#fff; border-radius:5px; border:1px solid #cc2a2a; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">🎭 v3</button>
     <button id="floatVerBtn_v4" onclick="setHubVersion('v4')" style="padding:5px 10px; background:#1a4c5c; color:#fff; border-radius:5px; border:1px solid #2accda; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">⚔️ v4</button>
   </div>
@@ -733,7 +733,7 @@
     </div>
     <ul class="sidebar-menu">
 
-      <div style="padding: 8px 12px; margin: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+      <div id="sidebarVersionSwitcher" style="padding: 8px 12px; margin: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
         <div style="font-size: 0.68rem; color: #9a8585; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; font-weight:700;">Versão Ativa no Hub</div>
         <div style="display: flex; gap: 6px;">
           <button id="sideVerBtn_v3" onclick="setHubVersion('v3')" style="flex: 1; text-align: center; padding: 5px; background: #5c1c22; color: #fff; border-radius: 5px; border: 1px solid #cc2a2a; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition:all 0.2s;">🎭 v3</button>
@@ -852,7 +852,10 @@
     <!-- View: Fichas -->
     <div id="view_fichas" class="hub-view hidden">
       <div class="card">
-        <h3 class="card-title">Minhas Fichas</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 22px; flex-wrap:wrap; gap:10px;">
+          <h3 class="card-title" style="margin-bottom:0">Fichas de Personagem</h3>
+          <button class="btn btn-primary btn-sm admin-only hidden" id="btnHubCreateSheet" onclick="createNewSheetHub()">+ Criar Ficha</button>
+        </div>
         <div class="char-grid" id="myFichasGrid">
           <!-- Populated dynamically -->
         </div>
@@ -941,7 +944,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   // Initialize Firebase app
   const firebaseConfig = {
@@ -974,6 +977,30 @@
   };
 
   function updateVersionUI() {
+    const user = EDAuth.currentUser();
+    const canAccessV4 = user && (user.role === 'admin' || (Array.isArray(user.versions) && user.versions.includes('v4')));
+
+    const floatWrap = document.getElementById('floatingVersionSwitcher');
+    const sideWrap = document.getElementById('sidebarVersionSwitcher');
+
+    if (canAccessV4) {
+      if (floatWrap) floatWrap.style.display = 'flex';
+      if (sideWrap) sideWrap.style.display = 'block';
+    } else {
+      if (floatWrap) floatWrap.style.display = 'none';
+      if (sideWrap) sideWrap.style.display = 'none';
+
+      // Automatically set active version to what the user possesses
+      if (!user || (Array.isArray(user.versions) && user.versions.includes('v3'))) {
+        currentActiveVersion = 'v3';
+      } else if (Array.isArray(user.versions) && user.versions.includes('v4')) {
+        currentActiveVersion = 'v4';
+      } else {
+        currentActiveVersion = 'v3';
+      }
+      localStorage.setItem('ed_selected_version', currentActiveVersion);
+    }
+
     const isV4 = currentActiveVersion === 'v4';
 
     // Update floating buttons styling
@@ -1274,7 +1301,7 @@
       const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
       const rowCls = u.status === 'pending' ? 'row-pending' : (u.status === 'denied' ? 'row-denied' : '');
 
-      const accessHTML = ['v1','v2','v3'].map((v) => {
+      const accessHTML = ['v1','v2','v3','v4'].map((v) => {
         const chk = u.versions && u.versions.includes(v) ? 'checked' : '';
         const dis = isAdmin ? 'disabled' : '';
         return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${chk} ${dis}/> ${v.toUpperCase()}</label>`;
@@ -1471,6 +1498,27 @@
     activeEditingUser = null;
   };
 
+  window.createNewSheetHub = () => {
+    const name = prompt("Digite o nome do personagem:");
+    if (!name || !name.trim()) return;
+    const isV4 = currentActiveVersion === 'v4';
+    const newId = 'ficha_' + Date.now();
+    const dbPath = isV4 ? `fichas_v4/${newId}` : `fichas_v3/${newId}`;
+
+    set(ref(db, dbPath), {
+      char_name: name.trim(),
+      nivel: 1,
+      category: 'default',
+      stock_folder: 'geral',
+      createdAt: Date.now()
+    }).then(() => {
+      alert(`Ficha "${name.trim()}" (${isV4 ? 'v4' : 'v3'}) criada com sucesso!`);
+      renderMyFichas();
+    }).catch(err => {
+      alert("Erro ao criar ficha: " + err.message);
+    });
+  };
+
   function renderEditUserFichas() {
     const grid = document.getElementById('editUserFichasGrid');
     grid.innerHTML = '';
@@ -1484,17 +1532,18 @@
     }
 
     assigned.forEach(id => {
-      const data = globalFichasV3[id];
+      const data = globalFichasV3[id] || globalFichasV4[id];
       if (!data) return;
 
       const card = document.createElement('div');
       card.className = 'char-card';
       card.style.cursor = 'default';
+      const verLabel = globalFichasV4[id] ? 'v4' : 'v3';
       card.innerHTML = `
         <div class="char-card-remove" onclick="detachSheet('${id}')">✖</div>
         <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : '👤'}</div>
         <div class="char-card-name">${data.char_name || id}</div>
-        <div class="char-card-level">Nível ${data.nivel || 1}</div>
+        <div class="char-card-level">Nível ${data.nivel || 1} <span style="font-size:0.65rem; opacity:0.8;">[${verLabel}]</span></div>
       `;
       grid.appendChild(card);
     });
@@ -1553,19 +1602,21 @@
 
     const assigned = user.assignedSheets || [];
     let count = 0;
+    const allSheets = { ...globalFichasV3, ...globalFichasV4 };
 
-    Object.entries(globalFichasV3).forEach(([id, data]) => {
+    Object.entries(allSheets).forEach(([id, data]) => {
       if (!assigned.includes(id)) {
         count++;
         const opt = document.createElement('option');
         opt.value = id;
-        opt.textContent = `${data.char_name || id} (Nível ${data.nivel || 1})`;
+        const ver = globalFichasV4[id] ? 'v4' : 'v3';
+        opt.textContent = `[${ver.toUpperCase()}] ${data.char_name || id} (Nível ${data.nivel || 1})`;
         selector.appendChild(opt);
       }
     });
 
     if (count === 0) {
-      alert('Todas as fichas V3 globais já foram associadas a este usuário.');
+      alert('Todas as fichas globais já foram associadas a este usuário.');
       return;
     }
 
