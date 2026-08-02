@@ -344,7 +344,7 @@
       </div>
     </div>
 
-    <h2 class="section-title">JOGADORES <button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button></h2>
+    <h2 class="section-title">JOGADORES <div style="display:flex; gap:6px;"><button class="btn-add-cat" onclick="createNewPlayerSheet()" style="background:#2e7d32; border-color:#4caf50;">+ Criar Ficha</button><button class="btn-add-cat" onclick="addCategory('players')">+ Divisória</button></div></h2>
     <div id="wrapper-players"></div>
 
     <h2 class="section-title">NPCs & INIMIGOS <button class="btn-add-cat" onclick="addCategory('npcs')">+ Divisória</button></h2>
@@ -501,6 +501,23 @@ function updateOverlayToggleBtn(){
   btn.textContent = isCombate ? '🖥️ Overlay: Combate' : '🖥️ Overlay: Nome';
   btn.classList.toggle('active', isCombate);
 }
+
+window.createNewPlayerSheet = () => {
+  const name = prompt("Digite o nome do personagem:");
+  if (!name || !name.trim()) return;
+  const newId = 'ficha_' + Date.now();
+  set(ref(db, `fichas_v4/${newId}`), {
+    char_name: name.trim(),
+    nivel: 1,
+    category: 'default',
+    stock_folder: 'geral',
+    createdAt: Date.now()
+  }).then(() => {
+    alert(`Ficha "${name.trim()}" v4 criada com sucesso!`);
+  }).catch(err => {
+    alert("Erro ao criar ficha: " + err.message);
+  });
+};
 
 function renderMoeda(){
   const el = document.getElementById('moeda_value');
