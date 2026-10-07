@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Véu RPG - Painel Geral e Gestão de Campanhas">
+  <title>Véu RPG | Gestão de Campanhas</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body class="dashboard-layout">
+  <!-- Ambient Liquid Glass Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- ========================================================================
+       1. SIDEBAR (PC / DESKTOP)
+       ======================================================================== -->
+  <aside id="sidebar" class="dashboard-sidebar">
+    <!-- Header with Brand & Hamburger Toggle -->
+    <div class="sidebar-header">
+      <a href="#" class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 8.5 12 15 22 8.5 12 2"></polygon>
+            <polygon points="2 8.5 12 15 12 22 2 15.5 2 8.5"></polygon>
+            <polygon points="22 8.5 12 15 12 22 22 15.5 22 8.5"></polygon>
+          </svg>
+        </div>
+        <span class="sidebar-brand-title">VÉU RPG</span>
+      </a>
+      <button id="btnToggleSidebar" class="btn-hamburger" type="button" title="Recolher / Expandir Menu" aria-label="Alternar menu lateral">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- User Profile Card -->
+    <div class="sidebar-user-card">
+      <div class="sidebar-user-avatar" id="sidebarUserAvatar">?</div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-name" id="sidebarUserName">Carregando...</span>
+        <span class="sidebar-user-role" id="sidebarUserEmail">Aventureiro</span>
+      </div>
+    </div>
+
+    <!-- Navigation List -->
+    <nav class="sidebar-nav" aria-label="Navegação Principal">
+      <button class="nav-item-btn active" data-section="campaigns" data-tooltip="Campanhas" title="Campanhas" type="button">
+        <!-- Shield / Swords icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span class="nav-item-text">Campanhas</span>
+      </button>
+
+      <button class="nav-item-btn" data-section="profile" data-tooltip="Perfil" title="Perfil" type="button">
+        <!-- User icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span class="nav-item-text">Perfil</span>
+      </button>
+
+      <button class="nav-item-btn" data-section="settings" data-tooltip="Configurações" title="Configurações" type="button">
+        <!-- Settings gear icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span class="nav-item-text">Configurações</span>
+      </button>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="sidebar-footer">
+      <button id="btnSidebarLogout" class="nav-item-btn btn-logout" data-tooltip="Sair" title="Sair" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="nav-item-text">Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       2. MAIN CONTENT AREA
+       ======================================================================== -->
+  <main class="dashboard-content">
+    <!-- Mobile Topbar -->
+    <div class="content-topbar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 8.5 12 15 22 8.5 12 2"></polygon>
+            <polygon points="2 8.5 12 15 12 22 2 15.5 2 8.5"></polygon>
+            <polygon points="22 8.5 12 15 12 22 22 15.5 22 8.5"></polygon>
+          </svg>
+        </div>
+        <span class="sidebar-brand-title">VÉU RPG</span>
+      </div>
+      <button id="btnMobileLogout" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.82rem;" type="button">
+        Sair
+      </button>
+    </div>
+
+    <!-- Alert / Toast Container -->
+    <div id="dashboardAlert" class="alert" style="display: none;" role="alert"></div>
+
+    <!-- --------------------------------------------------------------------
+         SECTION 1: CAMPANHAS (DEFAULT)
+         -------------------------------------------------------------------- -->
+    <section id="section-campaigns" class="dash-section active">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>Suas Campanhas</h2>
+          <p>Mestres, mundos e crônicas em andamento</p>
+        </div>
+        <div class="section-actions">
+          <button id="btnOpenJoinCampaign" class="btn btn-ghost" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span>Entrar em Campanha</span>
+          </button>
+          <button id="btnOpenCreateCampaign" class="btn btn-primary" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Criar Nova Campanha</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campaigns Grid -->
+      <div id="campaignsGrid" class="campaigns-grid">
+        <div class="empty-campaigns glass-panel">
+          <div class="btn-spinner" style="margin: 0 auto 12px auto; display: block; border-color: rgba(139, 92, 246, 0.3); border-top-color: var(--accent-primary);"></div>
+          <p style="color: var(--text-muted);">Sintonizando campanhas do Véu...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         SECTION 2: GERENCIAMENTO DE CAMPANHA (WORKSPACE FASE 3)
+         -------------------------------------------------------------------- -->
+    <section id="section-campaign-detail" class="dash-section">
+      <!-- Top Action Bar -->
+      <div class="campaign-detail-actions-bar">
+        <button id="btnBackToCampaigns" class="btn btn-ghost" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Voltar para Campanhas</span>
+        </button>
+
+        <div class="campaign-detail-actions-right">
+          <button id="btnOpenDuplicate" class="btn btn-ghost gm-only" type="button" title="Duplicar Campanha">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Duplicar Campanha</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campaign Header Banner -->
+      <div class="campaign-detail-header glass-panel">
+        <img id="detailCoverImg" src="" alt="Capa da Campanha" class="campaign-detail-header-bg">
+        <div class="campaign-detail-header-overlay"></div>
+        <div class="campaign-detail-header-content">
+          <div class="campaign-detail-badges">
+            <span id="detailSystemBadge" class="badge-tag badge-system">Sistema</span>
+            <span id="detailRoleBadge" class="badge-tag badge-master">Mestre</span>
+          </div>
+          <h2 id="detailTitle" class="campaign-detail-title">Nome da Campanha</h2>
+          <p id="detailMasterInfo" class="campaign-detail-master-info">Mestre: Carregando...</p>
+        </div>
+      </div>
+
+      <!-- Internal Tabs Navigation -->
+      <div class="camp-nav-container">
+        <nav class="camp-tabs-nav" aria-label="Abas da Campanha">
+          <button type="button" class="camp-tab-btn active" data-camptab="sheets">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Fichas</span>
+          </button>
+
+          <button type="button" class="camp-tab-btn" data-camptab="players">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Jogadores</span>
+          </button>
+
+          <button type="button" class="camp-tab-btn gm-only" data-camptab="gm-screen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Escudo do Mestre</span>
+          </button>
+
+          <button type="button" class="camp-tab-btn" data-camptab="compendium">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span>Compendium</span>
+          </button>
+
+          <button type="button" class="camp-tab-btn gm-only" data-camptab="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Configurações</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- ====================================================================
+           TAB 1: FICHAS (SHEETS)
+           ==================================================================== -->
+      <div id="campTab-sheets" class="camp-tab-panel active">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem;">Fichas de Personagem</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Aventureiros conectados e fichas da crônica
+            </p>
+          </div>
+          <button id="btnOpenCreateSheet" class="btn btn-primary" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Criar Nova Ficha</span>
+          </button>
+        </div>
+
+        <div id="sheetsGrid" class="sheets-grid">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           TAB 2: JOGADORES (PLAYERS)
+           ==================================================================== -->
+      <div id="campTab-players" class="camp-tab-panel">
+        <div class="campaign-detail-info-grid">
+          <!-- Lista de Jogadores -->
+          <div class="glass-panel" style="padding: 24px; border-radius: var(--radius-lg);">
+            <h3 style="font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 8px;">Aventureiros Conectados</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+              Membros que possuem acesso à mesa
+            </p>
+            <div id="campPlayersList" class="players-list">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- Código de Convite -->
+          <div class="glass-panel invite-code-card">
+            <h4 style="font-size: 1.05rem; font-weight: 600;">Código de Convite</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              Compartilhe este código de 6 caracteres com seus jogadores para ingressar na crônica:
+            </p>
+            <div class="invite-code-display">
+              <span id="detailInviteCode">------</span>
+              <button id="btnCopyInviteCode" class="btn btn-ghost" style="padding: 6px 10px;" type="button" title="Copiar código">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           TAB 3: ESCUDO DO MESTRE (GM SCREEN)
+           ==================================================================== -->
+      <div id="campTab-gm-screen" class="camp-tab-panel gm-only">
+        <div class="gm-screen-sections">
+          <!-- 1. Resumo dos Players (HUD Vital) -->
+          <div class="glass-panel gm-screen-box">
+            <div class="gm-box-header">
+              <h3>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <span>Resumo dos Players (Status Vitais)</span>
+              </h3>
+            </div>
+            <div id="gmVitalsGrid" class="gm-vitals-grid">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- 2. NPCs e Inimigos Rápidos -->
+          <div class="glass-panel gm-screen-box">
+            <div class="gm-box-header">
+              <h3>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>NPCs e Inimigos Rápidos</span>
+              </h3>
+              <button id="btnOpenCreateNPC" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" type="button">
+                + Novo NPC / Monstro
+              </button>
+            </div>
+            <div id="npcsGrid" class="gm-vitals-grid">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- 3. Gerenciador de Iniciativa -->
+          <div class="glass-panel gm-screen-box">
+            <div class="gm-box-header">
+              <h3>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Gerenciador de Iniciativa (Combate)</span>
+              </h3>
+              <span id="currentTurnBadge" class="badge-tag badge-master">Combate Parado</span>
+            </div>
+
+            <div class="initiative-container">
+              <div class="initiative-controls-bar">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button id="btnRollAllInitiatives" class="btn btn-ghost" type="button" title="Rolar d20 para todos">
+                    🎲 Rolar Todos
+                  </button>
+                  <button id="btnPrevTurn" class="btn btn-ghost" type="button">
+                    &larr; Turno Anterior
+                  </button>
+                  <button id="btnNextTurn" class="btn btn-primary" type="button">
+                    Próximo Turno &rarr;
+                  </button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button id="btnAddCombatant" class="btn btn-ghost" type="button">
+                    + Adicionar
+                  </button>
+                  <button id="btnClearInitiative" class="btn btn-ghost" style="color: var(--color-error);" type="button">
+                    Limpar
+                  </button>
+                </div>
+              </div>
+
+              <div id="initiativeItemsList" class="initiative-list">
+                <!-- Renderizado via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           TAB 4: COMPENDIUM
+           ==================================================================== -->
+      <div id="campTab-compendium" class="camp-tab-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem;">Compendium da Campanha</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Raças, Classes, Itens, Magias, Habilidades e Monstros
+            </p>
+          </div>
+          <button id="btnOpenCreateCompendium" class="btn btn-primary gm-only" type="button">
+            + Novo Registro
+          </button>
+        </div>
+
+        <!-- Filtros e Busca -->
+        <div class="compendium-filters">
+          <button type="button" class="filter-pill active" data-filter="todos">Todos</button>
+          <button type="button" class="filter-pill" data-filter="Raça">Raças</button>
+          <button type="button" class="filter-pill" data-filter="Classe">Classes</button>
+          <button type="button" class="filter-pill" data-filter="Item">Itens</button>
+          <button type="button" class="filter-pill" data-filter="Magia">Magias</button>
+          <button type="button" class="filter-pill" data-filter="Habilidade">Habilidades</button>
+          <button type="button" class="filter-pill" data-filter="Monstro">Monstros</button>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <input type="text" id="compendiumSearch" class="form-input" placeholder="Buscar no Compendium por nome ou descrição..." style="padding-left: 14px;">
+        </div>
+
+        <div id="compendiumGrid" class="compendium-grid">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           TAB 5: CONFIGURAÇÕES DA CAMPANHA (GM ONLY)
+           ==================================================================== -->
+      <div id="campTab-settings" class="camp-tab-panel gm-only">
+        <div class="glass-panel" style="max-width: 600px; padding: 28px; border-radius: var(--radius-xl);">
+          <h3 style="font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 6px;">Configurações da Mesa</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 22px;">
+            Altere os dados principais da crônica
+          </p>
+
+          <form id="formCampaignSettings">
+            <div class="form-group">
+              <label for="campSettingsName" class="form-label">Nome da Campanha</label>
+              <input type="text" id="campSettingsName" class="form-input" required style="padding-left: 14px;">
+            </div>
+
+            <div class="form-group">
+              <label for="campSettingsCover" class="form-label">Imagem de Capa da Campanha</label>
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                <input type="file" id="campSettingsCoverFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;">
+                <button type="button" class="btn btn-ghost" id="btnUploadCampSettingsCover" style="gap: 8px; font-size: 0.85rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>Subir do Dispositivo</span>
+                </button>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">ou informe uma URL:</span>
+              </div>
+              <input type="url" id="campSettingsCover" class="form-input" style="padding-left: 14px;" placeholder="https://exemplo.com/imagem.jpg">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Sistema de Regras</label>
+              <div class="system-select-grid">
+                <label class="system-radio-card">
+                  <input type="radio" name="campSettingsSystem" value="Sistema A" id="campSettingsSystemA">
+                  <div>
+                    <strong>Sistema A</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Mecânica Clássica d20</div>
+                  </div>
+                </label>
+                <label class="system-radio-card">
+                  <input type="radio" name="campSettingsSystem" value="Sistema B" id="campSettingsSystemB">
+                  <div>
+                    <strong>Sistema B</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Mecânica Narrativa</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+              Salvar Alterações
+            </button>
+          </form>
+
+          <!-- Danger Zone -->
+          <div class="danger-zone-card">
+            <h4>Zona de Perigo</h4>
+            <p>A exclusão da campanha destruirá permanentemente todas as fichas, NPCs e compêndios vinculados a ela.</p>
+            <button type="button" id="btnOpenDeleteCampaign" class="btn btn-ghost" style="color: var(--color-error); border-color: rgba(244, 63, 94, 0.4);">
+              Excluir Campanha Permanentemente
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         SECTION 3: PERFIL
+         -------------------------------------------------------------------- -->
+    <section id="section-profile" class="dash-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>Seu Perfil</h2>
+          <p>Informações de conta e identificação de aventureiro</p>
+        </div>
+      </div>
+
+      <div class="glass-panel profile-card">
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+          <div class="profile-avatar-wrapper" id="btnChangeAvatar" title="Clique para alterar foto de perfil" role="button" tabindex="0">
+            <div class="sidebar-user-avatar" id="profileAvatar">?</div>
+            <div class="avatar-edit-overlay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Alterar</span>
+            </div>
+          </div>
+          <div>
+            <h3 id="profileDisplayHeading" style="font-size: 1.25rem;">Aventureiro</h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="profileEmailSubtitle">seu@email.com</span>
+            <div style="margin-top: 6px;">
+              <button type="button" id="btnUploadAvatarText" class="link-btn" style="font-size: 0.85rem;">
+                Alterar foto de perfil
+              </button>
+            </div>
+          </div>
+          <!-- Input oculto para upload de imagem -->
+          <input type="file" id="avatarFileInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
+        </div>
+
+        <form id="formUpdateProfile">
+          <div class="form-group">
+            <label for="profileEmail" class="form-label">E-mail Cadastrado (não editável)</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </span>
+              <input type="email" id="profileEmail" class="form-input" disabled style="opacity: 0.7; cursor: not-allowed;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="profileDisplayName" class="form-label">Nome de Exibição / Jogador</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <input type="text" id="profileDisplayName" class="form-input" placeholder="Seu nome ou alcunha" required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+            <button type="submit" id="btnSaveProfile" class="btn btn-primary">
+              <span>Salvar Alterações</span>
+            </button>
+            <button type="button" id="btnSendPasswordReset" class="btn btn-ghost">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>Redefinir Senha por E-mail</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         SECTION 4: CONFIGURAÇÕES
+         -------------------------------------------------------------------- -->
+    <section id="section-settings" class="dash-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>Configurações</h2>
+          <p>Preferências visuais e customização do Véu RPG</p>
+        </div>
+      </div>
+
+      <div class="glass-panel settings-card">
+        <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 8px;">Tema da Interface</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+          Alterne entre a estética sombria dos reinos ou a luminosidade do éter:
+        </p>
+
+        <div class="theme-options-grid">
+          <button type="button" class="theme-option-btn" id="btnThemeDark" data-theme-set="dark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span>Tema Escuro (Dark)</span>
+          </button>
+          <button type="button" class="theme-option-btn" id="btnThemeLight" data-theme-set="light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <span>Tema Claro (Light)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       3. FLOATING BOTTOM NAVIGATION BAR (MOBILE)
+       ======================================================================== -->
+  <nav class="mobile-bottom-nav" aria-label="Navegação Mobile">
+    <button class="mobile-nav-btn active" data-section="campaigns" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      </svg>
+      <span>Campanhas</span>
+    </button>
+    <button class="mobile-nav-btn" data-section="profile" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+      <span>Perfil</span>
+    </button>
+    <button class="mobile-nav-btn" data-section="settings" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span>Configurações</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================================
+       4. MODAL: CRIAR CAMPANHA
+       ======================================================================== -->
+  <div id="modalCreateCampaign" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCreate">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="titleModalCreate" class="modal-title">Criar Nova Campanha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCreateCampaign" aria-label="Fechar modal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="formCreateCampaign" novalidate>
+        <div class="form-group">
+          <label for="createCampaignName" class="form-label">Nome da Campanha</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </span>
+            <input type="text" id="createCampaignName" class="form-input" placeholder="Ex: As Crônicas de Valória" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sistema de RPG</label>
+          <div class="system-select-grid">
+            <label class="system-radio-card selected" id="radioLabelSystemA">
+              <input type="radio" name="campaignSystem" value="Sistema A" checked>
+              <div>
+                <strong>Sistema A</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Mecânica Clássica d20</div>
+              </div>
+            </label>
+            <label class="system-radio-card" id="radioLabelSystemB">
+              <input type="radio" name="campaignSystem" value="Sistema B">
+              <div>
+                <strong>Sistema B</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Mecânica Narrativa</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Imagem de Capa da Campanha (opcional)</label>
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+            <input type="file" id="campaignCoverFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;">
+            <button type="button" class="btn btn-ghost" id="btnUploadCampaignCover" style="gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Subir do Dispositivo</span>
+            </button>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">ou informe uma URL:</span>
+          </div>
+
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </span>
+            <input type="url" id="createCampaignCover" class="form-input" placeholder="https://exemplo.com/imagem.jpg">
+          </div>
+
+          <!-- Preview container -->
+          <div class="image-preview-container" id="coverPreviewContainer" style="cursor: pointer;" title="Clique para escolher uma imagem ou arraste um arquivo">
+            <span class="image-preview-placeholder" id="coverPreviewPlaceholder">
+              Preview da Imagem de Capa (clique ou arraste uma foto aqui)
+            </span>
+            <img id="coverPreviewImg" src="" alt="Prévia da Capa">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalCreateCampaign">Cancelar</button>
+          <button type="submit" id="btnSubmitCreateCampaign" class="btn btn-primary">
+            <span>Criar Campanha</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       5. MODAL: ENTRAR EM CAMPANHA
+       ======================================================================== -->
+  <div id="modalJoinCampaign" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalJoin">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="titleModalJoin" class="modal-title">Entrar em Campanha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalJoinCampaign" aria-label="Fechar modal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="formJoinCampaign" novalidate>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px;">
+          Insira o código de convite de 6 caracteres fornecido pelo Mestre da mesa:
+        </p>
+
+        <div class="form-group">
+          <label for="joinInviteCode" class="form-label">Código do Convite</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </span>
+            <input type="text" id="joinInviteCode" class="form-input" placeholder="Ex: VEU123" maxlength="6" style="text-transform: uppercase; font-family: monospace; letter-spacing: 0.15em; font-size: 1.15rem; font-weight: 700;" required>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalJoinCampaign">Cancelar</button>
+          <button type="submit" id="btnSubmitJoinCampaign" class="btn btn-primary">
+            <span>Ingressar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       6. MODAL: AJUSTAR FOTO DE PERFIL (CROP / ZOOM)
+       ======================================================================== -->
+  <div id="modalCropAvatar" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCrop">
+    <div class="modal-box cropper-modal-box">
+      <div class="modal-header">
+        <h3 id="titleModalCrop" class="modal-title">Ajustar Foto de Perfil</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCropAvatar" aria-label="Fechar modal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 12px;">
+        Arraste a imagem para reposicionar e use a barra ou roda do mouse para ajustar o zoom:
+      </p>
+
+      <!-- Crop Canvas Viewport -->
+      <div class="crop-canvas-wrapper" id="cropCanvasWrapper">
+        <canvas id="cropCanvas" width="280" height="280"></canvas>
+      </div>
+
+      <!-- Zoom and Adjust Controls -->
+      <div class="crop-controls">
+        <button type="button" id="btnZoomOut" class="zoom-btn" title="Diminuir Zoom" aria-label="Diminuir Zoom">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <input type="range" id="zoomSlider" class="zoom-slider" min="1" max="3" step="0.01" value="1" aria-label="Ajuste de Zoom">
+        <button type="button" id="btnZoomIn" class="zoom-btn" title="Aumentar Zoom" aria-label="Aumentar Zoom">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button type="button" id="btnResetCrop" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.8rem;" title="Centralizar imagem">
+          Centralizar
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button type="button" class="btn btn-ghost" data-close-modal="modalCropAvatar">Cancelar</button>
+        <button type="button" id="btnSaveCrop" class="btn btn-primary">
+          <span>Salvar Foto</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: AJUSTAR CAPA DA CAMPANHA (CROP / ZOOM)
+       ======================================================================== -->
+  <div id="modalCropCampaignCover" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCropCover">
+    <div class="modal-box cropper-modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="titleModalCropCover" class="modal-title">Ajustar Capa da Campanha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCropCampaignCover" aria-label="Fechar modal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 12px;">
+        Arraste a imagem para enquadrar a capa e use a barra ou roda do mouse para ajustar o zoom:
+      </p>
+
+      <!-- Crop Canvas Viewport (16:9 banner) -->
+      <div class="crop-cover-canvas-wrapper" id="cropCoverCanvasWrapper">
+        <canvas id="cropCoverCanvas" width="360" height="220"></canvas>
+      </div>
+
+      <!-- Zoom and Adjust Controls -->
+      <div class="crop-controls">
+        <button type="button" id="btnCoverZoomOut" class="zoom-btn" title="Diminuir Zoom" aria-label="Diminuir Zoom">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <input type="range" id="coverZoomSlider" class="zoom-slider" min="1" max="3" step="0.01" value="1" aria-label="Ajuste de Zoom">
+        <button type="button" id="btnCoverZoomIn" class="zoom-btn" title="Aumentar Zoom" aria-label="Aumentar Zoom">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button type="button" id="btnResetCoverCrop" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.8rem;" title="Centralizar imagem">
+          Centralizar
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button type="button" class="btn btn-ghost" data-close-modal="modalCropCampaignCover">Cancelar</button>
+        <button type="button" id="btnSaveCoverCrop" class="btn btn-primary">
+          <span>Confirmar Capa</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       7. MODAL: CRIAR FICHA DE PERSONAGEM
+       ======================================================================== -->
+  <div id="modalCreateSheet" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCreateSheet">
+    <div class="modal-box" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 id="titleModalCreateSheet" class="modal-title">Forjar Nova Ficha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCreateSheet" aria-label="Fechar modal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="formCreateSheet" novalidate>
+        <div class="form-group">
+          <label for="sheetName" class="form-label">Nome do Personagem</label>
+          <input type="text" id="sheetName" class="form-input" placeholder="Ex: Valerius o Guardião" required style="padding-left: 14px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="sheetRace" class="form-label">Raça / Ancestralidade</label>
+            <input type="text" id="sheetRace" class="form-input" placeholder="Ex: Humano" style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label for="sheetClass" class="form-label">Classe / Arquétipo</label>
+            <input type="text" id="sheetClass" class="form-input" placeholder="Ex: Paladino" style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label for="sheetLevel" class="form-label">Nível</label>
+            <input type="number" id="sheetLevel" class="form-input" value="1" min="1" max="30" style="padding-left: 14px;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="sheetMaxHp" class="form-label">Pontos de Vida (HP)</label>
+            <input type="number" id="sheetMaxHp" class="form-input" value="12" min="1" required style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label for="sheetMaxMp" class="form-label">Pontos de Mana (PM)</label>
+            <input type="number" id="sheetMaxMp" class="form-input" value="6" min="0" required style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label for="sheetAc" class="form-label">Classe Armadura (CA)</label>
+            <input type="number" id="sheetAc" class="form-input" value="14" min="0" required style="padding-left: 14px;">
+          </div>
+        </div>
+
+        <!-- Atribuir jogador (visível para o Mestre) -->
+        <div class="form-group" id="sheetAssignPlayerGroup">
+          <label for="sheetAssignPlayerSelect" class="form-label">Atribuir Ficha a Jogador</label>
+          <select id="sheetAssignPlayerSelect" class="form-input" style="padding-left: 14px; cursor: pointer;">
+            <!-- Opções via JS -->
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalCreateSheet">Cancelar</button>
+          <button type="submit" id="btnSubmitCreateSheet" class="btn btn-primary">
+            <span>Criar Ficha</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       8. MODAL: ATRIBUIR FICHA A JOGADOR
+       ======================================================================== -->
+  <div id="modalAssignSheet" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Atribuir Ficha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalAssignSheet" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="formAssignSheet">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Selecione o jogador que terá controle sobre esta ficha:
+        </p>
+        <div class="form-group">
+          <label class="form-label">Jogador da Mesa</label>
+          <select id="assignTargetPlayerSelect" class="form-input" style="padding-left: 14px;">
+            <!-- Opções via JS -->
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalAssignSheet">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Atribuição</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       9. MODAL: CONFIRMAR EXCLUSÃO DE FICHA
+       ======================================================================== -->
+  <div id="modalConfirmDeleteSheet" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 420px; text-align: center;">
+      <h3 class="modal-title" style="color: var(--color-error); margin-bottom: 12px;">Destruir Ficha?</h3>
+      <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 20px;">
+        Tem certeza de que deseja destruir permanentemente a ficha <strong id="deleteSheetTargetName" style="color: var(--text-main);"></strong>? Esta ação não pode ser desfeita.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button type="button" class="btn btn-ghost" data-close-modal="modalConfirmDeleteSheet">Cancelar</button>
+        <button type="button" id="btnConfirmDeleteSheet" class="btn btn-primary" style="background: var(--color-error); border-color: var(--color-error);">
+          Confirmar Destruição
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       10. MODAL: REMOVER JOGADOR DA MESA
+       ======================================================================== -->
+  <div id="modalRemovePlayer" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 420px; text-align: center;">
+      <h3 class="modal-title" style="color: var(--color-error); margin-bottom: 12px;">Remover Jogador?</h3>
+      <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 20px;">
+        Deseja expulsar o jogador <strong id="removePlayerTargetName" style="color: var(--text-main);"></strong> desta campanha? Ele perderá acesso ao mural e fichas vinculadas.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button type="button" class="btn btn-ghost" data-close-modal="modalRemovePlayer">Cancelar</button>
+        <button type="button" id="btnConfirmRemovePlayer" class="btn btn-primary" style="background: var(--color-error); border-color: var(--color-error);">
+          Expulsar da Mesa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       11. MODAL: CRIAR NPC / MONSTRO RÁPIDO
+       ======================================================================== -->
+  <div id="modalCreateNPC" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Novo NPC ou Monstro</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCreateNPC" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="formCreateNPC" novalidate>
+        <div class="form-group">
+          <label for="npcName" class="form-label">Nome da Criatura / Personagem</label>
+          <input type="text" id="npcName" class="form-input" placeholder="Ex: Cultista das Sombras" required style="padding-left: 14px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="npcType" class="form-label">Tipo</label>
+            <select id="npcType" class="form-input" style="padding-left: 10px;">
+              <option value="Inimigo">Inimigo</option>
+              <option value="Chefe">Chefe</option>
+              <option value="Aliado">Aliado</option>
+              <option value="Neutro">Neutro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="npcMaxHp" class="form-label">Vida (HP)</label>
+            <input type="number" id="npcMaxHp" class="form-input" value="18" min="1" required style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label for="npcAc" class="form-label">Defesa (CA)</label>
+            <input type="number" id="npcAc" class="form-input" value="12" min="0" required style="padding-left: 14px;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="npcNotes" class="form-label">Ações / Notas Rápidas</label>
+          <textarea id="npcNotes" class="form-input" rows="3" placeholder="Ex: Garra +4 (1d6+2 perfurante). Resistente a frio." style="padding-left: 14px; resize: vertical;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalCreateNPC">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar NPC</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       12. MODAL: ADICIONAR COMBATENTE À INICIATIVA
+       ======================================================================== -->
+  <div id="modalAddCombatant" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Adicionar Combatente</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalAddCombatant" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="formAddCombatant">
+        <div class="form-group">
+          <label for="combatantName" class="form-label">Nome</label>
+          <input type="text" id="combatantName" class="form-input" placeholder="Ex: Esqueleto Guerreiro" required style="padding-left: 14px;">
+        </div>
+        <div class="form-group">
+          <label for="combatantScore" class="form-label">Iniciativa (deixe vazio para rolar d20)</label>
+          <input type="number" id="combatantScore" class="form-input" placeholder="Rolar aleatório" style="padding-left: 14px;">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalAddCombatant">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       13. MODAL: CRIAR REGISTRO NO COMPENDIUM
+       ======================================================================== -->
+  <div id="modalCreateCompendium" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Novo Registro no Compendium</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalCreateCompendium" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="formCreateCompendium" novalidate>
+        <div class="form-group">
+          <label for="compCategory" class="form-label">Categoria</label>
+          <select id="compCategory" class="form-input" style="padding-left: 14px;">
+            <option value="Magia">Magia</option>
+            <option value="Item">Item / Equipamento</option>
+            <option value="Raça">Raça</option>
+            <option value="Classe">Classe</option>
+            <option value="Habilidade">Habilidade / Talento</option>
+            <option value="Monstro">Monstro Pronto</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="compTitle" class="form-label">Título / Nome</label>
+          <input type="text" id="compTitle" class="form-input" placeholder="Ex: Bola de Fogo" required style="padding-left: 14px;">
+        </div>
+
+        <div class="form-group">
+          <label for="compProperties" class="form-label">Propriedades / Metadados Rápidos (opcional)</label>
+          <input type="text" id="compProperties" class="form-input" placeholder="Ex: 3º Círculo, Custo: 5 PM, Alcance: 36m" style="padding-left: 14px;">
+        </div>
+
+        <div class="form-group">
+          <label for="compDescription" class="form-label">Descrição Detalhada e Efeitos</label>
+          <textarea id="compDescription" class="form-input" rows="4" placeholder="Descreva os efeitos mecânicos, dano, testes de resistência ou lore..." style="padding-left: 14px; resize: vertical;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalCreateCompendium">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       14. MODAL: DUPLICAR CAMPANHA
+       ======================================================================== -->
+  <div id="modalDuplicateCampaign" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Duplicar Campanha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modalDuplicateCampaign" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="formDuplicateCampaign">
+        <div class="form-group">
+          <label for="duplicateCampaignName" class="form-label">Nome da Nova Campanha</label>
+          <input type="text" id="duplicateCampaignName" class="form-input" required style="padding-left: 14px;">
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin: 16px 0 10px 0;">
+          Escolha os elementos que deseja clonar para a nova campanha:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; background: var(--input-bg); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer;">
+            <input type="checkbox" id="dupCopyCompendium" checked style="accent-color: var(--accent-primary);">
+            <span>Copiar Compendium (Itens, Magias, Raças, etc.)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer;">
+            <input type="checkbox" id="dupCopyGMScreen" checked style="accent-color: var(--accent-primary);">
+            <span>Copiar Escudo do Mestre (NPCs e Monstros Rápidos)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer;">
+            <input type="checkbox" id="dupCopyPlayers" style="accent-color: var(--accent-primary);">
+            <span>Copiar Fichas de Personagem dos Jogadores</span>
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalDuplicateCampaign">Cancelar</button>
+          <button type="submit" id="btnSubmitDuplicate" class="btn btn-primary">
+            <span>Duplicar Campanha</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       15. MODAL: EXCLUIR CAMPANHA (DUPLA CONFIRMAÇÃO)
+       ======================================================================== -->
+  <div id="modalDeleteCampaign" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 460px; text-align: center;">
+      <h3 class="modal-title" style="color: var(--color-error); margin-bottom: 12px;">Excluir Campanha</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+        Esta ação destruirá irrevogavelmente a campanha <strong id="deleteCampTargetName" style="color: var(--text-main);"></strong>, bem como todas as fichas, NPCs e anotações.
+      </p>
+      <form id="formDeleteCampaign">
+        <div class="form-group" style="text-align: left;">
+          <label for="confirmCampaignNameInput" class="form-label">Digite o nome exato da campanha para confirmar:</label>
+          <input type="text" id="confirmCampaignNameInput" class="form-input" placeholder="Nome da campanha" required style="padding-left: 14px;">
+        </div>
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalDeleteCampaign">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--color-error); border-color: var(--color-error);">
+            Confirmar Exclusão
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       16. MODAL: DETALHES DA FICHA (FICHA COMPLETA)
+       ======================================================================== -->
+  <div id="modalViewSheet" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="viewSheetTitle">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div id="viewSheetAvatar" class="sheet-avatar" style="width: 44px; height: 44px; font-size: 1.2rem;">P</div>
+          <div>
+            <h3 id="viewSheetTitle" class="modal-title" style="margin: 0; line-height: 1.2;">Nome do Personagem</h3>
+            <span id="viewSheetSubtitle" style="font-size: 0.82rem; color: var(--text-muted);">Raça • Classe Nív. 1</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" data-close-modal="modalViewSheet" aria-label="Fechar modal">&times;</button>
+      </div>
+
+      <form id="formEditSheet" style="margin-top: 16px;">
+        <input type="hidden" id="viewSheetId">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: var(--input-bg); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Jogador Responsável:</span>
+          <strong id="viewSheetOwner" style="font-size: 0.88rem; color: var(--accent-primary);">Mestre</strong>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" for="viewSheetLevel">Nível</label>
+            <input type="number" id="viewSheetLevel" class="form-input" min="1" max="100" style="padding-left: 12px;" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" for="viewSheetAc">Defesa (CA)</label>
+            <input type="number" id="viewSheetAc" class="form-input" min="0" max="99" style="padding-left: 12px;" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label">HP %</label>
+            <div id="viewSheetHpBadge" class="badge-tag badge-system" style="height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">100%</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: #ef4444; margin-bottom: 8px;">PONTOS DE VIDA (HP)</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div style="flex: 1;">
+                <label for="viewSheetCurrentHp" style="font-size: 0.72rem; color: var(--text-muted); display: block;">Atual</label>
+                <input type="number" id="viewSheetCurrentHp" class="form-input" style="padding: 6px 10px; font-weight: bold;" required>
+              </div>
+              <span style="font-size: 1.2rem; color: var(--text-muted); margin-top: 14px;">/</span>
+              <div style="flex: 1;">
+                <label for="viewSheetMaxHp" style="font-size: 0.72rem; color: var(--text-muted); display: block;">Máximo</label>
+                <input type="number" id="viewSheetMaxHp" class="form-input" style="padding: 6px 10px; font-weight: bold;" required>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: #3b82f6; margin-bottom: 8px;">PONTOS DE MANA (MP)</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div style="flex: 1;">
+                <label for="viewSheetCurrentMp" style="font-size: 0.72rem; color: var(--text-muted); display: block;">Atual</label>
+                <input type="number" id="viewSheetCurrentMp" class="form-input" style="padding: 6px 10px; font-weight: bold;" required>
+              </div>
+              <span style="font-size: 1.2rem; color: var(--text-muted); margin-top: 14px;">/</span>
+              <div style="flex: 1;">
+                <label for="viewSheetMaxMp" style="font-size: 0.72rem; color: var(--text-muted); display: block;">Máximo</label>
+                <input type="number" id="viewSheetMaxMp" class="form-input" style="padding: 6px 10px; font-weight: bold;" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="viewSheetNotes" class="form-label">Anotações, Habilidades &amp; Inventário</label>
+          <textarea id="viewSheetNotes" class="form-input" rows="4" placeholder="Itens equipados, magias preparadas, talentos ou histórico..." style="padding-left: 14px; resize: vertical;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" data-close-modal="modalViewSheet">Fechar</button>
+          <button type="submit" id="btnSaveSheetChanges" class="btn btn-primary">
+            <span>Salvar Alterações</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- App Dashboard Module -->
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

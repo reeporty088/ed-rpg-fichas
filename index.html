@@ -1,1994 +1,231 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Escória de Deus — Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet" />
-  <style>
-    /* === Variables === */
-    :root {
-      --bg:      #070707;
-      --card:    #130909;
-      --border:  #5c1c22;
-      --accent:  #9b1a1a;
-      --bright:  #cc2a2a;
-      --text:    #f0e6e6;
-      --muted:   #9a8585;
-      --success: #1f8b4c;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      min-height: 100vh;
-      font-family: 'Raleway', 'Segoe UI', Tahoma, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    /* Ambient glow backdrop */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 65% 80% at 15% 45%, rgba(139,0,0,.07) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 60% at 85% 20%, rgba(100,10,10,.08) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 50% at 50% 100%, rgba(80,0,0,.05) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* === Layout === */
-    .wrap {
-      max-width: 1140px;
-      margin: 0 auto;
-      padding: 0 20px 70px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* === Portal Header === */
-    .portal-header {
-      text-align: center;
-      padding: 60px 20px 48px;
-    }
-
-    .portal-title {
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: clamp(2.4rem, 7vw, 4.6rem);
-      font-weight: 900;
-      letter-spacing: .08em;
-      line-height: 1;
-      background: linear-gradient(180deg, #f8e8e8 0%, #cc8080 55%, #8b0000 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 36px rgba(160,20,20,.55));
-    }
-
-    .portal-rule {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      margin: 18px auto 12px;
-      max-width: 340px;
-    }
-
-    .portal-rule::before,
-    .portal-rule::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-    }
-    .portal-rule::before { background: linear-gradient(to right, transparent, var(--border)); }
-    .portal-rule::after  { background: linear-gradient(to left,  transparent, var(--border)); }
-
-    .portal-rule-glyph {
-      color: var(--accent);
-      font-size: 1.15rem;
-      line-height: 1;
-      filter: drop-shadow(0 0 6px rgba(155,26,26,.6));
-    }
-
-    .portal-subtitle {
-      font-family: 'Cinzel', serif;
-      font-size: .76rem;
-      letter-spacing: .5em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    /* === Card === */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-
-    /* Top shimmer line */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 12%; right: 12%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(200,60,60,.55), transparent);
-    }
-
-    /* Inner highlight */
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 14px;
-      pointer-events: none;
-      background: linear-gradient(135deg, rgba(255,255,255,.018) 0%, transparent 45%);
-    }
-
-    .card-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.15rem;
-      font-weight: 600;
-      letter-spacing: .07em;
-      color: var(--text);
-      margin-bottom: 22px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-      opacity: .65;
-    }
-
-    /* === Auth Grid === */
-    .auth-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-      margin-bottom: 40px;
-    }
-
-    @media (max-width: 760px) {
-      .auth-grid { grid-template-columns: 1fr; }
-    }
-
-    /* === Form === */
-    .field {
-      display: grid;
-      gap: 5px;
-      margin-bottom: 13px;
-      position: relative;
-    }
-
-    .field label {
-      font-size: .71rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    select {
-      width: 100%;
-      padding: 10px 13px;
-      border-radius: 7px;
-      border: 1px solid rgba(110,44,50,.65);
-      background: rgba(7,3,3,.88);
-      color: var(--text);
-      font-family: inherit;
-      font-size: .92rem;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="password"]:focus,
-    select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(155,26,26,.18);
-    }
-
-    .remember-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 4px 0 14px;
-      font-size: .82rem;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .remember-wrap input[type="checkbox"] {
-      width: auto;
-      accent-color: var(--accent);
-    }
-
-    /* === Buttons === */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border-radius: 8px;
-      border: 1px solid;
-      padding: 11px 16px;
-      font-family: inherit;
-      font-weight: 700;
-      font-size: .84rem;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all .18s;
-      white-space: nowrap;
-    }
-
-    .btn-full { width: 100%; }
-
-    .btn-primary {
-      background: linear-gradient(170deg, #4a1515 0%, #1e0808 100%);
-      border-color: var(--accent);
-      color: #f0cece;
-    }
-    .btn-primary:hover {
-      background: linear-gradient(170deg, #6a2020 0%, #2e0e0e 100%);
-      border-color: var(--bright);
-      box-shadow: 0 0 20px rgba(155,26,26,.35);
-    }
-
-    .btn-danger {
-      background: linear-gradient(170deg, #4a1717 0%, #2d0f0f 100%);
-      border-color: #892828;
-      color: #f0c0c0;
-    }
-    .btn-danger:hover {
-      background: linear-gradient(170deg, #5a2020 0%, #3a1010 100%);
-      box-shadow: 0 0 14px rgba(140,26,26,.3);
-    }
-
-    .btn-success {
-      background: linear-gradient(170deg, #1a4d2e 0%, #0e2a19 100%);
-      border-color: #2b6645;
-      color: #9fe8bb;
-    }
-    .btn-success:hover {
-      background: linear-gradient(170deg, #246038 0%, #153520 100%);
-    }
-
-    .btn-neutral {
-      background: linear-gradient(170deg, #2a2020 0%, #1a1212 100%);
-      border-color: #4a3535;
-      color: var(--muted);
-    }
-    .btn-neutral:hover {
-      border-color: #6a5050;
-      color: var(--text);
-    }
-
-    .btn-sm { padding: 5px 10px; font-size: .74rem; }
-
-    /* === Messages === */
-    .msg {
-      min-height: 18px;
-      font-size: .83rem;
-      margin-top: 10px;
-      color: #ff9e9e;
-    }
-    .msg.ok { color: #7fe8a8; }
-
-    .hidden { display: none !important; }
-
-    /* === Hub Topbar === */
-    .hub-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .user-identity {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #5a1212, #1a0505);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-      box-shadow: 0 0 16px rgba(139,0,0,.3);
-      background-size: cover;
-      background-position: center;
-    }
-
-    .user-name {
-      font-family: 'Cinzel', serif;
-      font-size: 1.06rem;
-      font-weight: 600;
-      line-height: 1.2;
-    }
-
-    .user-role-wrap { margin-top: 5px; }
-
-    /* === Pills === */
-    .pill {
-      display: inline-block;
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-    }
-
-    .pill-admin    { background: rgba(155,26,26,.22); border: 1px solid var(--accent); color: #ff9a9a; }
-    .pill-player   { background: rgba(30,80,160,.2);  border: 1px solid #2a5298;       color: #88aaff; }
-    .pill-approved { background: rgba(31,139,76,.18); border: 1px solid #1f8b4c;       color: #6de89e; }
-    .pill-pending  { background: rgba(200,120,0,.15); border: 1px solid #c87800;       color: #ffc060; }
-    .pill-denied   { background: rgba(155,26,26,.18); border: 1px solid #892828;       color: #ff9a9a; }
-
-    /* === Version Cards === */
-    .version-grid {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    }
-
-    .version-card {
-      background: rgba(10,4,4,.85);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 22px 16px;
-      text-align: center;
-      transition: transform .18s, box-shadow .18s, border-color .18s;
-    }
-
-    .version-card.accessible {
-      cursor: pointer;
-    }
-    .version-card.accessible:hover {
-      transform: translateY(-3px);
-      border-color: var(--bright);
-      box-shadow: 0 8px 28px rgba(155,26,26,.24);
-    }
-
-    .version-card.locked {
-      opacity: .42;
-      filter: grayscale(.55);
-    }
-
-    .v-icon   { font-size: 2rem; margin-bottom: 10px; }
-    .v-name   { font-family: 'Cinzel', serif; font-size: .88rem; font-weight: 600; line-height: 1.3; }
-    .v-status { font-size: .72rem; color: var(--muted); margin-top: 6px; }
-    .v-status.ok { color: #5de09a; }
-
-    /* === Table === */
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 8px;
-      border: 1px solid rgba(90,28,34,.45);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .86rem;
-    }
-
-    thead th {
-      padding: 9px 12px;
-      text-align: left;
-      font-size: .68rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: rgba(0,0,0,.4);
-      border-bottom: 1px solid #4a2b2b;
-    }
-
-    tbody td {
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(74,43,43,.3);
-      vertical-align: middle;
-    }
-
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr.row-pending   { background: rgba(200,120,0,.04); }
-    tbody tr.row-denied    { opacity: .5; }
-
-    .access-labels { display: flex; gap: 8px; flex-wrap: wrap; }
-    .access-labels label {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: .78rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-      cursor: pointer;
-      color: var(--text);
-    }
-    .access-labels input[type="checkbox"] {
-      width: auto;
-      accent-color: var(--accent);
-    }
-
-    .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
-
-    /* === Sidebar CSS === */
-    .sidebar-nav {
-      position: fixed;
-      top: 0;
-      left: -280px;
-      width: 260px;
-      height: 100%;
-      background: rgba(19, 9, 9, 0.98);
-      border-right: 1px solid var(--border);
-      box-shadow: 5px 0 25px rgba(0,0,0,0.8);
-      z-index: 2000;
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      padding: 24px;
-    }
-    .sidebar-nav.open {
-      left: 0;
-    }
-    .sidebar-trigger {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 1900;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.2rem;
-      transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-    .sidebar-trigger:hover {
-      border-color: var(--bright);
-      color: var(--bright);
-    }
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(92,28,34,0.4);
-      margin-bottom: 20px;
-    }
-    .sidebar-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #5a1212, #1a0505);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-      background-size: cover;
-      background-position: center;
-    }
-    .sidebar-user-name {
-      font-family: 'Cinzel', serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .sidebar-menu {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex-grow: 1;
-    }
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--muted);
-      text-decoration: none;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .sidebar-link:hover, .sidebar-link.active {
-      background: rgba(155,26,26,0.15);
-      color: var(--text);
-      border-left: 3px solid var(--accent);
-    }
-    .sidebar-footer {
-      padding-top: 15px;
-      border-top: 1px solid rgba(92,28,34,0.4);
-    }
-    .sidebar-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 1999;
-      backdrop-filter: blur(2px);
-    }
-    .sidebar-backdrop.open {
-      display: block;
-    }
-
-    /* === Hub tabs & dynamic views === */
-    .hub-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid rgba(92,28,34,0.4);
-      padding-bottom: 10px;
-      overflow-x: auto;
-    }
-    .hub-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-family: 'Cinzel', serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 8px 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .hub-tab-btn.active, .hub-tab-btn:hover {
-      color: var(--text);
-      background: rgba(155, 26, 26, 0.15);
-      box-shadow: 0 0 10px rgba(155,26,26,0.25);
-    }
-
-    /* === Fichas Cards Grid === */
-    .char-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 16px;
-    }
-    .char-card {
-      background: rgba(10, 4, 4, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      transition: all 0.2s ease-in-out;
-      cursor: pointer;
-      position: relative;
-    }
-    .char-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--bright);
-      box-shadow: 0 8px 24px rgba(155, 26, 26, 0.35);
-    }
-    .char-card-avatar {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      margin: 0 auto 12px;
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      background-color: #1a0505;
-    }
-    .char-card-name {
-      font-family: 'Cinzel', serif;
-      font-size: 0.95rem;
-      font-weight: bold;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .char-card-level {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 4px;
-      text-transform: uppercase;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-    }
-    .char-card-remove {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(137, 40, 40, 0.2);
-      border: 1px solid #892828;
-      color: #ff9a9a;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.75rem;
-      transition: all 0.2s;
-    }
-    .char-card-remove:hover {
-      background: #892828;
-      color: #fff;
-    }
-
-    /* User editor field eyeball */
-    .eye-icon {
-      position: absolute;
-      right: 12px;
-      top: 31px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 1.1rem;
-    }
-
-    /* Modal dialog */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.85);
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 2500;
-      backdrop-filter: blur(4px);
-    }
-    .modal.open { display: flex; }
-    .modal-box {
-      width: min(500px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
-    }
-    .modal-box.edit-modal-box {
-      width: min(680px, 100%);
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-
-    /* === Sheet Access Manager Styles === */
-    .sm-container {
-      margin-top: 20px;
-      border-top: 1px solid rgba(92, 28, 34, 0.6);
-      padding-top: 16px;
-    }
-    .sm-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .sm-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0;
-    }
-    .sm-tabs {
-      display: flex;
-      gap: 6px;
-      background: rgba(0,0,0,0.5);
-      padding: 4px;
-      border-radius: 8px;
-      border: 1px solid rgba(92,28,34,0.5);
-    }
-    .sm-tab-btn {
-      padding: 6px 14px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      font-family: 'Cinzel', serif;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .sm-tab-btn:hover {
-      color: #fff;
-    }
-    .sm-tab-btn.active.v4 {
-      background: #1a4c5c;
-      color: #fff;
-      border-color: #2accda;
-      box-shadow: 0 0 10px rgba(42,204,218,0.4);
-    }
-    .sm-tab-btn.active.v3 {
-      background: #5c1c22;
-      color: #fff;
-      border-color: #cc2a2a;
-      box-shadow: 0 0 10px rgba(204,42,42,0.4);
-    }
-    .sm-search-wrap {
-      margin-bottom: 12px;
-    }
-    .sm-search-input {
-      width: 100%;
-      padding: 9px 12px;
-      border-radius: 6px;
-      border: 1px solid rgba(110,44,50,.65);
-      background: rgba(7,3,3,.95);
-      color: var(--text);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .sm-search-input:focus {
-      border-color: var(--bright);
-    }
-    .sm-sheet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 10px;
-      max-height: 300px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-    .sm-sheet-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      background: rgba(15, 7, 7, 0.85);
-      border: 1px solid rgba(92, 28, 34, 0.5);
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-    .sm-sheet-card.granted {
-      border-color: rgba(31, 139, 76, 0.6);
-      background: rgba(10, 32, 20, 0.5);
-    }
-    .sm-sheet-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 1;
-    }
-    .sm-sheet-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-      background-color: #1a0505;
-    }
-    .sm-sheet-details {
-      min-width: 0;
-      flex: 1;
-    }
-    .sm-sheet-name {
-      font-family: 'Cinzel', serif;
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sm-sheet-badge {
-      display: inline-block;
-      font-size: 0.65rem;
-      font-weight: bold;
-      padding: 1px 5px;
-      border-radius: 4px;
-      margin-top: 2px;
-    }
-    .sm-sheet-badge.v4 {
-      background: rgba(42,204,218,0.2);
-      color: #2accda;
-      border: 1px solid rgba(42,204,218,0.4);
-    }
-    .sm-sheet-badge.v3 {
-      background: rgba(204,42,42,0.2);
-      color: #ff9e9e;
-      border: 1px solid rgba(204,42,42,0.4);
-    }
-    .sm-sheet-badge.v1, .sm-sheet-badge.v2 {
-      background: rgba(150,150,150,0.2);
-      color: #ccc;
-      border: 1px solid rgba(150,150,150,0.4);
-    }
-    .sm-action-btn {
-      font-size: 0.75rem;
-      padding: 5px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .sm-action-btn.grant {
-      background: rgba(31, 139, 76, 0.2);
-      color: #4ade80;
-      border: 1px solid #1f8b4c;
-    }
-    .sm-action-btn.grant:hover {
-      background: #1f8b4c;
-      color: #fff;
-    }
-    .sm-action-btn.revoke {
-      background: rgba(137, 40, 40, 0.25);
-      color: #ff9a9a;
-      border: 1px solid #892828;
-    }
-    .sm-action-btn.revoke:hover {
-      background: #9b1a1a;
-      color: #fff;
-    }
-
-    /* Notification items */
-    .notification-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 14px;
-      background: rgba(0,0,0,0.35);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-  </style>
-  <script src="configs/auth.js"></script>
-  <link rel="manifest" href="configs/manifest.webmanifest" />
-  <meta name="theme-color" content="#130909" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="ED RPG" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Véu RPG - Sistema de Fichas de Personagem com design Liquid Glass">
+  <title>Véu RPG | Autenticação</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
-
-  <!-- Sidebar Trigger -->
-  <div class="sidebar-trigger id-logged hidden" onclick="toggleSidebar()">☰</div>
-
-  <!-- Floating Version Switcher (Directly below 3 bars icon) -->
-  <div class="version-floating-btn id-logged hidden" id="floatingVersionSwitcher" style="position:fixed; top:60px; left:15px; z-index:1899; display:flex; gap:4px; padding:4px; background:rgba(7,3,3,.95); border:1px solid #5c1c22; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.8);">
-    <button id="floatVerBtn_v3" onclick="setHubVersion('v3')" style="padding:5px 10px; background:#5c1c22; color:#fff; border-radius:5px; border:1px solid #cc2a2a; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">🎭 v3</button>
-    <button id="floatVerBtn_v4" onclick="setHubVersion('v4')" style="padding:5px 10px; background:#1a4c5c; color:#fff; border-radius:5px; border:1px solid #2accda; font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.2s;">⚔️ v4</button>
+  <!-- Ambient Glass Blobs Background -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
   </div>
 
+  <main class="auth-page">
+    <!-- Topbar with Theme Toggle -->
+    <header class="auth-topbar">
+      <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Alternar tema claro e escuro">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span id="themeToggleLabel">Tema</span>
+      </button>
+    </header>
 
-  <!-- Sidebar Backdrop -->
-  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
-
-  <!-- Sidebar Navigation -->
-  <nav class="sidebar-nav" id="sidebarNav">
-    <div class="sidebar-header">
-      <div class="sidebar-avatar" id="sideAvatar">⚔</div>
-      <div class="sidebar-user-name" id="sideUserName">Jogador</div>
-    </div>
-    <ul class="sidebar-menu">
-
-      <div id="sidebarVersionSwitcher" style="padding: 8px 12px; margin: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
-        <div style="font-size: 0.68rem; color: #9a8585; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; font-weight:700;">Versão Ativa no Hub</div>
-        <div style="display: flex; gap: 6px;">
-          <button id="sideVerBtn_v3" onclick="setHubVersion('v3')" style="flex: 1; text-align: center; padding: 5px; background: #5c1c22; color: #fff; border-radius: 5px; border: 1px solid #cc2a2a; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition:all 0.2s;">🎭 v3</button>
-          <button id="sideVerBtn_v4" onclick="setHubVersion('v4')" style="flex: 1; text-align: center; padding: 5px; background: #1a4c5c; color: #fff; border-radius: 5px; border: 1px solid #2accda; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition:all 0.2s;">⚔️ v4</button>
+    <!-- Glass Auth Card -->
+    <section class="auth-card glass-panel" aria-labelledby="authTitle">
+      <header class="auth-header">
+        <div class="auth-logo-badge" aria-hidden="true">
+          <!-- Mystical RPG D20 / Crystal SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="12 2 2 8.5 12 15 22 8.5 12 2"></polygon>
+            <polygon points="2 8.5 12 15 12 22 2 15.5 2 8.5"></polygon>
+            <polygon points="22 8.5 12 15 12 22 22 15.5 22 8.5"></polygon>
+          </svg>
         </div>
-      </div>
+        <h1 id="authTitle" class="auth-title">VÉU RPG</h1>
+        <p class="auth-subtitle">Sistema de Fichas de Personagem</p>
+      </header>
 
-      <li><div class="sidebar-link" onclick="switchHubTab('dashboard')">🏠 Hub</div></li>
-      <li><a class="sidebar-link" href="perfil.html">👤 Perfil</a></li>
-      <li><div class="sidebar-link" onclick="switchHubTab('fichas')">🎭 Fichas</div></li>
-      <li class="admin-only hidden"><a class="sidebar-link" id="sideLinkMestre" href="v3/ed_sistemav3_mestre.html">👑 Painel do Mestre</a></li>
-      <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('users')">👥 Gerenciar Usuários</div></li>
-      <li class="admin-only hidden"><a class="sidebar-link" id="sideLinkCalendario" href="v1/ed_sistemav1_calendario.html">📅 Calendário</a></li>
-      <li class="admin-only hidden"><div class="sidebar-link" onclick="switchHubTab('notifications')">🔔 Notificações</div></li>
-    </ul>
-    <div class="sidebar-footer">
-      <div class="sidebar-link" onclick="handleLogout()">🚪 Sair</div>
-    </div>
-  </nav>
+      <!-- Feedback / Alert Container -->
+      <div id="authAlert" class="alert" style="display: none;" role="alert"></div>
 
-<div class="wrap">
+      <!-- Segmented Navigation Tabs -->
+      <nav class="auth-tabs" role="tablist" aria-label="Opções de Acesso">
+        <button id="tabLogin" class="auth-tab-btn active" role="tab" aria-selected="true" aria-controls="panelLogin" type="button">
+          Entrar
+        </button>
+        <button id="tabRegister" class="auth-tab-btn" role="tab" aria-selected="false" aria-controls="panelRegister" type="button">
+          Cadastrar
+        </button>
+        <button id="tabForgot" class="auth-tab-btn" role="tab" aria-selected="false" aria-controls="panelForgot" type="button">
+          Recuperar
+        </button>
+      </nav>
 
-  <!-- ══ Header ══ -->
-  <header class="portal-header">
-    <div class="portal-title">Escória de Deus</div>
-    <div class="portal-rule">
-      <span class="portal-rule-glyph">✦</span>
-    </div>
-    <p class="portal-subtitle">Sistema de Fichas RPG</p>
-  </header>
-
-  <!-- ══ Auth Section ══ -->
-  <section id="authSection" class="auth-grid">
-    <!-- Login -->
-    <div class="card">
-      <h2 class="card-title">Login</h2>
-      <div class="field">
-        <label for="loginEmail">E-mail</label>
-        <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="loginPassword">Senha</label>
-        <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
-      </div>
-      <label class="remember-wrap">
-        <input id="remember" type="checkbox" />
-        Lembre-se de mim (15 dias)
-      </label>
-      <button id="btnLogin" class="btn btn-primary btn-full">Entrar</button>
-      <div id="loginMsg" class="msg"></div>
-    </div>
-
-    <!-- Register -->
-    <div class="card">
-      <h2 class="card-title">Registro</h2>
-      <div class="field">
-        <label for="regName">Nome</label>
-        <input id="regName" type="text" placeholder="Seu nome de guerreiro" autocomplete="name" />
-      </div>
-      <div class="field">
-        <label for="regEmail">E-mail</label>
-        <input id="regEmail" type="email" placeholder="seu@email.com" autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="regPass">Senha</label>
-        <input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password" />
-      </div>
-      <div class="field">
-        <label for="regPass2">Confirmar senha</label>
-        <input id="regPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
-      </div>
-      <button id="btnRegister" class="btn btn-primary btn-full">Registrar</button>
-      <div id="regMsg" class="msg"></div>
-    </div>
-  </section>
-
-  <!-- ══ Hub Section ══ -->
-  <section id="hubSection" class="hidden">
-    <!-- User identity card -->
-    <div class="card mb-24">
-      <div class="hub-topbar">
-        <div class="user-identity">
-          <div class="avatar" id="hubAvatar">⚔</div>
-          <div>
-            <div class="user-name" id="userName"></div>
-            <div class="user-role-wrap">
-              <span id="userRolePill"></span>
+      <!-- TAB 1: LOGIN -->
+      <div id="panelLogin" class="auth-form-panel active" role="tabpanel" aria-labelledby="tabLogin">
+        <form id="formLogin" novalidate>
+          <div class="form-group">
+            <label for="loginEmail" class="form-label">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </span>
+              <input type="email" id="loginEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
             </div>
           </div>
-        </div>
-        <button id="btnLogout" class="btn btn-danger">Sair</button>
-      </div>
-    </div>
 
-    <!-- Navigation Hub Tabs -->
-    <div class="hub-tabs" id="hubTabsContainer">
-      <button class="hub-tab-btn active" id="tabBtn_dashboard" onclick="switchHubTab('dashboard')">🏠 Hub</button>
-      <button class="hub-tab-btn" id="tabBtn_fichas" onclick="switchHubTab('fichas')">🎭 Fichas</button>
-      <button class="hub-tab-btn admin-only hidden" id="tabBtn_users" onclick="switchHubTab('users')">👥 Usuários</button>
-      <button class="hub-tab-btn admin-only hidden" id="tabBtn_notifications" onclick="switchHubTab('notifications')">🔔 Notificações</button>
-    </div>
-
-    <!-- View: Dashboard -->
-    <div id="view_dashboard" class="hub-view">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-          <h3 class="card-title" style="margin-bottom:0;">Acesso Rápido</h3>
-          <div id="hubVersionBadge" style="font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:12px; text-transform:uppercase; letter-spacing:0.05em;"></div>
-        </div>
-        <div class="version-grid" id="quickActionsGrid">
-          <!-- Populated dynamically by renderQuickActions() -->
-        </div>
-      </div>
-    </div>
-
-    <!-- View: Fichas -->
-    <div id="view_fichas" class="hub-view hidden">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 22px; flex-wrap:wrap; gap:10px;">
-          <h3 class="card-title" style="margin-bottom:0">Fichas de Personagem</h3>
-          <button class="btn btn-primary btn-sm admin-only hidden" id="btnHubCreateSheet" onclick="createNewSheetHub()">+ Criar Ficha</button>
-        </div>
-        <div class="char-grid" id="myFichasGrid">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-    </div>
-
-    <!-- View: Gerenciar Usuários (ADM) -->
-    <div id="view_users" class="hub-view hidden">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px;">
-          <h3 class="card-title" style="margin-bottom:0">Gerenciador de Usuários</h3>
-          <button class="btn btn-neutral btn-sm" onclick="triggerRefreshUsers()">↺ Atualizar</button>
-        </div>
-        <div id="adminUsersList"></div>
-      </div>
-    </div>
-
-    <!-- View: Notificações (ADM) -->
-    <div id="view_notifications" class="hub-view hidden">
-      <div class="card">
-        <h3 class="card-title">Notificações Pendentes</h3>
-        <div id="notificationsList" style="display:flex; flex-direction:column; gap:12px;"></div>
-      </div>
-    </div>
-
-  </section>
-
-</div><!-- /wrap -->
-
-<!-- User Editing Modal -->
-<div class="modal" id="editUserModal">
-  <div class="modal-box edit-modal-box">
-    <h3 class="card-title" id="editUserTitle">Editar Usuário</h3>
-    <input type="hidden" id="editUserId" />
-    
-    <div class="field">
-      <label for="editUserName">Nome de Guerreiro</label>
-      <input id="editUserName" type="text" />
-    </div>
-    
-    <div class="field">
-      <label for="editUserEmail">E-mail</label>
-      <input id="editUserEmail" type="email" />
-      <span class="eye-icon" onclick="toggleVisibility('editUserEmail')">👁️</span>
-      <div id="editUserReqEmailBlock" class="hidden" style="margin-top: 5px;">
-        <span style="font-size:0.75rem; color:#ffc060;">Solicitou alteração para: <b id="editUserReqEmailVal"></b></span>
-        <button class="btn btn-success btn-sm" style="margin-left: 10px; padding: 2px 6px;" onclick="approveFieldChange('email')">Aprovar</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="editUserPass">Senha</label>
-      <input id="editUserPass" type="password" />
-      <span class="eye-icon" onclick="toggleVisibility('editUserPass')">👁️</span>
-      <div id="editUserReqPassBlock" class="hidden" style="margin-top: 5px;">
-        <span style="font-size:0.75rem; color:#ffc060;">Solicitou alteração de Senha</span>
-        <button class="btn btn-success btn-sm" style="margin-left: 10px; padding: 2px 6px;" onclick="approveFieldChange('password')">Aprovar</button>
-      </div>
-    </div>
-
-    <!-- Gerenciador de Acesso a Fichas -->
-    <div class="sm-container">
-      <div class="sm-header">
-        <h4 class="sm-title">🛡️ Gerenciador de Acesso a Fichas</h4>
-        <div class="sm-tabs">
-          <button type="button" id="smTab_v4" class="sm-tab-btn v4 active" onclick="switchSMTab('v4')">⚔️ Versão V4</button>
-          <button type="button" id="smTab_v3" class="sm-tab-btn v3" onclick="switchSMTab('v3')">🎭 Versão V3</button>
-        </div>
-      </div>
-      <div class="sm-search-wrap">
-        <input type="text" id="smSearchInput" class="sm-search-input" placeholder="🔍 Filtrar ficha por nome..." oninput="renderSheetManager()" />
-      </div>
-      <div id="smListContainer" class="sm-sheet-grid">
-        <!-- Preenchido dinamicamente pelo renderSheetManager() -->
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveUserEdit()">Salvar Alterações</button>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  // Initialize Firebase app
-  const firebaseConfig = {
-    apiKey:            'AIzaSyCvxxwfsonP5a45nbcz34cxYhXaWBZVhwQ',
-    authDomain:        'ed-rpg---sistema-de-fichas.firebaseapp.com',
-    databaseURL:       'https://ed-rpg---sistema-de-fichas-default-rtdb.firebaseio.com',
-    projectId:         'ed-rpg---sistema-de-fichas',
-    storageBucket:     'ed-rpg---sistema-de-fichas.firebasestorage.app',
-    messagingSenderId: '350999444010',
-    appId:             '1:350999444010:web:d89f31d13e449b8fbfa153'
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const authSection = document.getElementById('authSection');
-  const hubSection  = document.getElementById('hubSection');
-
-  let globalFichasV3 = {};
-  let globalFichasV4 = {};
-  let currentActiveTab = 'dashboard';
-  let currentActiveVersion = localStorage.getItem('ed_selected_version') || 'v3';
-
-  window.setHubVersion = (ver) => {
-    if (ver !== 'v3' && ver !== 'v4') ver = 'v3';
-    currentActiveVersion = ver;
-    localStorage.setItem('ed_selected_version', ver);
-    updateVersionUI();
-    renderQuickActions();
-    renderMyFichas();
-  };
-
-  function updateVersionUI() {
-    const user = EDAuth.currentUser();
-    const canAccessV4 = user && (user.role === 'admin' || (Array.isArray(user.versions) && user.versions.includes('v4')));
-
-    const floatWrap = document.getElementById('floatingVersionSwitcher');
-    const sideWrap = document.getElementById('sidebarVersionSwitcher');
-
-    if (canAccessV4) {
-      if (floatWrap) floatWrap.style.display = 'flex';
-      if (sideWrap) sideWrap.style.display = 'block';
-    } else {
-      if (floatWrap) floatWrap.style.display = 'none';
-      if (sideWrap) sideWrap.style.display = 'none';
-
-      // Automatically set active version to what the user possesses
-      if (!user || (Array.isArray(user.versions) && user.versions.includes('v3'))) {
-        currentActiveVersion = 'v3';
-      } else if (Array.isArray(user.versions) && user.versions.includes('v4')) {
-        currentActiveVersion = 'v4';
-      } else {
-        currentActiveVersion = 'v3';
-      }
-      localStorage.setItem('ed_selected_version', currentActiveVersion);
-    }
-
-    const isV4 = currentActiveVersion === 'v4';
-
-    // Update floating buttons styling
-    const floatV3 = document.getElementById('floatVerBtn_v3');
-    const floatV4 = document.getElementById('floatVerBtn_v4');
-    if (floatV3) {
-      floatV3.style.background = isV4 ? 'rgba(25,10,12,0.6)' : '#5c1c22';
-      floatV3.style.borderColor = isV4 ? 'rgba(92,28,34,0.4)' : '#cc2a2a';
-      floatV3.style.color = isV4 ? '#a87878' : '#fff';
-      floatV3.style.boxShadow = isV4 ? 'none' : '0 0 10px rgba(204,42,42,0.6)';
-      floatV3.style.opacity = isV4 ? '0.6' : '1';
-    }
-    if (floatV4) {
-      floatV4.style.background = isV4 ? '#1a4c5c' : 'rgba(10,25,30,0.6)';
-      floatV4.style.borderColor = isV4 ? '#2accda' : 'rgba(26,76,92,0.4)';
-      floatV4.style.color = isV4 ? '#fff' : '#78a8b8';
-      floatV4.style.boxShadow = isV4 ? '0 0 10px rgba(42,204,218,0.6)' : 'none';
-      floatV4.style.opacity = isV4 ? '1' : '0.6';
-    }
-
-    // Update sidebar version buttons styling
-    const sideV3 = document.getElementById('sideVerBtn_v3');
-    const sideV4 = document.getElementById('sideVerBtn_v4');
-    if (sideV3) {
-      sideV3.style.background = isV4 ? 'rgba(25,10,12,0.6)' : '#5c1c22';
-      sideV3.style.borderColor = isV4 ? 'rgba(92,28,34,0.4)' : '#cc2a2a';
-      sideV3.style.color = isV4 ? '#a87878' : '#fff';
-      sideV3.style.opacity = isV4 ? '0.6' : '1';
-    }
-    if (sideV4) {
-      sideV4.style.background = isV4 ? '#1a4c5c' : 'rgba(10,25,30,0.6)';
-      sideV4.style.borderColor = isV4 ? '#2accda' : 'rgba(26,76,92,0.4)';
-      sideV4.style.color = isV4 ? '#fff' : '#78a8b8';
-      sideV4.style.opacity = isV4 ? '1' : '0.6';
-    }
-
-    // Update badge on Hub dashboard
-    const badge = document.getElementById('hubVersionBadge');
-    if (badge) {
-      badge.textContent = isV4 ? '⚔️ Versão v4 Ativa' : '🎭 Versão v3 Ativa';
-      badge.style.background = isV4 ? 'rgba(42,204,218,0.15)' : 'rgba(204,42,42,0.15)';
-      badge.style.border = isV4 ? '1px solid #2accda' : '1px solid #cc2a2a';
-      badge.style.color = isV4 ? '#7fe3ff' : '#ff8888';
-    }
-
-    // Update sidebar direct links
-    const sideMestre = document.getElementById('sideLinkMestre');
-    if (sideMestre) {
-      sideMestre.href = isV4 ? 'v4/ed_sistemav4_mestre.html' : 'v3/ed_sistemav3_mestre.html';
-    }
-    const sideCal = document.getElementById('sideLinkCalendario');
-    if (sideCal) {
-      sideCal.href = isV4 ? 'v4/ed_sistemav4_calendario.html' : 'v1/ed_sistemav1_calendario.html';
-    }
-  }
-
-  function renderQuickActions() {
-    const grid = document.getElementById('quickActionsGrid');
-    if (!grid) return;
-    const isV4 = currentActiveVersion === 'v4';
-
-    grid.innerHTML = `
-      <div class="version-card accessible" onclick="switchHubTab('fichas')">
-        <div class="v-icon">🎭</div>
-        <div class="v-name">Fichas de Personagem</div>
-        <div class="v-status ok">Fichas ${isV4 ? 'v4' : 'v3'}</div>
-      </div>
-      <div class="version-card accessible" onclick="window.location.href='perfil.html'">
-        <div class="v-icon">👤</div>
-        <div class="v-name">Configurar Perfil</div>
-        <div class="v-status ok">Avatar & Detalhes</div>
-      </div>
-      <div class="version-card accessible admin-only hidden" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_mestre.html' : 'v3/ed_sistemav3_mestre.html'}'">
-        <div class="v-icon">👑</div>
-        <div class="v-name">Painel do Mestre</div>
-        <div class="v-status ok">Painel Mestre (${isV4 ? 'v4' : 'v3'})</div>
-      </div>
-      <div class="version-card accessible" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_bancodedados.html' : 'v3/ed_sistemav3_bancodedados.html'}'">
-        <div class="v-icon">📚</div>
-        <div class="v-name">Compêndio / Banco de Dados</div>
-        <div class="v-status ok">Banco de Dados (${isV4 ? 'v4' : 'v3'})</div>
-      </div>
-      <div class="version-card accessible" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_criadordetecnicas.html' : 'v3/ed_sistemav3_criadordetecnicas.html'}'">
-        <div class="v-icon">⚡</div>
-        <div class="v-name">Criador de Técnicas</div>
-        <div class="v-status ok">Criador (${isV4 ? 'v4' : 'v3'})</div>
-      </div>
-      <div class="version-card accessible admin-only hidden" onclick="window.location.href='${isV4 ? 'v4/ed_sistemav4_calendario.html' : 'v1/ed_sistemav1_calendario.html'}'">
-        <div class="v-icon">📅</div>
-        <div class="v-name">Calendário</div>
-        <div class="v-status ok">Calendário (${isV4 ? 'v4' : 'v1'})</div>
-      </div>
-      <div class="version-card accessible admin-only hidden" onclick="switchHubTab('users')">
-        <div class="v-icon">👥</div>
-        <div class="v-name">Gerenciar Usuários</div>
-        <div class="v-status ok">Editar Contas & Fichas</div>
-      </div>
-    `;
-
-    // Re-check admin elements visibility
-    const user = EDAuth.currentUser();
-    if (user && user.role === 'admin') {
-      grid.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-    }
-  }
-
-  // Toggle Sidebar
-  window.toggleSidebar = () => {
-    const nav = document.getElementById('sidebarNav');
-    const backdrop = document.querySelector('.sidebar-backdrop');
-    nav.classList.toggle('open');
-    backdrop.classList.toggle('open');
-  };
-
-  window.handleLogout = () => {
-    EDAuth.logout();
-    render();
-  };
-
-  // Eyeball visibility toggle
-  window.toggleVisibility = (id) => {
-    const input = document.getElementById(id);
-    input.type = input.type === 'password' ? 'text' : 'password';
-  };
-
-  // Navigation tab switcher
-  window.switchHubTab = (tab) => {
-    // Hide sidebar
-    document.getElementById('sidebarNav').classList.remove('open');
-    document.querySelector('.sidebar-backdrop').classList.remove('open');
-
-    currentActiveTab = tab;
-    document.querySelectorAll('.hub-view').forEach(view => view.classList.add('hidden'));
-    document.querySelectorAll('.hub-tab-btn').forEach(btn => btn.classList.remove('active'));
-
-    const activeView = document.getElementById(`view_${tab}`);
-    if (activeView) activeView.classList.remove('hidden');
-
-    const activeBtn = document.getElementById(`tabBtn_${tab}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    if (tab === 'fichas') renderMyFichas();
-    if (tab === 'users') renderAdminUsers();
-    if (tab === 'notifications') renderNotifications();
-  };
-
-  // Initial routing if query param exists
-  function handleQueryTab() {
-    const params = new URLSearchParams(window.location.search);
-    const ver = params.get('ver');
-    if (ver && (ver === 'v3' || ver === 'v4')) {
-      currentActiveVersion = ver;
-      localStorage.setItem('ed_selected_version', ver);
-    }
-    const tab = params.get('tab');
-    if (tab) {
-      // Clear query parameter from URL history quietly
-      window.history.replaceState({}, document.title, window.location.pathname);
-      switchHubTab(tab);
-    }
-  }
-
-  /* ── main render ── */
-  function render() {
-    const user = EDAuth.currentUser();
-
-    if (!user) {
-      authSection.classList.remove('hidden');
-      hubSection.classList.add('hidden');
-      document.querySelectorAll('.id-logged').forEach(el => el.classList.add('hidden'));
-      return;
-    }
-
-    authSection.classList.add('hidden');
-    hubSection.classList.remove('hidden');
-    document.querySelectorAll('.id-logged').forEach(el => el.classList.remove('hidden'));
-
-    document.getElementById('userName').textContent = user.name;
-    document.getElementById('sideUserName').textContent = user.name;
-
-    // Handle avatar displays
-    const hubAv = document.getElementById('hubAvatar');
-    const sideAv = document.getElementById('sideAvatar');
-    if (user.photo) {
-      hubAv.style.backgroundImage = `url(${user.photo})`;
-      hubAv.textContent = '';
-      sideAv.style.backgroundImage = `url(${user.photo})`;
-      sideAv.textContent = '';
-    } else {
-      hubAv.style.backgroundImage = '';
-      hubAv.textContent = user.role === 'admin' ? '👑' : '⚔';
-      sideAv.style.backgroundImage = '';
-      sideAv.textContent = user.role === 'admin' ? '👑' : '⚔';
-    }
-
-    const rolePill = document.getElementById('userRolePill');
-    const tabsContainer = document.getElementById('hubTabsContainer');
-    if (user.role === 'admin') {
-      rolePill.className = 'pill pill-admin';
-      rolePill.textContent = 'Administrador';
-      document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-      if (tabsContainer) tabsContainer.classList.remove('hidden');
-    } else {
-      rolePill.className = 'pill pill-player';
-      rolePill.textContent = 'Jogador';
-      document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-      if (tabsContainer) tabsContainer.classList.add('hidden');
-    }
-
-    updateVersionUI();
-    renderQuickActions();
-    renderMyFichas();
-
-    if (user.role === 'admin') {
-      renderAdminUsers();
-      renderNotifications();
-    }
-  }
-
-  /* ── helper: resolve sheet metadata & destination URL ── */
-  function getSheetInfo(id, preferredVersion) {
-    const targetVer = preferredVersion || currentActiveVersion || 'v3';
-
-    if (targetVer === 'v3') {
-      if (globalFichasV3 && globalFichasV3[id]) {
-        return {
-          id,
-          version: 'v3',
-          data: globalFichasV3[id],
-          url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
-        };
-      }
-      if (id === 'v3_ficha_base') {
-        return {
-          id,
-          version: 'v3',
-          data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
-          url: 'v3/ed_sistemav3_ficha.html'
-        };
-      }
-      if (globalFichasV4 && globalFichasV4[id]) {
-        return {
-          id,
-          version: 'v4',
-          data: globalFichasV4[id],
-          url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
-        };
-      }
-      if (id === 'v4_ficha_base') {
-        return {
-          id,
-          version: 'v4',
-          data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
-          url: 'v4/ed_sistemav4_ficha.html'
-        };
-      }
-    } else {
-      if (globalFichasV4 && globalFichasV4[id]) {
-        return {
-          id,
-          version: 'v4',
-          data: globalFichasV4[id],
-          url: `v4/ed_sistemav4_ficha.html?p=${encodeURIComponent(id)}`
-        };
-      }
-      if (id === 'v4_ficha_base') {
-        return {
-          id,
-          version: 'v4',
-          data: { char_name: 'Ficha ED v4 - Base', nivel: 1 },
-          url: 'v4/ed_sistemav4_ficha.html'
-        };
-      }
-      if (globalFichasV3 && globalFichasV3[id]) {
-        return {
-          id,
-          version: 'v3',
-          data: globalFichasV3[id],
-          url: `v3/ed_sistemav3_ficha.html?p=${encodeURIComponent(id)}`
-        };
-      }
-      if (id === 'v3_ficha_base') {
-        return {
-          id,
-          version: 'v3',
-          data: { char_name: 'Ficha ED v3 - Base', nivel: 1 },
-          url: 'v3/ed_sistemav3_ficha.html'
-        };
-      }
-    }
-
-    if (id === 'v1_ficha') {
-      return { id, version: 'v1', data: { char_name: 'Ficha ED v1', nivel: 1 }, url: 'v1/ed_sistemav1_ficha.html' };
-    }
-    if (id === 'v2_ficha') {
-      return { id, version: 'v2', data: { char_name: 'Ficha ED v2', nivel: 1 }, url: 'v2/ed_sistemav2_ficha.html' };
-    }
-    return null;
-  }
-
-  /* ── render my fichas ── */
-  function renderMyFichas() {
-    const user = EDAuth.currentUser();
-    if (!user) return;
-    
-    const container = document.getElementById('myFichasGrid');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const isV4 = currentActiveVersion === 'v4';
-    const currentVer = isV4 ? 'v4' : 'v3';
-    const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
-
-    let ids = [];
-    if (user.role === 'admin') {
-      ids = Object.keys(sourceSheets);
-      const baseId = isV4 ? 'v4_ficha_base' : 'v3_ficha_base';
-      if (!ids.includes(baseId)) ids.unshift(baseId);
-    } else {
-      const assigned = user.assignedSheets || [];
-      ids = assigned.filter(id => {
-        if (isV4) {
-          return !!(globalFichasV4 && globalFichasV4[id]) || id === 'v4_ficha_base';
-        } else {
-          return !!(globalFichasV3 && globalFichasV3[id]) || id === 'v3_ficha_base' || id === 'v1_ficha' || id === 'v2_ficha';
-        }
-      });
-    }
-
-    if (!ids || ids.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1/-1; opacity:0.65; text-align:center; padding: 20px;">Nenhuma ficha ${isV4 ? 'v4' : 'v3'} disponível. Contate o ADM.</div>`;
-      return;
-    }
-
-    ids.forEach(id => {
-      const info = getSheetInfo(id, currentVer);
-      if (!info) return;
-
-      const card = document.createElement('div');
-      card.className = 'char-card';
-      const verLabel = info.version.toUpperCase();
-      const verBadgeStyle = info.version === 'v4' 
-        ? 'background:rgba(42,204,218,0.2); color:#2accda; border:1px solid rgba(42,204,218,0.4);' 
-        : 'background:rgba(204,42,42,0.2); color:#ff9e9e; border:1px solid rgba(204,42,42,0.4);';
-
-      const data = info.data;
-      card.innerHTML = `
-        <div class="char-card-avatar" style="${data.char_img ? `background-image:url('${data.char_img}');` : ''}">${data.char_img ? '' : (info.version === 'v4' ? '⚔️' : '🎭')}</div>
-        <div class="char-card-name">${data.char_name || id}</div>
-        <div class="char-card-level">Nível ${data.nivel || 1} <span style="font-size:0.68rem; padding:1px 5px; border-radius:4px; margin-left:4px; font-weight:bold; ${verBadgeStyle}">${verLabel}</span></div>
-      `;
-      card.onclick = () => {
-        window.location.href = info.url;
-      };
-      container.appendChild(card);
-    });
-  }
-
-  /* ── render admin user manager ── */
-  window.triggerRefreshUsers = () => {
-    renderAdminUsers();
-  };
-
-  function renderAdminUsers() {
-    const container = document.getElementById('adminUsersList');
-    if (!container) return;
-    const store = EDAuth.getStore();
-
-    /* sort: pending → denied → approved */
-    const ORDER = { pending: 0, denied: 1, approved: 2 };
-    const sorted = [...store.users].sort((a, b) => (ORDER[a.status] ?? 3) - (ORDER[b.status] ?? 3));
-
-    const wrap = document.createElement('div');
-    wrap.className = 'table-wrap';
-
-    const table = document.createElement('table');
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>E-mail</th>
-          <th>Status</th>
-          <th>Versões</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-    `;
-
-    const tbody = document.createElement('tbody');
-
-    sorted.forEach((u) => {
-      const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
-      const rowCls = u.status === 'pending' ? 'row-pending' : (u.status === 'denied' ? 'row-denied' : '');
-
-      const accessHTML = ['v1','v2','v3','v4'].map((v) => {
-        const chk = u.versions && u.versions.includes(v) ? 'checked' : '';
-        const dis = isAdmin ? 'disabled' : '';
-        return `<label><input type="checkbox" data-user="${u.id}" data-ver="${v}" ${chk} ${dis}/> ${v.toUpperCase()}</label>`;
-      }).join('');
-
-      const tr = document.createElement('tr');
-      if (rowCls) tr.className = rowCls;
-      tr.innerHTML = `
-        <td>${u.name}</td>
-        <td style="font-size:.8rem;color:var(--muted)">${u.email}</td>
-        <td>
-          <span class="pill ${{ approved: 'pill-approved', pending: 'pill-pending', denied: 'pill-denied' }[u.status] || ''}">
-            ${{ approved: 'Aprovado', pending: 'Pendente', denied: 'Negado' }[u.status] || u.status}
-          </span>
-        </td>
-        <td><div class="access-labels">${accessHTML}</div></td>
-        <td><div class="row-actions" id="act-${u.id}"></div></td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    wrap.appendChild(table);
-    container.innerHTML = '';
-    container.appendChild(wrap);
-
-    /* inject actions */
-    sorted.forEach((u) => {
-      const isAdmin = u.email === EDAuth.ADMIN_EMAIL;
-      const act = document.getElementById(`act-${u.id}`);
-      if (!act) return;
-
-      if (!isAdmin) {
-        if (u.status !== 'approved') {
-          const approve = document.createElement('button');
-          approve.className = 'btn btn-success btn-sm';
-          approve.textContent = 'Aprovar';
-          approve.onclick = () => { EDAuth.updateUser(u.id, { status: 'approved' }); render(); };
-          act.appendChild(approve);
-        }
-
-        if (u.status !== 'denied') {
-          const deny = document.createElement('button');
-          deny.className = 'btn btn-danger btn-sm';
-          deny.textContent = 'Negar';
-          deny.onclick = () => { EDAuth.updateUser(u.id, { status: 'denied', versions: [] }); render(); };
-          act.appendChild(deny);
-        }
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-primary btn-sm';
-        editBtn.textContent = '✏️ Editar';
-        editBtn.onclick = () => openUserEditModal(u);
-        act.appendChild(editBtn);
-
-        const del = document.createElement('button');
-        del.className = 'btn btn-danger btn-sm';
-        del.textContent = '🗑️ Excluir';
-        del.onclick = () => {
-          if (confirm(`Excluir o usuário "${u.name}"?`)) { EDAuth.deleteUser(u.id); render(); }
-        };
-        act.appendChild(del);
-      }
-    });
-
-    // Checkbox listeners
-    container.querySelectorAll('input[type="checkbox"]').forEach((box) => {
-      box.addEventListener('change', () => {
-        const fresh = EDAuth.getStore();
-        const target = fresh.users.find((u) => u.id === box.dataset.user);
-        if (!target || target.email === EDAuth.ADMIN_EMAIL) return;
-        let versions = Array.isArray(target.versions) ? [...target.versions] : [];
-        if (box.checked && !versions.includes(box.dataset.ver)) versions.push(box.dataset.ver);
-        if (!box.checked) versions = versions.filter((v) => v !== box.dataset.ver);
-        EDAuth.updateUser(target.id, { versions });
-      });
-    });
-  }
-
-  /* ── render admin notifications panel ── */
-  function renderNotifications() {
-    const list = document.getElementById('notificationsList');
-    if (!list) return;
-    list.innerHTML = '';
-
-    const store = EDAuth.getStore();
-    let count = 0;
-
-    store.users.forEach(u => {
-      if (u.requestedEmail) {
-        count++;
-        const div = document.createElement('div');
-        div.className = 'notification-item';
-        div.innerHTML = `
-          <div>
-            <div style="font-weight:bold;">${u.name}</div>
-            <div style="font-size:0.82rem; color:var(--muted)">Solicitou alteração de e-mail para: <span style="color:#ffc060;">${u.requestedEmail}</span></div>
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">Senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" data-target="loginPassword" aria-label="Mostrar ou ocultar senha">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-success btn-sm" onclick="approveDirect('${u.id}', 'email')">Aprovar</button>
-            <button class="btn btn-danger btn-sm" onclick="rejectDirect('${u.id}', 'email')">Recusar</button>
+
+          <div class="form-footer-actions">
+            <button type="button" id="linkToForgot" class="link-btn">Esqueceu a senha?</button>
           </div>
-        `;
-        list.appendChild(div);
-      }
 
-      if (u.requestedPassword) {
-        count++;
-        const div = document.createElement('div');
-        div.className = 'notification-item';
-        div.innerHTML = `
-          <div>
-            <div style="font-weight:bold;">${u.name}</div>
-            <div style="font-size:0.82rem; color:var(--muted)">Solicitou alteração de senha</div>
+          <button type="submit" id="btnLoginSubmit" class="btn btn-primary auth-submit-btn">
+            <span class="btn-text">Entrar no Véu</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- TAB 2: CADASTRO -->
+      <div id="panelRegister" class="auth-form-panel" role="tabpanel" aria-labelledby="tabRegister">
+        <form id="formRegister" novalidate>
+          <div class="form-group">
+            <label for="registerName" class="form-label">Nome de Jogador</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <input type="text" id="registerName" class="form-input" placeholder="Ex: Elminster de Shadowdale" required autocomplete="name">
+            </div>
           </div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-success btn-sm" onclick="approveDirect('${u.id}', 'password')">Aprovar</button>
-            <button class="btn btn-danger btn-sm" onclick="rejectDirect('${u.id}', 'password')">Recusar</button>
+
+          <div class="form-group">
+            <label for="registerEmail" class="form-label">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </span>
+              <input type="email" id="registerEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+            </div>
           </div>
-        `;
-        list.appendChild(div);
-      }
-    });
 
-    if (count === 0) {
-      list.innerHTML = '<div style="opacity:0.65; text-align:center; padding:20px;">Nenhuma notificação pendente.</div>';
-    }
-  }
-
-  // Action methods for direct notifications
-  window.approveDirect = (userId, type) => {
-    const store = EDAuth.getStore();
-    const user = store.users.find(u => u.id === userId);
-    if (!user) return;
-
-    if (type === 'email' && user.requestedEmail) {
-      EDAuth.updateUser(userId, { email: user.requestedEmail, requestedEmail: null });
-    } else if (type === 'password' && user.requestedPassword) {
-      EDAuth.updateUser(userId, { password: user.requestedPassword, requestedPassword: null });
-    }
-    render();
-  };
-
-  window.rejectDirect = (userId, type) => {
-    if (type === 'email') {
-      EDAuth.updateUser(userId, { requestedEmail: null });
-    } else if (type === 'password') {
-      EDAuth.updateUser(userId, { requestedPassword: null });
-    }
-    render();
-  };
-
-  /* ── user editing modal & Sheet Access Manager functions ── */
-  let activeEditingUser = null;
-  let activeSMTab = 'v4';
-
-  window.switchSMTab = (tab) => {
-    activeSMTab = tab;
-    const btnV4 = document.getElementById('smTab_v4');
-    const btnV3 = document.getElementById('smTab_v3');
-    if (btnV4) btnV4.classList.toggle('active', tab === 'v4');
-    if (btnV3) btnV3.classList.toggle('active', tab === 'v3');
-    renderSheetManager();
-  };
-
-  function openUserEditModal(user) {
-    activeEditingUser = user;
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('editUserTitle').textContent = `Editar: ${user.name}`;
-    document.getElementById('editUserName').value = user.name;
-    
-    const emailInput = document.getElementById('editUserEmail');
-    emailInput.value = user.email;
-    emailInput.type = 'password';
-
-    const passInput = document.getElementById('editUserPass');
-    passInput.value = user.password;
-    passInput.type = 'password';
-
-    const reqEmailBlock = document.getElementById('editUserReqEmailBlock');
-    if (user.requestedEmail) {
-      reqEmailBlock.classList.remove('hidden');
-      document.getElementById('editUserReqEmailVal').textContent = user.requestedEmail;
-    } else {
-      reqEmailBlock.classList.add('hidden');
-    }
-
-    const reqPassBlock = document.getElementById('editUserReqPassBlock');
-    if (user.requestedPassword) {
-      reqPassBlock.classList.remove('hidden');
-    } else {
-      reqPassBlock.classList.add('hidden');
-    }
-
-    renderSheetManager();
-    document.getElementById('editUserModal').classList.add('open');
-  }
-  window.openUserEditModal = openUserEditModal;
-
-  window.closeEditModal = () => {
-    document.getElementById('editUserModal').classList.remove('open');
-    activeEditingUser = null;
-  };
-
-  function renderSheetManager() {
-    const container = document.getElementById('smListContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    const user = activeEditingUser;
-    if (!user) return;
-
-    const assigned = user.assignedSheets || [];
-    const filterText = (document.getElementById('smSearchInput')?.value || '').toLowerCase().trim();
-
-    const isV4 = activeSMTab === 'v4';
-    const sourceSheets = isV4 ? globalFichasV4 : globalFichasV3;
-    const baseId = isV4 ? 'v4_ficha_base' : 'v3_ficha_base';
-
-    let sheetKeys = Object.keys(sourceSheets);
-    if (!sheetKeys.includes(baseId)) sheetKeys.unshift(baseId);
-
-    if (!isV4) {
-      if (!sheetKeys.includes('v1_ficha')) sheetKeys.push('v1_ficha');
-      if (!sheetKeys.includes('v2_ficha')) sheetKeys.push('v2_ficha');
-    }
-
-    let items = sheetKeys.map(id => getSheetInfo(id, activeSMTab)).filter(Boolean);
-    if (filterText) {
-      items = items.filter(info => (info.data.char_name || info.id).toLowerCase().includes(filterText));
-    }
-
-    if (items.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1/-1; opacity:0.6; text-align:center; padding:15px; font-size:0.85rem;">Nenhuma ficha ${isV4 ? 'V4' : 'V3'} encontrada.</div>`;
-      return;
-    }
-
-    items.forEach(info => {
-      const hasAccess = assigned.includes(info.id);
-      const card = document.createElement('div');
-      card.className = `sm-sheet-card ${hasAccess ? 'granted' : ''}`;
-      
-      const verLabel = info.version.toUpperCase();
-      const badgeCls = info.version;
-
-      card.innerHTML = `
-        <div class="sm-sheet-info">
-          <div class="sm-sheet-avatar" style="${info.data.char_img ? `background-image:url('${info.data.char_img}');` : ''}">${info.data.char_img ? '' : (info.version === 'v4' ? '⚔️' : '🎭')}</div>
-          <div class="sm-sheet-details">
-            <div class="sm-sheet-name">${info.data.char_name || info.id}</div>
-            <div class="sm-sheet-badge ${badgeCls}">${verLabel}</div>
+          <div class="form-group">
+            <label for="registerPassword" class="form-label">Senha (mínimo 6 caracteres)</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input type="password" id="registerPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" data-target="registerPassword" aria-label="Mostrar ou ocultar senha">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
-        <div>
-          ${hasAccess ? `
-            <button type="button" class="sm-action-btn revoke" onclick="toggleSheetAccess('${info.id}', false)">✖ Remover</button>
-          ` : `
-            <button type="button" class="sm-action-btn grant" onclick="toggleSheetAccess('${info.id}', true)">+ Conceder</button>
-          `}
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
-  window.renderSheetManager = renderSheetManager;
 
-  window.toggleSheetAccess = (sheetId, grant) => {
-    if (!activeEditingUser) return;
-    const userId = activeEditingUser.id;
+          <div class="form-group">
+            <label for="registerPasswordConfirm" class="form-label">Confirmar Senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input type="password" id="registerPasswordConfirm" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+            </div>
+          </div>
 
-    if (grant) {
-      EDAuth.attachSheetToUser(userId, sheetId);
-      const info = getSheetInfo(sheetId, activeSMTab);
-      if (info && (info.version === 'v4' || info.version === 'v3')) {
-        const freshUser = EDAuth.getStore().users.find(u => u.id === userId);
-        if (freshUser) {
-          let versions = Array.isArray(freshUser.versions) ? [...freshUser.versions] : [];
-          if (!versions.includes(info.version)) {
-            versions.push(info.version);
-            EDAuth.updateUser(userId, { versions });
-          }
-        }
-      }
-    } else {
-      EDAuth.detachSheetFromUser(userId, sheetId);
-    }
+          <button type="submit" id="btnRegisterSubmit" class="btn btn-primary auth-submit-btn">
+            <span class="btn-text">Criar Nova Conta</span>
+          </button>
+        </form>
+      </div>
 
-    const store = EDAuth.getStore();
-    activeEditingUser = store.users.find(u => u.id === userId);
-    renderSheetManager();
-    render();
-  };
+      <!-- TAB 3: RECUPERAR SENHA -->
+      <div id="panelForgot" class="auth-form-panel" role="tabpanel" aria-labelledby="tabForgot">
+        <form id="formForgot" novalidate>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+            Digite seu e-mail cadastrado. Enviaremos um link seguro para você redefinir sua senha de acesso.
+          </p>
 
-  window.createNewSheetHub = () => {
-    const name = prompt("Digite o nome do personagem:");
-    if (!name || !name.trim()) return;
-    const isV4 = currentActiveVersion === 'v4';
-    const newId = 'ficha_' + Date.now();
-    const dbPath = isV4 ? `fichas_v4/${newId}` : `fichas_v3/${newId}`;
+          <div class="form-group">
+            <label for="forgotEmail" class="form-label">E-mail de Cadastro</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </span>
+              <input type="email" id="forgotEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+            </div>
+          </div>
 
-    set(ref(db, dbPath), {
-      char_name: name.trim(),
-      nivel: 1,
-      category: 'default',
-      stock_folder: 'geral',
-      createdAt: Date.now()
-    }).then(() => {
-      alert(`Ficha "${name.trim()}" (${isV4 ? 'v4' : 'v3'}) criada com sucesso!`);
-      renderMyFichas();
-      if (activeEditingUser) renderSheetManager();
-    }).catch(err => {
-      alert("Erro ao criar ficha: " + err.message);
-    });
-  };
+          <button type="submit" id="btnForgotSubmit" class="btn btn-primary auth-submit-btn">
+            <span class="btn-text">Enviar Link de Recuperação</span>
+          </button>
 
-  window.approveFieldChange = (type) => {
-    if (!activeEditingUser) return;
-    const userId = activeEditingUser.id;
-    if (type === 'email' && activeEditingUser.requestedEmail) {
-      EDAuth.updateUser(userId, { email: activeEditingUser.requestedEmail, requestedEmail: null });
-      document.getElementById('editUserEmail').value = activeEditingUser.requestedEmail;
-      document.getElementById('editUserReqEmailBlock').classList.add('hidden');
-    } else if (type === 'password' && activeEditingUser.requestedPassword) {
-      EDAuth.updateUser(userId, { password: activeEditingUser.requestedPassword, requestedPassword: null });
-      document.getElementById('editUserPass').value = activeEditingUser.requestedPassword;
-      document.getElementById('editUserReqPassBlock').classList.add('hidden');
-    }
-    const store = EDAuth.getStore();
-    activeEditingUser = store.users.find(u => u.id === userId);
-    render();
-  };
+          <div class="auth-back-row">
+            <button type="button" id="btnBackToLogin" class="auth-back-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Voltar ao Login
+            </button>
+          </div>
+        </form>
+      </div>
 
-  window.saveUserEdit = () => {
-    if (!activeEditingUser) return;
-    const name = document.getElementById('editUserName').value.trim();
-    const email = document.getElementById('editUserEmail').value.trim().toLowerCase();
-    const password = document.getElementById('editUserPass').value.trim();
+      <footer class="auth-footer-lore">
+        <p>&copy; Véu RPG &bull; Forjado para Mestres e Jogadores</p>
+      </footer>
+    </section>
+  </main>
 
-    if (!name || !email || !password) {
-      alert('Preencha todos os campos obrigatórios.');
-      return;
-    }
-
-    EDAuth.updateUser(activeEditingUser.id, { name, email, password });
-    closeEditModal();
-    render();
-  };
-
-  /* ── auth actions ── */
-  document.getElementById('btnLogin').addEventListener('click', () => {
-    const result = EDAuth.login(
-      document.getElementById('loginEmail').value,
-      document.getElementById('loginPassword').value,
-      document.getElementById('remember').checked
-    );
-    const msg = document.getElementById('loginMsg');
-    msg.className = 'msg' + (result.ok ? ' ok' : '');
-    msg.textContent = result.ok ? 'Login realizado com sucesso.' : result.error;
-    if (result.ok) render();
-  });
-
-  ['loginEmail', 'loginPassword'].forEach((id) => {
-    document.getElementById(id).addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('btnLogin').click();
-    });
-  });
-
-  document.getElementById('btnRegister').addEventListener('click', () => {
-    const result = EDAuth.register({
-      name:            document.getElementById('regName').value,
-      email:           document.getElementById('regEmail').value,
-      password:        document.getElementById('regPass').value,
-      confirmPassword: document.getElementById('regPass2').value,
-    });
-    const msg = document.getElementById('regMsg');
-    msg.className = 'msg' + (result.ok ? ' ok' : '');
-    msg.textContent = result.ok ? result.message : result.error;
-  });
-
-  document.getElementById('regPass2').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('btnRegister').click();
-  });
-
-  document.getElementById('btnLogout').addEventListener('click', () => { EDAuth.logout(); render(); });
-
-  // Listen to remote changes in auth store
-  window.onAuthStoreChanged = render;
-
-  // Listen to remote changes in global sheets list (v3 and v4)
-  onValue(ref(db, 'fichas_v3'), (snap) => {
-    globalFichasV3 = snap.val() || {};
-    renderMyFichas();
-    if (activeEditingUser) renderSheetManager();
-  });
-
-  onValue(ref(db, 'fichas_v4'), (snap) => {
-    globalFichasV4 = snap.val() || {};
-    renderMyFichas();
-    if (activeEditingUser) renderSheetManager();
-  });
-
-  // Initial check
-  render();
-  handleQueryTab();
-</script>
-<script src="configs/pwa.js" defer></script>
+  <!-- Main Auth ES Module -->
+  <script type="module" src="assets/js/auth.js"></script>
 </body>
 </html>
