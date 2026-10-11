@@ -997,9 +997,13 @@ main.dashboard-content,
     display: none;
   }
 
+  main.dashboard-content,
   .dashboard-content {
     margin-left: 0 !important;
-    padding: 20px 16px 90px 16px; /* extra bottom padding for bottom nav */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 20px 16px 110px 16px !important; /* 110px de espaçamento inferior para evitar sobreposição da barra inferior */
   }
 
   .content-topbar {
@@ -1008,6 +1012,47 @@ main.dashboard-content,
 
   .campaign-detail-info-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Ações do Topo no Mobile: botões flexíveis com padding reduzido */
+  .campaign-detail-actions-bar {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .campaign-detail-actions-bar .btn {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+  }
+
+  .campaign-detail-actions-right {
+    gap: 6px;
+  }
+
+  /* Grid e Cards de Ficha no Mobile */
+  .sheets-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .sheet-card {
+    padding: 16px;
+  }
+
+  .sheet-card-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .sheet-card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Modais no Mobile */
+  .modal-box {
+    padding: 20px 16px;
+    max-height: 92vh;
   }
 
   /* Show floating bottom navigation bar */
@@ -1232,7 +1277,7 @@ main.dashboard-content,
   gap: 8px;
   background: var(--input-bg);
   padding: 6px;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
   overflow-x: auto;
@@ -1303,26 +1348,35 @@ main.dashboard-content,
    -------------------------------------------------------------------------- */
 .sheets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .sheet-card {
   padding: 22px;
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
   transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
 }
 
 .sheet-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--glass-shadow-hover);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 20px var(--accent-primary-glow);
   border-color: var(--accent-primary);
 }
 
@@ -1333,8 +1387,8 @@ main.dashboard-content,
 }
 
 .sheet-avatar {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   display: flex;
@@ -1346,6 +1400,16 @@ main.dashboard-content,
   flex-shrink: 0;
   box-shadow: 0 4px 12px var(--accent-primary-glow);
   overflow: hidden;
+  position: relative;
+}
+
+.sheet-avatar img,
+.sheet-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
 }
 
 .sheet-title-info {
@@ -1420,6 +1484,34 @@ main.dashboard-content,
   gap: 6px;
   font-size: 0.78rem;
   color: var(--text-muted);
+}
+
+.sheet-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sheet-card-actions .btn {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+/* Form row 3 columns for sheets modal */
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .form-row-3 {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 }
 
 /* --------------------------------------------------------------------------

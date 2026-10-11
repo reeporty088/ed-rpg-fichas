@@ -880,13 +880,13 @@
   </div>
 
   <!-- ========================================================================
-       7. MODAL: CRIAR FICHA DE PERSONAGEM
+       7. MODAL: CRIAR FICHA DE PERSONAGEM (#modal-ficha)
        ======================================================================== -->
-  <div id="modalCreateSheet" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCreateSheet">
+  <div id="modal-ficha" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titleModalCreateSheet">
     <div class="modal-box" style="max-width: 540px;">
       <div class="modal-header">
-        <h3 id="titleModalCreateSheet" class="modal-title">Forjar Nova Ficha</h3>
-        <button type="button" class="btn-close-modal" data-close-modal="modalCreateSheet" aria-label="Fechar modal">
+        <h3 id="titleModalCreateSheet" class="modal-title">Criar Nova Ficha</h3>
+        <button type="button" class="btn-close-modal" data-close-modal="modal-ficha" aria-label="Fechar modal">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -900,13 +900,13 @@
           <input type="text" id="sheetName" class="form-input" placeholder="Ex: Valerius o Guardião" required style="padding-left: 14px;">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-row-3">
           <div class="form-group">
-            <label for="sheetRace" class="form-label">Raça / Ancestralidade</label>
+            <label for="sheetRace" class="form-label">Raça</label>
             <input type="text" id="sheetRace" class="form-input" placeholder="Ex: Humano" style="padding-left: 14px;">
           </div>
           <div class="form-group">
-            <label for="sheetClass" class="form-label">Classe / Arquétipo</label>
+            <label for="sheetClass" class="form-label">Classe / Conceito</label>
             <input type="text" id="sheetClass" class="form-input" placeholder="Ex: Paladino" style="padding-left: 14px;">
           </div>
           <div class="form-group">
@@ -915,7 +915,18 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <!-- URL da Imagem de Avatar (opcional) -->
+        <div class="form-group">
+          <label for="sheetAvatarUrl" class="form-label">URL da Imagem de Avatar (opcional)</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div id="sheetAvatarPreview" class="sheet-avatar" style="width: 44px; height: 44px; font-size: 1.1rem; flex-shrink: 0;" title="Prévia do Avatar">
+              🎭
+            </div>
+            <input type="url" id="sheetAvatarUrl" class="form-input" placeholder="https://exemplo.com/avatar.jpg" style="padding-left: 14px; flex: 1;">
+          </div>
+        </div>
+
+        <div class="form-row-3">
           <div class="form-group">
             <label for="sheetMaxHp" class="form-label">Pontos de Vida (HP)</label>
             <input type="number" id="sheetMaxHp" class="form-input" value="12" min="1" required style="padding-left: 14px;">
@@ -925,21 +936,21 @@
             <input type="number" id="sheetMaxMp" class="form-input" value="6" min="0" required style="padding-left: 14px;">
           </div>
           <div class="form-group">
-            <label for="sheetAc" class="form-label">Classe Armadura (CA)</label>
+            <label for="sheetAc" class="form-label">Defesa / CA</label>
             <input type="number" id="sheetAc" class="form-input" value="14" min="0" required style="padding-left: 14px;">
           </div>
         </div>
 
-        <!-- Atribuir jogador (visível para o Mestre) -->
+        <!-- Atribuição de Jogador (para qual jogador da campanha ela pertence) -->
         <div class="form-group" id="sheetAssignPlayerGroup">
-          <label for="sheetAssignPlayerSelect" class="form-label">Atribuir Ficha a Jogador</label>
+          <label for="sheetAssignPlayerSelect" class="form-label">Atribuição de Jogador</label>
           <select id="sheetAssignPlayerSelect" class="form-input" style="padding-left: 14px; cursor: pointer;">
             <!-- Opções via JS -->
           </select>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-          <button type="button" class="btn btn-ghost" data-close-modal="modalCreateSheet">Cancelar</button>
+          <button type="button" class="btn btn-ghost" data-close-modal="modal-ficha">Cancelar</button>
           <button type="submit" id="btnSubmitCreateSheet" class="btn btn-primary">
             <span>Criar Ficha</span>
           </button>

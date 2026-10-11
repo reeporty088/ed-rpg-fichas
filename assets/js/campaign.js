@@ -74,10 +74,23 @@ const gmOnlyElements = document.querySelectorAll(".gm-only");
 // Fichas
 const sheetsGrid = document.getElementById("sheetsGrid");
 const btnOpenCreateSheet = document.getElementById("btnOpenCreateSheet");
-const modalCreateSheet = document.getElementById("modalCreateSheet");
+const modalCreateSheet = document.getElementById("modal-ficha") || document.getElementById("modalCreateSheet");
 const formCreateSheet = document.getElementById("formCreateSheet");
 const sheetAssignPlayerGroup = document.getElementById("sheetAssignPlayerGroup");
 const sheetAssignPlayerSelect = document.getElementById("sheetAssignPlayerSelect");
+const sheetAvatarUrlInput = document.getElementById("sheetAvatarUrl");
+const sheetAvatarPreview = document.getElementById("sheetAvatarPreview");
+
+if (sheetAvatarUrlInput && sheetAvatarPreview) {
+  sheetAvatarUrlInput.addEventListener("input", () => {
+    const url = sheetAvatarUrlInput.value.trim();
+    if (url) {
+      sheetAvatarPreview.innerHTML = `<img src="${escapeHtml(url)}" class="sheet-avatar-img" onerror="this.onerror=null; this.parentElement.textContent='🎭';">`;
+    } else {
+      sheetAvatarPreview.textContent = "🎭";
+    }
+  });
+}
 
 // Jogadores
 const campPlayersList = document.getElementById("campPlayersList");
@@ -225,13 +238,21 @@ campTabButtons.forEach((btn) => {
 // 5. ABA 1: FICHAS (SHEETS)
 // ==========================================================================
 function listenSheets(campaignId) {
-  const q = query(
-    collection(db, "campaigns", campaignId, "sheets"),
-    orderBy("createdAt", "desc")
-  );
+  if (unsubSheets) {
+    unsubSheets();
+    unsubSheets = null;
+  }
 
-  unsubSheets = onSnapshot(q, (snapshot) => {
+  const sheetsCol = collection(db, "campaigns", campaignId, "sheets");
+
+  unsubSheets = onSnapshot(sheetsCol, (snapshot) => {
     campaignSheetsCache = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    // Ordenação segura em memória: fichas mais recentes primeiro
+    campaignSheetsCache.sort((a, b) => {
+      const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+      const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+      return timeB - timeA;
+    });
     renderSheets();
     if (isMasterUser) {
       renderGmVitalsHud();
@@ -245,10 +266,10 @@ function renderSheets() {
   if (!sheetsGrid) return;
   sheetsGrid.innerHTML = "";
 
-  // Filtra por permissão: Mestre vê todas; Jogador vê as suas ou não atribuídas
+  // Permissões: Mestre (GM) visualiza todas as fichas da campanha; Jogadores visualizam apenas as suas próprias fichas (ownerId == auth.currentUser.uid).
   const visibleSheets = isMasterUser
     ? campaignSheetsCache
-    : campaignSheetsCache.filter((s) => s.ownerId === currentAuthUser.uid);
+    : campaignSheetsCache.filter((s) => s.ownerId === currentAuthUser?.uid);
 
   if (visibleSheets.length === 0) {
     sheetsGrid.innerHTML = `
@@ -266,35 +287,54 @@ function renderSheets() {
 
   visibleSheets.forEach((sheet) => {
     const card = document.createElement("article");
-    card.className = "sheet-card";
+    card.className = "sheet-card glass-panel";
+    card.setAttribute("data-id", sheet.id);
 
-    const hpPercent = sheet.maxHp > 0 ? Math.round((sheet.currentHp / sheet.maxHp) * 100) : 100;
-    const isOwner = sheet.ownerId === currentAuthUser.uid;
+    const charName = sheet.name || "Sem Nome";
+    const charClass = sheet.class || sheet.characterClass || "Aventureiro";
+    const charRace = sheet.race || "Humano";
+    const charLevel = sheet.level || 1;
+    const avatarUrl = sheet.avatarUrl || "";
+
+    const hpMax = sheet.hpMax ?? sheet.maxHp ?? 12;
+    const hpCurrent = sheet.hpCurrent ?? sheet.currentHp ?? hpMax;
+    const pmMax = sheet.pmMax ?? sheet.maxMp ?? 6;
+    const pmCurrent = sheet.pmCurrent ?? sheet.currentMp ?? pmMax;
+    const defense = sheet.defense ?? sheet.ac ?? 14;
+
+    const isOwner = sheet.ownerId === currentAuthUser?.uid;
+
+    let avatarHtml = `<div class="sheet-avatar">${escapeHtml((charName || "P").charAt(0).toUpperCase())}</div>`;
+    if (avatarUrl) {
+      avatarHtml = `
+        <div class="sheet-avatar">
+          <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(charName)}" class="sheet-avatar-img" onerror="this.onerror=null; this.parentElement.textContent='${escapeHtml((charName || "P").charAt(0).toUpperCase())}';">
+        </div>
+      `;
+    }
 
     card.innerHTML = `
       <div>
         <div class="sheet-card-header">
-          <div class="sheet-avatar">
-            ${(sheet.name || "P").charAt(0).toUpperCase()}
-          </div>
+          ${avatarHtml}
           <div class="sheet-title-info">
-            <h4 class="sheet-name" title="${escapeHtml(sheet.name)}">${escapeHtml(sheet.name)}</h4>
-            <span class="sheet-class-level">${escapeHtml(sheet.race || "Humano")} &bull; ${escapeHtml(sheet.characterClass || "Guerreiro")} Nív. ${sheet.level || 1}</span>
+            <h4 class="sheet-name" title="${escapeHtml(charName)}">${escapeHtml(charName)}</h4>
+            <span class="sheet-class-level">${escapeHtml(charClass)} &bull; ${escapeHtml(charRace)} Nív. ${charLevel}</span>
           </div>
         </div>
 
         <div class="sheet-vitals-row" style="margin-top: 14px;">
           <div class="vital-stat">
             <span class="vital-stat-label">Vida (HP)</span>
-            <span class="vital-stat-val vital-hp">${sheet.currentHp || 0}/${sheet.maxHp || 0}</span>
+            <span class="vital-stat-val vital-hp">${hpCurrent}/${hpMax}</span>
           </div>
           <div class="vital-stat">
             <span class="vital-stat-label">Mana (PM)</span>
-            <span class="vital-stat-val vital-mp">${sheet.currentMp || 0}/${sheet.maxMp || 0}</span>
+            <span class="vital-stat-val vital-mp">${pmCurrent}/${pmMax}</span>
           </div>
           <div class="vital-stat">
             <span class="vital-stat-label">Defesa (CA)</span>
-            <span class="vital-stat-val vital-ac">${sheet.ac || 10}</span>
+            <span class="vital-stat-val vital-ac">${defense}</span>
           </div>
         </div>
       </div>
@@ -308,17 +348,17 @@ function renderSheets() {
           <span>${escapeHtml(sheet.ownerName || "Não atribuída")}</span>
         </div>
 
-        <div style="display: flex; gap: 6px;">
-          <button type="button" class="btn btn-ghost btn-view-sheet" data-id="${sheet.id}" style="padding: 4px 8px; font-size: 0.76rem;" title="Abrir ficha completa">
+        <div class="sheet-card-actions">
+          <button type="button" class="btn btn-ghost btn-view-sheet" data-id="${sheet.id}" title="Abrir ficha completa">
             Abrir
           </button>
           ${isMasterUser ? `
-            <button type="button" class="btn btn-ghost btn-assign-sheet" data-id="${sheet.id}" style="padding: 4px 8px; font-size: 0.76rem;" title="Atribuir jogador">
+            <button type="button" class="btn btn-ghost btn-assign-sheet" data-id="${sheet.id}" title="Atribuir jogador">
               Atribuir
             </button>
           ` : ""}
           ${(isMasterUser || isOwner) ? `
-            <button type="button" class="btn btn-ghost btn-delete-sheet" data-id="${sheet.id}" data-name="${escapeHtml(sheet.name)}" style="padding: 4px 8px; font-size: 0.76rem; color: var(--color-error);" title="Excluir ficha">
+            <button type="button" class="btn btn-ghost btn-delete-sheet" data-id="${sheet.id}" data-name="${escapeHtml(charName)}" style="color: var(--color-error);" title="Excluir ficha">
               Excluir
             </button>
           ` : ""}
@@ -326,7 +366,7 @@ function renderSheets() {
       </div>
     `;
 
-    // Ações
+    // Ações do card
     const header = card.querySelector(".sheet-card-header");
     if (header) {
       header.style.cursor = "pointer";
@@ -361,19 +401,37 @@ function renderSheets() {
 // Modal Criar Ficha
 if (btnOpenCreateSheet) {
   btnOpenCreateSheet.addEventListener("click", () => {
-    // Popula o dropdown de jogadores caso seja Mestre
+    if (formCreateSheet) formCreateSheet.reset();
+    if (sheetAvatarPreview) sheetAvatarPreview.textContent = "🎭";
+
+    // Popula o dropdown de jogadores
     if (sheetAssignPlayerGroup && sheetAssignPlayerSelect) {
+      sheetAssignPlayerGroup.style.display = "block";
+
       if (isMasterUser) {
-        sheetAssignPlayerGroup.style.display = "block";
+        sheetAssignPlayerSelect.disabled = false;
         sheetAssignPlayerSelect.innerHTML = `<option value="">Não atribuída (Mestre)</option>`;
+
+        // Mestre como opção
+        if (activeCampaign.masterId) {
+          const mName = activeCampaign.masterName || "Mestre";
+          sheetAssignPlayerSelect.innerHTML += `<option value="${activeCampaign.masterId}|${escapeHtml(mName)}">${escapeHtml(mName)} (Mestre)</option>`;
+        }
+
+        // Jogadores conectados
         (activeCampaign.playerDetails || []).forEach((p) => {
-          sheetAssignPlayerSelect.innerHTML += `<option value="${p.uid}|${escapeHtml(p.name)}">${escapeHtml(p.name)} (${escapeHtml(p.role)})</option>`;
+          if (p.uid !== activeCampaign.masterId) {
+            sheetAssignPlayerSelect.innerHTML += `<option value="${p.uid}|${escapeHtml(p.name)}">${escapeHtml(p.name)} (${escapeHtml(p.role || "Jogador")})</option>`;
+          }
         });
       } else {
-        sheetAssignPlayerGroup.style.display = "none";
+        // Jogador comum criando para si mesmo
+        sheetAssignPlayerSelect.disabled = true;
+        const myName = currentAuthUser.displayName || currentAuthUser.email.split("@")[0];
+        sheetAssignPlayerSelect.innerHTML = `<option value="${currentAuthUser.uid}|${escapeHtml(myName)}" selected>${escapeHtml(myName)} (Você)</option>`;
       }
     }
-    openModalById("modalCreateSheet");
+    openModalById("modal-ficha");
   });
 }
 
@@ -383,12 +441,13 @@ if (formCreateSheet) {
     if (!activeCampaign || !currentAuthUser) return;
 
     const name = document.getElementById("sheetName").value.trim();
-    const race = document.getElementById("sheetRace").value.trim();
-    const characterClass = document.getElementById("sheetClass").value.trim();
+    const race = document.getElementById("sheetRace").value.trim() || "Humano";
+    const characterClass = document.getElementById("sheetClass").value.trim() || "Aventureiro";
     const level = parseInt(document.getElementById("sheetLevel").value, 10) || 1;
-    const maxHp = parseInt(document.getElementById("sheetMaxHp").value, 10) || 10;
-    const maxMp = parseInt(document.getElementById("sheetMaxMp").value, 10) || 5;
-    const ac = parseInt(document.getElementById("sheetAc").value, 10) || 10;
+    const avatarUrl = sheetAvatarUrlInput ? sheetAvatarUrlInput.value.trim() : "";
+    const maxHp = parseInt(document.getElementById("sheetMaxHp").value, 10) || 12;
+    const maxMp = parseInt(document.getElementById("sheetMaxMp").value, 10) || 6;
+    const ac = parseInt(document.getElementById("sheetAc").value, 10) || 14;
 
     let assignedUid = currentAuthUser.uid;
     let assignedName = currentAuthUser.displayName || currentAuthUser.email.split("@")[0];
@@ -399,7 +458,10 @@ if (formCreateSheet) {
       assignedName = pName;
     }
 
-    if (!name) return;
+    if (!name) {
+      showToast("Por favor, informe o nome do personagem.", "error");
+      return;
+    }
 
     try {
       const btn = document.getElementById("btnSubmitCreateSheet");
@@ -410,25 +472,33 @@ if (formCreateSheet) {
 
       await addDoc(collection(db, "campaigns", activeCampaign.id, "sheets"), {
         name,
-        race,
+        class: characterClass,
         characterClass,
+        race,
         level,
-        currentHp: maxHp,
-        maxHp,
-        currentMp: maxMp,
-        maxMp,
-        ac,
+        avatarUrl,
         ownerId: assignedUid,
         ownerName: assignedName,
+        hpMax: maxHp,
+        maxHp,
+        hpCurrent: maxHp,
+        currentHp: maxHp,
+        pmMax: maxMp,
+        maxMp,
+        pmCurrent: maxMp,
+        currentMp: maxMp,
+        defense: ac,
+        ac,
         createdAt: serverTimestamp()
       });
 
-      closeModalById("modalCreateSheet");
+      closeModalById("modal-ficha");
       formCreateSheet.reset();
-      showToast("Ficha forjada com sucesso!", "success");
+      if (sheetAvatarPreview) sheetAvatarPreview.textContent = "🎭";
+      showToast("Ficha criada com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao criar ficha:", err);
-      showToast("Não foi possível salvar a ficha.", "error");
+      showToast("Não foi possível salvar a ficha: " + err.message, "error");
     } finally {
       const btn = document.getElementById("btnSubmitCreateSheet");
       if (btn) {
@@ -447,11 +517,20 @@ const assignTargetPlayerSelect = document.getElementById("assignTargetPlayerSele
 
 function openAssignSheetModal(sheet) {
   sheetToAssign = sheet;
-  if (!assignTargetPlayerSelect) return;
+  if (!assignTargetPlayerSelect || !activeCampaign) return;
   assignTargetPlayerSelect.innerHTML = `<option value="">Não atribuída (Mestre)</option>`;
+
+  if (activeCampaign.masterId) {
+    const isMasterSelected = sheet.ownerId === activeCampaign.masterId ? "selected" : "";
+    const mName = activeCampaign.masterName || "Mestre";
+    assignTargetPlayerSelect.innerHTML += `<option value="${activeCampaign.masterId}|${escapeHtml(mName)}" ${isMasterSelected}>${escapeHtml(mName)} (Mestre)</option>`;
+  }
+
   (activeCampaign.playerDetails || []).forEach((p) => {
-    const selected = sheet.ownerId === p.uid ? "selected" : "";
-    assignTargetPlayerSelect.innerHTML += `<option value="${p.uid}|${escapeHtml(p.name)}" ${selected}>${escapeHtml(p.name)}</option>`;
+    if (p.uid !== activeCampaign.masterId) {
+      const selected = sheet.ownerId === p.uid ? "selected" : "";
+      assignTargetPlayerSelect.innerHTML += `<option value="${p.uid}|${escapeHtml(p.name)}" ${selected}>${escapeHtml(p.name)} (${escapeHtml(p.role || "Jogador")})</option>`;
+    }
   });
   openModalById("modalAssignSheet");
 }
@@ -539,8 +618,14 @@ function openViewSheetModal(sheet) {
 
   if (idInput) idInput.value = sheet.id;
   if (title) title.textContent = sheet.name || "Sem Nome";
-  if (subtitle) subtitle.textContent = `${sheet.race || "Humano"} • ${sheet.characterClass || "Guerreiro"}`;
-  if (avatar) avatar.textContent = (sheet.name || "P").charAt(0).toUpperCase();
+  if (subtitle) subtitle.textContent = `${sheet.class || sheet.characterClass || "Guerreiro"} • ${sheet.race || "Humano"}`;
+  if (avatar) {
+    if (sheet.avatarUrl) {
+      avatar.innerHTML = `<img src="${escapeHtml(sheet.avatarUrl)}" class="sheet-avatar-img" onerror="this.onerror=null; this.parentElement.textContent='${escapeHtml((sheet.name || "P").charAt(0).toUpperCase())}';">`;
+    } else {
+      avatar.textContent = (sheet.name || "P").charAt(0).toUpperCase();
+    }
+  }
   if (owner) owner.textContent = sheet.ownerName || "Não atribuída (Mestre)";
 
   if (levelInput) {
@@ -548,23 +633,23 @@ function openViewSheetModal(sheet) {
     levelInput.disabled = !canEdit;
   }
   if (acInput) {
-    acInput.value = sheet.ac || 10;
+    acInput.value = sheet.defense ?? sheet.ac ?? 10;
     acInput.disabled = !canEdit;
   }
   if (currentHpInput) {
-    currentHpInput.value = sheet.currentHp ?? 10;
+    currentHpInput.value = sheet.hpCurrent ?? sheet.currentHp ?? 10;
     currentHpInput.disabled = !canEdit;
   }
   if (maxHpInput) {
-    maxHpInput.value = sheet.maxHp ?? 10;
+    maxHpInput.value = sheet.hpMax ?? sheet.maxHp ?? 10;
     maxHpInput.disabled = !canEdit;
   }
   if (currentMpInput) {
-    currentMpInput.value = sheet.currentMp ?? 5;
+    currentMpInput.value = sheet.pmCurrent ?? sheet.currentMp ?? 5;
     currentMpInput.disabled = !canEdit;
   }
   if (maxMpInput) {
-    maxMpInput.value = sheet.maxMp ?? 5;
+    maxMpInput.value = sheet.pmMax ?? sheet.maxMp ?? 5;
     maxMpInput.disabled = !canEdit;
   }
   if (notesInput) {
@@ -572,7 +657,9 @@ function openViewSheetModal(sheet) {
     notesInput.disabled = !canEdit;
   }
 
-  const hpPercent = sheet.maxHp > 0 ? Math.round(((sheet.currentHp || 0) / sheet.maxHp) * 100) : 100;
+  const effectiveMaxHp = sheet.hpMax ?? sheet.maxHp ?? 10;
+  const effectiveCurHp = sheet.hpCurrent ?? sheet.currentHp ?? effectiveMaxHp;
+  const hpPercent = effectiveMaxHp > 0 ? Math.round((effectiveCurHp / effectiveMaxHp) * 100) : 100;
   if (hpBadge) hpBadge.textContent = `${hpPercent}%`;
 
   if (btnSave) {
@@ -605,10 +692,15 @@ if (formEditSheet) {
       await updateDoc(doc(db, "campaigns", activeCampaign.id, "sheets", currentViewingSheet.id), {
         level,
         ac,
+        defense: ac,
         currentHp,
+        hpCurrent: currentHp,
         maxHp,
+        hpMax: maxHp,
         currentMp,
+        pmCurrent: currentMp,
         maxMp,
+        pmMax: maxMp,
         notes
       });
 
@@ -1386,12 +1478,20 @@ if (formDeleteCampaign) {
 // 10. HELPERS
 // ==========================================================================
 function openModalById(id) {
-  const modal = document.getElementById(id);
+  let modal = document.getElementById(id);
+  if (!modal) {
+    if (id === "modalCreateSheet") modal = document.getElementById("modal-ficha");
+    if (id === "modal-ficha") modal = document.getElementById("modalCreateSheet");
+  }
   if (modal) modal.classList.add("active");
 }
 
 function closeModalById(id) {
-  const modal = document.getElementById(id);
+  let modal = document.getElementById(id);
+  if (!modal) {
+    if (id === "modalCreateSheet") modal = document.getElementById("modal-ficha");
+    if (id === "modal-ficha") modal = document.getElementById("modalCreateSheet");
+  }
   if (modal) modal.classList.remove("active");
 }
 
