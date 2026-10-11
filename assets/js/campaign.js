@@ -29,6 +29,7 @@ import { openCoverCropper } from "./cover-cropper.js";
 let activeCampaign = null;
 let currentAuthUser = null;
 let isMasterUser = false;
+let storedSwitchSection = null;
 
 // Listeners unsubscribe handles
 let unsubSheets = null;
@@ -144,6 +145,7 @@ export function initCampaignWorkspace(campaign, user, switchSectionCallback, sho
   activeCampaign = campaign;
   currentAuthUser = user;
   isMasterUser = campaign.masterId === user.uid;
+  storedSwitchSection = switchSectionCallback;
 
   // Atualiza banner superior da campanha
   if (detailCoverImg) detailCoverImg.src = campaign.coverUrl || "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop";
@@ -837,7 +839,13 @@ function openViewSheetModal(sheet) {
     btnSave.style.display = canEdit ? "inline-flex" : "none";
   }
 
-  openModalById("modalViewSheet");
+  if (typeof storedSwitchSection === "function") {
+    storedSwitchSection("sheet-view");
+  } else {
+    document.querySelectorAll(".dash-section").forEach((sec) => sec.classList.remove("active"));
+    const secSheet = document.getElementById("section-sheet-view");
+    if (secSheet) secSheet.classList.add("active");
+  }
 }
 
 function setInputValue(id, val) {
@@ -1633,6 +1641,8 @@ if (btnSaveSheetChanges) {
         name: fullName,
         firstName: fName,
         lastName: lName,
+        class: subtitle || currentViewingSheet.class || currentViewingSheet.characterClass || "Aventureiro",
+        characterClass: subtitle || currentViewingSheet.characterClass || currentViewingSheet.class || "Aventureiro",
         subtitle,
         alignment,
         race,
@@ -1666,14 +1676,41 @@ if (btnSaveSheetChanges) {
 
       await updateDoc(doc(db, "campaigns", activeCampaign.id, "sheets", currentViewingSheet.id), payload);
 
-      closeModalById("modalViewSheet");
+      currentViewingSheet = { ...currentViewingSheet, ...payload };
+      const cachedIdx = campaignSheetsCache.findIndex((s) => s.id === currentViewingSheet.id);
+      if (cachedIdx !== -1) {
+        campaignSheetsCache[cachedIdx] = { ...campaignSheetsCache[cachedIdx], ...payload };
+        renderSheets();
+      }
+
       showToast("Ficha salva com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao salvar alterações da ficha:", err);
       showToast("Erro ao salvar ficha: " + err.message, "error");
     } finally {
       btnSaveSheetChanges.disabled = false;
-      btnSaveSheetChanges.innerHTML = `<span>Salvar</span>`;
+      btnSaveSheetChanges.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        <span>Salvar Ficha</span>
+      `;
+    }
+  });
+}
+
+// Retornar da visualização dedicada da ficha para a campanha
+const btnBackToCampaignFromSheet = document.getElementById("btnBackToCampaignFromSheet");
+if (btnBackToCampaignFromSheet) {
+  btnBackToCampaignFromSheet.addEventListener("click", () => {
+    if (typeof storedSwitchSection === "function") {
+      storedSwitchSection("campaign-detail");
+    } else {
+      document.querySelectorAll(".dash-section").forEach((sec) => sec.classList.remove("active"));
+      const secCamp = document.getElementById("section-campaign-detail");
+      if (secCamp) secCamp.classList.add("active");
     }
   });
 }

@@ -1827,7 +1827,18 @@ main.dashboard-content,
    ESCÓRIA DE DEUS RPG - CHARACTER SHEET SYSTEM (LIQUID GLASS 3-COLUMN)
    ========================================================================== */
 
-/* Modal Container & Base Variables */
+/* Top Action Bar da Ficha Dedicada */
+.sheet-view-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Workspace Container & Base Variables */
+.ed-sheet-workspace,
 .ed-sheet-modal-box {
   --sheet-accent: #dc2626;
   --sheet-accent-glow: rgba(220, 38, 38, 0.45);
@@ -1835,10 +1846,9 @@ main.dashboard-content,
   --sheet-gold: #f59e0b;
   --sheet-gold-glow: rgba(245, 158, 11, 0.5);
 
-  width: 96vw;
-  max-width: 1420px;
-  height: 92vh;
-  max-height: 94vh;
+  width: 100%;
+  max-width: 100%;
+  min-height: calc(100vh - 140px);
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -1848,7 +1858,9 @@ main.dashboard-content,
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+  margin-bottom: 24px;
   transition: border-color var(--transition-normal);
 }
 
@@ -2183,17 +2195,23 @@ main.dashboard-content,
 /* --------------------------------------------------------------------------
    3. COLUNA 1: ATRIBUTOS, RETRATO, PV/PM & 26 PERÍCIAS
    -------------------------------------------------------------------------- */
+.ed-attr-art-flex,
 .ed-attr-portrait-split {
-  display: grid;
-  grid-template-columns: 1fr 130px;
-  gap: 14px;
+  display: flex;
+  gap: 16px;
   align-items: stretch;
+  position: relative;
+  min-height: 220px;
 }
 
+.ed-attributes-left,
 .ed-attributes-column {
+  flex: 1;
+  min-width: 160px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  z-index: 2;
 }
 
 .ed-attr-block {
@@ -2287,33 +2305,55 @@ main.dashboard-content,
 }
 
 /* Retrato com Máscara de Fade-out Suave */
+.ed-character-art-wrapper,
 .ed-portrait-box {
+  flex: 1.15;
+  min-width: 140px;
   position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 160px;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+[data-theme="light"] .ed-character-art-wrapper,
+[data-theme="light"] .ed-portrait-box {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.ed-character-art-img,
 .ed-portrait-fade {
   width: 100%;
   height: 100%;
+  max-height: 280px;
   object-fit: cover;
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%);
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%);
+  object-position: top center;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 98%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 98%);
+  transition: transform var(--transition-normal);
 }
 
+.ed-character-art-wrapper:hover .ed-character-art-img {
+  transform: scale(1.02);
+}
+
+.ed-character-art-placeholder,
 .ed-portrait-empty {
-  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
   color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 12px;
   text-align: center;
-  padding: 10px;
 }
 
 /* PV e PM Interativos */
@@ -3021,11 +3061,11 @@ main.dashboard-content,
 
 /* Mobile (< 768px): 1 coluna visível por vez com pílula flutuante */
 @media (max-width: 767px) {
+  .ed-sheet-workspace,
   .ed-sheet-modal-box {
-    width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    min-height: auto;
   }
 
   .ed-sheet-header {
@@ -3052,7 +3092,7 @@ main.dashboard-content,
 
   .ed-sheet-body {
     grid-template-columns: 1fr;
-    padding: 10px 12px 110px 12px;
+    padding: 10px 12px 140px 12px;
     overflow-y: auto;
   }
 
@@ -3084,22 +3124,27 @@ main.dashboard-content,
     display: none;
   }
 
-  /* Pílula Flutuante Inferior */
+  /* Pílula Flutuante Inferior (posicionada acima da bottom nav global de 16px) */
   .ed-mobile-column-pill {
     display: flex;
     position: fixed;
-    bottom: 20px;
+    bottom: 74px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1050;
-    background: rgba(14, 16, 26, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    z-index: 1000;
+    background: rgba(14, 16, 26, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-full);
     padding: 5px 8px;
     gap: 6px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  }
+
+  [data-theme="light"] .ed-mobile-column-pill {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
   .ed-pill-tab {

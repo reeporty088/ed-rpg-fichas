@@ -114,7 +114,7 @@ if (btnToggleSidebar && sidebar) {
 
 // Alternância de Seções (Campanhas, Perfil, Configurações, Detalhe)
 function switchSection(sectionId) {
-  if (sectionId !== "campaign-detail") {
+  if (sectionId !== "campaign-detail" && sectionId !== "sheet-view") {
     cleanupCampaignListeners();
   }
 

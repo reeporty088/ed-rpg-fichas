@@ -497,6 +497,544 @@
     </section>
 
     <!-- --------------------------------------------------------------------
+         SECTION: VISUALIZAÇÃO DEDICADA DA FICHA DE PERSONAGEM (ESCÓRIA DE DEUS RPG)
+         -------------------------------------------------------------------- -->
+    <section id="section-sheet-view" class="dash-section">
+      <!-- Top Action Bar da Ficha -->
+      <div class="sheet-view-topbar">
+        <button id="btnBackToCampaignFromSheet" class="btn btn-ghost" type="button" style="gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Voltar para a Campanha</span>
+        </button>
+
+        <div class="sheet-view-topbar-right" style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" id="btnSaveSheetChanges" class="btn btn-primary" style="gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Salvar Ficha</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Container Canvas da Ficha -->
+      <div class="ed-sheet-workspace" id="edSheetBox">
+        <!-- CABEÇALHO UNIFICADO NO TOPO -->
+        <header class="ed-sheet-header">
+          <div class="ed-header-brand">
+            <div class="ed-avatar-wrapper">
+              <div id="viewSheetAvatar" class="sheet-avatar ed-avatar-circle" title="Avatar do Personagem">🎭</div>
+              <button type="button" class="ed-avatar-edit-btn" id="btnOpenSheetAvatarModal" title="Alterar Foto/Retrato">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </button>
+              <input type="hidden" id="viewSheetAvatarUrl">
+            </div>
+            <div class="ed-header-names">
+              <div class="ed-names-line">
+                <input type="text" id="edCharFirstName" class="ed-input-title" placeholder="Nome" title="Nome do Personagem">
+                <input type="text" id="edCharLastName" class="ed-input-title" placeholder="Sobrenome" title="Sobrenome">
+                <input type="hidden" id="viewSheetId">
+                <h3 id="viewSheetTitle" style="display: none;"></h3>
+              </div>
+              <div class="ed-sub-line">
+                <input type="text" id="edCharSubtitle" class="ed-input-subtitle" placeholder="Subtítulo ou Conceito (ex: Caçador das Terras Ermas)">
+                <span id="viewSheetSubtitle" style="display: none;"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadados da Ficha (Alinhamento, Raça, Nível) -->
+          <div class="ed-header-meta">
+            <div class="ed-meta-item">
+              <label>Alinhamento</label>
+              <select id="edSheetAlignment" class="ed-meta-select">
+                <option value="Neutro">Neutro</option>
+                <option value="Ordeiro">Ordeiro</option>
+                <option value="Caótico">Caótico</option>
+                <option value="Devoto">Devoto</option>
+                <option value="Mártir">Mártir</option>
+                <option value="Herege">Herege</option>
+              </select>
+            </div>
+            <div class="ed-meta-item">
+              <label>Raça</label>
+              <input type="text" id="edSheetRace" class="ed-meta-input" placeholder="Raça" value="Humano">
+            </div>
+            <div class="ed-meta-item ed-meta-item-narrow">
+              <label>Nível</label>
+              <input type="number" id="viewSheetLevel" class="ed-meta-input text-center" min="1" max="50" value="1">
+            </div>
+            <div class="ed-meta-item">
+              <label>Dono</label>
+              <span id="viewSheetOwner" class="ed-owner-tag">Mestre</span>
+            </div>
+          </div>
+
+          <!-- Ações do Cabeçalho e Controles de Tema / Navegação -->
+          <div class="ed-header-actions">
+            <!-- Navegador do Desktop Médio (768px - 1099px) -->
+            <div class="ed-med-nav-controls" id="edMedNavControls">
+              <button type="button" class="btn btn-ghost btn-sm" id="btnMedPrevCols" title="Ver Colunas Anteriores">‹ Anterior</button>
+              <span class="ed-med-indicator" id="edMedNavIndicator">Colunas 1 &amp; 2</span>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnMedNextCols" title="Ver Próximas Colunas">Próxima ›</button>
+            </div>
+
+            <!-- Seletor de Cor de Destaque (--sheet-accent) -->
+            <div class="ed-theme-accent-picker" title="Personalizar Cor de Destaque">
+              <label for="edSheetAccentPicker" class="ed-accent-swatch-btn" id="edAccentSwatchPreview"></label>
+              <input type="color" id="edSheetAccentPicker" value="#dc2626">
+            </div>
+          </div>
+        </header>
+
+        <!-- CORPO DA FICHA: 3 COLUNAS ADAPTATIVAS -->
+        <div class="ed-sheet-body" id="edSheetBody">
+          <!-- ================================================================
+               COLUNA 1: ATRIBUTOS, IMAGEM VERTICAL, PV/PM & 26 PERÍCIAS
+               ================================================================ -->
+          <div class="ed-sheet-col ed-sheet-col-1" id="edSheetCol1" data-col-index="1">
+            <div class="ed-col-content">
+
+              <!-- Painel: Atributos Primordiais + Imagem do Personagem ao Lado com Degradê Suave -->
+              <div class="ed-glass-card ed-card-attributes-portrait">
+                <div class="ed-card-heading">
+                  <h4>Atributos Primordiais</h4>
+                  <button type="button" class="btn btn-ghost btn-xs btn-change-portrait" id="btnPortraitTrigger">
+                    📷 Alterar Imagem
+                  </button>
+                </div>
+
+                <div class="ed-attr-art-flex">
+                  <!-- Atributos: Físico, Mente, Alma -->
+                  <div class="ed-attributes-left">
+                    <!-- Físico -->
+                    <div class="ed-attr-block" data-attr-name="fisico">
+                      <div class="ed-attr-label-row">
+                        <span class="ed-attr-name">FÍSICO</span>
+                        <button type="button" class="ed-diamond-badge" id="btnAttrFisico" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
+                          <span>d6</span>
+                        </button>
+                      </div>
+                      <div class="ed-risk-ticks" data-attr-risk="fisico" title="Marcas de Evolução de Físico (1-3 destaque, >3 ouro)">
+                        <span class="ed-tick" data-tick="1"></span>
+                        <span class="ed-tick" data-tick="2"></span>
+                        <span class="ed-tick" data-tick="3"></span>
+                        <span class="ed-tick" data-tick="4"></span>
+                        <span class="ed-tick" data-tick="5"></span>
+                      </div>
+                    </div>
+
+                    <!-- Mente -->
+                    <div class="ed-attr-block" data-attr-name="mente">
+                      <div class="ed-attr-label-row">
+                        <span class="ed-attr-name">MENTE</span>
+                        <button type="button" class="ed-diamond-badge" id="btnAttrMente" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
+                          <span>d6</span>
+                        </button>
+                      </div>
+                      <div class="ed-risk-ticks" data-attr-risk="mente" title="Marcas de Evolução de Mente (1-3 destaque, >3 ouro)">
+                        <span class="ed-tick" data-tick="1"></span>
+                        <span class="ed-tick" data-tick="2"></span>
+                        <span class="ed-tick" data-tick="3"></span>
+                        <span class="ed-tick" data-tick="4"></span>
+                        <span class="ed-tick" data-tick="5"></span>
+                      </div>
+                    </div>
+
+                    <!-- Alma -->
+                    <div class="ed-attr-block" data-attr-name="alma">
+                      <div class="ed-attr-label-row">
+                        <span class="ed-attr-name">ALMA</span>
+                        <button type="button" class="ed-diamond-badge" id="btnAttrAlma" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
+                          <span>d6</span>
+                        </button>
+                      </div>
+                      <div class="ed-risk-ticks" data-attr-risk="alma" title="Marcas de Evolução de Alma (1-3 destaque, >3 ouro)">
+                        <span class="ed-tick" data-tick="1"></span>
+                        <span class="ed-tick" data-tick="2"></span>
+                        <span class="ed-tick" data-tick="3"></span>
+                        <span class="ed-tick" data-tick="4"></span>
+                        <span class="ed-tick" data-tick="5"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Imagem do Personagem em Corpo Inteiro com Degradê Suave -->
+                  <div class="ed-character-art-wrapper" id="edCharacterArtWrapper">
+                    <img id="edPortraitImage" src="" alt="Arte do Personagem" class="ed-character-art-img" style="display: none;">
+                    <div id="edPortraitEmpty" class="ed-character-art-placeholder">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.35">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <span>Sem Imagem</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Painel: PV e PM Interativos -->
+              <div class="ed-glass-card ed-card-vitals">
+                <!-- PV -->
+                <div class="ed-vital-container vital-pv">
+                  <div class="ed-vital-header">
+                    <div class="ed-vital-title-group">
+                      <span class="ed-vital-pill pill-pv">PV</span>
+                      <strong>Pontos de Vida</strong>
+                    </div>
+                    <div class="ed-vital-inputs">
+                      <span id="edDisplayCurrentHp" class="ed-current-num">10</span>
+                      <span class="ed-sep">/</span>
+                      <input type="number" id="viewSheetMaxHp" class="ed-max-input" min="1" max="99" value="10" title="PV Máximo">
+                      <input type="hidden" id="viewSheetCurrentHp" value="10">
+                      <span id="viewSheetHpBadge" style="display:none;">100%</span>
+                    </div>
+                  </div>
+                  <!-- Grade de quadradinhos interativos de PV -->
+                  <div class="ed-square-grid" id="edPvSquareGrid" title="Clique para ajustar PV"></div>
+                </div>
+
+                <!-- PM -->
+                <div class="ed-vital-container vital-pm">
+                  <div class="ed-vital-header">
+                    <div class="ed-vital-title-group">
+                      <span class="ed-vital-pill pill-pm">PM</span>
+                      <strong>Pontos de Mana</strong>
+                    </div>
+                    <div class="ed-vital-inputs">
+                      <span id="edDisplayCurrentMp" class="ed-current-num">6</span>
+                      <span class="ed-sep">/</span>
+                      <input type="number" id="viewSheetMaxMp" class="ed-max-input" min="0" max="99" value="6" title="PM Máximo">
+                      <input type="hidden" id="viewSheetCurrentMp" value="6">
+                    </div>
+                  </div>
+                  <!-- Grade de quadradinhos interativos de PM -->
+                  <div class="ed-square-grid" id="edPmSquareGrid" title="Clique para ajustar PM"></div>
+                </div>
+              </div>
+
+              <!-- Painel: 26 Perícias Obrigatórias -->
+              <div class="ed-glass-card ed-card-skills">
+                <div class="ed-card-heading">
+                  <h4>Perícias</h4>
+                  <span class="ed-card-sub">26 Perícias • Losango de Dado &bull; Evolução</span>
+                </div>
+                <div class="ed-skills-list" id="edSkillsList">
+                  <!-- 26 perícias renderizadas via JS -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ================================================================
+               COLUNA 2: ARCANA BUILDER, EQUIPAMENTOS, PROTEÇÃO, TROCA RÁPIDA
+               ================================================================ -->
+          <div class="ed-sheet-col ed-sheet-col-2" id="edSheetCol2" data-col-index="2">
+            <div class="ed-col-scroll">
+
+              <!-- Criador de Arcana / Feitiços -->
+              <div class="ed-glass-card ed-card-arcana">
+                <div class="ed-card-heading">
+                  <h4>Criador de Arcana</h4>
+                  <span class="ed-card-sub">Montagem de Técnicas</span>
+                </div>
+
+                <div class="ed-arcana-form">
+                  <div class="ed-arcana-selectors-grid">
+                    <div class="ed-form-field">
+                      <label>Função</label>
+                      <select id="arcanaSelectFuncao" class="ed-field-select">
+                        <option value="Dano">Dano</option>
+                        <option value="Proteção">Proteção</option>
+                        <option value="Cura">Cura</option>
+                        <option value="Sentidos">Sentidos</option>
+                        <option value="Controle">Controle</option>
+                        <option value="Movimento">Movimento</option>
+                        <option value="Ilusão">Ilusão</option>
+                        <option value="Evocação">Evocação</option>
+                      </select>
+                    </div>
+
+                    <div class="ed-form-field">
+                      <label>Característica</label>
+                      <select id="arcanaSelectCaracteristica" class="ed-field-select">
+                        <option value="Fogo">Fogo</option>
+                        <option value="Gelo">Gelo</option>
+                        <option value="Eletricidade">Eletricidade</option>
+                        <option value="Sombra">Sombra</option>
+                        <option value="Luz">Luz</option>
+                        <option value="Ar">Ar</option>
+                        <option value="Terra">Terra</option>
+                        <option value="Mental">Mental</option>
+                        <option value="Vital">Vital</option>
+                      </select>
+                    </div>
+
+                    <div class="ed-form-field">
+                      <label>Alvo</label>
+                      <select id="arcanaSelectAlvo" class="ed-field-select">
+                        <option value="Pessoal">Pessoal</option>
+                        <option value="Toque" selected>Toque</option>
+                        <option value="1 Alvo (9m)">1 Alvo (9m)</option>
+                        <option value="1 Alvo (18m)">1 Alvo (18m)</option>
+                        <option value="Área (6m)">Área (6m)</option>
+                        <option value="Cone (9m)">Cone (9m)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Badges Circulares de Resultado Dinâmico -->
+                  <div class="ed-arcana-results-row">
+                    <div class="ed-circle-indicator green" id="arcanaBadgeDistancia" title="Distância / Alcance da Técnica">
+                      <span class="ed-circle-dot">🟢</span>
+                      <span class="ed-circle-label" id="arcanaValDistancia">Toque</span>
+                    </div>
+                    <div class="ed-circle-indicator blue" id="arcanaBadgePm" title="Custo em Pontos de Mana (PM)">
+                      <span class="ed-circle-dot">🔵</span>
+                      <span class="ed-circle-label" id="arcanaValPm">2 PM</span>
+                    </div>
+                    <div class="ed-circle-indicator yellow" id="arcanaBadgeAcoes" title="Custo de Ações">
+                      <span class="ed-circle-dot">🟡</span>
+                      <span class="ed-circle-label" id="arcanaValAcoes">1 Ação</span>
+                    </div>
+                  </div>
+
+                  <div class="ed-arcana-action-row">
+                    <input type="text" id="arcanaCustomName" class="ed-field-input" placeholder="Nome da técnica (ex: Lança de Cinzas)...">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRegisterArcana">+ Adicionar Arcana</button>
+                  </div>
+                </div>
+
+                <!-- Lista de Arcanas do Personagem -->
+                <div class="ed-arcana-saved-list" id="edArcanaSavedList"></div>
+              </div>
+
+              <!-- Equipamentos 1 e 2 -->
+              <div class="ed-glass-card ed-card-gear">
+                <div class="ed-card-heading">
+                  <h4>Equipamentos em Punho</h4>
+                </div>
+
+                <div class="ed-gear-list">
+                  <!-- Equipamento 1 -->
+                  <div class="ed-gear-card" id="cardEquip1">
+                    <div class="ed-gear-top">
+                      <div class="ed-gear-circle-icon" id="iconSlotEquip1" title="Clique para trocar ícone">⚔️</div>
+                      <div class="ed-gear-titles">
+                        <input type="text" id="nameEquip1" class="ed-gear-name-input" placeholder="Equipamento 1" value="Espada Longa">
+                        <input type="text" id="descEquip1" class="ed-gear-desc-input" placeholder="Descrição e detalhes" value="Lâmina de aço afiada">
+                      </div>
+                    </div>
+                    <div class="ed-gear-badges-row">
+                      <div class="ed-gear-badge-item" title="Dado de Dano / Rolagem">
+                        <span class="badge-tag-label">Dado</span>
+                        <input type="text" id="diceEquip1" class="ed-badge-input" value="1d8">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Efeito Especial">
+                        <span class="badge-tag-label">Efeito</span>
+                        <input type="text" id="effectEquip1" class="ed-badge-input" value="Crítico 19">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Perícia Necessária">
+                        <span class="badge-tag-label">Perícia</span>
+                        <input type="text" id="skillEquip1" class="ed-badge-input" value="Luta">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Equipamento 2 -->
+                  <div class="ed-gear-card" id="cardEquip2">
+                    <div class="ed-gear-top">
+                      <div class="ed-gear-circle-icon" id="iconSlotEquip2" title="Clique para trocar ícone">🏹</div>
+                      <div class="ed-gear-titles">
+                        <input type="text" id="nameEquip2" class="ed-gear-name-input" placeholder="Equipamento 2" value="Arco Curto">
+                        <input type="text" id="descEquip2" class="ed-gear-desc-input" placeholder="Descrição e detalhes" value="Madeira recurva reforçada">
+                      </div>
+                    </div>
+                    <div class="ed-gear-badges-row">
+                      <div class="ed-gear-badge-item" title="Dado de Dano / Rolagem">
+                        <span class="badge-tag-label">Dado</span>
+                        <input type="text" id="diceEquip2" class="ed-badge-input" value="1d6">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Efeito Especial">
+                        <span class="badge-tag-label">Efeito</span>
+                        <input type="text" id="effectEquip2" class="ed-badge-input" value="Alcance 18m">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Perícia Necessária">
+                        <span class="badge-tag-label">Perícia</span>
+                        <input type="text" id="skillEquip2" class="ed-badge-input" value="Atirar">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Proteção 1 e 2 -->
+              <div class="ed-glass-card ed-card-gear">
+                <div class="ed-card-heading">
+                  <h4>Proteções &amp; Defesa</h4>
+                  <div class="ed-def-val-box">
+                    <span>Defesa (CA):</span>
+                    <input type="number" id="viewSheetAc" class="ed-def-input" min="0" max="99" value="14">
+                  </div>
+                </div>
+
+                <div class="ed-gear-list">
+                  <!-- Proteção 1 -->
+                  <div class="ed-gear-card" id="cardProt1">
+                    <div class="ed-gear-top">
+                      <div class="ed-gear-circle-icon" id="iconSlotProt1" title="Clique para trocar ícone">🛡️</div>
+                      <div class="ed-gear-titles">
+                        <input type="text" id="nameProt1" class="ed-gear-name-input" placeholder="Proteção 1" value="Escudo de Ferro">
+                        <input type="text" id="descProt1" class="ed-gear-desc-input" placeholder="Descrição da proteção" value="+2 na Defesa">
+                      </div>
+                    </div>
+                    <div class="ed-gear-badges-row">
+                      <div class="ed-gear-badge-item" title="Espaços de Proteção">
+                        <span class="badge-tag-label">Espaços</span>
+                        <input type="text" id="slotsProt1" class="ed-badge-input" value="1 Espaço">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Efeito de Proteção">
+                        <span class="badge-tag-label">Efeito</span>
+                        <input type="text" id="effectProt1" class="ed-badge-input" value="+2 Defesa">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Proteção 2 -->
+                  <div class="ed-gear-card" id="cardProt2">
+                    <div class="ed-gear-top">
+                      <div class="ed-gear-circle-icon" id="iconSlotProt2" title="Clique para trocar ícone">🦺</div>
+                      <div class="ed-gear-titles">
+                        <input type="text" id="nameProt2" class="ed-gear-name-input" placeholder="Proteção 2" value="Gibão de Couro">
+                        <input type="text" id="descProt2" class="ed-gear-desc-input" placeholder="Descrição da armadura" value="Couro curtido com reforço">
+                      </div>
+                    </div>
+                    <div class="ed-gear-badges-row">
+                      <div class="ed-gear-badge-item" title="Espaços de Proteção">
+                        <span class="badge-tag-label">Espaços</span>
+                        <input type="text" id="slotsProt2" class="ed-badge-input" value="2 Espaços">
+                      </div>
+                      <div class="ed-gear-badge-item" title="Efeito de Proteção">
+                        <span class="badge-tag-label">Efeito</span>
+                        <input type="text" id="effectProt2" class="ed-badge-input" value="Res. Corte">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Troca Rápida: Grade Horizontal com 6 Slots Circulares -->
+              <div class="ed-glass-card ed-card-quickswap">
+                <div class="ed-card-heading">
+                  <h4>⚡ Troca Rápida</h4>
+                  <span class="ed-card-sub">6 Slots &bull; Clique para equipar ou reposicionar</span>
+                </div>
+                <div class="ed-quickswap-slots" id="edQuickSwapSlotsContainer">
+                  <!-- 6 slots circulares gerados dinamicamente via JS -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ================================================================
+               COLUNA 3: MOCHILA (INVENTÁRIO), TIBARES, NOTAS RÁPIDAS & BLOCO
+               ================================================================ -->
+          <div class="ed-sheet-col ed-sheet-col-3" id="edSheetCol3" data-col-index="3">
+            <div class="ed-col-scroll">
+
+              <!-- Dinheiro: Tibares (T$) e Ouro -->
+              <div class="ed-glass-card ed-card-coins">
+                <div class="ed-card-heading">
+                  <h4>Moedas &amp; Economia</h4>
+                  <span class="ed-card-sub">Tibares (T$)</span>
+                </div>
+                <div class="ed-coins-grid">
+                  <div class="ed-coin-box">
+                    <span class="ed-coin-symbol">🪙</span>
+                    <div class="ed-coin-info">
+                      <label>Tibares (T$)</label>
+                      <input type="number" id="edCoinsTibares" class="ed-coin-input" value="50" min="0">
+                    </div>
+                  </div>
+                  <div class="ed-coin-box">
+                    <span class="ed-coin-symbol">✨</span>
+                    <div class="ed-coin-info">
+                      <label>Ouro (TO)</label>
+                      <input type="number" id="edCoinsOuro" class="ed-coin-input" value="0" min="0">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mochila / Inventário Geral -->
+              <div class="ed-glass-card ed-card-backpack">
+                <div class="ed-card-heading">
+                  <h4>Inventário Geral (Mochila)</h4>
+                  <div class="ed-capacity-badge" id="edBackpackCapacityBadge">
+                    <span id="edBackpackSlotsOccupied">0</span> / <span id="edBackpackSlotsMax">10</span> Espaços
+                  </div>
+                </div>
+
+                <!-- Formulário rápido para adicionar item -->
+                <div class="ed-add-backpack-form">
+                  <input type="text" id="edNewBackpackName" class="ed-field-input" placeholder="Nome do item...">
+                  <input type="number" id="edNewBackpackSlots" class="ed-field-input-slots" value="1" min="1" max="10" title="Espaços ocupados">
+                  <button type="button" class="btn btn-ghost btn-sm" id="btnAddNewBackpackItem">+ Add</button>
+                </div>
+
+                <!-- Lista de Itens da Mochila -->
+                <div class="ed-backpack-items-list" id="edBackpackItemsList">
+                  <!-- Renderizado via JS -->
+                </div>
+              </div>
+
+              <!-- Notas Rápidas & Condições -->
+              <div class="ed-glass-card ed-card-quicknotes">
+                <div class="ed-card-heading">
+                  <h4>Notas Rápidas &amp; Condições</h4>
+                </div>
+                <input type="text" id="edQuickConditionInput" class="ed-field-input" placeholder="Ex: Abençoado, Envenenado, Foco de Luz (+2 PM)...">
+              </div>
+
+              <!-- Bloco de Anotações Expansível -->
+              <div class="ed-glass-card ed-card-notes" id="edCardNotes">
+                <div class="ed-card-heading">
+                  <h4>Bloco de Anotações</h4>
+                  <button type="button" class="btn btn-ghost btn-xs" id="btnToggleExpandNotes">↕ Expandir</button>
+                </div>
+                <textarea id="viewSheetNotes" class="ed-notes-textarea" rows="6" placeholder="Histórico, pactos, conexões com facções, objetivos da crônica e segredos..."></textarea>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- PÍLULA DE NAVEGAÇÃO FLUTUANTE PARA MOBILE (< 768px) -->
+        <nav class="ed-mobile-column-pill" id="edMobileColumnPill">
+          <button type="button" class="ed-pill-tab active" data-col="1">
+            <span class="pill-number">1</span>
+            <span class="pill-title">Atributos</span>
+          </button>
+          <button type="button" class="ed-pill-tab" data-col="2">
+            <span class="pill-number">2</span>
+            <span class="pill-title">Arcana &amp; Gear</span>
+          </button>
+          <button type="button" class="ed-pill-tab" data-col="3">
+            <span class="pill-number">3</span>
+            <span class="pill-title">Mochila &amp; Notas</span>
+          </button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
          SECTION 3: PERFIL
          -------------------------------------------------------------------- -->
     <section id="section-profile" class="dash-section">
@@ -1217,519 +1755,6 @@
     </div>
   </div>
 
-  <!-- ========================================================================
-       16. MODAL: FICHA COMPLETA - ESCÓRIA DE DEUS RPG (3 COLUNAS RESPONSIVAS)
-       ======================================================================== -->
-  <div id="modalViewSheet" class="modal-overlay ed-sheet-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="viewSheetTitle">
-    <div class="modal-box ed-sheet-modal-box" id="edSheetBox">
-      <!-- CABEÇALHO UNIFICADO NO TOPO -->
-      <header class="ed-sheet-header">
-        <div class="ed-header-brand">
-          <div class="ed-avatar-wrapper">
-            <div id="viewSheetAvatar" class="sheet-avatar ed-avatar-circle" title="Avatar do Personagem">🎭</div>
-            <button type="button" class="ed-avatar-edit-btn" id="btnOpenSheetAvatarModal" title="Alterar Foto/Retrato">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            </button>
-            <input type="hidden" id="viewSheetAvatarUrl">
-          </div>
-          <div class="ed-header-names">
-            <div class="ed-names-line">
-              <input type="text" id="edCharFirstName" class="ed-input-title" placeholder="Nome" title="Nome do Personagem">
-              <input type="text" id="edCharLastName" class="ed-input-title" placeholder="Sobrenome" title="Sobrenome">
-              <input type="hidden" id="viewSheetId">
-              <h3 id="viewSheetTitle" style="display: none;"></h3>
-            </div>
-            <div class="ed-sub-line">
-              <input type="text" id="edCharSubtitle" class="ed-input-subtitle" placeholder="Subtítulo ou Conceito (ex: Caçador das Terras Ermas)">
-              <span id="viewSheetSubtitle" style="display: none;"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Metadados da Ficha (Alinhamento, Raça, Nível) -->
-        <div class="ed-header-meta">
-          <div class="ed-meta-item">
-            <label>Alinhamento</label>
-            <select id="edSheetAlignment" class="ed-meta-select">
-              <option value="Neutro">Neutro</option>
-              <option value="Ordeiro">Ordeiro</option>
-              <option value="Caótico">Caótico</option>
-              <option value="Devoto">Devoto</option>
-              <option value="Mártir">Mártir</option>
-              <option value="Herege">Herege</option>
-            </select>
-          </div>
-          <div class="ed-meta-item">
-            <label>Raça</label>
-            <input type="text" id="edSheetRace" class="ed-meta-input" placeholder="Raça" value="Humano">
-          </div>
-          <div class="ed-meta-item ed-meta-item-narrow">
-            <label>Nível</label>
-            <input type="number" id="viewSheetLevel" class="ed-meta-input text-center" min="1" max="50" value="1">
-          </div>
-          <div class="ed-meta-item">
-            <label>Dono</label>
-            <span id="viewSheetOwner" class="ed-owner-tag">Mestre</span>
-          </div>
-        </div>
-
-        <!-- Ações do Cabeçalho e Controles de Tema / Navegação -->
-        <div class="ed-header-actions">
-          <!-- Navegador do Desktop Médio (768px - 1099px) -->
-          <div class="ed-med-nav-controls" id="edMedNavControls">
-            <button type="button" class="btn btn-ghost btn-sm" id="btnMedPrevCols" title="Ver Colunas Anteriores">‹ Anterior</button>
-            <span class="ed-med-indicator" id="edMedNavIndicator">Colunas 1 &amp; 2</span>
-            <button type="button" class="btn btn-ghost btn-sm" id="btnMedNextCols" title="Ver Próximas Colunas">Próxima ›</button>
-          </div>
-
-          <!-- Seletor de Cor de Destaque (--sheet-accent) -->
-          <div class="ed-theme-accent-picker" title="Personalizar Cor de Destaque">
-            <label for="edSheetAccentPicker" class="ed-accent-swatch-btn" id="edAccentSwatchPreview"></label>
-            <input type="color" id="edSheetAccentPicker" value="#dc2626">
-          </div>
-
-          <button type="button" id="btnSaveSheetChanges" class="btn btn-primary btn-sm">
-            <span>Salvar</span>
-          </button>
-          <button type="button" class="btn-close-modal" data-close-modal="modalViewSheet" aria-label="Fechar modal">&times;</button>
-        </div>
-      </header>
-
-      <!-- CORPO DA FICHA: 3 COLUNAS ADAPTATIVAS -->
-      <div class="ed-sheet-body" id="edSheetBody">
-        <!-- ================================================================
-             COLUNA 1: ATRIBUTOS, RETRATO, PV/PM & 26 PERÍCIAS
-             ================================================================ -->
-        <div class="ed-sheet-col ed-sheet-col-1" id="edSheetCol1" data-col-index="1">
-          <div class="ed-col-content">
-
-            <!-- Painel: Atributos + Retrato Fade-out -->
-            <div class="ed-glass-card ed-card-attributes">
-              <div class="ed-card-heading">
-                <h4>Atributos Primordiais</h4>
-                <button type="button" class="btn btn-ghost btn-xs" id="btnPortraitTrigger">Foto / Retrato</button>
-              </div>
-
-              <div class="ed-attr-portrait-split">
-                <!-- Atributos: Físico, Mente, Alma -->
-                <div class="ed-attributes-column">
-                  <!-- Físico -->
-                  <div class="ed-attr-block" data-attr-name="fisico">
-                    <div class="ed-attr-label-row">
-                      <span class="ed-attr-name">FÍSICO</span>
-                      <button type="button" class="ed-diamond-badge" id="btnAttrFisico" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
-                        <span>d6</span>
-                      </button>
-                    </div>
-                    <div class="ed-risk-ticks" data-attr-risk="fisico" title="Marcas de Evolução de Físico (1-3 destaque, >3 ouro)">
-                      <span class="ed-tick" data-tick="1"></span>
-                      <span class="ed-tick" data-tick="2"></span>
-                      <span class="ed-tick" data-tick="3"></span>
-                      <span class="ed-tick" data-tick="4"></span>
-                      <span class="ed-tick" data-tick="5"></span>
-                    </div>
-                  </div>
-
-                  <!-- Mente -->
-                  <div class="ed-attr-block" data-attr-name="mente">
-                    <div class="ed-attr-label-row">
-                      <span class="ed-attr-name">MENTE</span>
-                      <button type="button" class="ed-diamond-badge" id="btnAttrMente" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
-                        <span>d6</span>
-                      </button>
-                    </div>
-                    <div class="ed-risk-ticks" data-attr-risk="mente" title="Marcas de Evolução de Mente (1-3 destaque, >3 ouro)">
-                      <span class="ed-tick" data-tick="1"></span>
-                      <span class="ed-tick" data-tick="2"></span>
-                      <span class="ed-tick" data-tick="3"></span>
-                      <span class="ed-tick" data-tick="4"></span>
-                      <span class="ed-tick" data-tick="5"></span>
-                    </div>
-                  </div>
-
-                  <!-- Alma -->
-                  <div class="ed-attr-block" data-attr-name="alma">
-                    <div class="ed-attr-label-row">
-                      <span class="ed-attr-name">ALMA</span>
-                      <button type="button" class="ed-diamond-badge" id="btnAttrAlma" data-dice="d6" title="Clique para alternar dado (d4, d6, d8, d10, d12)">
-                        <span>d6</span>
-                      </button>
-                    </div>
-                    <div class="ed-risk-ticks" data-attr-risk="alma" title="Marcas de Evolução de Alma (1-3 destaque, >3 ouro)">
-                      <span class="ed-tick" data-tick="1"></span>
-                      <span class="ed-tick" data-tick="2"></span>
-                      <span class="ed-tick" data-tick="3"></span>
-                      <span class="ed-tick" data-tick="4"></span>
-                      <span class="ed-tick" data-tick="5"></span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Retrato com máscara de fade-out suave na base -->
-                <div class="ed-portrait-box" id="edPortraitBox">
-                  <img id="edPortraitImage" src="" alt="Retrato do Personagem" class="ed-portrait-fade" style="display:none;">
-                  <div id="edPortraitEmpty" class="ed-portrait-empty">
-                    <span>Sem Imagem</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Painel: PV e PM Interativos -->
-            <div class="ed-glass-card ed-card-vitals">
-              <!-- PV -->
-              <div class="ed-vital-container vital-pv">
-                <div class="ed-vital-header">
-                  <div class="ed-vital-title-group">
-                    <span class="ed-vital-pill pill-pv">PV</span>
-                    <strong>Pontos de Vida</strong>
-                  </div>
-                  <div class="ed-vital-inputs">
-                    <span id="edDisplayCurrentHp" class="ed-current-num">10</span>
-                    <span class="ed-sep">/</span>
-                    <input type="number" id="viewSheetMaxHp" class="ed-max-input" min="1" max="99" value="10" title="PV Máximo">
-                    <input type="hidden" id="viewSheetCurrentHp" value="10">
-                    <span id="viewSheetHpBadge" style="display:none;">100%</span>
-                  </div>
-                </div>
-                <!-- Grade de quadradinhos interativos de PV -->
-                <div class="ed-square-grid" id="edPvSquareGrid" title="Clique para ajustar PV"></div>
-              </div>
-
-              <!-- PM -->
-              <div class="ed-vital-container vital-pm">
-                <div class="ed-vital-header">
-                  <div class="ed-vital-title-group">
-                    <span class="ed-vital-pill pill-pm">PM</span>
-                    <strong>Pontos de Mana</strong>
-                  </div>
-                  <div class="ed-vital-inputs">
-                    <span id="edDisplayCurrentMp" class="ed-current-num">6</span>
-                    <span class="ed-sep">/</span>
-                    <input type="number" id="viewSheetMaxMp" class="ed-max-input" min="0" max="99" value="6" title="PM Máximo">
-                    <input type="hidden" id="viewSheetCurrentMp" value="6">
-                  </div>
-                </div>
-                <!-- Grade de quadradinhos interativos de PM -->
-                <div class="ed-square-grid" id="edPmSquareGrid" title="Clique para ajustar PM"></div>
-              </div>
-            </div>
-
-            <!-- Painel: 26 Perícias Obrigatórias -->
-            <div class="ed-glass-card ed-card-skills">
-              <div class="ed-card-heading">
-                <h4>Perícias</h4>
-                <span class="ed-card-sub">26 Perícias • Losango de Dado &bull; Evolução</span>
-              </div>
-              <div class="ed-skills-list" id="edSkillsList">
-                <!-- 26 perícias renderizadas via JS -->
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- ================================================================
-             COLUNA 2: ARCANA BUILDER, EQUIPAMENTOS, PROTEÇÃO, TROCA RÁPIDA
-             ================================================================ -->
-        <div class="ed-sheet-col ed-sheet-col-2" id="edSheetCol2" data-col-index="2">
-          <div class="ed-col-scroll">
-
-            <!-- Criador de Arcana / Feitiços -->
-            <div class="ed-glass-card ed-card-arcana">
-              <div class="ed-card-heading">
-                <h4>Criador de Arcana</h4>
-                <span class="ed-card-sub">Montagem de Técnicas</span>
-              </div>
-
-              <div class="ed-arcana-form">
-                <div class="ed-arcana-selectors-grid">
-                  <div class="ed-form-field">
-                    <label>Função</label>
-                    <select id="arcanaSelectFuncao" class="ed-field-select">
-                      <option value="Dano">Dano</option>
-                      <option value="Proteção">Proteção</option>
-                      <option value="Cura">Cura</option>
-                      <option value="Sentidos">Sentidos</option>
-                      <option value="Controle">Controle</option>
-                      <option value="Movimento">Movimento</option>
-                      <option value="Ilusão">Ilusão</option>
-                      <option value="Evocação">Evocação</option>
-                    </select>
-                  </div>
-
-                  <div class="ed-form-field">
-                    <label>Característica</label>
-                    <select id="arcanaSelectCaracteristica" class="ed-field-select">
-                      <option value="Fogo">Fogo</option>
-                      <option value="Gelo">Gelo</option>
-                      <option value="Eletricidade">Eletricidade</option>
-                      <option value="Sombra">Sombra</option>
-                      <option value="Luz">Luz</option>
-                      <option value="Ar">Ar</option>
-                      <option value="Terra">Terra</option>
-                      <option value="Mental">Mental</option>
-                      <option value="Vital">Vital</option>
-                    </select>
-                  </div>
-
-                  <div class="ed-form-field">
-                    <label>Alvo</label>
-                    <select id="arcanaSelectAlvo" class="ed-field-select">
-                      <option value="Pessoal">Pessoal</option>
-                      <option value="Toque" selected>Toque</option>
-                      <option value="1 Alvo (9m)">1 Alvo (9m)</option>
-                      <option value="1 Alvo (18m)">1 Alvo (18m)</option>
-                      <option value="Área (6m)">Área (6m)</option>
-                      <option value="Cone (9m)">Cone (9m)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Badges Circulares de Resultado Dinâmico -->
-                <div class="ed-arcana-results-row">
-                  <div class="ed-circle-indicator green" id="arcanaBadgeDistancia" title="Distância / Alcance da Técnica">
-                    <span class="ed-circle-dot">🟢</span>
-                    <span class="ed-circle-label" id="arcanaValDistancia">Toque</span>
-                  </div>
-                  <div class="ed-circle-indicator blue" id="arcanaBadgePm" title="Custo em Pontos de Mana (PM)">
-                    <span class="ed-circle-dot">🔵</span>
-                    <span class="ed-circle-label" id="arcanaValPm">2 PM</span>
-                  </div>
-                  <div class="ed-circle-indicator yellow" id="arcanaBadgeAcoes" title="Custo de Ações">
-                    <span class="ed-circle-dot">🟡</span>
-                    <span class="ed-circle-label" id="arcanaValAcoes">1 Ação</span>
-                  </div>
-                </div>
-
-                <div class="ed-arcana-action-row">
-                  <input type="text" id="arcanaCustomName" class="ed-field-input" placeholder="Nome da técnica (ex: Lança de Cinzas)...">
-                  <button type="button" class="btn btn-primary btn-sm" id="btnRegisterArcana">+ Adicionar Arcana</button>
-                </div>
-              </div>
-
-              <!-- Lista de Arcanas do Personagem -->
-              <div class="ed-arcana-saved-list" id="edArcanaSavedList"></div>
-            </div>
-
-            <!-- Equipamentos 1 e 2 -->
-            <div class="ed-glass-card ed-card-gear">
-              <div class="ed-card-heading">
-                <h4>Equipamentos em Punho</h4>
-              </div>
-
-              <div class="ed-gear-list">
-                <!-- Equipamento 1 -->
-                <div class="ed-gear-card" id="cardEquip1">
-                  <div class="ed-gear-top">
-                    <div class="ed-gear-circle-icon" id="iconSlotEquip1" title="Clique para trocar ícone">⚔️</div>
-                    <div class="ed-gear-titles">
-                      <input type="text" id="nameEquip1" class="ed-gear-name-input" placeholder="Equipamento 1" value="Espada Longa">
-                      <input type="text" id="descEquip1" class="ed-gear-desc-input" placeholder="Descrição e detalhes" value="Lâmina de aço afiada">
-                    </div>
-                  </div>
-                  <div class="ed-gear-badges-row">
-                    <div class="ed-gear-badge-item" title="Dado de Dano / Rolagem">
-                      <span class="badge-tag-label">Dado</span>
-                      <input type="text" id="diceEquip1" class="ed-badge-input" value="1d8">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Efeito Especial">
-                      <span class="badge-tag-label">Efeito</span>
-                      <input type="text" id="effectEquip1" class="ed-badge-input" value="Crítico 19">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Perícia Necessária">
-                      <span class="badge-tag-label">Perícia</span>
-                      <input type="text" id="skillEquip1" class="ed-badge-input" value="Luta">
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Equipamento 2 -->
-                <div class="ed-gear-card" id="cardEquip2">
-                  <div class="ed-gear-top">
-                    <div class="ed-gear-circle-icon" id="iconSlotEquip2" title="Clique para trocar ícone">🏹</div>
-                    <div class="ed-gear-titles">
-                      <input type="text" id="nameEquip2" class="ed-gear-name-input" placeholder="Equipamento 2" value="Arco Curto">
-                      <input type="text" id="descEquip2" class="ed-gear-desc-input" placeholder="Descrição e detalhes" value="Madeira recurva reforçada">
-                    </div>
-                  </div>
-                  <div class="ed-gear-badges-row">
-                    <div class="ed-gear-badge-item" title="Dado de Dano / Rolagem">
-                      <span class="badge-tag-label">Dado</span>
-                      <input type="text" id="diceEquip2" class="ed-badge-input" value="1d6">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Efeito Especial">
-                      <span class="badge-tag-label">Efeito</span>
-                      <input type="text" id="effectEquip2" class="ed-badge-input" value="Alcance 18m">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Perícia Necessária">
-                      <span class="badge-tag-label">Perícia</span>
-                      <input type="text" id="skillEquip2" class="ed-badge-input" value="Atirar">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Proteção 1 e 2 -->
-            <div class="ed-glass-card ed-card-gear">
-              <div class="ed-card-heading">
-                <h4>Proteções &amp; Defesa</h4>
-                <div class="ed-def-val-box">
-                  <span>Defesa (CA):</span>
-                  <input type="number" id="viewSheetAc" class="ed-def-input" min="0" max="99" value="14">
-                </div>
-              </div>
-
-              <div class="ed-gear-list">
-                <!-- Proteção 1 -->
-                <div class="ed-gear-card" id="cardProt1">
-                  <div class="ed-gear-top">
-                    <div class="ed-gear-circle-icon" id="iconSlotProt1" title="Clique para trocar ícone">🛡️</div>
-                    <div class="ed-gear-titles">
-                      <input type="text" id="nameProt1" class="ed-gear-name-input" placeholder="Proteção 1" value="Escudo de Ferro">
-                      <input type="text" id="descProt1" class="ed-gear-desc-input" placeholder="Descrição da proteção" value="+2 na Defesa">
-                    </div>
-                  </div>
-                  <div class="ed-gear-badges-row">
-                    <div class="ed-gear-badge-item" title="Espaços de Proteção">
-                      <span class="badge-tag-label">Espaços</span>
-                      <input type="text" id="slotsProt1" class="ed-badge-input" value="1 Espaço">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Efeito de Proteção">
-                      <span class="badge-tag-label">Efeito</span>
-                      <input type="text" id="effectProt1" class="ed-badge-input" value="+2 Defesa">
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Proteção 2 -->
-                <div class="ed-gear-card" id="cardProt2">
-                  <div class="ed-gear-top">
-                    <div class="ed-gear-circle-icon" id="iconSlotProt2" title="Clique para trocar ícone">🦺</div>
-                    <div class="ed-gear-titles">
-                      <input type="text" id="nameProt2" class="ed-gear-name-input" placeholder="Proteção 2" value="Gibão de Couro">
-                      <input type="text" id="descProt2" class="ed-gear-desc-input" placeholder="Descrição da armadura" value="Couro curtido com reforço">
-                    </div>
-                  </div>
-                  <div class="ed-gear-badges-row">
-                    <div class="ed-gear-badge-item" title="Espaços de Proteção">
-                      <span class="badge-tag-label">Espaços</span>
-                      <input type="text" id="slotsProt2" class="ed-badge-input" value="2 Espaços">
-                    </div>
-                    <div class="ed-gear-badge-item" title="Efeito de Proteção">
-                      <span class="badge-tag-label">Efeito</span>
-                      <input type="text" id="effectProt2" class="ed-badge-input" value="Res. Corte">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Troca Rápida: Grade Horizontal com 6 Slots Circulares -->
-            <div class="ed-glass-card ed-card-quickswap">
-              <div class="ed-card-heading">
-                <h4>⚡ Troca Rápida</h4>
-                <span class="ed-card-sub">6 Slots &bull; Clique para equipar ou reposicionar</span>
-              </div>
-              <div class="ed-quickswap-slots" id="edQuickSwapSlotsContainer">
-                <!-- 6 slots circulares gerados dinamicamente via JS -->
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- ================================================================
-             COLUNA 3: MOCHILA (INVENTÁRIO), TIBARES, NOTAS RÁPIDAS & BLOCO
-             ================================================================ -->
-        <div class="ed-sheet-col ed-sheet-col-3" id="edSheetCol3" data-col-index="3">
-          <div class="ed-col-scroll">
-
-            <!-- Dinheiro: Tibares (T$) e Ouro -->
-            <div class="ed-glass-card ed-card-coins">
-              <div class="ed-card-heading">
-                <h4>Moedas &amp; Economia</h4>
-                <span class="ed-card-sub">Tibares (T$)</span>
-              </div>
-              <div class="ed-coins-grid">
-                <div class="ed-coin-box">
-                  <span class="ed-coin-symbol">🪙</span>
-                  <div class="ed-coin-info">
-                    <label>Tibares (T$)</label>
-                    <input type="number" id="edCoinsTibares" class="ed-coin-input" value="50" min="0">
-                  </div>
-                </div>
-                <div class="ed-coin-box">
-                  <span class="ed-coin-symbol">✨</span>
-                  <div class="ed-coin-info">
-                    <label>Ouro (TO)</label>
-                    <input type="number" id="edCoinsOuro" class="ed-coin-input" value="0" min="0">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mochila / Inventário Geral -->
-            <div class="ed-glass-card ed-card-backpack">
-              <div class="ed-card-heading">
-                <h4>Inventário Geral (Mochila)</h4>
-                <div class="ed-capacity-badge" id="edBackpackCapacityBadge">
-                  <span id="edBackpackSlotsOccupied">0</span> / <span id="edBackpackSlotsMax">10</span> Espaços
-                </div>
-              </div>
-
-              <!-- Formulário rápido para adicionar item -->
-              <div class="ed-add-backpack-form">
-                <input type="text" id="edNewBackpackName" class="ed-field-input" placeholder="Nome do item...">
-                <input type="number" id="edNewBackpackSlots" class="ed-field-input-slots" value="1" min="1" max="10" title="Espaços ocupados">
-                <button type="button" class="btn btn-ghost btn-sm" id="btnAddNewBackpackItem">+ Add</button>
-              </div>
-
-              <!-- Lista de Itens da Mochila -->
-              <div class="ed-backpack-items-list" id="edBackpackItemsList">
-                <!-- Renderizado via JS -->
-              </div>
-            </div>
-
-            <!-- Notas Rápidas & Condições -->
-            <div class="ed-glass-card ed-card-quicknotes">
-              <div class="ed-card-heading">
-                <h4>Notas Rápidas &amp; Condições</h4>
-              </div>
-              <input type="text" id="edQuickConditionInput" class="ed-field-input" placeholder="Ex: Abençoado, Envenenado, Foco de Luz (+2 PM)...">
-            </div>
-
-            <!-- Bloco de Anotações Expansível -->
-            <div class="ed-glass-card ed-card-notes" id="edCardNotes">
-              <div class="ed-card-heading">
-                <h4>Bloco de Anotações</h4>
-                <button type="button" class="btn btn-ghost btn-xs" id="btnToggleExpandNotes">↕ Expandir</button>
-              </div>
-              <textarea id="viewSheetNotes" class="ed-notes-textarea" rows="6" placeholder="Histórico, pactos, conexões com facções, objetivos da crônica e segredos..."></textarea>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- PÍLULA DE NAVEGAÇÃO FLUTUANTE PARA MOBILE (< 768px) -->
-      <nav class="ed-mobile-column-pill" id="edMobileColumnPill">
-        <button type="button" class="ed-pill-tab active" data-col="1">
-          <span class="pill-number">1</span>
-          <span class="pill-title">Atributos</span>
-        </button>
-        <button type="button" class="ed-pill-tab" data-col="2">
-          <span class="pill-number">2</span>
-          <span class="pill-title">Arcana &amp; Gear</span>
-        </button>
-        <button type="button" class="ed-pill-tab" data-col="3">
-          <span class="pill-number">3</span>
-          <span class="pill-title">Mochila &amp; Notas</span>
-        </button>
-      </nav>
-    </div>
-  </div>
 
   <!-- ========================================================================
        17. MODAL AUXILIAR: AÇÃO DE TROCA RÁPIDA (#modalQuickSwapAction)
