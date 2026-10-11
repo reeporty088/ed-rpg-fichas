@@ -1271,6 +1271,61 @@ main.dashboard-content,
   margin-bottom: 24px;
 }
 
+/* Internal Tabs Navigation Wrapper & Lateral Arrows */
+.tabs-nav-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.tab-arrow-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+.tab-arrow-btn:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px var(--accent-primary-glow);
+  background: var(--glass-bg-hover);
+  transform: scale(1.05);
+}
+
+.tab-arrow-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.tab-arrow-btn:disabled,
+.tab-arrow-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.tabs-nav-scroll,
 .camp-tabs-nav {
   display: flex;
   align-items: center;
@@ -1281,14 +1336,16 @@ main.dashboard-content,
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
   overflow-x: auto;
+  scroll-behavior: smooth;
   white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
+.tabs-nav-scroll::-webkit-scrollbar,
 .camp-tabs-nav::-webkit-scrollbar {
   display: none;
 }

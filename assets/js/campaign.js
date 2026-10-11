@@ -213,18 +213,70 @@ function listenCampaignDoc(campaignId) {
 }
 
 // ==========================================================================
-// 4. CONTROLE DE ABAS INTERNAS DA CAMPANHA
+// 4. CONTROLE DE ABAS INTERNAS DA CAMPANHA E NAVEGAÇÃO LATERAL
 // ==========================================================================
+const campaignTabsScroll = document.getElementById("campaign-tabs-scroll");
+const tabArrowLeft = document.getElementById("tab-arrow-left");
+const tabArrowRight = document.getElementById("tab-arrow-right");
+
+function updateTabArrowsVisibility() {
+  if (!campaignTabsScroll) return;
+
+  const scrollLeft = campaignTabsScroll.scrollLeft;
+  const clientWidth = campaignTabsScroll.clientWidth;
+  const scrollWidth = campaignTabsScroll.scrollWidth;
+
+  const maxScroll = scrollWidth - clientWidth;
+  const hasOverflow = maxScroll > 2;
+
+  if (tabArrowLeft) {
+    const isAtStart = scrollLeft <= 2;
+    const hideLeft = !hasOverflow || isAtStart;
+    tabArrowLeft.disabled = hideLeft;
+    tabArrowLeft.classList.toggle("hidden", hideLeft);
+  }
+
+  if (tabArrowRight) {
+    const isAtEnd = scrollLeft >= maxScroll - 2;
+    const hideRight = !hasOverflow || isAtEnd;
+    tabArrowRight.disabled = hideRight;
+    tabArrowRight.classList.toggle("hidden", hideRight);
+  }
+}
+
+if (tabArrowLeft && campaignTabsScroll) {
+  tabArrowLeft.addEventListener("click", () => {
+    campaignTabsScroll.scrollBy({ left: -180, behavior: "smooth" });
+  });
+}
+
+if (tabArrowRight && campaignTabsScroll) {
+  tabArrowRight.addEventListener("click", () => {
+    campaignTabsScroll.scrollBy({ left: 180, behavior: "smooth" });
+  });
+}
+
+if (campaignTabsScroll) {
+  campaignTabsScroll.addEventListener("scroll", updateTabArrowsVisibility, { passive: true });
+}
+
+window.addEventListener("resize", updateTabArrowsVisibility);
+
 function switchCampTab(tabId) {
   campTabButtons.forEach((btn) => {
     const isTarget = btn.getAttribute("data-camptab") === tabId;
     btn.classList.toggle("active", isTarget);
+    if (isTarget && campaignTabsScroll) {
+      btn.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" });
+    }
   });
 
   campTabPanels.forEach((panel) => {
     const isTarget = panel.id === `campTab-${tabId}`;
     panel.classList.toggle("active", isTarget);
   });
+
+  setTimeout(updateTabArrowsVisibility, 60);
 }
 
 campTabButtons.forEach((btn) => {

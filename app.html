@@ -194,7 +194,9 @@
 
       <!-- Internal Tabs Navigation -->
       <div class="camp-nav-container">
-        <nav class="camp-tabs-nav" aria-label="Abas da Campanha">
+        <div class="tabs-nav-wrapper">
+          <button type="button" id="tab-arrow-left" class="tab-arrow-btn left" aria-label="Rolar abas para a esquerda" title="Rolar para a esquerda">&#10094;</button>
+          <nav id="campaign-tabs-scroll" class="camp-tabs-nav tabs-nav-scroll" aria-label="Abas da Campanha">
           <button type="button" class="camp-tab-btn active" data-camptab="sheets">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -237,7 +239,9 @@
             </svg>
             <span>Configurações</span>
           </button>
-        </nav>
+          </nav>
+          <button type="button" id="tab-arrow-right" class="tab-arrow-btn right" aria-label="Rolar abas para a direita" title="Rolar para a direita">&#10095;</button>
+        </div>
       </div>
 
       <!-- ====================================================================
