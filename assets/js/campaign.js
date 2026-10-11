@@ -148,7 +148,7 @@ export function initCampaignWorkspace(campaign, user, switchSectionCallback, sho
   // Atualiza banner superior da campanha
   if (detailCoverImg) detailCoverImg.src = campaign.coverUrl || "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop";
   if (detailTitle) detailTitle.textContent = campaign.name;
-  if (detailSystemBadge) detailSystemBadge.textContent = campaign.system || "Sistema A";
+  if (detailSystemBadge) detailSystemBadge.textContent = campaign.system || "Escória de Deus RPG";
 
   if (detailRoleBadge) {
     detailRoleBadge.textContent = isMasterUser ? "Mestre" : "Jogador";
@@ -644,76 +644,195 @@ if (btnConfirmDeleteSheet) {
   });
 }
 
-// Modal Detalhes e Edição da Ficha Completa
+// ==========================================================================
+// 5. MODAL DETALHES E FICHA COMPLETA: ESCÓRIA DE DEUS RPG
+// ==========================================================================
 let currentViewingSheet = null;
-const formEditSheet = document.getElementById("formEditSheet");
+let selectedQuickSwapSlotIndex = null;
+
+const ED_SKILLS_LIST = [
+  "Agilidade", "Animais", "Arte", "Atirar", "Conduzir", "Conhecimento",
+  "Energia", "Enganação", "Esquiva", "Esporte", "Fortitude", "Furtividade",
+  "Influência", "Intuição", "Investigação", "Ladinagem", "Luta", "Máquinas",
+  "Medicina", "Mística", "Ofício", "Percepção", "Persuasão", "Sobrevivência",
+  "Vitalidade", "Vontade"
+];
+const ED_DICE_CYCLE = ["-", "d4", "d6", "d8", "d10", "d12"];
+const ED_ATTR_DICE_CYCLE = ["d4", "d6", "d8", "d10", "d12"];
 
 function openViewSheetModal(sheet) {
-  currentViewingSheet = sheet;
+  currentViewingSheet = { ...sheet };
   const isOwner = sheet.ownerId === currentAuthUser.uid;
   const canEdit = isMasterUser || isOwner;
 
+  const sheetBox = document.getElementById("edSheetBox");
+  const edBody = document.getElementById("edSheetBody");
+
+  // Identidade e Cabeçalho
   const idInput = document.getElementById("viewSheetId");
-  const title = document.getElementById("viewSheetTitle");
-  const subtitle = document.getElementById("viewSheetSubtitle");
-  const avatar = document.getElementById("viewSheetAvatar");
-  const owner = document.getElementById("viewSheetOwner");
+  const firstNameInput = document.getElementById("edCharFirstName");
+  const lastNameInput = document.getElementById("edCharLastName");
+  const subtitleInput = document.getElementById("edCharSubtitle");
+  const alignmentSelect = document.getElementById("edSheetAlignment");
+  const raceInput = document.getElementById("edSheetRace");
   const levelInput = document.getElementById("viewSheetLevel");
-  const acInput = document.getElementById("viewSheetAc");
-  const currentHpInput = document.getElementById("viewSheetCurrentHp");
-  const maxHpInput = document.getElementById("viewSheetMaxHp");
-  const currentMpInput = document.getElementById("viewSheetCurrentMp");
-  const maxMpInput = document.getElementById("viewSheetMaxMp");
-  const notesInput = document.getElementById("viewSheetNotes");
-  const hpBadge = document.getElementById("viewSheetHpBadge");
+  const ownerLabel = document.getElementById("viewSheetOwner");
+  const avatarCircle = document.getElementById("viewSheetAvatar");
+  const avatarUrlHidden = document.getElementById("viewSheetAvatarUrl");
+  const portraitImg = document.getElementById("edPortraitImage");
+  const portraitEmpty = document.getElementById("edPortraitEmpty");
+  const accentPicker = document.getElementById("edSheetAccentPicker");
+  const accentPreview = document.getElementById("edAccentSwatchPreview");
   const btnSave = document.getElementById("btnSaveSheetChanges");
 
   if (idInput) idInput.value = sheet.id;
-  if (title) title.textContent = sheet.name || "Sem Nome";
-  if (subtitle) subtitle.textContent = `${sheet.class || sheet.characterClass || "Guerreiro"} • ${sheet.race || "Humano"}`;
-  if (avatar) {
-    if (sheet.avatarUrl) {
-      avatar.innerHTML = `<img src="${escapeHtml(sheet.avatarUrl)}" class="sheet-avatar-img" onerror="this.onerror=null; this.parentElement.textContent='${escapeHtml((sheet.name || "P").charAt(0).toUpperCase())}';">`;
+
+  // Nome e Sobrenome
+  let [fName, ...lNames] = (sheet.name || "Aventureiro").split(" ");
+  if (sheet.firstName !== undefined) fName = sheet.firstName;
+  if (sheet.lastName !== undefined) lNames = [sheet.lastName];
+
+  if (firstNameInput) firstNameInput.value = fName || "";
+  if (lastNameInput) lastNameInput.value = lNames.join(" ") || "";
+  if (subtitleInput) subtitleInput.value = sheet.subtitle || (sheet.class ? `${sheet.class} • ${sheet.race || "Humano"}` : "");
+  if (alignmentSelect) alignmentSelect.value = sheet.alignment || "Neutro";
+  if (raceInput) raceInput.value = sheet.race || "Humano";
+  if (levelInput) levelInput.value = sheet.level || 1;
+  if (ownerLabel) ownerLabel.textContent = sheet.ownerName || "Não atribuída (Mestre)";
+
+  // Cor de Destaque (--sheet-accent)
+  const accentColor = sheet.accentColor || "#dc2626";
+  if (sheetBox) {
+    sheetBox.style.setProperty("--sheet-accent", accentColor);
+    sheetBox.style.setProperty("--sheet-accent-glow", `${accentColor}70`);
+    sheetBox.style.setProperty("--sheet-accent-subtle", `${accentColor}20`);
+  }
+  if (accentPreview) accentPreview.style.background = accentColor;
+  if (accentPicker) accentPicker.value = accentColor;
+
+  // Retrato e Avatar
+  const avUrl = sheet.avatarUrl || "";
+  if (avatarUrlHidden) avatarUrlHidden.value = avUrl;
+  if (avatarCircle) {
+    if (avUrl) {
+      avatarCircle.innerHTML = `<img src="${escapeHtml(avUrl)}" alt="Avatar" onerror="this.onerror=null; this.parentElement.textContent='${escapeHtml((sheet.name || "P").charAt(0).toUpperCase())}';">`;
     } else {
-      avatar.textContent = (sheet.name || "P").charAt(0).toUpperCase();
+      avatarCircle.textContent = (sheet.name || "P").charAt(0).toUpperCase();
     }
   }
-  if (owner) owner.textContent = sheet.ownerName || "Não atribuída (Mestre)";
 
-  if (levelInput) {
-    levelInput.value = sheet.level || 1;
-    levelInput.disabled = !canEdit;
-  }
-  if (acInput) {
-    acInput.value = sheet.defense ?? sheet.ac ?? 10;
-    acInput.disabled = !canEdit;
-  }
-  if (currentHpInput) {
-    currentHpInput.value = sheet.hpCurrent ?? sheet.currentHp ?? 10;
-    currentHpInput.disabled = !canEdit;
-  }
-  if (maxHpInput) {
-    maxHpInput.value = sheet.hpMax ?? sheet.maxHp ?? 10;
-    maxHpInput.disabled = !canEdit;
-  }
-  if (currentMpInput) {
-    currentMpInput.value = sheet.pmCurrent ?? sheet.currentMp ?? 5;
-    currentMpInput.disabled = !canEdit;
-  }
-  if (maxMpInput) {
-    maxMpInput.value = sheet.pmMax ?? sheet.maxMp ?? 5;
-    maxMpInput.disabled = !canEdit;
-  }
-  if (notesInput) {
-    notesInput.value = sheet.notes || "";
-    notesInput.disabled = !canEdit;
+  if (portraitImg && portraitEmpty) {
+    if (avUrl) {
+      portraitImg.src = avUrl;
+      portraitImg.style.display = "block";
+      portraitEmpty.style.display = "none";
+    } else {
+      portraitImg.style.display = "none";
+      portraitEmpty.style.display = "block";
+    }
   }
 
-  const effectiveMaxHp = sheet.hpMax ?? sheet.maxHp ?? 10;
-  const effectiveCurHp = sheet.hpCurrent ?? sheet.currentHp ?? effectiveMaxHp;
-  const hpPercent = effectiveMaxHp > 0 ? Math.round((effectiveCurHp / effectiveMaxHp) * 100) : 100;
-  if (hpBadge) hpBadge.textContent = `${hpPercent}%`;
+  // Atributos (Físico, Mente, Alma)
+  currentViewingSheet.attributes = sheet.attributes || {
+    fisico: { dice: "d6", marks: 0 },
+    mente: { dice: "d6", marks: 0 },
+    alma: { dice: "d6", marks: 0 }
+  };
+  renderAttributes();
 
+  // PV e PM Interativos
+  const maxHp = sheet.hpMax ?? sheet.maxHp ?? 10;
+  const currentHp = sheet.hpCurrent ?? sheet.currentHp ?? maxHp;
+  const maxMp = sheet.pmMax ?? sheet.maxMp ?? 6;
+  const currentMp = sheet.pmCurrent ?? sheet.currentMp ?? maxMp;
+
+  currentViewingSheet.maxHp = maxHp;
+  currentViewingSheet.currentHp = currentHp;
+  currentViewingSheet.maxMp = maxMp;
+  currentViewingSheet.currentMp = currentMp;
+
+  const maxHpInput = document.getElementById("viewSheetMaxHp");
+  const maxMpInput = document.getElementById("viewSheetMaxMp");
+  if (maxHpInput) maxHpInput.value = maxHp;
+  if (maxMpInput) maxMpInput.value = maxMp;
+
+  renderPvGrid(currentHp, maxHp);
+  renderPmGrid(currentMp, maxMp);
+
+  // 26 Perícias
+  currentViewingSheet.skills = sheet.skills || {};
+  renderSkills();
+
+  // Arcana
+  currentViewingSheet.arcanas = sheet.arcanas || [];
+  updateArcanaOutcome();
+  renderArcanaSavedList();
+
+  // Equipamentos 1 e 2
+  currentViewingSheet.equip1 = sheet.equip1 || { icon: "⚔️", name: "Espada Longa", desc: "Lâmina de aço temperado", dice: "1d8", effect: "Crítico 19", skill: "Luta" };
+  currentViewingSheet.equip2 = sheet.equip2 || { icon: "🏹", name: "Arco Curto", desc: "Madeira reforçada", dice: "1d6", effect: "Alcance 18m", skill: "Atirar" };
+
+  setInputValue("nameEquip1", currentViewingSheet.equip1.name);
+  setInputValue("descEquip1", currentViewingSheet.equip1.desc);
+  setInputValue("diceEquip1", currentViewingSheet.equip1.dice);
+  setInputValue("effectEquip1", currentViewingSheet.equip1.effect);
+  setInputValue("skillEquip1", currentViewingSheet.equip1.skill);
+  setElementText("iconSlotEquip1", currentViewingSheet.equip1.icon || "⚔️");
+
+  setInputValue("nameEquip2", currentViewingSheet.equip2.name);
+  setInputValue("descEquip2", currentViewingSheet.equip2.desc);
+  setInputValue("diceEquip2", currentViewingSheet.equip2.dice);
+  setInputValue("effectEquip2", currentViewingSheet.equip2.effect);
+  setInputValue("skillEquip2", currentViewingSheet.equip2.skill);
+  setElementText("iconSlotEquip2", currentViewingSheet.equip2.icon || "🏹");
+
+  // Proteção 1 e 2 & Defesa (CA)
+  currentViewingSheet.prot1 = sheet.prot1 || { icon: "🛡️", name: "Escudo de Ferro", desc: "Bloqueio reforçado", slots: "1 Espaço", effect: "+2 Defesa" };
+  currentViewingSheet.prot2 = sheet.prot2 || { icon: "🦺", name: "Gibão de Couro", desc: "Armadura flexível", slots: "2 Espaços", effect: "Res. Corte" };
+
+  setInputValue("nameProt1", currentViewingSheet.prot1.name);
+  setInputValue("descProt1", currentViewingSheet.prot1.desc);
+  setInputValue("slotsProt1", currentViewingSheet.prot1.slots);
+  setInputValue("effectProt1", currentViewingSheet.prot1.effect);
+  setElementText("iconSlotProt1", currentViewingSheet.prot1.icon || "🛡️");
+
+  setInputValue("nameProt2", currentViewingSheet.prot2.name);
+  setInputValue("descProt2", currentViewingSheet.prot2.desc);
+  setInputValue("slotsProt2", currentViewingSheet.prot2.slots);
+  setInputValue("effectProt2", currentViewingSheet.prot2.effect);
+  setElementText("iconSlotProt2", currentViewingSheet.prot2.icon || "🦺");
+
+  const acInput = document.getElementById("viewSheetAc");
+  if (acInput) acInput.value = sheet.defense ?? sheet.ac ?? 14;
+
+  // Troca Rápida (6 slots)
+  currentViewingSheet.quickSwap = sheet.quickSwap || Array(6).fill(null);
+  renderQuickSwapSlots();
+
+  // Dinheiro (Tibares T$ e Ouro)
+  setInputValue("edCoinsTibares", sheet.tibares ?? 50);
+  setInputValue("edCoinsOuro", sheet.ouro ?? 0);
+
+  // Mochila (Inventário)
+  currentViewingSheet.backpack = sheet.backpack || [
+    { id: "bp_1", name: "Tocha (3x)", slots: 1 },
+    { id: "bp_2", name: "Ração de Viagem (5 dias)", slots: 1 },
+    { id: "bp_3", name: "Corda de Cânhamo (15m)", slots: 1 }
+  ];
+  currentViewingSheet.backpackMaxSlots = sheet.backpackMaxSlots || 10;
+  renderBackpack();
+
+  // Notas Rápidas e Anotações
+  setInputValue("edQuickConditionInput", sheet.conditions || "");
+  setInputValue("viewSheetNotes", sheet.notes || "");
+
+  // Inicializa estados de responsividade
+  if (edBody) {
+    if (!edBody.getAttribute("data-active-view")) edBody.setAttribute("data-active-view", "1-2");
+    if (!edBody.getAttribute("data-active-mobile")) edBody.setAttribute("data-active-mobile", "1");
+  }
+
+  // Controle de permissão de salvar
   if (btnSave) {
     btnSave.style.display = canEdit ? "inline-flex" : "none";
   }
@@ -721,30 +840,805 @@ function openViewSheetModal(sheet) {
   openModalById("modalViewSheet");
 }
 
-if (formEditSheet) {
-  formEditSheet.addEventListener("submit", async (e) => {
+function setInputValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val ?? "";
+}
+
+function setElementText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val ?? "";
+}
+
+// --------------------------------------------------------------------------
+// ATRIBUTOS E MARCAS DE RISCO (1-3 destaque, >3 ouro)
+// --------------------------------------------------------------------------
+function renderAttributes() {
+  if (!currentViewingSheet) return;
+  const attrs = currentViewingSheet.attributes || {};
+
+  ["fisico", "mente", "alma"].forEach((attr) => {
+    const data = attrs[attr] || { dice: "d6", marks: 0 };
+    const btnDice = document.getElementById(`btnAttr${attr.charAt(0).toUpperCase() + attr.slice(1)}`);
+    if (btnDice) {
+      btnDice.innerHTML = `<span>${escapeHtml(data.dice || "d6")}</span>`;
+      btnDice.setAttribute("data-dice", data.dice || "d6");
+    }
+
+    const ticksContainer = document.querySelector(`.ed-risk-ticks[data-attr-risk="${attr}"]`);
+    if (ticksContainer) {
+      ticksContainer.querySelectorAll(".ed-tick").forEach((tick) => {
+        const tickIdx = parseInt(tick.getAttribute("data-tick"), 10);
+        tick.className = "ed-tick";
+        if (tickIdx <= data.marks) {
+          if (data.marks > 3 && tickIdx > 3) {
+            tick.classList.add("gold");
+          } else {
+            tick.classList.add("marked");
+          }
+        }
+      });
+    }
+  });
+}
+
+// Listeners de alternância de dado de atributo e marcas de risco
+["fisico", "mente", "alma"].forEach((attr) => {
+  const cap = attr.charAt(0).toUpperCase() + attr.slice(1);
+  const btnDice = document.getElementById(`btnAttr${cap}`);
+  if (btnDice) {
+    btnDice.addEventListener("click", () => {
+      if (!currentViewingSheet) return;
+      currentViewingSheet.attributes = currentViewingSheet.attributes || {};
+      currentViewingSheet.attributes[attr] = currentViewingSheet.attributes[attr] || { dice: "d6", marks: 0 };
+
+      const curDice = currentViewingSheet.attributes[attr].dice || "d6";
+      const nextIdx = (ED_ATTR_DICE_CYCLE.indexOf(curDice) + 1) % ED_ATTR_DICE_CYCLE.length;
+      currentViewingSheet.attributes[attr].dice = ED_ATTR_DICE_CYCLE[nextIdx];
+      renderAttributes();
+    });
+  }
+
+  const ticksContainer = document.querySelector(`.ed-risk-ticks[data-attr-risk="${attr}"]`);
+  if (ticksContainer) {
+    ticksContainer.querySelectorAll(".ed-tick").forEach((tick) => {
+      tick.addEventListener("click", () => {
+        if (!currentViewingSheet) return;
+        currentViewingSheet.attributes = currentViewingSheet.attributes || {};
+        currentViewingSheet.attributes[attr] = currentViewingSheet.attributes[attr] || { dice: "d6", marks: 0 };
+
+        const tickIdx = parseInt(tick.getAttribute("data-tick"), 10);
+        const curMarks = currentViewingSheet.attributes[attr].marks || 0;
+
+        // Se clicou na marca já ativa, reduz em 1; caso contrário, ativa até ela
+        currentViewingSheet.attributes[attr].marks = curMarks === tickIdx ? tickIdx - 1 : tickIdx;
+        renderAttributes();
+      });
+    });
+  }
+});
+
+// --------------------------------------------------------------------------
+// PONTOS VITAIS: PV E PM INTERATIVOS
+// --------------------------------------------------------------------------
+function renderPvGrid(currentHp, maxHp) {
+  const container = document.getElementById("edPvSquareGrid");
+  if (!container) return;
+  container.innerHTML = "";
+  const display = document.getElementById("edDisplayCurrentHp");
+  const hidden = document.getElementById("viewSheetCurrentHp");
+  if (display) display.textContent = currentHp;
+  if (hidden) hidden.value = currentHp;
+
+  for (let i = 1; i <= maxHp; i++) {
+    const box = document.createElement("div");
+    box.className = `ed-square-box ${i <= currentHp ? "active" : ""}`;
+    box.title = `PV ${i}`;
+    box.addEventListener("click", () => {
+      if (!currentViewingSheet) return;
+      let newHp = currentViewingSheet.currentHp === i ? i - 1 : i;
+      currentViewingSheet.currentHp = Math.max(0, Math.min(newHp, currentViewingSheet.maxHp));
+      currentViewingSheet.hpCurrent = currentViewingSheet.currentHp;
+      renderPvGrid(currentViewingSheet.currentHp, currentViewingSheet.maxHp);
+    });
+    container.appendChild(box);
+  }
+}
+
+function renderPmGrid(currentMp, maxMp) {
+  const container = document.getElementById("edPmSquareGrid");
+  if (!container) return;
+  container.innerHTML = "";
+  const display = document.getElementById("edDisplayCurrentMp");
+  const hidden = document.getElementById("viewSheetCurrentMp");
+  if (display) display.textContent = currentMp;
+  if (hidden) hidden.value = currentMp;
+
+  for (let i = 1; i <= maxMp; i++) {
+    const box = document.createElement("div");
+    box.className = `ed-square-box ${i <= currentMp ? "active" : ""}`;
+    box.title = `PM ${i}`;
+    box.addEventListener("click", () => {
+      if (!currentViewingSheet) return;
+      let newMp = currentViewingSheet.currentMp === i ? i - 1 : i;
+      currentViewingSheet.currentMp = Math.max(0, Math.min(newMp, currentViewingSheet.maxMp));
+      currentViewingSheet.pmCurrent = currentViewingSheet.currentMp;
+      renderPmGrid(currentViewingSheet.currentMp, currentViewingSheet.maxMp);
+    });
+    container.appendChild(box);
+  }
+}
+
+const inputMaxHp = document.getElementById("viewSheetMaxHp");
+if (inputMaxHp) {
+  inputMaxHp.addEventListener("change", (e) => {
+    if (!currentViewingSheet) return;
+    const newMax = Math.max(1, parseInt(e.target.value, 10) || 10);
+    currentViewingSheet.maxHp = newMax;
+    currentViewingSheet.hpMax = newMax;
+    currentViewingSheet.currentHp = Math.min(currentViewingSheet.currentHp, newMax);
+    renderPvGrid(currentViewingSheet.currentHp, newMax);
+  });
+}
+
+const inputMaxMp = document.getElementById("viewSheetMaxMp");
+if (inputMaxMp) {
+  inputMaxMp.addEventListener("change", (e) => {
+    if (!currentViewingSheet) return;
+    const newMax = Math.max(0, parseInt(e.target.value, 10) || 6);
+    currentViewingSheet.maxMp = newMax;
+    currentViewingSheet.pmMax = newMax;
+    currentViewingSheet.currentMp = Math.min(currentViewingSheet.currentMp, newMax);
+    renderPmGrid(currentViewingSheet.currentMp, newMax);
+  });
+}
+
+// --------------------------------------------------------------------------
+// 26 PERÍCIAS (DADO EM LOSANGO + MARCAS DE EVOLUÇÃO)
+// --------------------------------------------------------------------------
+function renderSkills() {
+  const container = document.getElementById("edSkillsList");
+  if (!container || !currentViewingSheet) return;
+  container.innerHTML = "";
+
+  currentViewingSheet.skills = currentViewingSheet.skills || {};
+
+  ED_SKILLS_LIST.forEach((skillName) => {
+    if (!currentViewingSheet.skills[skillName]) {
+      currentViewingSheet.skills[skillName] = { dice: "-", marks: 0 };
+    }
+    const sk = currentViewingSheet.skills[skillName];
+
+    const row = document.createElement("div");
+    row.className = "ed-skill-item";
+
+    const nameCol = document.createElement("div");
+    nameCol.className = "ed-skill-name-col";
+
+    const title = document.createElement("strong");
+    title.textContent = skillName;
+    nameCol.appendChild(title);
+
+    const ticksDiv = document.createElement("div");
+    ticksDiv.className = "ed-skill-ticks";
+    for (let t = 1; t <= 3; t++) {
+      const tick = document.createElement("span");
+      tick.className = `ed-skill-tick ${t <= (sk.marks || 0) ? "marked" : ""}`;
+      tick.title = `Marca ${t}`;
+      tick.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sk.marks = sk.marks === t ? t - 1 : t;
+        renderSkills();
+      });
+      ticksDiv.appendChild(tick);
+    }
+    nameCol.appendChild(ticksDiv);
+
+    const dieBtn = document.createElement("button");
+    dieBtn.type = "button";
+    dieBtn.className = "ed-skill-die-btn";
+    dieBtn.title = "Clique para alternar dado (- / d4 / d6 / d8 / d10 / d12)";
+    dieBtn.innerHTML = `<span>${sk.dice || "-"}</span>`;
+    dieBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const curIdx = ED_DICE_CYCLE.indexOf(sk.dice || "-");
+      const nextIdx = (curIdx + 1) % ED_DICE_CYCLE.length;
+      sk.dice = ED_DICE_CYCLE[nextIdx];
+      renderSkills();
+    });
+
+    row.appendChild(nameCol);
+    row.appendChild(dieBtn);
+    container.appendChild(row);
+  });
+}
+
+// --------------------------------------------------------------------------
+// CRIADOR DE ARCANA (FEITIÇOS & TÉCNICAS COM INDICADORES DINÂMICOS)
+// --------------------------------------------------------------------------
+function updateArcanaOutcome() {
+  const funcao = document.getElementById("arcanaSelectFuncao")?.value || "Dano";
+  const caracteristica = document.getElementById("arcanaSelectCaracteristica")?.value || "Fogo";
+  const alvo = document.getElementById("arcanaSelectAlvo")?.value || "Toque";
+
+  let distancia = "Toque";
+  if (alvo === "Pessoal") distancia = "Pessoal";
+  else if (alvo.includes("9m")) distancia = "9m";
+  else if (alvo.includes("18m")) distancia = "18m";
+  else if (alvo.includes("Área")) distancia = "Área 6m";
+  else if (alvo.includes("Cone")) distancia = "Cone 9m";
+
+  let basePm = 2;
+  if (funcao === "Cura" || funcao === "Controle") basePm = 3;
+  else if (funcao === "Evocação") basePm = 4;
+  else if (funcao === "Sentidos") basePm = 1;
+
+  let alvoMod = 0;
+  if (alvo.includes("9m")) alvoMod = 1;
+  else if (alvo.includes("18m")) alvoMod = 2;
+  else if (alvo.includes("Área")) alvoMod = 3;
+  else if (alvo.includes("Cone")) alvoMod = 2;
+
+  const totalPm = Math.max(1, basePm + alvoMod);
+
+  let acoes = "1 Ação";
+  if (alvo.includes("Área") || funcao === "Evocação") acoes = "2 Ações";
+  else if (funcao === "Movimento") acoes = "1 Ação / Reação";
+
+  const valDist = document.getElementById("arcanaValDistancia");
+  const valPm = document.getElementById("arcanaValPm");
+  const valAcoes = document.getElementById("arcanaValAcoes");
+
+  if (valDist) valDist.textContent = distancia;
+  if (valPm) valPm.textContent = `${totalPm} PM`;
+  if (valAcoes) valAcoes.textContent = acoes;
+
+  return { funcao, caracteristica, alvo, distancia, pm: totalPm, acoes };
+}
+
+["arcanaSelectFuncao", "arcanaSelectCaracteristica", "arcanaSelectAlvo"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("change", updateArcanaOutcome);
+});
+
+const btnRegisterArcana = document.getElementById("btnRegisterArcana");
+if (btnRegisterArcana) {
+  btnRegisterArcana.addEventListener("click", () => {
+    if (!currentViewingSheet) return;
+    const outcome = updateArcanaOutcome();
+    const nameInput = document.getElementById("arcanaCustomName");
+    const customName = nameInput ? nameInput.value.trim() : "";
+
+    const newArcana = {
+      id: "arc_" + Date.now().toString(),
+      name: customName || `${outcome.funcao} de ${outcome.caracteristica}`,
+      funcao: outcome.funcao,
+      caracteristica: outcome.caracteristica,
+      alvo: outcome.alvo,
+      distancia: outcome.distancia,
+      pm: outcome.pm,
+      acoes: outcome.acoes
+    };
+
+    currentViewingSheet.arcanas = currentViewingSheet.arcanas || [];
+    currentViewingSheet.arcanas.push(newArcana);
+
+    if (nameInput) nameInput.value = "";
+    renderArcanaSavedList();
+    showToast(`Arcana "${newArcana.name}" criada com sucesso!`, "success");
+  });
+}
+
+function renderArcanaSavedList() {
+  const container = document.getElementById("edArcanaSavedList");
+  if (!container || !currentViewingSheet) return;
+  container.innerHTML = "";
+
+  const arcanas = currentViewingSheet.arcanas || [];
+  if (arcanas.length === 0) {
+    container.innerHTML = `<p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin: 6px 0;">Nenhuma técnica de Arcana cadastrada.</p>`;
+    return;
+  }
+
+  arcanas.forEach((arc, idx) => {
+    const item = document.createElement("div");
+    item.className = "ed-arcana-item-card";
+    item.innerHTML = `
+      <div>
+        <div class="ed-arcana-item-title">${escapeHtml(arc.name || "Arcana")}</div>
+        <div class="ed-arcana-item-meta">
+          ${escapeHtml(arc.funcao)} (${escapeHtml(arc.caracteristica)}) • 🔵 ${arc.pm} PM • 🟢 ${escapeHtml(arc.distancia)} • 🟡 ${escapeHtml(arc.acoes)}
+        </div>
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <button type="button" class="btn btn-ghost btn-xs btn-del-arcana" style="color: var(--color-error); padding: 2px 6px;" title="Remover técnica">✕</button>
+      </div>
+    `;
+
+    item.querySelector(".btn-del-arcana")?.addEventListener("click", () => {
+      arcanas.splice(idx, 1);
+      renderArcanaSavedList();
+    });
+
+    container.appendChild(item);
+  });
+}
+
+// --------------------------------------------------------------------------
+// TROCA RÁPIDA (6 SLOTS CIRCULARES)
+// --------------------------------------------------------------------------
+function renderQuickSwapSlots() {
+  const container = document.getElementById("edQuickSwapSlotsContainer");
+  if (!container || !currentViewingSheet) return;
+  container.innerHTML = "";
+
+  currentViewingSheet.quickSwap = currentViewingSheet.quickSwap || Array(6).fill(null);
+
+  for (let i = 0; i < 6; i++) {
+    const item = currentViewingSheet.quickSwap[i];
+    const slot = document.createElement("div");
+    slot.className = `ed-quickswap-slot-item ${item ? "occupied" : ""}`;
+    slot.title = item ? `${item.name} (Clique para ações de troca)` : `Slot ${i + 1} Vazio`;
+
+    slot.innerHTML = `
+      <span class="ed-slot-number">${i + 1}</span>
+      <span class="ed-slot-icon">${item ? (item.icon || "⚔️") : "+"}</span>
+      ${item ? `<span class="ed-slot-name">${escapeHtml(item.name || "")}</span>` : ""}
+    `;
+
+    slot.addEventListener("click", () => {
+      if (item) {
+        selectedQuickSwapSlotIndex = i;
+        const modalTitle = document.getElementById("quickSwapItemName");
+        if (modalTitle) modalTitle.textContent = item.name || `Item ${i + 1}`;
+        openModalById("modalQuickSwapAction");
+      } else {
+        // Se vazio, transfere o primeiro item da mochila
+        if (currentViewingSheet.backpack && currentViewingSheet.backpack.length > 0) {
+          const bpItem = currentViewingSheet.backpack[0];
+          currentViewingSheet.quickSwap[i] = {
+            id: bpItem.id || Date.now().toString(),
+            name: bpItem.name,
+            icon: "🎒",
+            desc: "Item da mochila",
+            slots: bpItem.slots || 1
+          };
+          currentViewingSheet.backpack.splice(0, 1);
+          renderQuickSwapSlots();
+          renderBackpack();
+          showToast(`"${bpItem.name}" movido para o Slot ${i + 1}!`, "info");
+        } else {
+          showToast("Mochila vazia para preencher o slot.", "info");
+        }
+      }
+    });
+
+    container.appendChild(slot);
+  }
+}
+
+// Ações do Modal de Troca Rápida
+document.getElementById("btnSwapToEquip1")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  const item = currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex];
+  if (!item) return;
+
+  const currentEquip1 = {
+    name: document.getElementById("nameEquip1")?.value || "Espada Longa",
+    desc: document.getElementById("descEquip1")?.value || "",
+    dice: document.getElementById("diceEquip1")?.value || "1d8",
+    effect: document.getElementById("effectEquip1")?.value || "",
+    skill: document.getElementById("skillEquip1")?.value || "Luta",
+    icon: document.getElementById("iconSlotEquip1")?.textContent || "⚔️"
+  };
+
+  // Aplica o item do slot no Equipamento 1
+  setInputValue("nameEquip1", item.name);
+  setInputValue("descEquip1", item.desc || "Item da Troca Rápida");
+  setInputValue("diceEquip1", item.dice || "1d8");
+  setInputValue("effectEquip1", item.effect || "Equipado");
+  setInputValue("skillEquip1", item.skill || "Luta");
+  setElementText("iconSlotEquip1", item.icon || "⚔️");
+
+  // Coloca o que estava equipado de volta no slot
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = currentEquip1;
+  renderQuickSwapSlots();
+  closeModalById("modalQuickSwapAction");
+  showToast(`"${item.name}" equipado em Equipamento 1!`, "success");
+});
+
+document.getElementById("btnSwapToEquip2")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  const item = currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex];
+  if (!item) return;
+
+  const currentEquip2 = {
+    name: document.getElementById("nameEquip2")?.value || "Arco Curto",
+    desc: document.getElementById("descEquip2")?.value || "",
+    dice: document.getElementById("diceEquip2")?.value || "1d6",
+    effect: document.getElementById("effectEquip2")?.value || "",
+    skill: document.getElementById("skillEquip2")?.value || "Atirar",
+    icon: document.getElementById("iconSlotEquip2")?.textContent || "🏹"
+  };
+
+  setInputValue("nameEquip2", item.name);
+  setInputValue("descEquip2", item.desc || "Item da Troca Rápida");
+  setInputValue("diceEquip2", item.dice || "1d6");
+  setInputValue("effectEquip2", item.effect || "Equipado");
+  setInputValue("skillEquip2", item.skill || "Atirar");
+  setElementText("iconSlotEquip2", item.icon || "🏹");
+
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = currentEquip2;
+  renderQuickSwapSlots();
+  closeModalById("modalQuickSwapAction");
+  showToast(`"${item.name}" equipado em Equipamento 2!`, "success");
+});
+
+document.getElementById("btnSwapToProt1")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  const item = currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex];
+  if (!item) return;
+
+  const currentProt1 = {
+    name: document.getElementById("nameProt1")?.value || "Escudo de Ferro",
+    desc: document.getElementById("descProt1")?.value || "",
+    slots: document.getElementById("slotsProt1")?.value || "1 Espaço",
+    effect: document.getElementById("effectProt1")?.value || "+2 Defesa",
+    icon: document.getElementById("iconSlotProt1")?.textContent || "🛡️"
+  };
+
+  setInputValue("nameProt1", item.name);
+  setInputValue("descProt1", item.desc || "Proteção");
+  setInputValue("slotsProt1", item.slots || "1 Espaço");
+  setInputValue("effectProt1", item.effect || "+2 Defesa");
+  setElementText("iconSlotProt1", item.icon || "🛡️");
+
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = currentProt1;
+  renderQuickSwapSlots();
+  closeModalById("modalQuickSwapAction");
+  showToast(`"${item.name}" equipado em Proteção 1!`, "success");
+});
+
+document.getElementById("btnSwapToProt2")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  const item = currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex];
+  if (!item) return;
+
+  const currentProt2 = {
+    name: document.getElementById("nameProt2")?.value || "Gibão de Couro",
+    desc: document.getElementById("descProt2")?.value || "",
+    slots: document.getElementById("slotsProt2")?.value || "2 Espaços",
+    effect: document.getElementById("effectProt2")?.value || "Res. Corte",
+    icon: document.getElementById("iconSlotProt2")?.textContent || "🦺"
+  };
+
+  setInputValue("nameProt2", item.name);
+  setInputValue("descProt2", item.desc || "Armadura");
+  setInputValue("slotsProt2", item.slots || "2 Espaços");
+  setInputValue("effectProt2", item.effect || "Res. Corte");
+  setElementText("iconSlotProt2", item.icon || "🦺");
+
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = currentProt2;
+  renderQuickSwapSlots();
+  closeModalById("modalQuickSwapAction");
+  showToast(`"${item.name}" equipado em Proteção 2!`, "success");
+});
+
+document.getElementById("btnSwapToBackpack")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  const item = currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex];
+  if (!item) return;
+
+  currentViewingSheet.backpack = currentViewingSheet.backpack || [];
+  currentViewingSheet.backpack.push({
+    id: item.id || Date.now().toString(),
+    name: item.name,
+    slots: parseInt(item.slots, 10) || 1
+  });
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = null;
+
+  renderQuickSwapSlots();
+  renderBackpack();
+  closeModalById("modalQuickSwapAction");
+  showToast(`"${item.name}" guardado na mochila!`, "info");
+});
+
+document.getElementById("btnSwapClearSlot")?.addEventListener("click", () => {
+  if (selectedQuickSwapSlotIndex === null || !currentViewingSheet) return;
+  currentViewingSheet.quickSwap[selectedQuickSwapSlotIndex] = null;
+  renderQuickSwapSlots();
+  closeModalById("modalQuickSwapAction");
+  showToast("Slot da Troca Rápida liberado.", "info");
+});
+
+// --------------------------------------------------------------------------
+// MOCHILA (INVENTÁRIO COM GESTÃO DE ESPAÇOS E ENVIO DIRETO)
+// --------------------------------------------------------------------------
+function renderBackpack() {
+  const list = document.getElementById("edBackpackItemsList");
+  const occupiedEl = document.getElementById("edBackpackSlotsOccupied");
+  const maxEl = document.getElementById("edBackpackSlotsMax");
+  if (!list || !currentViewingSheet) return;
+  list.innerHTML = "";
+
+  currentViewingSheet.backpack = currentViewingSheet.backpack || [];
+  const maxSlots = currentViewingSheet.backpackMaxSlots || 10;
+  let occupiedSlots = 0;
+
+  currentViewingSheet.backpack.forEach((item, idx) => {
+    occupiedSlots += (parseInt(item.slots, 10) || 1);
+
+    const card = document.createElement("div");
+    card.className = "ed-backpack-item-card";
+    card.innerHTML = `
+      <div class="ed-backpack-item-main">
+        <span class="ed-backpack-item-name">${escapeHtml(item.name)}</span>
+        <span class="ed-backpack-item-slots">${item.slots || 1} esp.</span>
+      </div>
+      <div class="ed-backpack-item-actions">
+        <button type="button" class="btn-quickswap-transfer" title="Enviar diretamente para Troca Rápida">⚡ Troca Rápida</button>
+        <button type="button" class="btn btn-ghost btn-xs btn-del-bp" style="color: var(--color-error); padding: 2px 6px;">✕</button>
+      </div>
+    `;
+
+    card.querySelector(".btn-quickswap-transfer")?.addEventListener("click", () => {
+      currentViewingSheet.quickSwap = currentViewingSheet.quickSwap || Array(6).fill(null);
+      const emptyIdx = currentViewingSheet.quickSwap.findIndex(s => s === null);
+      if (emptyIdx === -1) {
+        showToast("Todos os 6 slots de Troca Rápida estão ocupados!", "error");
+        return;
+      }
+      currentViewingSheet.quickSwap[emptyIdx] = {
+        id: item.id || Date.now().toString(),
+        name: item.name,
+        icon: "⚔️",
+        desc: "Item da mochila",
+        slots: item.slots || 1
+      };
+      currentViewingSheet.backpack.splice(idx, 1);
+      renderQuickSwapSlots();
+      renderBackpack();
+      showToast(`"${item.name}" enviado para a Troca Rápida (Slot ${emptyIdx + 1})!`, "success");
+    });
+
+    card.querySelector(".btn-del-bp")?.addEventListener("click", () => {
+      currentViewingSheet.backpack.splice(idx, 1);
+      renderBackpack();
+    });
+
+    list.appendChild(card);
+  });
+
+  if (occupiedEl) occupiedEl.textContent = occupiedSlots;
+  if (maxEl) maxEl.textContent = maxSlots;
+}
+
+const btnAddBackpackItem = document.getElementById("btnAddNewBackpackItem");
+if (btnAddBackpackItem) {
+  btnAddBackpackItem.addEventListener("click", () => {
+    if (!currentViewingSheet) return;
+    const nameInput = document.getElementById("edNewBackpackName");
+    const slotsInput = document.getElementById("edNewBackpackSlots");
+    const itemName = nameInput ? nameInput.value.trim() : "";
+    const slots = parseInt(slotsInput?.value, 10) || 1;
+
+    if (!itemName) {
+      showToast("Informe o nome do item para adicionar à mochila.", "error");
+      return;
+    }
+
+    currentViewingSheet.backpack = currentViewingSheet.backpack || [];
+    currentViewingSheet.backpack.push({
+      id: "bp_" + Date.now().toString(),
+      name: itemName,
+      slots
+    });
+
+    if (nameInput) nameInput.value = "";
+    if (slotsInput) slotsInput.value = "1";
+    renderBackpack();
+    showToast(`"${itemName}" adicionado à mochila.`, "success");
+  });
+}
+
+// --------------------------------------------------------------------------
+// RETRATO / FOTO MODAL
+// --------------------------------------------------------------------------
+const btnOpenPortrait1 = document.getElementById("btnOpenSheetAvatarModal");
+const btnOpenPortrait2 = document.getElementById("btnPortraitTrigger");
+if (btnOpenPortrait1) btnOpenPortrait1.addEventListener("click", () => openModalById("modalSheetPortrait"));
+if (btnOpenPortrait2) btnOpenPortrait2.addEventListener("click", () => openModalById("modalSheetPortrait"));
+
+const formSheetPortrait = document.getElementById("formSheetPortrait");
+if (formSheetPortrait) {
+  formSheetPortrait.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!currentViewingSheet) return;
+
+    const fileInput = document.getElementById("sheetPortraitFileInput");
+    const urlInput = document.getElementById("sheetPortraitUrlInput");
+
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (re) => {
+        applyNewPortrait(re.target.result);
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    } else if (urlInput && urlInput.value.trim()) {
+      applyNewPortrait(urlInput.value.trim());
+    } else {
+      showToast("Selecione um arquivo ou informe uma URL.", "error");
+    }
+  });
+}
+
+function applyNewPortrait(url) {
+  if (!currentViewingSheet) return;
+  currentViewingSheet.avatarUrl = url;
+
+  const hidden = document.getElementById("viewSheetAvatarUrl");
+  if (hidden) hidden.value = url;
+
+  const portraitImg = document.getElementById("edPortraitImage");
+  const portraitEmpty = document.getElementById("edPortraitEmpty");
+  const avatarCircle = document.getElementById("viewSheetAvatar");
+
+  if (portraitImg && portraitEmpty) {
+    portraitImg.src = url;
+    portraitImg.style.display = "block";
+    portraitEmpty.style.display = "none";
+  }
+  if (avatarCircle) {
+    avatarCircle.innerHTML = `<img src="${escapeHtml(url)}" alt="Avatar">`;
+  }
+
+  closeModalById("modalSheetPortrait");
+  showToast("Retrato atualizado!", "success");
+}
+
+// --------------------------------------------------------------------------
+// SELETOR DE COR DE DESTAQUE (--sheet-accent)
+// --------------------------------------------------------------------------
+const accentPicker = document.getElementById("edSheetAccentPicker");
+const accentSwatch = document.getElementById("edAccentSwatchPreview");
+const sheetBoxContainer = document.getElementById("edSheetBox");
+
+if (accentPicker && sheetBoxContainer) {
+  accentPicker.addEventListener("input", (e) => {
+    const col = e.target.value;
+    sheetBoxContainer.style.setProperty("--sheet-accent", col);
+    sheetBoxContainer.style.setProperty("--sheet-accent-glow", `${col}70`);
+    sheetBoxContainer.style.setProperty("--sheet-accent-subtle", `${col}20`);
+    if (accentSwatch) accentSwatch.style.background = col;
+    if (currentViewingSheet) currentViewingSheet.accentColor = col;
+  });
+}
+
+// --------------------------------------------------------------------------
+// EXPANSÃO DO BLOCO DE ANOTAÇÕES
+// --------------------------------------------------------------------------
+const btnToggleExpandNotes = document.getElementById("btnToggleExpandNotes");
+const cardNotes = document.getElementById("edCardNotes");
+if (btnToggleExpandNotes && cardNotes) {
+  btnToggleExpandNotes.addEventListener("click", () => {
+    cardNotes.classList.toggle("expanded");
+    btnToggleExpandNotes.textContent = cardNotes.classList.contains("expanded") ? "↕ Reduzir" : "↕ Expandir";
+  });
+}
+
+// --------------------------------------------------------------------------
+// NAVEGAÇÃO RESPONSIVA: DESKTOP MÉDIO E MOBILE
+// --------------------------------------------------------------------------
+const btnMedPrev = document.getElementById("btnMedPrevCols");
+const btnMedNext = document.getElementById("btnMedNextCols");
+const medIndicator = document.getElementById("edMedNavIndicator");
+const edBodyContainer = document.getElementById("edSheetBody");
+
+if (btnMedPrev && edBodyContainer) {
+  btnMedPrev.addEventListener("click", () => {
+    edBodyContainer.setAttribute("data-active-view", "1-2");
+    if (medIndicator) medIndicator.textContent = "Colunas 1 & 2";
+  });
+}
+if (btnMedNext && edBodyContainer) {
+  btnMedNext.addEventListener("click", () => {
+    edBodyContainer.setAttribute("data-active-view", "2-3");
+    if (medIndicator) medIndicator.textContent = "Colunas 2 & 3";
+  });
+}
+
+// Pílula Móvel Flutuante (< 768px)
+const pillTabs = document.querySelectorAll(".ed-pill-tab");
+pillTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const col = tab.getAttribute("data-col");
+    if (edBodyContainer) edBodyContainer.setAttribute("data-active-mobile", col);
+    pillTabs.forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+  });
+});
+
+// --------------------------------------------------------------------------
+// SALVAR TODAS AS ALTERAÇÕES DA FICHA (PERSISTÊNCIA NO CLOUD FIRESTORE)
+// --------------------------------------------------------------------------
+const btnSaveSheetChanges = document.getElementById("btnSaveSheetChanges");
+if (btnSaveSheetChanges) {
+  btnSaveSheetChanges.addEventListener("click", async () => {
     if (!currentViewingSheet || !activeCampaign) return;
 
-    const level = parseInt(document.getElementById("viewSheetLevel").value, 10) || 1;
-    const ac = parseInt(document.getElementById("viewSheetAc").value, 10) || 10;
-    const currentHp = parseInt(document.getElementById("viewSheetCurrentHp").value, 10) || 0;
-    const maxHp = parseInt(document.getElementById("viewSheetMaxHp").value, 10) || 1;
-    const currentMp = parseInt(document.getElementById("viewSheetCurrentMp").value, 10) || 0;
-    const maxMp = parseInt(document.getElementById("viewSheetMaxMp").value, 10) || 0;
-    const notes = document.getElementById("viewSheetNotes").value.trim();
+    const fName = document.getElementById("edCharFirstName")?.value.trim() || "";
+    const lName = document.getElementById("edCharLastName")?.value.trim() || "";
+    const fullName = (fName + " " + lName).trim() || currentViewingSheet.name || "Aventureiro";
+
+    const subtitle = document.getElementById("edCharSubtitle")?.value.trim() || "";
+    const alignment = document.getElementById("edSheetAlignment")?.value || "Neutro";
+    const race = document.getElementById("edSheetRace")?.value.trim() || "Humano";
+    const level = parseInt(document.getElementById("viewSheetLevel")?.value, 10) || 1;
+    const ac = parseInt(document.getElementById("viewSheetAc")?.value, 10) || 14;
+
+    const currentHp = currentViewingSheet.currentHp ?? 10;
+    const maxHp = currentViewingSheet.maxHp ?? 10;
+    const currentMp = currentViewingSheet.currentMp ?? 6;
+    const maxMp = currentViewingSheet.maxMp ?? 6;
+
+    const avatarUrl = document.getElementById("viewSheetAvatarUrl")?.value.trim() || currentViewingSheet.avatarUrl || "";
+    const accentColor = currentViewingSheet.accentColor || "#dc2626";
+
+    // Equipamentos 1 & 2
+    const equip1 = {
+      name: document.getElementById("nameEquip1")?.value.trim() || "Espada Longa",
+      desc: document.getElementById("descEquip1")?.value.trim() || "",
+      dice: document.getElementById("diceEquip1")?.value.trim() || "1d8",
+      effect: document.getElementById("effectEquip1")?.value.trim() || "",
+      skill: document.getElementById("skillEquip1")?.value.trim() || "Luta",
+      icon: document.getElementById("iconSlotEquip1")?.textContent || "⚔️"
+    };
+
+    const equip2 = {
+      name: document.getElementById("nameEquip2")?.value.trim() || "Arco Curto",
+      desc: document.getElementById("descEquip2")?.value.trim() || "",
+      dice: document.getElementById("diceEquip2")?.value.trim() || "1d6",
+      effect: document.getElementById("effectEquip2")?.value.trim() || "",
+      skill: document.getElementById("skillEquip2")?.value.trim() || "Atirar",
+      icon: document.getElementById("iconSlotEquip2")?.textContent || "🏹"
+    };
+
+    // Proteção 1 & 2
+    const prot1 = {
+      name: document.getElementById("nameProt1")?.value.trim() || "Escudo de Ferro",
+      desc: document.getElementById("descProt1")?.value.trim() || "",
+      slots: document.getElementById("slotsProt1")?.value.trim() || "1 Espaço",
+      effect: document.getElementById("effectProt1")?.value.trim() || "+2 Defesa",
+      icon: document.getElementById("iconSlotProt1")?.textContent || "🛡️"
+    };
+
+    const prot2 = {
+      name: document.getElementById("nameProt2")?.value.trim() || "Gibão de Couro",
+      desc: document.getElementById("descProt2")?.value.trim() || "",
+      slots: document.getElementById("slotsProt2")?.value.trim() || "2 Espaços",
+      effect: document.getElementById("effectProt2")?.value.trim() || "Res. Corte",
+      icon: document.getElementById("iconSlotProt2")?.textContent || "🦺"
+    };
+
+    const tibares = parseInt(document.getElementById("edCoinsTibares")?.value, 10) || 0;
+    const ouro = parseInt(document.getElementById("edCoinsOuro")?.value, 10) || 0;
+    const conditions = document.getElementById("edQuickConditionInput")?.value.trim() || "";
+    const notes = document.getElementById("viewSheetNotes")?.value.trim() || "";
 
     try {
-      const btn = document.getElementById("btnSaveSheetChanges");
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="btn-spinner"></span> <span>Salvando...</span>`;
-      }
+      btnSaveSheetChanges.disabled = true;
+      btnSaveSheetChanges.innerHTML = `<span class="btn-spinner"></span> <span>Salvando...</span>`;
 
-      await updateDoc(doc(db, "campaigns", activeCampaign.id, "sheets", currentViewingSheet.id), {
+      const payload = {
+        name: fullName,
+        firstName: fName,
+        lastName: lName,
+        subtitle,
+        alignment,
+        race,
         level,
-        ac,
         defense: ac,
+        ac,
         currentHp,
         hpCurrent: currentHp,
         maxHp,
@@ -753,23 +1647,37 @@ if (formEditSheet) {
         pmCurrent: currentMp,
         maxMp,
         pmMax: maxMp,
+        avatarUrl,
+        accentColor,
+        attributes: currentViewingSheet.attributes || {},
+        skills: currentViewingSheet.skills || {},
+        arcanas: currentViewingSheet.arcanas || [],
+        equip1,
+        equip2,
+        prot1,
+        prot2,
+        quickSwap: currentViewingSheet.quickSwap || Array(6).fill(null),
+        backpack: currentViewingSheet.backpack || [],
+        tibares,
+        ouro,
+        conditions,
         notes
-      });
+      };
+
+      await updateDoc(doc(db, "campaigns", activeCampaign.id, "sheets", currentViewingSheet.id), payload);
 
       closeModalById("modalViewSheet");
-      showToast("Ficha atualizada com sucesso!", "success");
+      showToast("Ficha salva com sucesso!", "success");
     } catch (err) {
-      console.error("Erro ao atualizar ficha:", err);
-      showToast("Não foi possível salvar alterações da ficha.", "error");
+      console.error("Erro ao salvar alterações da ficha:", err);
+      showToast("Erro ao salvar ficha: " + err.message, "error");
     } finally {
-      const btn = document.getElementById("btnSaveSheetChanges");
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = `<span>Salvar Alterações</span>`;
-      }
+      btnSaveSheetChanges.disabled = false;
+      btnSaveSheetChanges.innerHTML = `<span>Salvar</span>`;
     }
   });
 }
+
 
 // ==========================================================================
 // 6. ABA 2: JOGADORES (PLAYERS)
@@ -1332,7 +2240,7 @@ if (formCampaignSettings) {
 
     const name = campSettingsName.value.trim();
     const coverUrl = campSettingsCover.value.trim();
-    const system = campSettingsSystemB.checked ? "Sistema B" : "Sistema A";
+    const system = campSettingsSystemB.checked ? "Sistema B" : "Escória de Deus RPG";
 
     if (!name) return;
 
@@ -1419,7 +2327,7 @@ if (formDuplicateCampaign) {
       // 1. Cria nova campanha
       const newCampaignDoc = await addDoc(collection(db, "campaigns"), {
         name: newName,
-        system: activeCampaign.system || "Sistema A",
+        system: activeCampaign.system || "Escória de Deus RPG",
         coverUrl: activeCampaign.coverUrl || "",
         inviteCode: newCode,
         masterId: currentAuthUser.uid,

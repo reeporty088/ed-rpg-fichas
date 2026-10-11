@@ -1823,4 +1823,1323 @@ main.dashboard-content,
   margin-bottom: 16px;
 }
 
+/* ==========================================================================
+   ESCÓRIA DE DEUS RPG - CHARACTER SHEET SYSTEM (LIQUID GLASS 3-COLUMN)
+   ========================================================================== */
+
+/* Modal Container & Base Variables */
+.ed-sheet-modal-box {
+  --sheet-accent: #dc2626;
+  --sheet-accent-glow: rgba(220, 38, 38, 0.45);
+  --sheet-accent-subtle: rgba(220, 38, 38, 0.12);
+  --sheet-gold: #f59e0b;
+  --sheet-gold-glow: rgba(245, 158, 11, 0.5);
+
+  width: 96vw;
+  max-width: 1420px;
+  height: 92vh;
+  max-height: 94vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  transition: border-color var(--transition-normal);
+}
+
+/* --------------------------------------------------------------------------
+   1. CABEÇALHO UNIFICADO NO TOPO
+   -------------------------------------------------------------------------- */
+.ed-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  background: rgba(12, 14, 22, 0.55);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .ed-sheet-header {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.ed-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 240px;
+}
+
+.ed-avatar-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.ed-avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid var(--sheet-accent);
+  box-shadow: 0 0 10px var(--sheet-accent-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ed-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ed-avatar-edit-btn {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sheet-accent);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-fast);
+}
+
+.ed-avatar-edit-btn:hover {
+  transform: scale(1.15);
+}
+
+.ed-header-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ed-names-line {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ed-input-title {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  width: 140px;
+  transition: all var(--transition-fast);
+}
+
+.ed-input-title:focus,
+.ed-input-title:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border);
+}
+
+.ed-sub-line {
+  display: flex;
+}
+
+.ed-input-subtitle {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 1px 6px;
+  width: 220px;
+  transition: all var(--transition-fast);
+}
+
+.ed-input-subtitle:focus,
+.ed-input-subtitle:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border);
+}
+
+/* Metadados: Alinhamento, Raça, Nível */
+.ed-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ed-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ed-meta-item label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.ed-meta-select,
+.ed-meta-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.ed-meta-select:focus,
+.ed-meta-input:focus {
+  border-color: var(--sheet-accent);
+}
+
+.ed-meta-item-narrow .ed-meta-input {
+  width: 52px;
+}
+
+.ed-owner-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+}
+
+/* Ações do Topo */
+.ed-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Seletor de Cor de Destaque */
+.ed-theme-accent-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ed-accent-swatch-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sheet-accent);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px var(--sheet-accent-glow);
+  cursor: pointer;
+  display: block;
+  transition: transform var(--transition-fast);
+}
+
+.ed-accent-swatch-btn:hover {
+  transform: scale(1.18);
+}
+
+.ed-theme-accent-picker input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+/* Desktop Médio Navegador (768px - 1099px) */
+.ed-med-nav-controls {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--glass-border);
+}
+
+.ed-med-indicator {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   2. CORPO DA FICHA: 3 COLUNAS
+   -------------------------------------------------------------------------- */
+.ed-sheet-body {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1.1fr 1.15fr 0.95fr;
+  gap: 16px;
+  padding: 16px 20px;
+  overflow: hidden;
+}
+
+.ed-sheet-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ed-col-content,
+.ed-col-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.ed-col-content::-webkit-scrollbar,
+.ed-col-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ed-col-content::-webkit-scrollbar-thumb,
+.ed-col-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Cards Liquid Glass Internos */
+.ed-glass-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-theme="light"] .ed-glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+.ed-card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 8px;
+}
+
+.ed-card-heading h4 {
+  font-family: var(--font-heading);
+  font-size: 0.96rem;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.ed-card-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   3. COLUNA 1: ATRIBUTOS, RETRATO, PV/PM & 26 PERÍCIAS
+   -------------------------------------------------------------------------- */
+.ed-attr-portrait-split {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.ed-attributes-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ed-attr-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-attr-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ed-attr-name {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-main);
+}
+
+/* Losango Badge para Dados (d4, d6, d8, d10, d12) */
+.ed-diamond-badge {
+  width: 34px;
+  height: 34px;
+  transform: rotate(45deg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid var(--sheet-accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--sheet-accent-glow);
+  transition: all var(--transition-fast);
+  margin: 4px;
+  flex-shrink: 0;
+}
+
+.ed-diamond-badge:hover {
+  transform: rotate(45deg) scale(1.1);
+  border-color: #ffffff;
+}
+
+.ed-diamond-badge span {
+  transform: rotate(-45deg);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+/* Marcas de Risco de Evolução (1-3 destaque, >3 ouro) */
+.ed-risk-ticks {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.ed-tick {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ed-tick:hover {
+  border-color: #ffffff;
+}
+
+/* Marcado 1 a 3: Cor de Destaque */
+.ed-tick.marked {
+  background: var(--sheet-accent);
+  border-color: var(--sheet-accent);
+  box-shadow: 0 0 6px var(--sheet-accent-glow);
+}
+
+/* Marcado 4 e 5: Ouro Especial */
+.ed-tick.gold {
+  background: var(--sheet-gold);
+  border-color: #fbbf24;
+  box-shadow: 0 0 8px var(--sheet-gold-glow);
+}
+
+/* Retrato com Máscara de Fade-out Suave */
+.ed-portrait-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ed-portrait-fade {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ed-portrait-empty {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 10px;
+}
+
+/* PV e PM Interativos */
+.ed-card-vitals {
+  gap: 12px;
+}
+
+.ed-vital-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.ed-vital-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ed-vital-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-vital-pill {
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pill-pv {
+  background: var(--sheet-accent-subtle);
+  border: 1px solid var(--sheet-accent);
+  color: var(--sheet-accent);
+}
+
+.pill-pm {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid #3b82f6;
+  color: #60a5fa;
+}
+
+.ed-vital-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ed-current-num {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  min-width: 22px;
+  text-align: right;
+}
+
+.ed-sep {
+  color: var(--text-muted);
+}
+
+.ed-max-input {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 2px 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Grade de quadradinhos interativos */
+.ed-square-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 4px 0;
+}
+
+.ed-square-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ed-square-box:hover {
+  transform: scale(1.15);
+}
+
+.vital-pv .ed-square-box.active {
+  background: var(--sheet-accent);
+  border-color: #ffffff;
+  box-shadow: 0 0 6px var(--sheet-accent-glow);
+}
+
+.vital-pm .ed-square-box.active {
+  background: #3b82f6;
+  border-color: #ffffff;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+}
+
+/* 26 Perícias */
+.ed-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-skill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.ed-skill-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ed-skill-name-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.ed-skill-name-col strong {
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.ed-skill-ticks {
+  display: flex;
+  gap: 4px;
+}
+
+.ed-skill-tick {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.ed-skill-tick.marked {
+  background: var(--sheet-accent);
+  border-color: var(--sheet-accent);
+}
+
+.ed-skill-die-btn {
+  width: 28px;
+  height: 28px;
+  transform: rotate(45deg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--sheet-accent);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 2px 6px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.ed-skill-die-btn:hover {
+  transform: rotate(45deg) scale(1.15);
+}
+
+.ed-skill-die-btn span {
+  transform: rotate(-45deg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* --------------------------------------------------------------------------
+   4. COLUNA 2: ARCANA, EQUIPAMENTOS, PROTEÇÃO, TROCA RÁPIDA
+   -------------------------------------------------------------------------- */
+.ed-arcana-selectors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ed-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ed-form-field label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ed-field-select,
+.ed-field-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  outline: none;
+  width: 100%;
+}
+
+.ed-field-select:focus,
+.ed-field-input:focus {
+  border-color: var(--sheet-accent);
+}
+
+/* Badges Circulares de Resultado da Arcana */
+.ed-arcana-results-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.ed-circle-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.03);
+  min-width: 80px;
+}
+
+.ed-circle-indicator.green {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.ed-circle-indicator.blue {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.ed-circle-indicator.yellow {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.ed-circle-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ed-arcana-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ed-arcana-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ed-arcana-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+.ed-arcana-item-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ed-arcana-item-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Equipamentos e Proteções */
+.ed-gear-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ed-gear-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ed-gear-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ed-gear-circle-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.ed-gear-circle-icon:hover {
+  border-color: var(--sheet-accent);
+  transform: scale(1.1);
+}
+
+.ed-gear-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.ed-gear-name-input {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 2px 4px;
+}
+
+.ed-gear-desc-input {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  padding: 1px 4px;
+}
+
+.ed-gear-name-input:focus,
+.ed-gear-desc-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border);
+}
+
+.ed-gear-badges-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ed-gear-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+.badge-tag-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.ed-badge-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.76rem;
+  font-weight: 600;
+  width: 65px;
+  outline: none;
+}
+
+.ed-def-val-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.ed-def-input {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 2px 6px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Troca Rápida: Grade Horizontal com 6 Slots Circulares */
+.ed-quickswap-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.ed-quickswap-slot-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px dashed var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ed-quickswap-slot-item:hover {
+  border-color: var(--sheet-accent);
+  box-shadow: 0 0 10px var(--sheet-accent-glow);
+  transform: translateY(-2px);
+}
+
+.ed-quickswap-slot-item.occupied {
+  border-style: solid;
+  border-color: var(--sheet-accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ed-slot-number {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ed-slot-icon {
+  font-size: 1.25rem;
+}
+
+.ed-slot-name {
+  font-size: 0.62rem;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. COLUNA 3: MOCHILA, TIBARES, NOTAS
+   -------------------------------------------------------------------------- */
+.ed-coins-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ed-coin-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
+.ed-coin-symbol {
+  font-size: 1.5rem;
+}
+
+.ed-coin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.ed-coin-info label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ed-coin-input {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+}
+
+.ed-capacity-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+}
+
+.ed-add-backpack-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ed-field-input-slots {
+  width: 48px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 6px;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.ed-backpack-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-backpack-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.ed-backpack-item-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ed-backpack-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-backpack-item-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.ed-backpack-item-slots {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.ed-backpack-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-quickswap-transfer {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid var(--sheet-accent);
+  color: #ff8888;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-quickswap-transfer:hover {
+  background: var(--sheet-accent);
+  color: #ffffff;
+}
+
+/* Anotações */
+.ed-notes-textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  padding: 10px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  width: 100%;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.ed-notes-textarea:focus {
+  border-color: var(--sheet-accent);
+}
+
+.ed-card-notes.expanded .ed-notes-textarea {
+  min-height: 280px;
+}
+
+/* --------------------------------------------------------------------------
+   6. RESPONSIVIDADE ADAPTATIVA: DESKTOP LARGO, MÉDIO E MOBILE
+   -------------------------------------------------------------------------- */
+
+/* Desktop Médio (768px a 1099px): 2 colunas visíveis por vez */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .ed-med-nav-controls {
+    display: flex;
+  }
+
+  .ed-sheet-body {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Estado 1-2: exibe colunas 1 e 2 */
+  .ed-sheet-body[data-active-view="1-2"] .ed-sheet-col-1,
+  .ed-sheet-body[data-active-view="1-2"] .ed-sheet-col-2 {
+    display: flex;
+  }
+
+  .ed-sheet-body[data-active-view="1-2"] .ed-sheet-col-3 {
+    display: none;
+  }
+
+  /* Estado 2-3: exibe colunas 2 e 3 */
+  .ed-sheet-body[data-active-view="2-3"] .ed-sheet-col-1 {
+    display: none;
+  }
+
+  .ed-sheet-body[data-active-view="2-3"] .ed-sheet-col-2,
+  .ed-sheet-body[data-active-view="2-3"] .ed-sheet-col-3 {
+    display: flex;
+  }
+}
+
+/* Desktop Largo (≥ 1100px): todas as 3 colunas visíveis lado a lado */
+@media (min-width: 1100px) {
+  .ed-med-nav-controls {
+    display: none !important;
+  }
+
+  .ed-sheet-col-1,
+  .ed-sheet-col-2,
+  .ed-sheet-col-3 {
+    display: flex !important;
+  }
+}
+
+/* Pílula de navegação flutuante inferior no Mobile */
+.ed-mobile-column-pill {
+  display: none;
+}
+
+/* Mobile (< 768px): 1 coluna visível por vez com pílula flutuante */
+@media (max-width: 767px) {
+  .ed-sheet-modal-box {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .ed-sheet-header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .ed-header-brand {
+    min-width: 100%;
+  }
+
+  .ed-input-title {
+    width: 120px;
+    font-size: 1rem;
+  }
+
+  .ed-input-subtitle {
+    width: 180px;
+  }
+
+  .ed-med-nav-controls {
+    display: none !important;
+  }
+
+  .ed-sheet-body {
+    grid-template-columns: 1fr;
+    padding: 10px 12px 110px 12px;
+    overflow-y: auto;
+  }
+
+  /* Controle de Coluna Ativa no Mobile */
+  .ed-sheet-body[data-active-mobile="1"] .ed-sheet-col-1 {
+    display: flex;
+  }
+
+  .ed-sheet-body[data-active-mobile="1"] .ed-sheet-col-2,
+  .ed-sheet-body[data-active-mobile="1"] .ed-sheet-col-3 {
+    display: none;
+  }
+
+  .ed-sheet-body[data-active-mobile="2"] .ed-sheet-col-2 {
+    display: flex;
+  }
+
+  .ed-sheet-body[data-active-mobile="2"] .ed-sheet-col-1,
+  .ed-sheet-body[data-active-mobile="2"] .ed-sheet-col-3 {
+    display: none;
+  }
+
+  .ed-sheet-body[data-active-mobile="3"] .ed-sheet-col-3 {
+    display: flex;
+  }
+
+  .ed-sheet-body[data-active-mobile="3"] .ed-sheet-col-1,
+  .ed-sheet-body[data-active-mobile="3"] .ed-sheet-col-2 {
+    display: none;
+  }
+
+  /* Pílula Flutuante Inferior */
+  .ed-mobile-column-pill {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    background: rgba(14, 16, 26, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    padding: 5px 8px;
+    gap: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  }
+
+  .ed-pill-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 6px 12px;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .pill-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+
+  .ed-pill-tab.active {
+    background: var(--sheet-accent);
+    color: #ffffff;
+    box-shadow: 0 0 10px var(--sheet-accent-glow);
+  }
+
+  .ed-pill-tab.active .pill-number {
+    background: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+  }
+}
+
+
 

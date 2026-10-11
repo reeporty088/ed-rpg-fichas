@@ -365,7 +365,7 @@ if (formCreateCampaign) {
 
     const name = document.getElementById("createCampaignName").value.trim();
     const systemRadio = document.querySelector("input[name='campaignSystem']:checked");
-    const system = systemRadio ? systemRadio.value : "Sistema A";
+    const system = systemRadio ? systemRadio.value : "Escória de Deus RPG";
     let coverUrl = coverInput.value.trim() || DEFAULT_COVER_URL;
 
     if (!name) {
@@ -565,7 +565,7 @@ function renderCampaignsGrid(docs) {
       <div class="campaign-card-content">
         <div class="campaign-card-top">
           <span class="badge-tag ${roleBadgeClass}">${roleBadgeText}</span>
-          <span class="badge-tag badge-system">${data.system || "Sistema A"}</span>
+          <span class="badge-tag badge-system">${data.system || "Escória de Deus RPG"}</span>
         </div>
 
         <div class="campaign-card-bottom">
